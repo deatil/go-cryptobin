@@ -120,6 +120,42 @@ func main() {
 
     // =====
 
+    // Rsa 加密解密 - 公钥加密/私钥解密
+    rsa := cryptobin.NewRsa()
+
+    enkey, _ := fs.Get("./runtime/key/rsa_key.pub")
+    cypt := rsa.
+        FromString("test-pass").
+        FromPublicKey([]byte(enkey)).
+        Encrypt().
+        ToBase64String()
+    dekey, _ := fs.Get("./runtime/key/rsa_key")
+    cyptde := rsa.
+        FromBase64String("MHECIFVKOBAB9uiXrFQlNexfJuv7tjuydu7UdMYpTxQ/mPeHAiBSZdqNaciEP3XgX8xT2JLap4dWedX1EDQh7JyqifhHQAQgPcr5+KHIz3v300sGPc7nv6VM9fOo/kgPTHqZy5MtXMMECVKFT0dwWJwdCQ==").
+        FromPrivateKey([]byte(dekey)).
+        Decrypt().
+        ToString()
+
+    // =====
+
+    // Rsa 加密解密 - 私钥加密/公钥解密
+    rsa := cryptobin.NewRsa()
+
+    enkey, _ := fs.Get("./runtime/key/rsa_key")
+    cypt := rsa.
+        FromString("test-pass").
+        FromPrivateKey([]byte(enkey)).
+        PriKeyEncrypt().
+        ToBase64String()
+    dekey, _ := fs.Get("./runtime/key/rsa_key.pub")
+    cyptde := rsa.
+        FromBase64String("MHECIFVKOBAB9uiXrFQlNexfJuv7tjuydu7UdMYpTxQ/mPeHAiBSZdqNaciEP3XgX8xT2JLap4dWedX1EDQh7JyqifhHQAQgPcr5+KHIz3v300sGPc7nv6VM9fOo/kgPTHqZy5MtXMMECVKFT0dwWJwdCQ==").
+        FromPublicKey([]byte(dekey)).
+        PubKeyDecrypt().
+        ToString()
+
+    // =====
+
     // Ecdsa
     ecdsa := cryptobin.NewEcdsa()
     rsaPriKey := ecdsa.

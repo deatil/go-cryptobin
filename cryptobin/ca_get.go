@@ -1,7 +1,6 @@
 package cryptobin
 
 import (
-    "crypto/rsa"
     "crypto/x509"
 )
 
@@ -11,12 +10,12 @@ func (this CA) GetCsr() *x509.Certificate {
 }
 
 // 获取 PrivateKey
-func (this CA) GetPrivateKey() *rsa.PrivateKey {
+func (this CA) GetPrivateKey() any {
     return this.privateKey
 }
 
-// 获取 PublicKey
-func (this CA) GetPublicKey() *rsa.PublicKey {
+// 获取 publicKey
+func (this CA) GetPublicKey() any {
     return this.publicKey
 }
 

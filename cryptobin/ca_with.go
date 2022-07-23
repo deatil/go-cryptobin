@@ -1,7 +1,6 @@
 package cryptobin
 
 import (
-    "crypto/rsa"
     "crypto/x509"
 )
 
@@ -13,14 +12,14 @@ func (this CA) WithCsr(data *x509.Certificate) CA {
 }
 
 // 设置 PrivateKey
-func (this CA) WithPrivateKey(data *rsa.PrivateKey) CA {
+func (this CA) WithPrivateKey(data any) CA {
     this.privateKey = data
 
     return this
 }
 
-// 设置 PublicKey
-func (this CA) WithPublicKey(data *rsa.PublicKey) CA {
+// 设置 publicKey
+func (this CA) WithPublicKey(data any) CA {
     this.publicKey = data
 
     return this

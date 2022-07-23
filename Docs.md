@@ -525,17 +525,17 @@ func main() {
         StreetAddress: []string{"Golden Gate Bridge"},
         PostalCode:    []string{"94016"},
     }
-    ca := cryptobin.NewCA().GenerateKey(4096)
+    ca := cryptobin.NewCA().GenerateRsaKey(4096)
 
     // ca
-    ca1 := ca.MakeCa(caSubj, 1)
-    ca1String := ca1.CreateCA().ToKeyString()
+    ca1 := ca.MakeCSR(caSubj, 1, true)
+    ca1String := ca1.CreateCSR().ToKeyString()
     ca1KeyString := ca1.CreatePrivateKey().ToKeyString()
 
     // tls
     ca1Csr := ca1.GetCsr()
-    ca2 := ca.MakeTLS(caSubj, 1, []string{"test.default.svc", "test"}, []net.IP{})
-    ca2String := ca2.CreateTLS(ca1Csr).ToKeyString()
+    ca2 := ca.MakeCert(caSubj, 1, []string{"test.default.svc", "test"}, []net.IP{})
+    ca2String := ca2.CreateCert(ca1Csr).ToKeyString()
     ca2KeyString := ca2.CreatePrivateKey().ToKeyString()
 
     // fs.Put("./runtime/key/ca.cst", ca1String)

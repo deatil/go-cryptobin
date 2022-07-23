@@ -25,21 +25,12 @@ type (
         Names              []AttributeTypeAndValue
         ExtraNames         []AttributeTypeAndValue
     }
-    subj := &pkix.Name{
-        CommonName:    "chinamobile.com",
-        Organization:  []string{"Company, INC."},
-        Country:       []string{"US"},
-        Province:      []string{""},
-        Locality:      []string{"San Francisco"},
-        StreetAddress: []string{"Golden Gate Bridge"},
-        PostalCode:    []string{"94016"},
-    }
     */
     CAPkixName = pkix.Name
 )
 
-// 生成 CA
-func (this CA) MakeCa(subject *pkix.Name, expire int) CA {
+// 生成证书请求
+func (this CA) MakeCSR(subject *pkix.Name, expire int, isCA bool) CA {
     this.csr = &x509.Certificate{
         SerialNumber: big.NewInt(rand.Int63n(2000)),
         Subject:      *subject,
@@ -48,7 +39,7 @@ func (this CA) MakeCa(subject *pkix.Name, expire int) CA {
         // 过期时间，年为单位
         NotAfter:     time.Now().AddDate(expire, 0, 0),
         // 表示用于CA
-        IsCA:         true,
+        IsCA:         isCA,
         // openssl 中的 extendedKeyUsage = clientAuth, serverAuth 字段
         ExtKeyUsage:  []x509.ExtKeyUsage{
             x509.ExtKeyUsageClientAuth,
@@ -62,8 +53,8 @@ func (this CA) MakeCa(subject *pkix.Name, expire int) CA {
     return this
 }
 
-// 生成 TLS
-func (this CA) MakeTLS(subject *pkix.Name, expire int, dns []string, ip []net.IP) CA {
+// 生成自签名证书
+func (this CA) MakeCert(subject *pkix.Name, expire int, dns []string, ip []net.IP) CA {
     this.csr = &x509.Certificate{
         SerialNumber: big.NewInt(rand.Int63n(2000)),
         Subject:      *subject,

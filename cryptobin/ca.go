@@ -1,7 +1,6 @@
 package cryptobin
 
 import (
-    "crypto/rsa"
     "crypto/x509"
 )
 
@@ -16,10 +15,10 @@ type CA struct {
     csr *x509.Certificate
 
     // 私钥
-    privateKey *rsa.PrivateKey
+    privateKey any
 
     // 公钥
-    publicKey *rsa.PublicKey
+    publicKey any
 
     // [私钥/公钥/cert]数据
     keyData []byte

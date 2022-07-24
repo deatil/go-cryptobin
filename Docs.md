@@ -561,6 +561,37 @@ func main() {
     // fs.Put("./runtime/key/ca_tls.cst", ca2String)
     // fs.Put("./runtime/key/ca_tls.key", ca2KeyString)
 
+    // =====
+
+    // DSA 生成证书
+    dsa := cryptobin.NewDSA()
+    dsaPriKey := dsa.
+        GenerateKey("L2048N256").
+        CreatePrivateKey().
+        ToKeyString()
+    dsaPubKey := dsa.
+        FromPrivateKey([]byte(dsaPriKey)).
+        CreatePublicKey().
+        ToKeyString()
+    // fs.Put("./runtime/key/dsa", dsaPriKey)
+    // fs.Put("./runtime/key/dsa.pub", dsaPubKey)
+
+    // DSA 验证
+    dsa := cryptobin.NewDSA()
+
+    dsaPri, _ := fs.Get("./runtime/key/dsa")
+    dsacypt := dsa.
+        FromString("test-pass").
+        FromPrivateKey([]byte(dsaPri)).
+        Sign().
+        ToBase64String()
+    dsaPub, _ := fs.Get("./runtime/key/dsa.pub")
+    dsacyptde := dsa.
+        FromBase64String("MEUCIQCDbQnS7obfU4yZCXPRROE3ki9/LYaaQ90KqicZRt95kAIgcjddd1BTOFkublWHeZk10XpKG4HOH/5T9kwhhirq8kg=").
+        FromPublicKey([]byte(dsaPub)).
+        Very([]byte("test-pass")).
+        ToVeryed()
+
 }
 
 ~~~

@@ -16,12 +16,62 @@ import (
 
 // 证书请求
 func (this CA) CreateCSR() CA {
+    if this.privateKey == nil {
+        this.Error = errors.New("privateKey error.")
+        return this
+    }
+
+    var csrBytes []byte
+    var err error
+
+    switch privateKey := this.privateKey.(type) {
+        case *sm2.PrivateKey:
+            certRequest := this.certRequest.(*sm2X509.CertificateRequest)
+            csrBytes, err = sm2X509.CreateCertificateRequest(rand.Reader, certRequest, privateKey)
+
+        default:
+            certRequest := this.certRequest.(*x509.CertificateRequest)
+            csrBytes, err = x509.CreateCertificateRequest(rand.Reader, certRequest, this.privateKey)
+    }
+
+    if err != nil {
+        this.Error = err
+        return this
+    }
+
+    csrBlock := &pem.Block{
+        Type: "CERTIFICATE REQUEST",
+        Bytes: csrBytes,
+    }
+
+    this.keyData = pem.EncodeToMemory(csrBlock)
+
+    return this
+}
+
+// CA 证书
+func (this CA) CreateCA() CA {
     if this.publicKey == nil || this.privateKey == nil {
         this.Error = errors.New("publicKey or privateKey error.")
         return this
     }
 
-    caBytes, err := x509.CreateCertificate(rand.Reader, this.csr, this.csr, this.publicKey, this.privateKey)
+    var caBytes []byte
+    var err error
+
+    switch privateKey := this.privateKey.(type) {
+        case *sm2.PrivateKey:
+            cert := this.cert.(*sm2X509.Certificate)
+            publicKey := &privateKey.PublicKey
+
+            caBytes, err = sm2X509.CreateCertificate(cert, cert, publicKey, privateKey)
+
+        default:
+            cert := this.cert.(*x509.Certificate)
+
+            caBytes, err = x509.CreateCertificate(rand.Reader, cert, cert, this.publicKey, this.privateKey)
+    }
+
     if err != nil {
         this.Error = err
         return this
@@ -38,24 +88,41 @@ func (this CA) CreateCSR() CA {
 }
 
 // 自签名证书
-func (this CA) CreateCert(ca *x509.Certificate) CA {
+func (this CA) CreateCert(ca any) CA {
     if this.publicKey == nil || this.privateKey == nil {
         this.Error = errors.New("publicKey or privateKey error.")
         return this
     }
 
-    caBytes, err := x509.CreateCertificate(rand.Reader, this.csr, ca, this.publicKey, this.privateKey)
+    var certBytes []byte
+    var err error
+
+    switch privateKey := this.privateKey.(type) {
+        case *sm2.PrivateKey:
+            newCert := this.cert.(*sm2X509.Certificate)
+            newCa := ca.(*sm2X509.Certificate)
+            publicKey := &privateKey.PublicKey
+
+            certBytes, err = sm2X509.CreateCertificate(newCert, newCa, publicKey, privateKey)
+
+        default:
+            newCert := this.cert.(*x509.Certificate)
+            newCa := ca.(*x509.Certificate)
+
+            certBytes, err = x509.CreateCertificate(rand.Reader, newCert, newCa, this.publicKey, this.privateKey)
+    }
+
     if err != nil {
         this.Error = err
         return this
     }
 
-    caBlock := &pem.Block{
+    certBlock := &pem.Block{
         Type: "CERTIFICATE",
-        Bytes: caBytes,
+        Bytes: certBytes,
     }
 
-    this.keyData = pem.EncodeToMemory(caBlock)
+    this.keyData = pem.EncodeToMemory(certBlock)
 
     return this
 }

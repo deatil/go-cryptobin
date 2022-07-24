@@ -1,12 +1,17 @@
 package cryptobin
 
-import (
-    "crypto/x509"
-)
+// 设置 cert
+// 可用 [*x509.Certificate | *sm2X509.Certificate]
+func (this CA) WithCsr(data any) CA {
+    this.cert = data
 
-// 设置 csr
-func (this CA) WithCsr(data *x509.Certificate) CA {
-    this.csr = data
+    return this
+}
+
+// 设置 certRequest
+// 可用 [*x509.CertificateRequest | *sm2X509.CertificateRequest]
+func (this CA) WithCertRequest(data any) CA {
+    this.certRequest = data
 
     return this
 }

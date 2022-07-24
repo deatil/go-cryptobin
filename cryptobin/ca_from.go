@@ -11,9 +11,30 @@ import (
     "github.com/tjfoc/gmsm/sm2"
 )
 
-// 私钥
-func (this CA) FromCsr(csr *x509.Certificate) CA {
-    this.csr = csr
+// 证书
+func (this CA) FromCert(cert *x509.Certificate) CA {
+    this.cert = cert
+
+    return this
+}
+
+// 解析证书导入
+func (this CA) FromCertificateDer(der []byte) CA {
+    this.cert, this.Error = x509.ParseCertificate(der)
+
+    return this
+}
+
+// 证书请求
+func (this CA) FromCertRequest(cert *x509.CertificateRequest) CA {
+    this.certRequest = cert
+
+    return this
+}
+
+// 解析证书导入
+func (this CA) FromCertificateRequestDer(asn1Data []byte) CA {
+    this.certRequest, this.Error = x509.ParseCertificateRequest(asn1Data)
 
     return this
 }
@@ -76,11 +97,7 @@ func (this CA) GenerateEcdsaKey(curve string) CA {
     this.Error = err
 
     // 生成公钥
-    this.publicKey = &ecdsa.PublicKey{
-        Curve: useCurve,
-        X: privateKey.X,
-        Y: privateKey.Y,
-    }
+    this.publicKey = &privateKey.PublicKey
 
     return this
 }

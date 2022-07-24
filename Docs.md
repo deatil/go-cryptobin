@@ -178,14 +178,13 @@ func main() {
 
     // Ecdsa
     ecdsa := cryptobin.NewEcdsa()
-    rsaPriKey := ecdsa.
+    ecdsaPriKey := ecdsa.
         WithCurve("P521").
         GenerateKey().
         CreatePrivateKey().
         ToKeyString()
-    rsaPubKey := ecdsa.
-        FromPrivateKey([]byte(rsaPriKey)).
-        WithCurve("P521").
+    ecdsaPubKey := ecdsa.
+        FromPrivateKey([]byte(ecdsaPriKey)).
         CreatePublicKey().
         ToKeyString()
 
@@ -546,15 +545,15 @@ func main() {
         PostalCode:    []string{"94016"},
     }
     ca := cryptobin.NewCA().GenerateRsaKey(4096)
+    ca1KeyString := ca.CreatePrivateKey().ToKeyString()
 
     // ca
-    ca1 := ca.MakeCA(caSubj, 1)
+    ca1 := ca.MakeCA(caSubj, 1, "SHA256WithRSA")
     ca1String := ca1.CreateCA().ToKeyString()
-    ca1KeyString := ca1.CreatePrivateKey().ToKeyString()
 
     // tls
     ca1Csr := ca1.GetCert()
-    ca2 := ca.MakeCert(caSubj, 1, []string{"test.default.svc", "test"}, []net.IP{})
+    ca2 := ca.MakeCert(caSubj, 1, []string{"test.default.svc", "test"}, []net.IP{}, "SHA256WithRSA")
     ca2String := ca2.CreateCert(ca1Csr).ToKeyString()
 
     // fs.Put("./runtime/key/ca.cst", ca1String)

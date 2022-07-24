@@ -26,11 +26,21 @@ func (this CA) CreateCSR() CA {
 
     switch privateKey := this.privateKey.(type) {
         case *sm2.PrivateKey:
-            certRequest := this.certRequest.(*sm2X509.CertificateRequest)
+            certRequest, ok := this.certRequest.(*sm2X509.CertificateRequest)
+            if !ok {
+                this.Error = errors.New("sm2 certRequest error.")
+                return this
+            }
+
             csrBytes, err = sm2X509.CreateCertificateRequest(rand.Reader, certRequest, privateKey)
 
         default:
-            certRequest := this.certRequest.(*x509.CertificateRequest)
+            certRequest, ok := this.certRequest.(*x509.CertificateRequest)
+            if !ok {
+                this.Error = errors.New("certRequest error.")
+                return this
+            }
+
             csrBytes, err = x509.CreateCertificateRequest(rand.Reader, certRequest, this.privateKey)
     }
 
@@ -61,13 +71,22 @@ func (this CA) CreateCA() CA {
 
     switch privateKey := this.privateKey.(type) {
         case *sm2.PrivateKey:
-            cert := this.cert.(*sm2X509.Certificate)
+            cert, ok := this.cert.(*sm2X509.Certificate)
+            if !ok {
+                this.Error = errors.New("sm2 cert error.")
+                return this
+            }
+
             publicKey := &privateKey.PublicKey
 
             caBytes, err = sm2X509.CreateCertificate(cert, cert, publicKey, privateKey)
 
         default:
-            cert := this.cert.(*x509.Certificate)
+            cert, ok := this.cert.(*x509.Certificate)
+            if !ok {
+                this.Error = errors.New("cert error.")
+                return this
+            }
 
             caBytes, err = x509.CreateCertificate(rand.Reader, cert, cert, this.publicKey, this.privateKey)
     }
@@ -99,15 +118,34 @@ func (this CA) CreateCert(ca any) CA {
 
     switch privateKey := this.privateKey.(type) {
         case *sm2.PrivateKey:
-            newCert := this.cert.(*sm2X509.Certificate)
-            newCa := ca.(*sm2X509.Certificate)
+            newCert, certOk := this.cert.(*sm2X509.Certificate)
+            if !certOk {
+                this.Error = errors.New("sm2 cert error.")
+                return this
+            }
+
+            newCa, caOk := ca.(*sm2X509.Certificate)
+            if !caOk {
+                this.Error = errors.New("sm2 ca error.")
+                return this
+            }
+
             publicKey := &privateKey.PublicKey
 
             certBytes, err = sm2X509.CreateCertificate(newCert, newCa, publicKey, privateKey)
 
         default:
-            newCert := this.cert.(*x509.Certificate)
-            newCa := ca.(*x509.Certificate)
+            newCert, certOk := this.cert.(*x509.Certificate)
+            if !certOk {
+                this.Error = errors.New("cert error.")
+                return this
+            }
+
+            newCa, caOk := ca.(*x509.Certificate)
+            if !caOk {
+                this.Error = errors.New("ca error.")
+                return this
+            }
 
             certBytes, err = x509.CreateCertificate(rand.Reader, newCert, newCa, this.publicKey, this.privateKey)
     }

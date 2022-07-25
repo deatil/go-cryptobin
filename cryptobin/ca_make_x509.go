@@ -112,7 +112,7 @@ func (this CA) MakeCert(
     return this
 }
 
-// 更新 CSR 数据
+// 更新 Cert 数据
 func (this CA) UpdateCert(fn func(*x509.Certificate) *x509.Certificate) CA {
     this.cert = fn(this.cert.(*x509.Certificate))
 

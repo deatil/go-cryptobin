@@ -63,6 +63,11 @@ func (this Ecdsa) Very(data []byte, separator ...string) Ecdsa {
     }
 
     split := strings.Split(string(this.data), sep)
+    if len(split) != 2 {
+        this.Error = errors.New("sign data is error.")
+        return this
+    }
+
     rStr := split[0]
     sStr := split[1]
     rr := new(big.Int)

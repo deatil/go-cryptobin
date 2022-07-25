@@ -12,6 +12,8 @@ import (
 
     "github.com/tjfoc/gmsm/sm2"
     sm2X509 "github.com/tjfoc/gmsm/x509"
+    sm2Pkcs12 "github.com/tjfoc/gmsm/pkcs12"
+    sslmatePkcs12 "software.sslmate.com/src/go-pkcs12"
 )
 
 // 证书请求
@@ -210,6 +212,63 @@ func (this CA) CreatePrivateKey() CA {
     }
 
     this.keyData = pem.EncodeToMemory(privateBlock)
+
+    return this
+}
+
+// =======================
+
+// pkcs12 密钥
+// caCerts 通常保留为空
+// 支持 [rsa | ecdsa | sm2]
+func (this CA) CreatePKCS12(caCerts []*x509.Certificate, pwd string) CA {
+    if this.privateKey == nil {
+        this.Error = errors.New("privateKey error.")
+        return this
+    }
+
+    var pfxData []byte
+    var err error
+
+    switch privateKey := this.privateKey.(type) {
+        case *sm2.PrivateKey:
+            cert, ok := this.cert.(*sm2X509.Certificate)
+            if !ok {
+                this.Error = errors.New("sm2 cert error.")
+                return this
+            }
+
+            pfxData, err = sm2Pkcs12.Encode(privateKey, cert, caCerts, pwd)
+
+        default:
+            cert, ok := this.cert.(*x509.Certificate)
+            if !ok {
+                this.Error = errors.New("cert error.")
+                return this
+            }
+
+            pfxData, err = sslmatePkcs12.Encode(rand.Reader, privateKey, cert, caCerts, pwd)
+    }
+
+    if err != nil {
+        this.Error = err
+        return this
+    }
+
+    this.keyData = pfxData
+
+    return this
+}
+
+// pkcs12 密钥
+func (this CA) CreatePKCS12TrustStore(certs []*x509.Certificate, password string) CA {
+    pfxData, err := sslmatePkcs12.EncodeTrustStore(rand.Reader, certs, password)
+    if err != nil {
+        this.Error = err
+        return this
+    }
+
+    this.keyData = pfxData
 
     return this
 }

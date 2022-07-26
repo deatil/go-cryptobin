@@ -8,7 +8,7 @@ import (
 )
 
 // 序列号
-var dsaPrivKeyVersion = 1
+var dsaPrivKeyVersion = 0
 
 // 私钥
 type dsaPrivateKey struct {

@@ -8,6 +8,16 @@ import (
     "encoding/pem"
 )
 
+// 私钥, PKCS1 别名
+func (this Rsa) CreatePrivateKey() Rsa {
+    return this.CreatePKCS1PrivateKey()
+}
+
+// 私钥带密码, PKCS1 别名
+func (this Rsa) CreatePrivateKeyWithPassword(password string, opts ...string) Rsa {
+    return this.CreatePKCS1PrivateKeyWithPassword(password, opts...)
+}
+
 // PKCS1 私钥
 func (this Rsa) CreatePKCS1PrivateKey() Rsa {
     if this.privateKey == nil {

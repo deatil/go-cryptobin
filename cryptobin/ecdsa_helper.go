@@ -20,6 +20,11 @@ func EcdsaFromPrivateKey(key []byte) Ecdsa {
     return NewEcdsa().FromPrivateKey(key)
 }
 
+// 私钥
+func EcdsaFromPrivateKeyWithPassword(key []byte, password string) Ecdsa {
+    return NewEcdsa().FromPrivateKeyWithPassword(key, password)
+}
+
 // 公钥
 func EcdsaFromPublicKey(key []byte) Ecdsa {
     return NewEcdsa().FromPublicKey(key)

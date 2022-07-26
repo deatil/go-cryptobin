@@ -50,13 +50,13 @@ func (this Rsa) ParseRSAPrivateKeyFromPEMWithPassword(key []byte, password strin
         return nil, ErrKeyMustBePEMEncoded
     }
 
-    var parsedKey any
-
     var blockDecrypted []byte
     if blockDecrypted, err = x509.DecryptPEMBlock(block, []byte(password)); err != nil {
         return nil, err
     }
 
+    // Parse the key
+    var parsedKey any
     if parsedKey, err = x509.ParsePKCS1PrivateKey(blockDecrypted); err != nil {
         if parsedKey, err = x509.ParsePKCS8PrivateKey(blockDecrypted); err != nil {
             return nil, err

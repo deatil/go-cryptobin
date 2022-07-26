@@ -20,7 +20,7 @@ func main() {
         SetKey("dfertf12dfertf12").
         Aes().
         ECB().
-        PKCS7Padding().
+        PKCS5Padding().
         Encrypt().
         ToBase64String()
     cyptde := cryptobin.
@@ -28,7 +28,7 @@ func main() {
         SetKey("dfertf12dfertf12").
         Aes().
         ECB().
-        PKCS7Padding().
+        PKCS5Padding().
         Decrypt().
         ToString()
 
@@ -644,6 +644,8 @@ func main() {
     // fs.Put("./runtime/key/dsa", dsaPriKey)
     // fs.Put("./runtime/key/dsa.pub", dsaPubKey)
 
+    // =====
+
     // DSA 验证
     dsa := cryptobin.NewDSA()
 
@@ -659,6 +661,24 @@ func main() {
         FromPublicKey([]byte(dsaPub)).
         Very([]byte("test-pass")).
         ToVeryed()
+
+    // =====
+
+    // Xts 加密测试
+    cypt1 := cryptobin.
+        FromString("test-pass").
+        SetKey("1234567890abcdef1234567890abcdef").
+        Xts("Aes", 0x3333333333).
+        PKCS5Padding().
+        Encrypt().
+        ToHexString()
+    cyptde1 := cryptobin.
+        FromHexString("d062ce7c53988c59acf6df73d148c2bf").
+        SetKey("1234567890abcdef1234567890abcdef").
+        PKCS5Padding().
+        Xts("Aes", 0x3333333333).
+        Decrypt().
+        ToString()
 
 }
 

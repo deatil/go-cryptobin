@@ -13,7 +13,7 @@ func (this DSA) CreatePrivateKey() DSA {
         return this
     }
 
-    privateKeyBytes, err := this.MarshalPrivateKey(*this.privateKey)
+    privateKeyBytes, err := this.MarshalPrivateKey(this.privateKey)
     if err != nil {
         this.Error = err
         return this
@@ -45,7 +45,7 @@ func (this DSA) CreatePublicKey() DSA {
         publicKey = this.publicKey
     }
 
-    publicKeyBytes, err := this.MarshalPublicKey(*publicKey)
+    publicKeyBytes, err := this.MarshalPublicKey(publicKey)
     if err != nil {
         this.Error = err
         return this

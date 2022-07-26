@@ -9,7 +9,7 @@ import (
 )
 
 // PKCS1 私钥
-func (this Rsa) CreatePKCS1() Rsa {
+func (this Rsa) CreatePKCS1PrivateKey() Rsa {
     if this.privateKey == nil {
         this.Error = errors.New("privateKey error.")
         return this
@@ -28,8 +28,8 @@ func (this Rsa) CreatePKCS1() Rsa {
 }
 
 // PKCS1 私钥带密码
-// CreatePKCS1WithPassword("123", "AES256CBC")
-func (this Rsa) CreatePKCS1WithPassword(password string, opts ...string) Rsa {
+// CreatePKCS1PrivateKeyWithPassword("123", "AES256CBC")
+func (this Rsa) CreatePKCS1PrivateKeyWithPassword(password string, opts ...string) Rsa {
     if this.privateKey == nil {
         this.Error = errors.New("privateKey error.")
         return this
@@ -71,7 +71,7 @@ func (this Rsa) CreatePKCS1WithPassword(password string, opts ...string) Rsa {
 }
 
 // PKCS8 私钥
-func (this Rsa) CreatePKCS8() Rsa {
+func (this Rsa) CreatePKCS8PrivateKey() Rsa {
     if this.privateKey == nil {
         this.Error = errors.New("privateKey error.")
         return this
@@ -94,8 +94,8 @@ func (this Rsa) CreatePKCS8() Rsa {
 }
 
 // PKCS8 私钥带密码
-// CreatePKCS8WithPassword("123", "AES256CBC", "SHA256")
-func (this Rsa) CreatePKCS8WithPassword(password string, opts ...string) Rsa {
+// CreatePKCS8PrivateKeyWithPassword("123", "AES256CBC", "SHA256")
+func (this Rsa) CreatePKCS8PrivateKeyWithPassword(password string, opts ...string) Rsa {
     if this.privateKey == nil {
         this.Error = errors.New("privateKey error.")
         return this

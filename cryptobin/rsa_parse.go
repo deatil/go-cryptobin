@@ -103,7 +103,7 @@ func (this Rsa) ParseRSAPKCS8PrivateKeyFromPEMWithPassword(key []byte, password 
 }
 
 // 解析 pkf 证书
-func (this Rsa) ParseRSAPKCS12PrivateKeyFromPEMWithPassword(pfxData []byte, password string) (*rsa.PrivateKey, error) {
+func (this Rsa) ParseRSAPKCS12CertFromPEMWithPassword(pfxData []byte, password string) (*rsa.PrivateKey, error) {
     privateKey, _, err := pkcs12.Decode(pfxData, password)
     if err != nil {
         return nil, err

@@ -31,6 +31,30 @@ func (this Ecdsa) CreatePrivateKey() Ecdsa {
     return this
 }
 
+// PKCS8 私钥
+func (this Ecdsa) CreatePKCS8PrivateKey() Ecdsa {
+    if this.privateKey == nil {
+        this.Error = errors.New("privateKey error.")
+
+        return this
+    }
+
+    x509PrivateKey, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
+    if err != nil {
+        this.Error = err
+        return this
+    }
+
+    privateBlock := &pem.Block{
+        Type: "EC PRIVATE KEY",
+        Bytes: x509PrivateKey,
+    }
+
+    this.keyData = pem.EncodeToMemory(privateBlock)
+
+    return this
+}
+
 // 公钥
 func (this Ecdsa) CreatePublicKey() Ecdsa {
     var publicKey *ecdsa.PublicKey

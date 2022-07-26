@@ -14,6 +14,13 @@ func (this Ecdsa) FromPrivateKey(key []byte) Ecdsa {
     return this
 }
 
+// PKCS8 私钥
+func (this Ecdsa) FromPKCS8PrivateKey(key []byte) Ecdsa {
+    this.privateKey, this.Error = this.ParseECPrivateKeyFromPEM(key)
+
+    return this
+}
+
 // 公钥
 func (this Ecdsa) FromPublicKey(key []byte) Ecdsa {
     this.publicKey, this.Error = this.ParseECPublicKeyFromPEM(key)

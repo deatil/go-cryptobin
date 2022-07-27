@@ -71,6 +71,36 @@ func (this Ecdsa) ParseECPrivateKeyFromPEMWithPassword(key []byte, password stri
     return pkey, nil
 }
 
+// 解析 PKCS8 带密码的私钥
+func (this Ecdsa) ParseECPKCS8PrivateKeyFromPEMWithPassword(key []byte, password string) (*ecdsa.PrivateKey, error) {
+    var err error
+
+    // Parse PEM block
+    var block *pem.Block
+    if block, _ = pem.Decode(key); block == nil {
+        return nil, ErrKeyMustBePEMEncoded
+    }
+
+    var parsedKey any
+
+    var blockDecrypted []byte
+    if blockDecrypted, err = DecryptPKCS8PrivateKey(block.Bytes, []byte(password)); err != nil {
+        return nil, err
+    }
+
+    if parsedKey, err = x509.ParsePKCS8PrivateKey(blockDecrypted); err != nil {
+        return nil, err
+    }
+
+    var pkey *ecdsa.PrivateKey
+    var ok bool
+    if pkey, ok = parsedKey.(*ecdsa.PrivateKey); !ok {
+        return nil, ErrNotRSAPrivateKey
+    }
+
+    return pkey, nil
+}
+
 // 解析公钥
 func (this Ecdsa) ParseECPublicKeyFromPEM(key []byte) (*ecdsa.PublicKey, error) {
     var err error

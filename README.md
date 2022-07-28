@@ -62,7 +62,7 @@ func main() {
 
 ### 结构说明
 
-默认方式 `Aes`, `ECB`, `NoPadding`
+*  默认方式 `Aes`, `ECB`, `NoPadding`
 ~~~go
 // 加密数据
 cypt := cryptobin.
@@ -78,7 +78,7 @@ cyptde := cryptobin.
     ToString()
 ~~~
 
-结构说明
+*  结构说明
 ~~~go
 // 使用代码
 // 注意: 数据来源,设置密码,加密类型,加密模式,补码方式 在 操作类型 之前, 可以调换顺序
@@ -95,13 +95,13 @@ ret := cryptobin.
 
 ### 可用方法
 
-数据来源: `FromBytes(data []byte)`, `FromString(data string)`, `FromBase64String(data string)`, `FromHexString(data string)`
-设置密码: `SetKey(data string)`, `WithKey(key []byte)`
-加密类型: `Aes()`, `Des()`, `TriDes()`, `Twofish()`, `Blowfish()`, `Tea(rounds ...int)`, `Xtea()`, `Cast5()`, `SM4()`, `Chacha20(nonce string, counter ...uint32)`, `Chacha20poly1305(nonce string, additional string)`, `RC4()`, `Xts(cipher string, sectorNum uint64)`
-加密模式: `ECB()`, `CBC()`, `CFB()`, `OFB()`, `CTR()`, `GCM(nonce string, additional ...string)`
-补码方式: `NoPadding()`, `ZeroPadding()`, `PKCS5Padding()`, `PKCS7Padding()`, `X923Padding()`, `ISO10126Padding()`, `ISO7816_4Padding()`, `TBCPadding()`, `PKCS1Padding(bt ...string)`
-操作类型: `Encrypt()`, `Decrypt()`, `FuncEncrypt(f func(Cryptobin) Cryptobin)`, `FuncDecrypt(f func(Cryptobin) Cryptobin)`
-返回数据类型: `ToBytes()`, `ToString()`, `ToBase64String()`, `ToHexString()`
+*  数据来源: `FromBytes(data []byte)`, `FromString(data string)`, `FromBase64String(data string)`, `FromHexString(data string)`
+*  设置密码: `SetKey(data string)`, `WithKey(key []byte)`
+*  加密类型: `Aes()`, `Des()`, `TriDes()`, `Twofish()`, `Blowfish()`, `Tea(rounds ...int)`, `Xtea()`, `Cast5()`, `SM4()`, `Chacha20(nonce string, counter ...uint32)`, `Chacha20poly1305(nonce string, additional string)`, `RC4()`, `Xts(cipher string, sectorNum uint64)`
+*  加密模式: `ECB()`, `CBC()`, `CFB()`, `OFB()`, `CTR()`, `GCM(nonce string, additional ...string)`
+*  补码方式: `NoPadding()`, `ZeroPadding()`, `PKCS5Padding()`, `PKCS7Padding()`, `X923Padding()`, `ISO10126Padding()`, `ISO7816_4Padding()`, `TBCPadding()`, `PKCS1Padding(bt ...string)`
+*  操作类型: `Encrypt()`, `Decrypt()`, `FuncEncrypt(f func(Cryptobin) Cryptobin)`, `FuncDecrypt(f func(Cryptobin) Cryptobin)`
+*  返回数据类型: `ToBytes()`, `ToString()`, `ToBase64String()`, `ToHexString()`
 
 
 ### 开源协议

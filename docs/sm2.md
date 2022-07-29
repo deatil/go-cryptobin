@@ -19,7 +19,7 @@ func main() {
     obj := cryptobin.
         NewSM2().
         GenerateKey()
-    
+
     objPriKey := obj.
         CreatePrivateKey().
         // CreatePrivateKeyWithPassword("123").
@@ -176,11 +176,24 @@ func main() {
         CreatePrivateKey().
         ToKeyString()
 
-    // =====
+}
+~~~
 
-    // sm2 签名【招行】
+* 【招商银行】支付签名验证
+~~~go
+package main
+
+import (
+    "fmt"
+    "encoding/base64"
+
+    "github.com/deatil/go-cryptobin/cryptobin"
+)
+
+func main() {
+    // sm2 签名【招商银行】
     sm2key := "NBtl7WnuUtA2v5FaebEkU0/Jj1IodLGT6lQqwkzmd2E="
-    sm2keyBytes := encoding.FromBase64String(sm2key).ToBytes()
+    sm2keyBytes, _ := base64.StdEncoding.DecodeString(sm2key)
     sm2data := `{"request":{"body":{"TEST":"中文","TEST2":"!@#$%^&*()","TEST3":12345,"TEST4":[{"arrItem1":"qaz","arrItem2":123,"arrItem3":true,"arrItem4":"中文"}],"buscod":"N02030"},"head":{"funcode":"DCLISMOD","userid":"N003261207"}},"signature":{"sigdat":"__signature_sigdat__"}}`
     sm2userid := "N0032612070000000000000000"
     sm2userid = sm2userid[0:16]
@@ -190,21 +203,21 @@ func main() {
         SignHex([]byte(sm2userid)).
         ToBase64String()
 
-    // =====
-
-    // sm2 验证【招行】
+    // sm2 验证【招商银行】
     sm2key := "NBtl7WnuUtA2v5FaebEkU0/Jj1IodLGT6lQqwkzmd2E="
-    sm2keyBytes := encoding.FromBase64String(sm2key).ToBytes()
+    sm2keyBytes, _ := base64.StdEncoding.DecodeString(sm2key)
     sm2data := `{"request":{"body":{"TEST":"中文","TEST2":"!@#$%^&*()","TEST3":12345,"TEST4":[{"arrItem1":"qaz","arrItem2":123,"arrItem3":true,"arrItem4":"中文"}],"buscod":"N02030"},"head":{"funcode":"DCLISMOD","userid":"N003261207"}},"signature":{"sigdat":"__signature_sigdat__"}}`
     sm2userid := "N0032612070000000000000000"
     sm2userid = sm2userid[0:16]
-
     sm2signdata := "CDAYcxm3jM+65XKtFNii0tKrTmEbfNdR/Q/BtuQFzm5+luEf2nAhkjYTS2ygPjodpuAkarsNqjIhCZ6+xD4WKA=="
-    sm2Sign := cryptobin.NewSM2().
+    sm2Very := cryptobin.NewSM2().
         FromPrivateKeyBytes(sm2keyBytes).
         FromBase64String(sm2signdata).
         VerifyHex([]byte(sm2data), []byte(sm2userid)).
         ToVeryed()
+
+    fmt.Println("签名结果：", sm2Sign)
+    fmt.Println("验证结果：", sm2Very)
 
 }
 ~~~

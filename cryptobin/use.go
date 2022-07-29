@@ -115,35 +115,35 @@ func (this Cryptobin) Xts(cipher string, sectorNum uint64) Cryptobin {
 
 // ==========
 
-// ECB
+// 电码本模式
 func (this Cryptobin) ECB() Cryptobin {
     this.mode = "ECB"
 
     return this
 }
 
-// CBC
+// 密码分组链接模式
 func (this Cryptobin) CBC() Cryptobin {
     this.mode = "CBC"
 
     return this
 }
 
-// CFB
+// 密码反馈模式
 func (this Cryptobin) CFB() Cryptobin {
     this.mode = "CFB"
 
     return this
 }
 
-// OFB
+// 输出反馈模式
 func (this Cryptobin) OFB() Cryptobin {
     this.mode = "OFB"
 
     return this
 }
 
-// CTR
+// 计算器模式
 func (this Cryptobin) CTR() Cryptobin {
     this.mode = "CTR"
 

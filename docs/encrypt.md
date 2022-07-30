@@ -7,7 +7,7 @@ package main
 import (
     "fmt"
 
-    "github.com/deatil/go-cryptobin/cryptobin"
+    cryptobin "github.com/deatil/go-cryptobin/cryptobin/crypto"
     "github.com/deatil/lakego-filesystem/filesystem"
 )
 
@@ -25,7 +25,7 @@ func main() {
         Encrypt().
         Error.
         Error()
-        
+
     // 获取报错数据2
     var cypt2Err error
     cypt2 := cryptobin.

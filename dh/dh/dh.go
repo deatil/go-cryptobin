@@ -30,11 +30,14 @@ type DH struct {
 // 生成证书
 func (this *DH) GenerateKey(rand io.Reader) (private PrivateKey, public PublicKey, err error) {
     if this.P == nil {
-        panic("crypto/dh: group prime is nil")
+        err = errors.New("group prime is nil")
+        return
     }
     if this.G == nil {
-        panic("crypto/dh: group generator is nil")
+        err = errors.New("crypto/dh: group generator is nil")
+        return
     }
+
     if rand == nil {
         rand = cryptorand.Reader
     }

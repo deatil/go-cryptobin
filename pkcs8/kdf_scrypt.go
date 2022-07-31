@@ -60,3 +60,7 @@ func (this ScryptOpts) GetSaltSize() int {
 func (this ScryptOpts) OID() asn1.ObjectIdentifier {
     return oidScrypt
 }
+
+func init() {
+    AddKDF(oidScrypt, new(scryptParams))
+}

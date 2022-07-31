@@ -31,27 +31,6 @@ var (
     oidHMACWithSHA512_256  = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 13}
 )
 
-// hash 列表
-var hashMap = map[string]crypto.Hash{
-    "MD5":        crypto.MD5,
-    "SHA1":       crypto.SHA1,
-    "SHA224":     crypto.SHA224,
-    "SHA256":     crypto.SHA256,
-    "SHA384":     crypto.SHA384,
-    "SHA512":     crypto.SHA512,
-    "SHA512_224": crypto.SHA512_224,
-    "SHA512_256": crypto.SHA512_256,
-}
-
-// 获取 hash
-func GetHash(name string) (crypto.Hash, error) {
-    if h, ok := hashMap[name]; ok {
-        return h, nil
-    }
-
-    return crypto.MD5, errors.New("pkcs8: unsupported hash function")
-}
-
 // 返回使用的 Hash 方式
 func prfByOID(oid asn1.ObjectIdentifier) (func() hash.Hash, error) {
     switch {
@@ -148,4 +127,8 @@ func (this PBKDF2Opts) GetSaltSize() int {
 
 func (this PBKDF2Opts) OID() asn1.ObjectIdentifier {
     return oidPKCS5PBKDF2
+}
+
+func init() {
+    AddKDF(oidPKCS5PBKDF2, new(pbkdf2Params))
 }

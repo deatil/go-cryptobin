@@ -135,9 +135,6 @@ func (this SM2) FromPrivateKeyBytes(priByte []byte) SM2 {
 
     this.privateKey = priv
 
-    // 同时生成公钥
-    this.publicKey = &this.privateKey.PublicKey
-
     return this
 }
 

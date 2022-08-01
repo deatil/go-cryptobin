@@ -66,10 +66,10 @@ func main() {
         CreatePKCS8PrivateKeyWithPassword("123", cryptobin_rsa.Opts{
             Cipher:  cryptobin_rsa.CipherMap["AES256CBC"],
             KDFOpts: cryptobin_rsa.ScryptOpts{
-                CostParameter:            1 << 2,
+                CostParameter:            1 << 15,
                 BlockSize:                8,
                 ParallelizationParameter: 1,
-                SaltSize:                 16,
+                SaltSize:                 8,
             },
         }).
         ToKeyString()

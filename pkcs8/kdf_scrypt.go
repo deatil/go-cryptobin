@@ -20,8 +20,9 @@ type scryptParams struct {
 
 func (this scryptParams) DeriveKey(password []byte, size int) (key []byte, err error) {
     return scrypt.Key(
-        password, this.Salt, this.CostParameter,
-        this.BlockSize, this.ParallelizationParameter, size,
+        password, this.Salt,
+        this.CostParameter, this.BlockSize,
+        this.ParallelizationParameter, size,
     )
 }
 

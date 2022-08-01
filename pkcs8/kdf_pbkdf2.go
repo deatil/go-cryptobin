@@ -21,6 +21,8 @@ var (
 
     // hash 方式
     oidDigestAlgorithm     = asn1.ObjectIdentifier{1, 2, 840, 113549, 2}
+    oidHMACWithMD2         = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 2}
+    oidHMACWithMD4         = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 4}
     oidHMACWithMD5         = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 5}
     oidHMACWithSHA1        = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 7}
     oidHMACWithSHA224      = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 8}

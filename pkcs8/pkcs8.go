@@ -127,7 +127,7 @@ func EncryptPKCS8PrivateKey(
     }
 
     keyDerivationFunc := pkix.AlgorithmIdentifier{
-        Algorithm:  oidPKCS5PBKDF2,
+        Algorithm:  opt.KDFOpts.OID(),
         Parameters: asn1.RawValue{
             FullBytes: marshalledParams,
         },

@@ -27,6 +27,7 @@ func (this CipherBlock) OID() asn1.ObjectIdentifier {
     return this.identifier
 }
 
+// 加密
 func (this CipherBlock) Encrypt(key, iv, plaintext []byte) ([]byte, error) {
     block, err := this.cipherFunc(key)
     if err != nil {
@@ -51,6 +52,7 @@ func (this CipherBlock) Encrypt(key, iv, plaintext []byte) ([]byte, error) {
     return encrypted, nil
 }
 
+// 解密
 func (this CipherBlock) Decrypt(key, iv, ciphertext []byte) ([]byte, error) {
     block, err := this.cipherFunc(key)
     if err != nil {
@@ -58,6 +60,7 @@ func (this CipherBlock) Decrypt(key, iv, ciphertext []byte) ([]byte, error) {
     }
 
     plaintext := make([]byte, len(ciphertext))
+
     mode := cipher.NewCBCDecrypter(block, iv)
     mode.CryptBlocks(plaintext, ciphertext)
 
@@ -76,6 +79,7 @@ func (this CipherBlock) Decrypt(key, iv, ciphertext []byte) ([]byte, error) {
         return nil, x509.IncorrectPasswordError
     }
 
+    // 保证最后填充数据为连续数据
     for _, val := range plaintext[dlen-last:] {
         if int(val) != last {
             return nil, x509.IncorrectPasswordError

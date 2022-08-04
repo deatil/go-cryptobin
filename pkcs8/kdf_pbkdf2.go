@@ -3,7 +3,6 @@ package pkcs8
 import (
     "hash"
     "errors"
-    "crypto"
     "crypto/md5"
     "crypto/sha1"
     "crypto/sha256"
@@ -11,12 +10,26 @@ import (
     "crypto/x509/pkix"
     "encoding/asn1"
 
+    "golang.org/x/crypto/md4"
     "golang.org/x/crypto/pbkdf2"
     "github.com/tjfoc/gmsm/sm3"
 )
 
+// pkcs8 可使用的 hash 方式
+type Hash uint
+
 const (
-    SM3 = crypto.BLAKE2b_512 + 2
+    MD2 Hash = 1 + iota // 暂时没有提供
+    MD4
+    MD5
+    SHA1
+    SHA224
+    SHA256
+    SHA384
+    SHA512
+    SHA512_224
+    SHA512_256
+    SM3
 )
 
 var (
@@ -42,6 +55,8 @@ var (
 // 返回使用的 Hash 方式
 func prfByOID(oid asn1.ObjectIdentifier) (func() hash.Hash, error) {
     switch {
+        case oid.Equal(oidHMACWithMD4):
+            return md4.New, nil
         case oid.Equal(oidHMACWithMD5):
             return md5.New, nil
         case oid.Equal(oidHMACWithSHA1):
@@ -66,23 +81,25 @@ func prfByOID(oid asn1.ObjectIdentifier) (func() hash.Hash, error) {
 }
 
 // 返回使用的 Hash 对应的 asn1
-func oidByHash(h crypto.Hash) (asn1.ObjectIdentifier, error) {
+func oidByHash(h Hash) (asn1.ObjectIdentifier, error) {
     switch h {
-        case crypto.MD5:
+        case MD4:
+            return oidHMACWithMD4, nil
+        case MD5:
             return oidHMACWithMD5, nil
-        case crypto.SHA1:
+        case SHA1:
             return oidHMACWithSHA1, nil
-        case crypto.SHA224:
+        case SHA224:
             return oidHMACWithSHA224, nil
-        case crypto.SHA256:
+        case SHA256:
             return oidHMACWithSHA256, nil
-        case crypto.SHA384:
+        case SHA384:
             return oidHMACWithSHA384, nil
-        case crypto.SHA512:
+        case SHA512:
             return oidHMACWithSHA512, nil
-        case crypto.SHA512_224:
+        case SHA512_224:
             return oidHMACWithSHA512_224, nil
-        case crypto.SHA512_256:
+        case SHA512_256:
             return oidHMACWithSHA512_256, nil
         case SM3:
             return oidHMACWithSM3, nil
@@ -111,16 +128,21 @@ func (this pbkdf2Params) DeriveKey(password []byte, size int) (key []byte, err e
 type PBKDF2Opts struct {
     SaltSize       int
     IterationCount int
-    HMACHash       crypto.Hash
+    HMACHash       Hash
 }
 
 func (this PBKDF2Opts) DeriveKey(password, salt []byte, size int) (key []byte, params KDFParameters, err error) {
-    key = pbkdf2.Key(password, salt, this.IterationCount, size, this.HMACHash.New)
-
     alg, err := oidByHash(this.HMACHash)
     if err != nil {
         return nil, nil, err
     }
+
+    h, err := prfByOID(alg)
+    if err != nil {
+        return nil, nil, err
+    }
+
+    key = pbkdf2.Key(password, salt, this.IterationCount, size, h)
 
     prfParam := pkix.AlgorithmIdentifier{
         Algorithm:  alg,

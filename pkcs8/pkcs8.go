@@ -4,7 +4,6 @@ import (
     "io"
     "fmt"
     "errors"
-    "crypto"
     "crypto/x509"
     "crypto/x509/pkix"
     "encoding/asn1"
@@ -76,7 +75,7 @@ var DefaultOpts = Opts{
     KDFOpts: PBKDF2Opts{
         SaltSize:       16,
         IterationCount: 10000,
-        HMACHash:       crypto.SHA256,
+        HMACHash:       SHA256,
     },
 }
 

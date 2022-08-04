@@ -17,10 +17,6 @@ import (
     "github.com/tjfoc/gmsm/sm3"
 )
 
-const (
-    SM3 = crypto.BLAKE2b_512 + 2
-)
-
 type (
     // hashFunc
     hashFunc = func() hash.Hash
@@ -94,7 +90,6 @@ var defaultCryptoHashes = CryptoHashMap{
     "BLAKE2b_256": crypto.BLAKE2b_256,
     "BLAKE2b_384": crypto.BLAKE2b_384,
     "BLAKE2b_512": crypto.BLAKE2b_512,
-    "SM3": SM3,
 }
 
 /**
@@ -146,7 +141,7 @@ func (this Hash) GetHash(typ string) hashFunc {
         return sha
     }
 
-    return this.hashes["SHA512"]
+    return this.hashes["SHA256"]
 }
 
 // 类型
@@ -156,7 +151,7 @@ func (this Hash) GetCryptoHash(typ string) crypto.Hash {
         return sha
     }
 
-    return this.cryptoHashes["SHA512"]
+    return this.cryptoHashes["SHA256"]
 }
 
 // 签名后数据

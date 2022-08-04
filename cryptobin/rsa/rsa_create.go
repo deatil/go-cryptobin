@@ -233,8 +233,7 @@ func parseOpt(opts ...any) (pkcs8.Opts, error) {
                 return pkcs8.Opts{}, errors.New("PEMCipher not exists.")
             }
 
-            hmacHash := cryptobin_tool.NewHash().
-                GetCryptoHash(encryptHash)
+            hmacHash := cryptobin_tool.GetPkcs8HmacHash(encryptHash)
 
             // 设置
             enOpt := pkcs8.Opts{

@@ -21,12 +21,20 @@ type (
 )
 
 // Cipher 列表
-var CipherMap = map[string]pkcs8.CipherBlock{
+var CipherMap = map[string]pkcs8.Cipher{
     "DESCBC":     pkcs8.DESCBC,
     "DESEDE3CBC": pkcs8.DESEDE3CBC,
+
     "AES128CBC":  pkcs8.AES128CBC,
     "AES192CBC":  pkcs8.AES192CBC,
     "AES256CBC":  pkcs8.AES256CBC,
+
+    "AES128GCM":  pkcs8.AES128GCM,
+    "AES192GCM":  pkcs8.AES192GCM,
+    "AES256GCM":  pkcs8.AES256GCM,
+
+    "SM4CBC":  pkcs8.SM4CBC,
+    "SM4GCM":  pkcs8.SM4GCM,
 }
 
 // 私钥

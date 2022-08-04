@@ -13,6 +13,12 @@ import (
     "golang.org/x/crypto/blake2s"
     "golang.org/x/crypto/blake2b"
     "golang.org/x/crypto/ripemd160"
+
+    "github.com/tjfoc/gmsm/sm3"
+)
+
+const (
+    SM3 = crypto.BLAKE2b_512 + 2
 )
 
 type (
@@ -65,6 +71,7 @@ var defaultHashes = HashMap{
     "BLAKE2b_256": newBlake2bHash256,
     "BLAKE2b_384": newBlake2bHash384,
     "BLAKE2b_512": newBlake2bHash512,
+    "SM3": sm3.New,
 }
 
 // hash 官方默认
@@ -87,6 +94,7 @@ var defaultCryptoHashes = CryptoHashMap{
     "BLAKE2b_256": crypto.BLAKE2b_256,
     "BLAKE2b_384": crypto.BLAKE2b_384,
     "BLAKE2b_512": crypto.BLAKE2b_512,
+    "SM3": SM3,
 }
 
 /**

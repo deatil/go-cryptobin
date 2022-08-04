@@ -12,6 +12,11 @@ import (
     "encoding/asn1"
 
     "golang.org/x/crypto/pbkdf2"
+    "github.com/tjfoc/gmsm/sm3"
+)
+
+const (
+    SM3 = crypto.BLAKE2b_512 + 2
 )
 
 var (
@@ -31,6 +36,7 @@ var (
     oidHMACWithSHA512      = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 11}
     oidHMACWithSHA512_224  = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 12}
     oidHMACWithSHA512_256  = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 13}
+    oidHMACWithSM3         = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 401, 2}
 )
 
 // 返回使用的 Hash 方式
@@ -52,6 +58,8 @@ func prfByOID(oid asn1.ObjectIdentifier) (func() hash.Hash, error) {
             return sha512.New512_224, nil
         case oid.Equal(oidHMACWithSHA512_256):
             return sha512.New512_256, nil
+        case oid.Equal(oidHMACWithSM3):
+            return sm3.New, nil
     }
 
     return nil, errors.New("pkcs8: unsupported hash function")
@@ -76,6 +84,8 @@ func oidByHash(h crypto.Hash) (asn1.ObjectIdentifier, error) {
             return oidHMACWithSHA512_224, nil
         case crypto.SHA512_256:
             return oidHMACWithSHA512_256, nil
+        case SM3:
+            return oidHMACWithSM3, nil
     }
 
     return nil, errors.New("pkcs8: unsupported hash function")

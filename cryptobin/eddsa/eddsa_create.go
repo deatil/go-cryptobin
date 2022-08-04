@@ -7,40 +7,29 @@ import (
     "crypto/ed25519"
     "encoding/pem"
 
-    "github.com/deatil/go-cryptobin/pkcs8"
-    cryptobin_tool "github.com/deatil/go-cryptobin/tool"
+    cryptobin_pkcs8 "github.com/deatil/go-cryptobin/pkcs8"
 )
 
 type (
     // 配置
-    Opts = pkcs8.Opts
+    Opts = cryptobin_pkcs8.Opts
     // PBKDF2 配置
-    PBKDF2Opts = pkcs8.PBKDF2Opts
+    PBKDF2Opts = cryptobin_pkcs8.PBKDF2Opts
     // Scrypt 配置
-    ScryptOpts = pkcs8.ScryptOpts
+    ScryptOpts = cryptobin_pkcs8.ScryptOpts
 )
 
-// Cipher 列表
-var CipherMap = map[string]pkcs8.Cipher{
-    "DESCBC":     pkcs8.DESCBC,
-    "DESEDE3CBC": pkcs8.DESEDE3CBC,
-
-    "AES128CBC":  pkcs8.AES128CBC,
-    "AES192CBC":  pkcs8.AES192CBC,
-    "AES256CBC":  pkcs8.AES256CBC,
-
-    "AES128GCM":  pkcs8.AES128GCM,
-    "AES192GCM":  pkcs8.AES192GCM,
-    "AES256GCM":  pkcs8.AES256GCM,
-
-    "SM4CBC":  pkcs8.SM4CBC,
-    "SM4GCM":  pkcs8.SM4GCM,
-}
+var (
+    // 获取 Cipher 类型
+    GetCipherFromName = cryptobin_pkcs8.GetCipherFromName
+    // 获取 hash 类型
+    GetHashFromName   = cryptobin_pkcs8.GetHashFromName
+)
 
 // 私钥
 func (this EdDSA) CreatePrivateKey() EdDSA {
     if this.privateKey == nil {
-        this.Error = errors.New("privateKey error.")
+        this.Error = errors.New("EdDSA: [CreatePrivateKey()] privateKey error.")
         return this
     }
 
@@ -64,11 +53,11 @@ func (this EdDSA) CreatePrivateKey() EdDSA {
 // CreatePrivateKeyWithPassword("123", "AES256CBC", "SHA256")
 func (this EdDSA) CreatePrivateKeyWithPassword(password string, opts ...any) EdDSA {
     if this.privateKey == nil {
-        this.Error = errors.New("privateKey error.")
+        this.Error = errors.New("EdDSA: [CreatePrivateKeyWithPassword()] privateKey error.")
         return this
     }
 
-    opt, err := parseOpt(opts...)
+    opt, err := cryptobin_pkcs8.ParseOpts(opts...)
     if err != nil {
         this.Error = err
         return this
@@ -82,7 +71,7 @@ func (this EdDSA) CreatePrivateKeyWithPassword(password string, opts ...any) EdD
     }
 
     // 生成加密数据
-    privateBlock, err := pkcs8.EncryptPKCS8PrivateKey(
+    privateBlock, err := cryptobin_pkcs8.EncryptPKCS8PrivateKey(
         rand.Reader,
         "ENCRYPTED PRIVATE KEY",
         x509PrivateKey,
@@ -105,7 +94,7 @@ func (this EdDSA) CreatePublicKey() EdDSA {
 
     if this.publicKey == nil {
         if this.privateKey == nil {
-            this.Error = errors.New("privateKey error.")
+            this.Error = errors.New("EdDSA: [CreatePublicKey()] privateKey error.")
 
             return this
         }
@@ -129,54 +118,4 @@ func (this EdDSA) CreatePublicKey() EdDSA {
     this.keyData = pem.EncodeToMemory(publicBlock)
 
     return this
-}
-
-// 解析配置
-func parseOpt(opts ...any) (pkcs8.Opts, error) {
-    if len(opts) == 0 {
-        return pkcs8.DefaultOpts, nil
-    }
-
-    switch newOpt := opts[0].(type) {
-        case pkcs8.Opts:
-            return newOpt, nil
-        case string:
-            // DESCBC | DESEDE3CBC
-            // AES128CBC | AES192CBC | AES256CBC
-            // AES128GCM | AES192GCM | AES256GCM
-            // SM4CBC | SM4GCM
-            opt := "AES256CBC"
-            if len(opts) > 0 {
-                opt = opts[0].(string)
-            }
-
-            // MD4 | MD5 | SHA1 | SHA224 | SHA256 | SHA384
-            // SHA512 | SHA512_224 | SHA512_256 | SM3
-            encryptHash := "SHA1"
-            if len(opts) > 1 {
-                encryptHash = opts[1].(string)
-            }
-
-            // 具体方式
-            cipher, ok := CipherMap[opt]
-            if !ok {
-                return pkcs8.Opts{}, errors.New("PEMCipher not exists.")
-            }
-
-            hmacHash := cryptobin_tool.GetPkcs8HmacHash(encryptHash)
-
-            // 设置
-            enOpt := pkcs8.Opts{
-                Cipher:  cipher,
-                KDFOpts: pkcs8.PBKDF2Opts{
-                    SaltSize:       16,
-                    IterationCount: 10000,
-                    HMACHash:       hmacHash,
-                },
-            }
-
-            return enOpt, nil
-        default:
-            return pkcs8.DefaultOpts, nil
-    }
 }

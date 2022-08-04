@@ -213,15 +213,17 @@ func parseOpt(opts ...any) (pkcs8.Opts, error) {
         case pkcs8.Opts:
             return newOpt, nil
         case string:
-            // DESCBC | DESEDE3CBC | AES128CBC
-            // AES192CBC | AES256CBC
+            // DESCBC | DESEDE3CBC
+            // AES128CBC | AES192CBC | AES256CBC
+            // AES128GCM | AES192GCM | AES256GCM
+            // SM4CBC | SM4GCM
             opt := "AES256CBC"
             if len(opts) > 0 {
                 opt = opts[0].(string)
             }
 
-            // MD5 | SHA1 | SHA224 | SHA256 | SHA384
-            // SHA512 | SHA512_224 | SHA512_256
+            // MD4 | MD5 | SHA1 | SHA224 | SHA256 | SHA384
+            // SHA512 | SHA512_224 | SHA512_256 | SM3
             encryptHash := "SHA256"
             if len(opts) > 1 {
                 encryptHash = opts[1].(string)

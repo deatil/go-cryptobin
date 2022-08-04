@@ -70,7 +70,7 @@ func ParseOpts(opts ...any) (Opts, error) {
 
             // MD4 | MD5 | SHA1 | SHA224 | SHA256 | SHA384
             // SHA512 | SHA512_224 | SHA512_256 | SM3
-            hash := "SHA1"
+            hash := "SHA256"
             if len(opts) > 1 {
                 hash = opts[1].(string)
             }

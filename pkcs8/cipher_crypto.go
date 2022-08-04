@@ -26,7 +26,7 @@ var (
     oidSM4GCM = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 104, 8}
 )
 
-// DESCBC is the 64-bit key 3DES cipher in CBC mode.
+// DESCBC is the 56-bit key 3DES cipher in CBC mode.
 var DESCBC = CipherCBC{
     cipherFunc: des.NewCipher,
     keySize:    8,

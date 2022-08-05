@@ -47,7 +47,10 @@ func (this CipherECB) Encrypt(key, plaintext []byte) ([]byte, []byte, error) {
     }
 
     // 返回数据
-    paramBytes := []byte("")
+    paramBytes, err := asn1.Marshal([]byte(""))
+    if err != nil {
+        return nil, nil, err
+    }
 
     return encrypted, paramBytes, nil
 }

@@ -39,7 +39,8 @@ var (
     oidSM4CBC  = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 104, 2}
     oidSM4OFB  = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 104, 3}
     oidSM4CFB  = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 104, 4}
-    oidSM4CFB1 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 104, 5} // 暂时不提供
+    // CFB1 暂时不提供
+    oidSM4CFB1 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 104, 5}
     oidSM4CFB8 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 104, 6}
     oidSM4GCM  = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 104, 8}
     oidSM4CCM  = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 104, 9}

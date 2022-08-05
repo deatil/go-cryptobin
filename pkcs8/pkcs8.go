@@ -185,7 +185,11 @@ func EncryptPKCS8PrivateKey(
 }
 
 // 解出 PKCS8 密钥
-// 加密方式: AES-128-CBC | AES-192-CBC | AES-256-CBC | DES | 3DES
+// 加密方式:
+// DESCBC | DESEDE3CBC
+// AES128CBC | AES192CBC | AES256CBC
+// AES128GCM | AES192GCM | AES256GCM
+// SM4CBC | SM4GCM
 func DecryptPKCS8PrivateKey(data, password []byte) ([]byte, error) {
     var pki encryptedPrivateKeyInfo
     if _, err := asn1.Unmarshal(data, &pki); err != nil {
@@ -213,8 +217,7 @@ func DecryptPKCS8PrivateKey(data, password []byte) ([]byte, error) {
 
     keySize := cipher.KeySize()
 
-    // AES-128-CBC, AES-192-CBC, AES-256-CBC
-    // DES, TripleDES
+    // 生成密钥
     symkey, err := kdfParam.DeriveKey(password, keySize)
     if err != nil {
         return nil, err

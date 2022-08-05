@@ -108,15 +108,20 @@ func EncryptPKCS8PrivateKey(
 
     cipher := opt.Cipher
     if cipher == nil {
-        return nil, errors.New("failed to encrypt PEM: unknown algorithm")
+        return nil, errors.New("failed to encrypt PEM: unknown opts cipher")
     }
 
-    salt := make([]byte, opt.KDFOpts.GetSaltSize())
+    kdfOpts := opt.KDFOpts
+    if kdfOpts == nil {
+        return nil, errors.New("failed to encrypt PEM: unknown opts kdfOpts")
+    }
+
+    salt := make([]byte, kdfOpts.GetSaltSize())
     if _, err := io.ReadFull(rand, salt); err != nil {
         return nil, errors.New(err.Error() + " failed to generate salt")
     }
 
-    key, kdfParams, err := opt.KDFOpts.DeriveKey(password, salt, cipher.KeySize())
+    key, kdfParams, err := kdfOpts.DeriveKey(password, salt, cipher.KeySize())
     if err != nil {
         return nil, err
     }
@@ -133,7 +138,7 @@ func EncryptPKCS8PrivateKey(
     }
 
     keyDerivationFunc := pkix.AlgorithmIdentifier{
-        Algorithm:  opt.KDFOpts.OID(),
+        Algorithm:  kdfOpts.OID(),
         Parameters: asn1.RawValue{
             FullBytes: marshalledParams,
         },

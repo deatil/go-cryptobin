@@ -50,6 +50,8 @@ func (this CipherGCM) Encrypt(key, plaintext []byte) ([]byte, []byte, error) {
 
     // 加密数据
     ciphertext := aead.Seal(nil, nonce, plaintext, nil)
+
+    // 需要编码的参数
     paramSeq := gcmParams{
         Nonce:  nonce,
         ICVLen: aead.Overhead(),

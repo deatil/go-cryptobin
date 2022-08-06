@@ -3,20 +3,20 @@ package pkcs8pbe
 import (
     "hash"
     "errors"
-    "crypto/cipher"
+    "crypto/rc4"
     "encoding/asn1"
 )
 
 // pbe 数据
-type pbeBlockParams struct {
+type pbeRc4Params struct {
     Salt           []byte
     IterationCount int
 }
 
 // cbc 模式加密
-type CipherBlockCBC struct {
+type CipherRC4 struct {
     // 对称加密
-    cipherFunc     func(key []byte) (cipher.Block, error)
+    cipherFunc     func(key []byte) (*rc4.Cipher, error)
     // hash 摘要
     hashFunc       func() hash.Hash
     // 密钥生成
@@ -32,30 +32,25 @@ type CipherBlockCBC struct {
 }
 
 // 值大小
-func (this CipherBlockCBC) KeySize() int {
+func (this CipherRC4) KeySize() int {
     return this.keySize
 }
 
 // oid
-func (this CipherBlockCBC) OID() asn1.ObjectIdentifier {
+func (this CipherRC4) OID() asn1.ObjectIdentifier {
     return this.oid
 }
 
 // 加密
-func (this CipherBlockCBC) Encrypt(password, plaintext []byte) ([]byte, []byte, error) {
-    // 加密数据补码
-    plaintext = pkcs7Padding(plaintext, this.blockSize)
-
+func (this CipherRC4) Encrypt(password, plaintext []byte) ([]byte, []byte, error) {
     salt, err := genRandom(this.blockSize)
     if err != nil {
         return nil, nil, errors.New(err.Error() + " failed to generate salt")
     }
 
-    key, iv := this.derivedKeyFunc(string(password), string(salt), this.iterationCount, this.keySize, this.hashFunc)
+    key, _ := this.derivedKeyFunc(string(password), string(salt), this.iterationCount, this.keySize, this.hashFunc)
 
-    iv = iv[:this.blockSize]
-
-    block, err := this.cipherFunc(key)
+    rc, err := this.cipherFunc(key)
     if err != nil {
         return nil, nil, errors.New("pkcs8:" + err.Error() + " failed to create cipher")
     }
@@ -63,11 +58,10 @@ func (this CipherBlockCBC) Encrypt(password, plaintext []byte) ([]byte, []byte, 
     // 需要保存的加密数据
     encrypted := make([]byte, len(plaintext))
 
-    enc := cipher.NewCBCEncrypter(block, iv)
-    enc.CryptBlocks(encrypted, plaintext)
+    rc.XORKeyStream(encrypted, plaintext)
 
     // 返回数据
-    paramBytes, err := asn1.Marshal(pbeBlockParams{
+    paramBytes, err := asn1.Marshal(pbeRc4Params{
         Salt:           salt,
         IterationCount: this.iterationCount,
     })
@@ -79,35 +73,22 @@ func (this CipherBlockCBC) Encrypt(password, plaintext []byte) ([]byte, []byte, 
 }
 
 // 解密
-func (this CipherBlockCBC) Decrypt(password, params, ciphertext []byte) ([]byte, error) {
-    var param pbeBlockParams
+func (this CipherRC4) Decrypt(password, params, ciphertext []byte) ([]byte, error) {
+    var param pbeRc4Params
     if _, err := asn1.Unmarshal(params, &param); err != nil {
         return nil, errors.New("pkcs8: invalid PBES2 parameters")
     }
 
-    key, iv := this.derivedKeyFunc(string(password), string(param.Salt), param.IterationCount, this.keySize, this.hashFunc)
+    key, _ := this.derivedKeyFunc(string(password), string(param.Salt), param.IterationCount, this.keySize, this.hashFunc)
 
-    iv = iv[:this.blockSize]
-
-    block, err := this.cipherFunc(key)
+    rc, err := this.cipherFunc(key)
     if err != nil {
         return nil, err
     }
 
-    // 判断数据是否为填充数据
-    blockSize := block.BlockSize()
-    dlen := len(ciphertext)
-    if dlen == 0 || dlen%blockSize != 0 {
-        return nil, errors.New("pkcs8: invalid padding")
-    }
-
     plaintext := make([]byte, len(ciphertext))
 
-    mode := cipher.NewCBCDecrypter(block, iv)
-    mode.CryptBlocks(plaintext, ciphertext)
-
-    // 解析加密数据
-    plaintext = pkcs7UnPadding(plaintext)
+    rc.XORKeyStream(plaintext, ciphertext)
 
     return plaintext, nil
 }

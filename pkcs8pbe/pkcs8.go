@@ -2,77 +2,34 @@ package pkcs8pbe
 
 import (
     "io"
-    "hash"
+    "fmt"
     "errors"
-    "crypto/des"
-    "crypto/md5"
-    "crypto/sha1"
     "crypto/x509"
     "crypto/x509/pkix"
-    "crypto/cipher"
     "encoding/asn1"
     "encoding/pem"
 )
 
-// 迭代次数
-const iterationCount = 2048
-
-var (
-    oidPbeWithMD5AndDES   = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 3}
-    oidPbeWithSHA1AndDES  = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 10}
-    oidPbeWithSHA1And3DES = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 12, 1, 3}
-)
-
-type PEMCipher int
-
-// Possible values for the EncryptPEMBlock encryption algorithm.
-const (
-    _ PEMCipher = iota
-    PEMCipherMD5AndDES
-    PEMCipherSHA1AndDES
-    PEMCipherSHA1And3DES
-)
-
-type rfc1423Algo struct {
-    cipher     PEMCipher
-    // 对称加密
-    cipherFunc func(key []byte) (cipher.Block, error)
-    // hash 摘要
-    hashFunc   func() hash.Hash
-    // 与 key 长度相关
-    keySize    int
-    // 与 iv 长度相关
-    blockSize  int
+// 加密接口
+type PEMCipher interface {
     // oid
-    oid        asn1.ObjectIdentifier
+    OID() asn1.ObjectIdentifier
+
+    // 值大小
+    KeySize() int
+
+    // 加密, 返回: [加密后数据, 参数, error]
+    Encrypt(key, plaintext []byte) ([]byte, []byte, error)
+
+    // 解密
+    Decrypt(key, params, ciphertext []byte) ([]byte, error)
 }
 
-// 列表
-var rfc1423Algos = []rfc1423Algo{
-    {
-        cipher:     PEMCipherMD5AndDES,
-        cipherFunc: des.NewCipher,
-        hashFunc:   md5.New,
-        keySize:    8,
-        blockSize:  des.BlockSize,
-        oid:        oidPbeWithMD5AndDES,
-    },
-    {
-        cipher:     PEMCipherSHA1AndDES,
-        cipherFunc: des.NewCipher,
-        hashFunc:   sha1.New,
-        keySize:    8,
-        blockSize:  des.BlockSize,
-        oid:        oidPbeWithSHA1AndDES,
-    },
-    {
-        cipher:     PEMCipherSHA1And3DES,
-        cipherFunc: des.NewTripleDESCipher,
-        hashFunc:   sha1.New,
-        keySize:    24,
-        blockSize:  des.BlockSize,
-        oid:        oidPbeWithSHA1And3DES,
-    },
+var ciphers = make(map[string]PEMCipher)
+
+// 添加加密
+func AddCipher(oid asn1.ObjectIdentifier, cipher PEMCipher) {
+    ciphers[oid.String()] = cipher
 }
 
 // 结构体数据可以查看以下文档
@@ -83,53 +40,25 @@ type encryptedPrivateKeyInfo struct {
     EncryptedData       []byte
 }
 
-// pbe 数据
-type pbeParams struct {
-    Salt           []byte
-    IterationCount int
-}
-
 // 加密 PKCS8
 func EncryptPKCS8PrivateKey(
     rand io.Reader,
     blockType string,
     data []byte,
     password []byte,
-    alg PEMCipher,
+    cipher PEMCipher,
 ) (*pem.Block, error) {
-    cipher := cipherByKey(alg)
     if cipher == nil {
-        return nil, errors.New("failed to encrypt PEM: unknown opts cipher")
+        return nil, errors.New("failed to encrypt PEM: unknown cipher")
     }
 
-    salt := make([]byte, cipher.blockSize)
-    if _, err := io.ReadFull(rand, salt); err != nil {
-        return nil, errors.New(err.Error() + " failed to generate salt")
-    }
-
-    key, iv := derivedKey(string(password), string(salt), iterationCount, cipher.keySize, cipher.blockSize, cipher.hashFunc)
-
-    en := CipherCBC{
-        cipherFunc: cipher.cipherFunc,
-        blockSize:  cipher.blockSize,
-    }
-
-    encrypted, err := en.Encrypt(key, iv, data)
-    if err != nil {
-        return nil, err
-    }
-
-    // 生成 asn1 数据开始
-    marshalledParams, err := asn1.Marshal(pbeParams{
-        Salt:           salt,
-        IterationCount: iterationCount,
-    })
+    encrypted, marshalledParams, err := cipher.Encrypt(password, data)
     if err != nil {
         return nil, err
     }
 
     encryptionAlgorithm := pkix.AlgorithmIdentifier{
-        Algorithm:  cipher.oid,
+        Algorithm:  cipher.OID(),
         Parameters: asn1.RawValue{
             FullBytes: marshalledParams,
         },
@@ -159,24 +88,14 @@ func DecryptPKCS8PrivateKey(data, password []byte) ([]byte, error) {
         return nil, errors.New(err.Error() + " failed to unmarshal private key")
     }
 
-    var params pbeParams
-    if _, err := asn1.Unmarshal(pki.EncryptionAlgorithm.Parameters.FullBytes, &params); err != nil {
-        return nil, errors.New("pkcs8: invalid PBES2 parameters")
+    cipher, cipherParams, err := parseEncryptionScheme(pki.EncryptionAlgorithm)
+    if err != nil {
+        return nil, err
     }
 
-    cipher := cipherByOid(pki.EncryptionAlgorithm.Algorithm)
+    encryptedKey := pki.EncryptedData
 
-    key, iv := derivedKey(string(password), string(params.Salt), params.IterationCount, cipher.keySize, cipher.blockSize, cipher.hashFunc)
-
-    // 加密的数据
-    data = pki.EncryptedData
-
-    en := CipherCBC{
-        cipherFunc: cipher.cipherFunc,
-        blockSize:  cipher.blockSize,
-    }
-
-    decryptedKey, err := en.Decrypt(key, iv, data)
+    decryptedKey, err := cipher.Decrypt(password, cipherParams, encryptedKey)
     if err != nil {
         return nil, err
     }
@@ -198,25 +117,14 @@ func DecryptPEMBlock(block *pem.Block, password []byte) ([]byte, error) {
     return nil, errors.New("unsupported encrypted PEM")
 }
 
-func cipherByKey(key PEMCipher) *rfc1423Algo {
-    for i := range rfc1423Algos {
-        alg := &rfc1423Algos[i]
-        if alg.cipher == key {
-            return alg
-        }
+func parseEncryptionScheme(encryptionScheme pkix.AlgorithmIdentifier) (PEMCipher, []byte, error) {
+    oid := encryptionScheme.Algorithm.String()
+    cipher, ok := ciphers[oid]
+    if !ok {
+        return nil, nil, fmt.Errorf("pkcs8: unsupported cipher (OID: %s)", oid)
     }
 
-    return nil
+    params := encryptionScheme.Parameters.FullBytes
+
+    return cipher, params, nil
 }
-
-func cipherByOid(oid asn1.ObjectIdentifier) *rfc1423Algo {
-    for i := range rfc1423Algos {
-        alg := &rfc1423Algos[i]
-        if oid.Equal(alg.oid) {
-            return alg
-        }
-    }
-
-    return nil
-}
-

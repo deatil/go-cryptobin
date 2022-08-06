@@ -179,7 +179,7 @@ func (this DSA) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any) 
 // CreatePKCS8KdfPrivateKeyWithPassword("123", "AES256CBC", "SHA256")
 func (this DSA) CreatePKCS8KdfPrivateKeyWithPassword(password string, opts ...any) DSA {
     if this.privateKey == nil {
-        this.Error = errors.New("dsa: [CreatePKCS8KdfPrivateKeyWithPassword()] privateKey error.")
+        this.Error = errors.New("DSA: [CreatePKCS8KdfPrivateKeyWithPassword()] privateKey error.")
         return this
     }
 
@@ -217,7 +217,7 @@ func (this DSA) CreatePKCS8KdfPrivateKeyWithPassword(password string, opts ...an
 // 生成 PKCS8 私钥带密码 pem 数据
 func (this DSA) CreatePKCS8PbePrivateKeyWithPassword(password string, alg string) DSA {
     if this.privateKey == nil {
-        this.Error = errors.New("dsa: [CreatePKCS8PbePrivateKeyWithPassword()] privateKey error.")
+        this.Error = errors.New("DSA: [CreatePKCS8PbePrivateKeyWithPassword()] privateKey error.")
         return this
     }
 

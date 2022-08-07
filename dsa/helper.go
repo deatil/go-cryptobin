@@ -45,13 +45,3 @@ func MarshalPKCS8PrivateKey(key *dsa.PrivateKey) ([]byte, error) {
 func ParsePKCS8PrivateKey(derBytes []byte) (key *dsa.PrivateKey, err error) {
     return NewDsaPkcs8Key().ParsePKCS8PrivateKey(derBytes)
 }
-
-
-
-
-
-
-
-
-
-

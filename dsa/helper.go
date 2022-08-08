@@ -4,7 +4,7 @@ import (
     "crypto/dsa"
 )
 
-// 生成公钥
+// 包装公钥
 func MarshalPublicKey(key *dsa.PublicKey) ([]byte, error) {
     return NewDsaPkcs1Key().MarshalPublicKey(key)
 }
@@ -45,13 +45,3 @@ func MarshalPKCS8PrivateKey(key *dsa.PrivateKey) ([]byte, error) {
 func ParsePKCS8PrivateKey(derBytes []byte) (key *dsa.PrivateKey, err error) {
     return NewDsaPkcs8Key().ParsePKCS8PrivateKey(derBytes)
 }
-
-
-
-
-
-
-
-
-
-

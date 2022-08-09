@@ -45,6 +45,18 @@ func (this Curve25519) FromPublicKey(key []byte) Curve25519 {
     return this
 }
 
+// 根据私钥 x, y 生成
+func (this Curve25519) FromKeyXYHexString(xString string, yString string) Curve25519 {
+    priv := &curve25519.PrivateKey{}
+    priv.X = []byte(xString)
+    priv.PublicKey.Y = []byte(yString)
+
+    this.privateKey = priv
+    this.publicKey  = &priv.PublicKey
+
+    return this
+}
+
 // 生成密钥
 func (this Curve25519) GenerateKey() Curve25519 {
     this.privateKey, this.publicKey, this.Error = curve25519.GenerateKey(rand.Reader)

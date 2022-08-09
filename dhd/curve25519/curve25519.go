@@ -85,6 +85,23 @@ func GenerateKey(rand io.Reader) (*PrivateKey, *PublicKey, error) {
     return private, public, nil
 }
 
+// 从私钥获取公钥
+func GeneratePublicKey(private *PrivateKey) (*PublicKey, error) {
+    var pri, pub [32]byte
+
+    for i := 0; i < 32; i++ {
+        pri[i] = byte(private.X[i])
+    }
+
+    curve25519.ScalarBaseMult(&pub, &pri)
+
+    public := &PublicKey{
+        Y: pub[:],
+    }
+
+    return public, nil
+}
+
 // 生成密码
 func ComputeSecret(private *PrivateKey, peersPublic *PublicKey) (secret []byte) {
     if len(private.X) != 32 {

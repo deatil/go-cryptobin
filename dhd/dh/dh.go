@@ -123,6 +123,21 @@ func GenerateKey(groupID GroupID, rand io.Reader) (*PrivateKey, *PublicKey, erro
     return private, public, nil
 }
 
+// 从私钥获取公钥
+func GeneratePublicKey(private *PrivateKey) (*PublicKey, error) {
+    pub := new(big.Int).Exp(private.G, private.X, private.P)
+
+    public := &PublicKey{
+        Y: pub,
+        Parameters: Parameters{
+            P: private.P,
+            G: private.G,
+        },
+    }
+
+    return public, nil
+}
+
 // 生成密钥
 func ComputeSecret(private *PrivateKey, peersPublic *PublicKey) *big.Int {
     secret := new(big.Int).Exp(peersPublic.Y, private.X, private.P)

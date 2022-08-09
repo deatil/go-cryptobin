@@ -45,6 +45,34 @@ func (this Ecdh) FromPublicKey(key []byte) Ecdh {
     return this
 }
 
+// 根据私钥 x, y 生成
+func (this Ecdh) FromKeyXYString(curve string, xString string, yString string) Ecdh {
+    var c ecdh.Curve
+
+    switch curve {
+        case "P521":
+            c = ecdh.P521()
+        case "P384":
+            c = ecdh.P384()
+        case "P256":
+            c = ecdh.P256()
+        case "P224":
+            c = ecdh.P224()
+        default:
+            c = ecdh.P224()
+    }
+
+    priv := &ecdh.PrivateKey{}
+    priv.X = []byte(xString)
+    priv.PublicKey.Y = []byte(yString)
+    priv.PublicKey.Curve = c
+
+    this.privateKey = priv
+    this.publicKey  = &priv.PublicKey
+
+    return this
+}
+
 // 生成密钥
 func (this Ecdh) GenerateKey(curve string) Ecdh {
     var c ecdh.Curve

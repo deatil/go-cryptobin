@@ -4,6 +4,7 @@ import (
     "crypto/rand"
 
     "github.com/deatil/go-cryptobin/dhd/ecdh"
+    cryptobin_tool "github.com/deatil/go-cryptobin/tool"
 )
 
 // 私钥
@@ -46,7 +47,7 @@ func (this Ecdh) FromPublicKey(key []byte) Ecdh {
 }
 
 // 根据私钥 x, y 生成
-func (this Ecdh) FromKeyXYString(curve string, xString string, yString string) Ecdh {
+func (this Ecdh) FromKeyXYHexString(curve string, xString string, yString string) Ecdh {
     var c ecdh.Curve
 
     switch curve {
@@ -62,9 +63,14 @@ func (this Ecdh) FromKeyXYString(curve string, xString string, yString string) E
             c = ecdh.P224()
     }
 
+    encoding := cryptobin_tool.NewEncoding()
+
+    x, _ := encoding.HexDecode(xString)
+    y, _ := encoding.HexDecode(yString)
+
     priv := &ecdh.PrivateKey{}
-    priv.X = []byte(xString)
-    priv.PublicKey.Y = []byte(yString)
+    priv.X = x
+    priv.PublicKey.Y = y
     priv.PublicKey.Curve = c
 
     this.privateKey = priv

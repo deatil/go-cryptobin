@@ -4,6 +4,7 @@ import (
     "crypto/rand"
 
     "github.com/deatil/go-cryptobin/dhd/curve25519"
+    cryptobin_tool "github.com/deatil/go-cryptobin/tool"
 )
 
 // 私钥
@@ -47,9 +48,14 @@ func (this Curve25519) FromPublicKey(key []byte) Curve25519 {
 
 // 根据私钥 x, y 生成
 func (this Curve25519) FromKeyXYHexString(xString string, yString string) Curve25519 {
+    encoding := cryptobin_tool.NewEncoding()
+
+    x, _ := encoding.HexDecode(xString)
+    y, _ := encoding.HexDecode(yString)
+
     priv := &curve25519.PrivateKey{}
-    priv.X = []byte(xString)
-    priv.PublicKey.Y = []byte(yString)
+    priv.X = x
+    priv.PublicKey.Y = y
 
     this.privateKey = priv
     this.publicKey  = &priv.PublicKey

@@ -63,6 +63,37 @@ func (this Curve25519) FromKeyXYHexString(xString string, yString string) Curve2
     return this
 }
 
+// 根据私钥 x 生成
+func (this Curve25519) FromPrivateKeyXHexString(xString string) Curve25519 {
+    encoding := cryptobin_tool.NewEncoding()
+
+    x, _ := encoding.HexDecode(xString)
+
+    priv := &curve25519.PrivateKey{}
+    priv.X = x
+
+    public, _ := curve25519.GeneratePublicKey(priv)
+    priv.PublicKey = *public
+
+    this.privateKey = priv
+
+    return this
+}
+
+// 根据公钥 y 生成
+func (this Curve25519) FromPublicKeyYHexString(yString string) Curve25519 {
+    encoding := cryptobin_tool.NewEncoding()
+
+    y, _ := encoding.HexDecode(yString)
+
+    public := &curve25519.PublicKey{}
+    public.Y = y
+
+    this.publicKey = public
+
+    return this
+}
+
 // 生成密钥
 func (this Curve25519) GenerateKey() Curve25519 {
     this.privateKey, this.publicKey, this.Error = curve25519.GenerateKey(rand.Reader)

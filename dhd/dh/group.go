@@ -5,20 +5,6 @@ import (
     "math/big"
 )
 
-// 分组 id
-type GroupID uint
-
-const (
-    P1001 GroupID = 1 + iota
-    P1002
-    P1536
-    P2048
-    P3072
-    P4096
-    P6144
-    P8192
-)
-
 // 分组数据
 type Group struct {
     // The prime

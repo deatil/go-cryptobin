@@ -11,6 +11,20 @@ var zero *big.Int = big.NewInt(0)
 var one  *big.Int = big.NewInt(1)
 var two  *big.Int = big.NewInt(2)
 
+// 分组 id
+type GroupID uint
+
+const (
+    P1001 GroupID = 1 + iota
+    P1002
+    P1536
+    P2048
+    P3072
+    P4096
+    P6144
+    P8192
+)
+
 // 公用参数
 type Parameters struct {
     // The prime
@@ -51,10 +65,8 @@ func (this *PrivateKey) Public() crypto.PublicKey {
 }
 
 // 生成密钥
-func (this *PrivateKey) ComputeSecret(peersPublic *PublicKey) *big.Int {
-    secret := new(big.Int).Exp(peersPublic.Y, this.X, this.P)
-
-    return secret
+func (this *PrivateKey) ComputeSecret(peersPublic *PublicKey) (secret []byte) {
+    return ComputeSecret(this, peersPublic)
 }
 
 // 生成证书
@@ -130,13 +142,13 @@ func GeneratePublicKey(private *PrivateKey) (*PublicKey, error) {
 }
 
 // 生成密钥
-func ComputeSecret(private *PrivateKey, peersPublic *PublicKey) *big.Int {
+func ComputeSecret(private *PrivateKey, peersPublic *PublicKey) []byte {
     secret := new(big.Int).Exp(peersPublic.Y, private.X, private.P)
 
-    return secret
+    return secret.Bytes()
 }
 
-func IsSafePrimeGroup(param Group, n int) bool {
+func IsSafePrimeGroup(param *Group, n int) bool {
     q := new(big.Int).Sub(param.P, one)
     q = q.Div(q, two)
 

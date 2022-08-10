@@ -7,6 +7,11 @@ import (
     "github.com/deatil/go-cryptobin/dhd/dh"
 )
 
+type (
+    // Group 别名
+    Group = dh.Group
+)
+
 // 私钥
 func (this Dh) FromPrivateKey(key []byte) Dh {
     parsedKey, err := this.ParsePrivateKeyFromPEM(key)

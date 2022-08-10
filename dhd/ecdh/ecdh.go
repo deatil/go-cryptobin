@@ -51,12 +51,7 @@ func (this *PrivateKey) Public() crypto.PublicKey {
 
 // 生成密码
 func (this *PrivateKey) ComputeSecret(peersPublic *PublicKey) (secret []byte) {
-    x, y := unmarshal(this.Curve, peersPublic.Y)
-
-    sX, _ := this.Curve.ScalarMult(x, y, this.X)
-
-    secret = sX.Bytes()
-    return
+    return ComputeSecret(this, peersPublic)
 }
 
 // 生成密钥对

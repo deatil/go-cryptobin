@@ -6,11 +6,13 @@ import (
     "crypto/rand"
     "crypto/ecdsa"
     "encoding/asn1"
+
+    cryptobin_crypto "github.com/deatil/go-cryptobin/crypto"
 )
 
 // ecdsa 签名
 type KeySignWithEcdsa struct {
-    hashFunc   crypto.Hash
+    hashFunc   cryptobin_crypto.IHash
     hashId     asn1.ObjectIdentifier
     identifier asn1.ObjectIdentifier
 }
@@ -34,14 +36,14 @@ func (this KeySignWithEcdsa) Sign(pkey crypto.PrivateKey, data []byte) ([]byte, 
         return nil, nil, errors.New("pkcs7: PrivateKey is not ecdsa PrivateKey")
     }
 
-    hashData := hashSignData(this.hashFunc, data)
+    hashData := hashSignData(this.hashFunc.(crypto.Hash), data)
 
     signData, err := ecdsa.SignASN1(rand.Reader, priv, hashData)
 
     return hashData, signData, err
 }
 
-// 签名
+// 验证
 func (this KeySignWithEcdsa) Verify(pkey crypto.PublicKey, signed []byte, signature []byte) (bool, error) {
     var pub *ecdsa.PublicKey
     var ok bool
@@ -50,7 +52,7 @@ func (this KeySignWithEcdsa) Verify(pkey crypto.PublicKey, signed []byte, signat
         return false, errors.New("pkcs7: PublicKey is not ecdsa PublicKey")
     }
 
-    hashData := hashSignData(this.hashFunc, signed)
+    hashData := hashSignData(this.hashFunc.(crypto.Hash), signed)
 
     return ecdsa.VerifyASN1(pub, hashData, signature), nil
 }

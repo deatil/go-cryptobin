@@ -6,11 +6,13 @@ import (
     "crypto/rand"
     "crypto/ed25519"
     "encoding/asn1"
+
+    cryptobin_crypto "github.com/deatil/go-cryptobin/crypto"
 )
 
 // EdDsa 签名
 type KeySignWithEdDsa struct {
-    hashFunc   crypto.Hash
+    hashFunc   cryptobin_crypto.IHash
     hashId     asn1.ObjectIdentifier
     identifier asn1.ObjectIdentifier
 }
@@ -34,7 +36,7 @@ func (this KeySignWithEdDsa) Sign(pkey crypto.PrivateKey, data []byte) ([]byte, 
         return nil, nil, errors.New("pkcs7: PrivateKey is not ed25519 PrivateKey")
     }
 
-    hashData := hashSignData(this.hashFunc, data)
+    hashData := hashSignData(this.hashFunc.(crypto.Hash), data)
 
     signData, err := priv.Sign(rand.Reader, hashData, crypto.Hash(0))
     if err != nil {
@@ -44,7 +46,7 @@ func (this KeySignWithEdDsa) Sign(pkey crypto.PrivateKey, data []byte) ([]byte, 
     return hashData, signData, nil
 }
 
-// 签名
+// 验证
 func (this KeySignWithEdDsa) Verify(pkey crypto.PublicKey, signed []byte, signature []byte) (bool, error) {
     var pub ed25519.PublicKey
     var ok bool
@@ -53,7 +55,7 @@ func (this KeySignWithEdDsa) Verify(pkey crypto.PublicKey, signed []byte, signat
         return false, errors.New("pkcs7: PublicKey is not ed25519 PublicKey")
     }
 
-    hashData := hashSignData(this.hashFunc, signed)
+    hashData := hashSignData(this.hashFunc.(crypto.Hash), signed)
 
     return ed25519.Verify(pub, hashData, signature), nil
 }

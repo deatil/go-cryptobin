@@ -7,6 +7,8 @@ import (
     _ "crypto/sha256"
     _ "crypto/sha512"
     "encoding/asn1"
+
+    cryptobin_crypto "github.com/deatil/go-cryptobin/crypto"
 )
 
 var (
@@ -26,9 +28,13 @@ var (
     oidDigestAlgorithmRSASHA256 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 11}
     oidDigestAlgorithmRSASHA384 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 12}
     oidDigestAlgorithmRSASHA512 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 13}
+    oidDigestAlgorithmRSASM3    = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 504}
 
     // eddsa 签名
     oidDigestAlgorithmEd25519   = asn1.ObjectIdentifier{1, 3, 101, 112}
+
+    // sm2 签名
+    oidDigestAlgorithmSM2SM3    = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 501}
 )
 
 var KeySignWithDSASHA1 = KeySignWithDSA{
@@ -95,6 +101,12 @@ var KeySignWithEdDsaSHA1 = KeySignWithRsa{
     identifier: oidDigestAlgorithmEd25519,
 }
 
+var KeySignWithSM2SM3 = KeySignWithSM2{
+    hashFunc:   cryptobin_crypto.SM3,
+    hashId:     oidDigestAlgorithmSM3,
+    identifier: oidDigestAlgorithmSM2SM3,
+}
+
 func init() {
     AddKeySign(oidDigestAlgorithmDSASHA1, func() KeySign {
         return KeySignWithDSASHA1
@@ -134,6 +146,10 @@ func init() {
 
     AddKeySign(oidDigestAlgorithmEd25519, func() KeySign {
         return KeySignWithEdDsaSHA1
+    })
+
+    AddKeySign(oidDigestAlgorithmSM2SM3, func() KeySign {
+        return KeySignWithSM2SM3
     })
 }
 

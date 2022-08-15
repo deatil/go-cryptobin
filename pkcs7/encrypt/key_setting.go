@@ -10,6 +10,7 @@ import (
 var(
     // Signature Algorithms
     oidEncryptionAlgorithmRSA       = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 1}
+    oidEncryptionAlgorithmRSAESOAEP = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 7}
     oidEncryptionAlgorithmRSASHA1   = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 5}
     oidEncryptionAlgorithmRSASHA256 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 11}
     oidEncryptionAlgorithmRSASHA384 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 12}
@@ -20,6 +21,12 @@ var(
 var KeyEncryptRSA = KeyEncryptRsa{
     hashFunc:   nil,
     identifier: oidEncryptionAlgorithmRSA,
+}
+
+// KeyEncryptRSAESOAEP
+var KeyEncryptRSAESOAEP = KeyEncryptRsa{
+    hashFunc:   sha1.New,
+    identifier: oidEncryptionAlgorithmRSAESOAEP,
 }
 
 // KeyEncryptRSASHA1
@@ -49,6 +56,9 @@ var KeyEncryptRSASHA512 = KeyEncryptRsa{
 func init() {
     AddkeyEncrypt(oidEncryptionAlgorithmRSA, func() KeyEncrypt {
         return KeyEncryptRSA
+    })
+    AddkeyEncrypt(oidEncryptionAlgorithmRSAESOAEP, func() KeyEncrypt {
+        return KeyEncryptRSAESOAEP
     })
     AddkeyEncrypt(oidEncryptionAlgorithmRSASHA1, func() KeyEncrypt {
         return KeyEncryptRSASHA1

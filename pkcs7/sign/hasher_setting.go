@@ -9,6 +9,7 @@ import (
 
 var (
     // Digest Algorithms
+    oidDigestAlgorithmMd5    = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 5}
     oidDigestAlgorithmSHA1   = asn1.ObjectIdentifier{1, 3, 14, 3, 2, 26}
     oidDigestAlgorithmSHA256 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 2, 1}
     oidDigestAlgorithmSHA384 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 2, 2}

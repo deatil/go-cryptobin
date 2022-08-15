@@ -7,8 +7,6 @@ import (
     "crypto/dsa"
     "crypto/rand"
     "encoding/asn1"
-
-    crypto_crypto "github.com/deatil/go-cryptobin/crypto"
 )
 
 type dsaSignature struct {
@@ -17,7 +15,7 @@ type dsaSignature struct {
 
 // rsa 签名
 type KeySignWithDSA struct {
-    hashFunc   crypto_crypto.IHash
+    hashFunc   crypto.Hash
     hashId     asn1.ObjectIdentifier
     identifier asn1.ObjectIdentifier
 }
@@ -41,7 +39,7 @@ func (this KeySignWithDSA) Sign(pkey crypto.PrivateKey, data []byte) ([]byte, []
         return nil, nil, errors.New("pkcs7: PrivateKey is not dsa PrivateKey")
     }
 
-    hashData := hashSignData(this.hashFunc.(crypto.Hash), data)
+    hashData := hashSignData(this.hashFunc, data)
 
     r, s, err := dsa.Sign(rand.Reader, priv, hashData)
     if err != nil {
@@ -74,7 +72,7 @@ func (this KeySignWithDSA) Verify(pkey crypto.PublicKey, signed []byte, signatur
     r := dsaSign.R
     s := dsaSign.S
 
-    hashData := hashSignData(this.hashFunc.(crypto.Hash), signed)
+    hashData := hashSignData(this.hashFunc, signed)
 
     return dsa.Verify(pub, hashData, r, s), nil
 }

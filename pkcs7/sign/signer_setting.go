@@ -8,7 +8,7 @@ import (
     _ "crypto/sha512"
     "encoding/asn1"
 
-    cryptobin_crypto "github.com/deatil/go-cryptobin/crypto"
+    "github.com/tjfoc/gmsm/sm3"
 )
 
 var (
@@ -102,7 +102,7 @@ var KeySignWithEdDsaSHA1 = KeySignWithRsa{
 }
 
 var KeySignWithSM2SM3 = KeySignWithSM2{
-    hashFunc:   cryptobin_crypto.SM3,
+    hashFunc:   sm3.New,
     hashId:     oidDigestAlgorithmSM3,
     identifier: oidDigestAlgorithmSM2SM3,
 }

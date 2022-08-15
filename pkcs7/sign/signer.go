@@ -1,9 +1,8 @@
 package sign
 
 import (
+    "hash"
     "crypto"
-
-    cryptobin_crypto "github.com/deatil/go-cryptobin/crypto"
 )
 
 // 通用加密
@@ -16,8 +15,8 @@ func hashSignData(hashType crypto.Hash, data []byte) []byte {
 }
 
 // 通用加密
-func cryptobinHashSignData(hashType cryptobin_crypto.Hash, data []byte) []byte {
-    h := hashType.New()
+func hashFuncSignData(hashType func() hash.Hash, data []byte) []byte {
+    h := hashType()
     h.Write(data)
     hash := h.Sum(nil)
 

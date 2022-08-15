@@ -1,19 +1,18 @@
 package sign
 
 import (
+    "hash"
     "errors"
     "crypto"
     "crypto/rand"
     "encoding/asn1"
 
     "github.com/tjfoc/gmsm/sm2"
-
-    cryptobin_crypto "github.com/deatil/go-cryptobin/crypto"
 )
 
 // sm2 签名
 type KeySignWithSM2 struct {
-    hashFunc   cryptobin_crypto.IHash
+    hashFunc   func() hash.Hash
     hashId     asn1.ObjectIdentifier
     identifier asn1.ObjectIdentifier
 }
@@ -37,7 +36,7 @@ func (this KeySignWithSM2) Sign(pkey crypto.PrivateKey, data []byte) ([]byte, []
         return nil, nil, errors.New("pkcs7: PrivateKey is not sm2 PrivateKey")
     }
 
-    hashData := cryptobinHashSignData(this.hashFunc.(cryptobin_crypto.Hash), data)
+    hashData := hashFuncSignData(this.hashFunc, data)
 
     signData, err := priv.Sign(rand.Reader, hashData, nil)
 
@@ -53,7 +52,7 @@ func (this KeySignWithSM2) Verify(pkey crypto.PublicKey, signed []byte, signatur
         return false, errors.New("pkcs7: PublicKey is not sm2 PublicKey")
     }
 
-    hashData := cryptobinHashSignData(this.hashFunc.(cryptobin_crypto.Hash), signed)
+    hashData := hashFuncSignData(this.hashFunc, signed)
 
     return pub.Verify(hashData, signature), nil
 }

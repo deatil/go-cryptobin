@@ -6,14 +6,12 @@ import (
     "crypto/rsa"
     "crypto/rand"
     "encoding/asn1"
-
-    cryptobin_crypto "github.com/deatil/go-cryptobin/crypto"
 )
 
 // rsa 签名
 type KeySignWithRsa struct {
     isRSAPSS   bool
-    hashFunc   cryptobin_crypto.IHash
+    hashFunc   crypto.Hash
     hashId     asn1.ObjectIdentifier
     identifier asn1.ObjectIdentifier
 }
@@ -37,7 +35,7 @@ func (this KeySignWithRsa) Sign(pkey crypto.PrivateKey, data []byte) ([]byte, []
         return nil, nil, errors.New("pkcs7: PrivateKey is not rsa PrivateKey")
     }
 
-    hashType := this.hashFunc.(crypto.Hash)
+    hashType := this.hashFunc
     hashData := hashSignData(hashType, data)
 
     var signData []byte
@@ -61,7 +59,7 @@ func (this KeySignWithRsa) Verify(pkey crypto.PublicKey, data []byte, signature 
         return false, errors.New("pkcs7: PublicKey is not rsa PublicKey")
     }
 
-    hashType := this.hashFunc.(crypto.Hash)
+    hashType := this.hashFunc
     hashData := hashSignData(hashType, data)
 
     var err error

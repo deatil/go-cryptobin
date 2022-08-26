@@ -5,6 +5,7 @@ import (
     "errors"
     "crypto"
     "crypto/rand"
+    "crypto/ecdsa"
     "encoding/asn1"
 
     "github.com/tjfoc/gmsm/sm2"
@@ -46,10 +47,25 @@ func (this KeySignWithSM2) Sign(pkey crypto.PrivateKey, data []byte) ([]byte, []
 // 验证
 func (this KeySignWithSM2) Verify(pkey crypto.PublicKey, signed []byte, signature []byte) (bool, error) {
     var pub *sm2.PublicKey
-    var ok bool
 
-    if pub, ok = pkey.(*sm2.PublicKey); !ok {
-        return false, errors.New("pkcs7: PublicKey is not sm2 PublicKey")
+    switch k := pkey.(type) {
+        case *sm2.PublicKey:
+            pub = k
+        case *ecdsa.PublicKey:
+            switch k.Curve {
+                case sm2.P256Sm2():
+                    pub = &sm2.PublicKey{
+                        Curve: k.Curve,
+                        X:     k.X,
+                        Y:     k.Y,
+                    }
+
+                    if !k.IsOnCurve(k.X, k.Y) {
+                        return false, errors.New("pkcs7: error while validating SM2 public key: %v")
+                    }
+            }
+        default:
+            return false, errors.New("pkcs7: PublicKey is not sm2 PublicKey")
     }
 
     hashData := hashFuncSignData(this.hashFunc, signed)

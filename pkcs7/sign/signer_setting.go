@@ -14,6 +14,7 @@ import (
 var (
     // dsa 签名
     oidDigestAlgorithmDSASHA1   = asn1.ObjectIdentifier{1, 2, 840, 10040, 4, 3}
+    oidDigestAlgorithmDSASHA224 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 3, 1}
     oidDigestAlgorithmDSASHA256 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 3, 2}
 
     // ecdsa 签名

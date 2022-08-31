@@ -12,7 +12,7 @@ import (
 type KeyEdDsa struct {}
 
 // 包装
-func (this KeyEdDsa) Marshal(key crypto.PrivateKey, comment string) (string, []byte, []byte, error) {
+func (this KeyEdDsa) Marshal(key crypto.PrivateKey, comment string, padding []byte) (string, []byte, []byte, error) {
     k, ok := key.(ed25519.PrivateKey)
     if !ok {
         return "", nil, nil, errors.Errorf("unsupported key type %T", key)
@@ -40,9 +40,10 @@ func (this KeyEdDsa) Marshal(key crypto.PrivateKey, comment string) (string, []b
         Pub     []byte
         Priv    []byte
         Comment string
+        Pad     []byte
     }{
         pub, priv,
-        comment,
+        comment, padding,
     }
     rest := ssh.Marshal(prikey)
 
@@ -62,10 +63,8 @@ func (this KeyEdDsa) Parse(rest []byte) (crypto.PrivateKey, error) {
         return nil, err
     }
 
-    for i, b := range key.Pad {
-        if int(b) != i+1 {
-            return nil, errors.New("error decoding key: padding not as expected")
-        }
+    if err := checkOpenSSHKeyPadding(key.Pad); err != nil {
+        return nil, err
     }
 
     if len(key.Priv) != ed25519.PrivateKeySize {

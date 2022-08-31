@@ -14,7 +14,7 @@ import (
 type KeyEcdsa struct {}
 
 // 包装
-func (this KeyEcdsa) Marshal(key crypto.PrivateKey, comment string) (string, []byte, []byte, error) {
+func (this KeyEcdsa) Marshal(key crypto.PrivateKey, comment string, padding []byte) (string, []byte, []byte, error) {
     k, ok := key.(*ecdsa.PrivateKey)
     if !ok {
         return "", nil, nil, errors.Errorf("unsupported key type %T", key)
@@ -53,9 +53,10 @@ func (this KeyEcdsa) Marshal(key crypto.PrivateKey, comment string) (string, []b
         Pub     []byte
         D       *big.Int
         Comment string
+        Pad     []byte
     }{
         curve, pub, k.D,
-        comment,
+        comment, padding,
     }
     rest := ssh.Marshal(prikey)
 
@@ -76,10 +77,8 @@ func (this KeyEcdsa) Parse(rest []byte) (crypto.PrivateKey, error) {
         return nil, errors.Wrap(err, "error unmarshaling key")
     }
 
-    for i, b := range key.Pad {
-        if int(b) != i+1 {
-            return nil, errors.New("error decoding key: padding not as expected")
-        }
+    if err := checkOpenSSHKeyPadding(key.Pad); err != nil {
+        return nil, err
     }
 
     var curve elliptic.Curve

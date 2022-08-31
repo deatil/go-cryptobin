@@ -122,6 +122,8 @@ func MarshalOpenSSHPrivateKey(key crypto.PrivateKey, password string, opts ...Op
         opt = opts[0]
     }
 
+    var padding []byte
+
     if password == "" {
         w.CipherName = "none"
         w.KdfName = "none"
@@ -135,6 +137,8 @@ func MarshalOpenSSHPrivateKey(key crypto.PrivateKey, password string, opts ...Op
 
         w.CipherName = opt.Cipher.Name()
         w.KdfName = opt.KDFOpts.Name()
+
+        padding = makeOpenSSHKeyPadding(opt.Cipher.BlockSize())
     }
 
     parsedKey, err := ParseKeytype(GetStructName(key))
@@ -142,7 +146,7 @@ func MarshalOpenSSHPrivateKey(key crypto.PrivateKey, password string, opts ...Op
         return nil, err
     }
 
-    keyType, pubKey, rest, err := parsedKey.Marshal(key, opt.Comment)
+    keyType, pubKey, rest, err := parsedKey.Marshal(key, opt.Comment, padding)
     if err != nil {
         return nil, err
     }

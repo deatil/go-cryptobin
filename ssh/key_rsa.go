@@ -13,7 +13,7 @@ import (
 type KeyRsa struct {}
 
 // 包装
-func (this KeyRsa) Marshal(key crypto.PrivateKey, comment string) (string, []byte, []byte, error) {
+func (this KeyRsa) Marshal(key crypto.PrivateKey, comment string, padding []byte) (string, []byte, []byte, error) {
     k, ok := key.(*rsa.PrivateKey)
     if !ok {
         return "", nil, nil, errors.Errorf("unsupported key type %T", key)
@@ -43,10 +43,11 @@ func (this KeyRsa) Marshal(key crypto.PrivateKey, comment string) (string, []byt
         P       *big.Int
         Q       *big.Int
         Comment string
+        Pad     []byte
     }{
         k.PublicKey.N, E,
         k.D, k.Precomputed.Qinv, k.Primes[0], k.Primes[1],
-        comment,
+        comment, padding,
     }
     rest := ssh.Marshal(prikey)
 
@@ -71,10 +72,8 @@ func (this KeyRsa) Parse(rest []byte) (crypto.PrivateKey, error) {
         return nil, err
     }
 
-    for i, b := range key.Pad {
-        if int(b) != i+1 {
-            return nil, errors.New("error decoding key: padding not as expected")
-        }
+    if err := checkOpenSSHKeyPadding(key.Pad); err != nil {
+        return nil, err
     }
 
     pk := &rsa.PrivateKey{

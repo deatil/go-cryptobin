@@ -43,7 +43,7 @@ type KDFParameters interface {
 // Key 接口
 type Key interface {
     // 包装
-    Marshal(key crypto.PrivateKey, comment string) (string, []byte, []byte, error)
+    Marshal(key crypto.PrivateKey, comment string, padding []byte) (string, []byte, []byte, error)
 
     // 解析
     Parse(data []byte) (crypto.PrivateKey, error)

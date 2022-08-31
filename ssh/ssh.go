@@ -54,11 +54,6 @@ func ParseOpenSSHPrivateKey(key []byte, password string) (crypto.PrivateKey, err
     }
 
     if w.KdfName != "none" || w.CipherName != "none" {
-        salt, rounds, err := ParseKdfOpts(w.KdfOpts)
-        if err != nil {
-            return nil, err
-        }
-
         newCipher, err := ParseCipher(w.CipherName)
         if err != nil {
             return nil, err
@@ -69,7 +64,9 @@ func ParseOpenSSHPrivateKey(key []byte, password string) (crypto.PrivateKey, err
             return nil, err
         }
 
-        k, err := newKdf.DeriveKey([]byte(password), salt, int(rounds), newCipher.KeySize()+newCipher.BlockSize())
+        size := newCipher.KeySize() + newCipher.BlockSize()
+
+        k, err := newKdf.DeriveKey([]byte(password), w.KdfOpts, size)
         if err != nil {
             return nil, errors.Wrap(err, "error deriving password")
         }
@@ -154,12 +151,14 @@ func MarshalOpenSSHPrivateKey(key crypto.PrivateKey, password string, opts ...Op
         newCipher := opt.Cipher
         newKdf := opt.KDFOpts
 
-        k, bufString, err := newKdf.DeriveKey([]byte(password), newCipher.KeySize()+newCipher.BlockSize())
+        size := newCipher.KeySize() + newCipher.BlockSize()
+
+        k, kdfOpts, err := newKdf.DeriveKey([]byte(password), size)
         if err != nil {
             return nil, errors.Wrap(err, "error deriving decryption key")
         }
 
-        w.KdfOpts = bufString
+        w.KdfOpts = kdfOpts
 
         dst, err := newCipher.Encrypt(k, w.PrivKeyBlock)
         if err != nil {

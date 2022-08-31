@@ -37,7 +37,7 @@ type KDFOpts interface {
 // 数据接口
 type KDFParameters interface {
     // 生成密钥
-    DeriveKey(password, salt []byte, rounds, size int) (key []byte, err error)
+    DeriveKey(password []byte, kdfOpts string, size int) (key []byte, err error)
 }
 
 // Key 接口

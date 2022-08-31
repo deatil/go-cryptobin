@@ -47,7 +47,7 @@ package main
 
 import (
     "fmt"
-    "crypto/rsa"
+    go_rsa "crypto/rsa"
     "encoding/pem"
 
     "github.com/deatil/lakego-filesystem/filesystem"
@@ -66,7 +66,7 @@ func main() {
 
     if err == nil {
         sshRsaPriKey := cryptobin_rsa.NewRsa().
-            WithPrivateKey(sshRsaKey.(*rsa.PrivateKey)).
+            WithPrivateKey(sshRsaKey.(*go_rsa.PrivateKey)).
             CreatePKCS8PrivateKey().
             ToKeyString()
 

@@ -2,33 +2,7 @@ package ssh
 
 import (
     "fmt"
-    "bytes"
-    "encoding/binary"
-
-    "github.com/pkg/errors"
 )
-
-func ParseKdfOpts(kdfOpts string) ([]byte, uint32, error) {
-    // Read kdf options.
-    buf := bytes.NewReader([]byte(kdfOpts))
-
-    var saltLength uint32
-    if err := binary.Read(buf, binary.BigEndian, &saltLength); err != nil {
-        return nil, 0, errors.New("cannot decode encrypted private keys: bad format")
-    }
-
-    salt := make([]byte, saltLength)
-    if err := binary.Read(buf, binary.BigEndian, &salt); err != nil {
-        return nil, 0, errors.New("cannot decode encrypted private keys: bad format")
-    }
-
-    var rounds uint32
-    if err := binary.Read(buf, binary.BigEndian, &rounds); err != nil {
-        return nil, 0, errors.New("cannot decode encrypted private keys: bad format")
-    }
-
-    return salt, rounds, nil
-}
 
 func ParseCipher(cipherName string) (Cipher, error) {
     cipher, ok := ciphers[cipherName]

@@ -4,6 +4,8 @@ import (
     "bytes"
     "encoding/binary"
 
+    "github.com/pkg/errors"
+
     "github.com/deatil/go-cryptobin/bcrypt_pbkdf"
 )
 
@@ -14,10 +16,37 @@ var (
 // bcrypt 数据
 type bcryptParams struct {}
 
-func (this bcryptParams) DeriveKey(password []byte, salt []byte, rounds int, size int) (key []byte, err error) {
+func parseBcryptKdfOpts(kdfOpts string) ([]byte, uint32, error) {
+    // Read kdf options.
+    buf := bytes.NewReader([]byte(kdfOpts))
+
+    var saltLength uint32
+    if err := binary.Read(buf, binary.BigEndian, &saltLength); err != nil {
+        return nil, 0, errors.New("cannot decode encrypted private keys: bad format")
+    }
+
+    salt := make([]byte, saltLength)
+    if err := binary.Read(buf, binary.BigEndian, &salt); err != nil {
+        return nil, 0, errors.New("cannot decode encrypted private keys: bad format")
+    }
+
+    var rounds uint32
+    if err := binary.Read(buf, binary.BigEndian, &rounds); err != nil {
+        return nil, 0, errors.New("cannot decode encrypted private keys: bad format")
+    }
+
+    return salt, rounds, nil
+}
+
+func (this bcryptParams) DeriveKey(password []byte, kdfOpts string, size int) (key []byte, err error) {
+    salt, rounds, err := parseBcryptKdfOpts(kdfOpts)
+    if err != nil {
+        return nil, err
+    }
+
     return bcrypt_pbkdf.Key(
         password, salt,
-        rounds, size,
+        int(rounds), size,
     )
 }
 

@@ -20,7 +20,7 @@ func main() {
     rsa := cryptobin_rsa.NewRsa().GenerateKey(2048)
 
     // block, _ := cryptobin_ssh.MarshalOpenSSHPrivateKey(obj.GetPrivateKey(), "ssh")
-    // block, _ := cryptobin_ssh.MarshalOpenSSHPrivateKeyWithPassword(obj.GetPrivateKey(), "ssh", "123")
+    // block, _ := cryptobin_ssh.MarshalOpenSSHPrivateKeyWithPassword(obj.GetPrivateKey(), "ssh", []byte("123"))
     rsaBlock, _ := cryptobin_ssh.MarshalOpenSSHPrivateKeyWithPassword(
         rsa.GetPrivateKey(),
         "ssh",

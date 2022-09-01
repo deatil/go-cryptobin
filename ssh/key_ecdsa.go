@@ -14,7 +14,7 @@ import (
 type KeyEcdsa struct {}
 
 // 包装
-func (this KeyEcdsa) Marshal(key crypto.PrivateKey, comment string, padding []byte) (string, []byte, []byte, error) {
+func (this KeyEcdsa) Marshal(key crypto.PrivateKey, comment string) (string, []byte, []byte, error) {
     k, ok := key.(*ecdsa.PrivateKey)
     if !ok {
         return "", nil, nil, errors.Errorf("unsupported key type %T", key)
@@ -53,10 +53,9 @@ func (this KeyEcdsa) Marshal(key crypto.PrivateKey, comment string, padding []by
         Pub     []byte
         D       *big.Int
         Comment string
-        Pad     []byte
     }{
         curve, pub, k.D,
-        comment, padding,
+        comment,
     }
     rest := ssh.Marshal(prikey)
 

@@ -12,7 +12,7 @@ import (
 type KeyEdDsa struct {}
 
 // 包装
-func (this KeyEdDsa) Marshal(key crypto.PrivateKey, comment string, padding []byte) (string, []byte, []byte, error) {
+func (this KeyEdDsa) Marshal(key crypto.PrivateKey, comment string) (string, []byte, []byte, error) {
     k, ok := key.(ed25519.PrivateKey)
     if !ok {
         return "", nil, nil, errors.Errorf("unsupported key type %T", key)
@@ -40,10 +40,9 @@ func (this KeyEdDsa) Marshal(key crypto.PrivateKey, comment string, padding []by
         Pub     []byte
         Priv    []byte
         Comment string
-        Pad     []byte
     }{
         pub, priv,
-        comment, padding,
+        comment,
     }
     rest := ssh.Marshal(prikey)
 

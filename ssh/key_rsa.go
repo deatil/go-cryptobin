@@ -13,7 +13,7 @@ import (
 type KeyRsa struct {}
 
 // 包装
-func (this KeyRsa) Marshal(key crypto.PrivateKey, comment string, padding []byte) (string, []byte, []byte, error) {
+func (this KeyRsa) Marshal(key crypto.PrivateKey, comment string) (string, []byte, []byte, error) {
     k, ok := key.(*rsa.PrivateKey)
     if !ok {
         return "", nil, nil, errors.Errorf("unsupported key type %T", key)
@@ -43,11 +43,10 @@ func (this KeyRsa) Marshal(key crypto.PrivateKey, comment string, padding []byte
         P       *big.Int
         Q       *big.Int
         Comment string
-        Pad     []byte
     }{
         k.PublicKey.N, E,
         k.D, k.Precomputed.Qinv, k.Primes[0], k.Primes[1],
-        comment, padding,
+        comment,
     }
     rest := ssh.Marshal(prikey)
 

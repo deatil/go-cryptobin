@@ -7,14 +7,24 @@ import (
 
 // Cipher 列表
 var CipherMap = map[string]Cipher{
+    "DESEDE3CBC":       DESEDE3CBC,
+    "BlowfishCBC":      BlowfishCBC,
+    "Chacha20poly1305": Chacha20poly1305,
+
     "AES128CBC": AES128CBC,
-    "AES128CTR": AES128CTR,
-
     "AES192CBC": AES192CBC,
-    "AES192CTR": AES192CTR,
-
     "AES256CBC": AES256CBC,
+
+    "AES128CTR": AES128CTR,
+    "AES192CTR": AES192CTR,
     "AES256CTR": AES256CTR,
+
+    "AES128GCM": AES128GCM,
+    "AES256GCM": AES256GCM,
+
+    "Arcfour":    Arcfour,
+    "Arcfour128": Arcfour128,
+    "Arcfour256": Arcfour256,
 
     "SM4CBC": SM4CBC,
     "SM4CTR": SM4CTR,

@@ -5,6 +5,7 @@ import (
     "crypto/des"
     "crypto/cipher"
 
+    "golang.org/x/crypto/cast5"
     "golang.org/x/crypto/blowfish"
     "golang.org/x/crypto/chacha20poly1305"
 
@@ -25,14 +26,15 @@ var (
     SSHAES128GCM = "aes128-gcm@openssh.com"
     SSHAES256GCM = "aes256-gcm@openssh.com"
 
-    // RC4
+    // RC4 = arcfour
     SSHArcfour     = "arcfour"
     SSHArcfour128  = "arcfour128"
     SSHArcfour256  = "arcfour256"
 
     SSHBlowfishCBC = "blowfish-cbc"
 
-    // SSHCAST128CBC  = "cast128-cbc"
+    // cast5 = cast128
+    SSHCast128CBC  = "cast128-cbc"
 
     SSHChacha20poly1305 = "chacha20-poly1305@openssh.com"
 
@@ -43,6 +45,9 @@ var (
 var (
     newBlowfishCipher = func(key []byte) (cipher.Block, error) {
         return blowfish.NewCipher(key)
+    }
+    newCast5Cipher = func(key []byte) (cipher.Block, error) {
+        return cast5.NewCipher(key)
     }
 )
 
@@ -65,6 +70,14 @@ var Chacha20poly1305 = CipherChacha20poly1305{
     keySize:    32,
     nonceSize:  chacha20poly1305.NonceSize,
     identifier: SSHChacha20poly1305,
+}
+
+// Cast128CBC is the 128-bit key cast5 cipher in CBC mode.
+var Cast128CBC = CipherCBC{
+    cipherFunc: newCast5Cipher,
+    keySize:    16,
+    blockSize:  cast5.BlockSize,
+    identifier: SSHCast128CBC,
 }
 
 // AES128CBC is the 128-bit key AES cipher in CBC mode.
@@ -169,6 +182,11 @@ func init() {
     })
     AddCipher(SSHChacha20poly1305, func() Cipher {
         return Chacha20poly1305
+    })
+
+    // Cast128CBC
+    AddCipher(SSHCast128CBC, func() Cipher {
+        return Cast128CBC
     })
 
     AddCipher(SSHAES128CBC, func() Cipher {

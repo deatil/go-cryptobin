@@ -11,6 +11,8 @@ var CipherMap = map[string]Cipher{
     "BlowfishCBC":      BlowfishCBC,
     "Chacha20poly1305": Chacha20poly1305,
 
+    "Cast128CBC": Cast128CBC,
+
     "AES128CBC": AES128CBC,
     "AES192CBC": AES192CBC,
     "AES256CBC": AES256CBC,

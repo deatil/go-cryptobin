@@ -29,7 +29,7 @@ var (
 
 var (
     newRC2Cipher = func(key []byte) (cipher.Block, error) {
-        return cryptobin_rc2.NewCipher(key, len(key))
+        return cryptobin_rc2.NewCipher(key, len(key)*8)
     }
 )
 
@@ -63,7 +63,7 @@ var PEMCipherSHA1AndDES = CipherBlockCBC{
 var PEMCipherSHA1And3DES = CipherBlockCBC{
     cipherFunc:     des.NewTripleDESCipher,
     hashFunc:       sha1.New,
-    derivedKeyFunc: derivedKey2,
+    derivedKeyFunc: derivedKeyWithPbkdf,
     keySize:        24,
     blockSize:      des.BlockSize,
     iterationCount: 2048,
@@ -73,7 +73,7 @@ var PEMCipherSHA1And3DES = CipherBlockCBC{
 var PEMCipherSHA1AndRC2_128 = CipherBlockCBC{
     cipherFunc:     newRC2Cipher,
     hashFunc:       sha1.New,
-    derivedKeyFunc: derivedKey,
+    derivedKeyFunc: derivedKeyWithPbkdf,
     keySize:        16,
     blockSize:      cryptobin_rc2.BlockSize,
     iterationCount: 2048,
@@ -82,7 +82,7 @@ var PEMCipherSHA1AndRC2_128 = CipherBlockCBC{
 var PEMCipherSHA1AndRC2_40 = CipherBlockCBC{
     cipherFunc:     newRC2Cipher,
     hashFunc:       sha1.New,
-    derivedKeyFunc: derivedKey,
+    derivedKeyFunc: derivedKeyWithPbkdf,
     keySize:        5,
     blockSize:      cryptobin_rc2.BlockSize,
     iterationCount: 2048,
@@ -118,7 +118,7 @@ var PEMCipherMD5AndRC2_64 = CipherBlockCBC{
 
 var PEMCipherSHA1AndRC4_128 = CipherRC4{
     hashFunc:       sha1.New,
-    derivedKeyFunc: derivedKey,
+    derivedKeyFunc: derivedKeyWithPbkdf,
     keySize:        16,
     blockSize:      16,
     iterationCount: 2048,
@@ -126,7 +126,7 @@ var PEMCipherSHA1AndRC4_128 = CipherRC4{
 }
 var PEMCipherSHA1AndRC4_40 = CipherRC4{
     hashFunc:       sha1.New,
-    derivedKeyFunc: derivedKey,
+    derivedKeyFunc: derivedKeyWithPbkdf,
     keySize:        5,
     blockSize:      5,
     iterationCount: 2048,

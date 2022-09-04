@@ -264,7 +264,7 @@ func (this Cryptobin) CipherBlock(key []byte) (cipher.Block, error) {
             block, err = cast5.NewCipher(key)
         case "RC2":
             // RC2 key, at least 1 byte and at most 128 bytes.
-            block, err = cryptobin_rc2.NewCipher(key, len(key))
+            block, err = cryptobin_rc2.NewCipher(key, len(key)*8)
         case "SM4":
             // 国密 sm4 加密
             block, err = sm4.NewCipher(key)

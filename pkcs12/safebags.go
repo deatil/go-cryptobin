@@ -26,16 +26,9 @@ type certBag struct {
 func decodePkcs8ShroudedKeyBag(asn1Data, password []byte) (privateKey any, err error) {
     var pkData []byte
 
-    originalPassword, err := decodeBMPString(password)
+    pkData, err = cryptobin_pkcs8pbe.DecryptPKCS8PrivateKey(asn1Data, password)
     if err != nil {
-        return nil, err
-    }
-
-    utf8Password := []byte(originalPassword)
-
-    pkData, err = cryptobin_pkcs8.DecryptPKCS8PrivateKey(asn1Data, utf8Password)
-    if err != nil {
-        pkData, err = cryptobin_pkcs8pbe.DecryptPKCS8PrivateKey(asn1Data, utf8Password)
+        pkData, err = cryptobin_pkcs8.DecryptPKCS8PrivateKey(asn1Data, password)
         if err != nil {
             return nil, errors.New("pkcs12: error decrypting PKCS#8: " + err.Error())
         }
@@ -64,22 +57,15 @@ func encodePkcs8ShroudedKeyBag(
         return nil, err
     }
 
-    originalPassword, err := decodeBMPString(password)
-    if err != nil {
-        return nil, err
-    }
-
-    utf8Password := []byte(originalPassword)
-
     var keyBlock *pem.Block
 
     if opt.PKCS8KDFOpts != nil {
-        keyBlock, err = cryptobin_pkcs8.EncryptPKCS8PrivateKey(rand, "KEY", pkData, utf8Password, cryptobin_pkcs8.Opts{
+        keyBlock, err = cryptobin_pkcs8.EncryptPKCS8PrivateKey(rand, "KEY", pkData, password, cryptobin_pkcs8.Opts{
             opt.PKCS8Cipher,
             opt.PKCS8KDFOpts,
         })
     } else {
-        keyBlock, err = cryptobin_pkcs8pbe.EncryptPKCS8PrivateKey(rand, "KEY", pkData, utf8Password, opt.PKCS8Cipher)
+        keyBlock, err = cryptobin_pkcs8pbe.EncryptPKCS8PrivateKey(rand, "KEY", pkData, password, opt.PKCS8Cipher)
     }
 
     asn1Data = keyBlock.Bytes

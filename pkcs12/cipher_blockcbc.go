@@ -1,4 +1,4 @@
-package pkcs8pbe
+package pkcs12
 
 import (
     "hash"
@@ -8,7 +8,7 @@ import (
 )
 
 // pbe 数据
-type pbeParams struct {
+type pbeParam struct {
     Salt           []byte
     IterationCount int
 }
@@ -65,7 +65,7 @@ func (this CipherBlockCBC) Encrypt(password, plaintext []byte) ([]byte, []byte, 
     enc.CryptBlocks(encrypted, plaintext)
 
     // 返回数据
-    paramBytes, err := asn1.Marshal(pbeParams{
+    paramBytes, err := asn1.Marshal(pbeParam{
         Salt:           salt,
         IterationCount: this.iterationCount,
     })
@@ -78,7 +78,7 @@ func (this CipherBlockCBC) Encrypt(password, plaintext []byte) ([]byte, []byte, 
 
 // 解密
 func (this CipherBlockCBC) Decrypt(password, params, ciphertext []byte) ([]byte, error) {
-    var param pbeParams
+    var param pbeParam
     if _, err := asn1.Unmarshal(params, &param); err != nil {
         return nil, errors.New("pkcs8: invalid PBES2 parameters")
     }

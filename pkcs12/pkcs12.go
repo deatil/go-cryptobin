@@ -3,8 +3,6 @@ package pkcs12
 import (
     "io"
     "errors"
-    "crypto/ecdsa"
-    "crypto/rsa"
     "crypto/sha1"
     "crypto/x509"
     "crypto/x509/pkix"
@@ -31,15 +29,15 @@ var (
     oidAnyExtendedKeyUsage = asn1.ObjectIdentifier([]int{2, 5, 29, 37, 0})
 )
 
+type contentInfo struct {
+    ContentType asn1.ObjectIdentifier
+    Content     asn1.RawValue `asn1:"tag:0,explicit,optional"`
+}
+
 type pfxPdu struct {
     Version  int
     AuthSafe contentInfo
     MacData  macData `asn1:"optional"`
-}
-
-type contentInfo struct {
-    ContentType asn1.ObjectIdentifier
-    Content     asn1.RawValue `asn1:"tag:0,explicit,optional"`
 }
 
 type encryptedData struct {
@@ -57,9 +55,9 @@ func (i encryptedContentInfo) Algorithm() pkix.AlgorithmIdentifier {
     return i.ContentEncryptionAlgorithm
 }
 
-func (i encryptedContentInfo) Data() []byte { return i.EncryptedContent }
-
-func (i *encryptedContentInfo) SetData(data []byte) { i.EncryptedContent = data }
+func (i encryptedContentInfo) Data() []byte {
+    return i.EncryptedContent
+}
 
 type safeBag struct {
     Id         asn1.ObjectIdentifier
@@ -81,41 +79,11 @@ type pkcs12Attribute struct {
     Value asn1.RawValue `asn1:"set"`
 }
 
-type encryptedPrivateKeyInfo struct {
-    AlgorithmIdentifier pkix.AlgorithmIdentifier
-    EncryptedData       []byte
-}
-
-func (i encryptedPrivateKeyInfo) Algorithm() pkix.AlgorithmIdentifier {
-    return i.AlgorithmIdentifier
-}
-
-func (i encryptedPrivateKeyInfo) Data() []byte {
-    return i.EncryptedData
-}
-
-func (i *encryptedPrivateKeyInfo) SetData(data []byte) {
-    i.EncryptedData = data
-}
-
 // PEM block types
 const (
     certificateType = "CERTIFICATE"
     privateKeyType  = "PRIVATE KEY"
 )
-
-// unmarshal calls asn1.Unmarshal, but also returns an error if there is any
-// trailing data after unmarshaling.
-func unmarshal(in []byte, out any) error {
-    trailing, err := asn1.Unmarshal(in, out)
-    if err != nil {
-        return err
-    }
-    if len(trailing) != 0 {
-        return errors.New("pkcs12: trailing data found")
-    }
-    return nil
-}
 
 // ToPEM converts all "safe bags" contained in pfxData to PEM blocks.
 //
@@ -157,6 +125,7 @@ func convertBag(bag *safeBag, password []byte) (*pem.Block, error) {
         if err != nil {
             return nil, err
         }
+
         block.Headers[k] = v
     }
 
@@ -176,16 +145,9 @@ func convertBag(bag *safeBag, password []byte) (*pem.Block, error) {
                 return nil, err
             }
 
-            switch key := key.(type) {
-            case *rsa.PrivateKey:
-                block.Bytes = x509.MarshalPKCS1PrivateKey(key)
-            case *ecdsa.PrivateKey:
-                block.Bytes, err = x509.MarshalECPrivateKey(key)
-                if err != nil {
-                    return nil, err
-                }
-            default:
-                return nil, errors.New("found unknown private key type in PKCS#8 wrapping")
+            block.Bytes, err = MarshalPrivateKey(key)
+            if err != nil {
+                    return nil, errors.New("found unknown private key type in PKCS#8 wrapping: " + err.Error())
             }
         default:
             return nil, errors.New("don't know how to convert a safe bag of type " + bag.Id.String())
@@ -223,6 +185,7 @@ func convertAttribute(attribute *pkcs12Attribute) (key, value string, err error)
         if err := unmarshal(attribute.Value.Bytes, &id); err != nil {
             return "", "", err
         }
+
         value = hex.EncodeToString(id)
     }
 
@@ -370,16 +333,19 @@ func getSafeContents(p12Data, password []byte, expectedItems int) (bags []safeBa
         if !(len(password) == 2 && password[0] == 0 && password[1] == 0) {
             return nil, nil, errors.New("pkcs12: no MAC in data")
         }
-    } else if err := verifyMac(&pfx.MacData, pfx.AuthSafe.Content.Bytes, password); err != nil {
-        if err == ErrIncorrectPassword && len(password) == 2 && password[0] == 0 && password[1] == 0 {
-            // some implementations use an empty byte array
-            // for the empty string password try one more
-            // time with empty-empty password
-            password = nil
-            err = verifyMac(&pfx.MacData, pfx.AuthSafe.Content.Bytes, password)
-        }
-        if err != nil {
-            return nil, nil, err
+    } else {
+        if err := pfx.MacData.Verify(pfx.AuthSafe.Content.Bytes, password); err != nil {
+            if err == ErrIncorrectPassword && len(password) == 2 && password[0] == 0 && password[1] == 0 {
+                // some implementations use an empty byte array
+                // for the empty string password try one more
+                // time with empty-empty password
+                password = nil
+                err = pfx.MacData.Verify(pfx.AuthSafe.Content.Bytes, password)
+            }
+
+            if err != nil {
+                return nil, nil, err
+            }
         }
     }
 
@@ -396,29 +362,42 @@ func getSafeContents(p12Data, password []byte, expectedItems int) (bags []safeBa
         var data []byte
 
         switch {
-        case ci.ContentType.Equal(oidDataContentType):
-            if err := unmarshal(ci.Content.Bytes, &data); err != nil {
-                return nil, nil, err
-            }
-        case ci.ContentType.Equal(oidEncryptedDataContentType):
-            var encryptedData encryptedData
-            if err := unmarshal(ci.Content.Bytes, &encryptedData); err != nil {
-                return nil, nil, err
-            }
-            if encryptedData.Version != 0 {
-                return nil, nil, NotImplementedError("only version 0 of EncryptedData is supported")
-            }
-            if data, err = pbDecrypt(encryptedData.EncryptedContentInfo, password); err != nil {
-                return nil, nil, err
-            }
-        default:
-            return nil, nil, NotImplementedError("only data and encryptedData content types are supported in authenticated safe")
+            case ci.ContentType.Equal(oidDataContentType):
+                if err := unmarshal(ci.Content.Bytes, &data); err != nil {
+                    return nil, nil, err
+                }
+            case ci.ContentType.Equal(oidEncryptedDataContentType):
+                var encryptedData encryptedData
+                if err := unmarshal(ci.Content.Bytes, &encryptedData); err != nil {
+                    return nil, nil, err
+                }
+
+                if encryptedData.Version != 0 {
+                    return nil, nil, NotImplementedError("only version 0 of EncryptedData is supported")
+                }
+
+                encryptedContentInfo := encryptedData.EncryptedContentInfo
+                encryptedContent := encryptedContentInfo.EncryptedContent
+                contentEncryptionAlgorithm := encryptedContentInfo.ContentEncryptionAlgorithm
+
+                newCipher, enParams, err := parseContentEncryptionAlgorithm(contentEncryptionAlgorithm)
+                if err != nil {
+                    return nil, nil, err
+                }
+
+                data, err = newCipher.Decrypt(password, enParams, encryptedContent)
+                if err != nil {
+                    return nil, nil, err
+                }
+            default:
+                return nil, nil, NotImplementedError("only data and encryptedData content types are supported in authenticated safe")
         }
 
         var safeContents []safeBag
         if err := unmarshal(data, &safeContents); err != nil {
             return nil, nil, err
         }
+
         bags = append(bags, safeContents...)
     }
 
@@ -443,7 +422,34 @@ func getSafeContents(p12Data, password []byte, expectedItems int) (bags []safeBa
 // 3DES  The private key bag and the end-entity certificate bag have the
 // LocalKeyId attribute set to the SHA-1 fingerprint of the end-entity
 // certificate.
-func Encode(rand io.Reader, privateKey any, certificate *x509.Certificate, caCerts []*x509.Certificate, password string) (pfxData []byte, err error) {
+func Encode(
+    rand io.Reader,
+    privateKey any,
+    certificate *x509.Certificate,
+    caCerts []*x509.Certificate,
+    password string,
+    opts ...Opts,
+) (pfxData []byte, err error) {
+    var opt = DefaultOpts
+    if len(opts) > 0 {
+        opt = opts[0]
+    }
+
+    cipher := opt.Cipher
+    if cipher == nil {
+        return nil, errors.New("pkcs12: unknown opts cipher")
+    }
+
+    kdfOpts := opt.KDFOpts
+    if kdfOpts == nil {
+        return nil, errors.New("pkcs12: unknown opts kdfOpts")
+    }
+
+    pkcs8Cipher := opt.PKCS8Cipher
+    if pkcs8Cipher == nil {
+        return nil, errors.New("pkcs12: unknown opts pkcs8Cipher")
+    }
+
     encodedPassword, err := bmpStringZeroTerminated(password)
     if err != nil {
         return nil, err
@@ -481,7 +487,7 @@ func Encode(rand io.Reader, privateKey any, certificate *x509.Certificate, caCer
     keyBag.Value.Class = 2
     keyBag.Value.Tag = 0
     keyBag.Value.IsCompound = true
-    if keyBag.Value.Bytes, err = encodePkcs8ShroudedKeyBag(rand, privateKey, encodedPassword); err != nil {
+    if keyBag.Value.Bytes, err = encodePkcs8ShroudedKeyBag(rand, privateKey, encodedPassword, opt); err != nil {
         return nil, err
     }
     keyBag.Attributes = append(keyBag.Attributes, localKeyIdAttr)
@@ -490,10 +496,10 @@ func Encode(rand io.Reader, privateKey any, certificate *x509.Certificate, caCer
     // The first SafeContents is encrypted and contains the cert bags.
     // The second SafeContents is unencrypted and contains the shrouded key bag.
     var authenticatedSafe [2]contentInfo
-    if authenticatedSafe[0], err = makeSafeContents(rand, certBags, encodedPassword); err != nil {
+    if authenticatedSafe[0], err = makeSafeContents(rand, certBags, encodedPassword, opt.Cipher); err != nil {
         return nil, err
     }
-    if authenticatedSafe[1], err = makeSafeContents(rand, []safeBag{keyBag}, nil); err != nil {
+    if authenticatedSafe[1], err = makeSafeContents(rand, []safeBag{keyBag}, nil, nil); err != nil {
         return nil, err
     }
 
@@ -503,15 +509,13 @@ func Encode(rand io.Reader, privateKey any, certificate *x509.Certificate, caCer
     }
 
     // compute the MAC
-    pfx.MacData.Mac.Algorithm.Algorithm = oidSHA1
-    pfx.MacData.MacSalt = make([]byte, 8)
-    if _, err = rand.Read(pfx.MacData.MacSalt); err != nil {
+    var kdfMacData KDFParameters
+    kdfMacData, err = opt.KDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
+    if err != nil {
         return nil, err
     }
-    pfx.MacData.Iterations = 1
-    if err = computeMac(&pfx.MacData, authenticatedSafeBytes, encodedPassword); err != nil {
-        return nil, err
-    }
+
+    pfx.MacData = kdfMacData.(macData)
 
     pfx.AuthSafe.ContentType = oidDataContentType
     pfx.AuthSafe.Content.Class = 2
@@ -546,7 +550,12 @@ func Encode(rand io.Reader, privateKey any, certificate *x509.Certificate, caCer
 // resulting Friendly Names (Aliases) will be identical, which Java may treat as
 // the same entry when used as a Java TrustStore, e.g. with `keytool`.  To
 // customize the Friendly Names, use EncodeTrustStoreEntries.
-func EncodeTrustStore(rand io.Reader, certs []*x509.Certificate, password string) (pfxData []byte, err error) {
+func EncodeTrustStore(
+    rand io.Reader,
+    certs []*x509.Certificate,
+    password string,
+    opts ...Opts,
+) (pfxData []byte, err error) {
     var certsWithFriendlyNames []TrustStoreEntry
     for _, cert := range certs {
         certsWithFriendlyNames = append(certsWithFriendlyNames, TrustStoreEntry{
@@ -554,7 +563,8 @@ func EncodeTrustStore(rand io.Reader, certs []*x509.Certificate, password string
             FriendlyName: cert.Subject.String(),
         })
     }
-    return EncodeTrustStoreEntries(rand, certsWithFriendlyNames, password)
+
+    return EncodeTrustStoreEntries(rand, certsWithFriendlyNames, password, opts...)
 }
 
 // TrustStoreEntry represents an entry in a Java TrustStore.
@@ -584,7 +594,27 @@ type TrustStoreEntry struct {
 //
 // EncodeTrustStoreEntries creates a single SafeContents that's encrypted
 // with RC2 and contains the certificates.
-func EncodeTrustStoreEntries(rand io.Reader, entries []TrustStoreEntry, password string) (pfxData []byte, err error) {
+func EncodeTrustStoreEntries(
+    rand io.Reader,
+    entries []TrustStoreEntry,
+    password string,
+    opts ...Opts,
+) (pfxData []byte, err error) {
+    var opt = DefaultOpts
+    if len(opts) > 0 {
+        opt = opts[0]
+    }
+
+    cipher := opt.Cipher
+    if cipher == nil {
+        return nil, errors.New("pkcs12: unknown opts cipher")
+    }
+
+    kdfOpts := opt.KDFOpts
+    if kdfOpts == nil {
+        return nil, errors.New("pkcs12: unknown opts kdfOpts")
+    }
+
     encodedPassword, err := bmpStringZeroTerminated(password)
     if err != nil {
         return nil, err
@@ -650,7 +680,7 @@ func EncodeTrustStoreEntries(rand io.Reader, entries []TrustStoreEntry, password
     // Construct an authenticated safe with one SafeContent.
     // The SafeContents is encrypted and contains the cert bags.
     var authenticatedSafe [1]contentInfo
-    if authenticatedSafe[0], err = makeSafeContents(rand, certBags, encodedPassword); err != nil {
+    if authenticatedSafe[0], err = makeSafeContents(rand, certBags, encodedPassword, opt.Cipher); err != nil {
         return nil, err
     }
 
@@ -660,15 +690,13 @@ func EncodeTrustStoreEntries(rand io.Reader, entries []TrustStoreEntry, password
     }
 
     // compute the MAC
-    pfx.MacData.Mac.Algorithm.Algorithm = oidSHA1
-    pfx.MacData.MacSalt = make([]byte, 8)
-    if _, err = rand.Read(pfx.MacData.MacSalt); err != nil {
+    var kdfMacData KDFParameters
+    kdfMacData, err = opt.KDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
+    if err != nil {
         return nil, err
     }
-    pfx.MacData.Iterations = 1
-    if err = computeMac(&pfx.MacData, authenticatedSafeBytes, encodedPassword); err != nil {
-        return nil, err
-    }
+
+    pfx.MacData = kdfMacData.(macData)
 
     pfx.AuthSafe.ContentType = oidDataContentType
     pfx.AuthSafe.Content.Class = 2
@@ -700,7 +728,7 @@ func makeCertBag(certBytes []byte, attributes []pkcs12Attribute) (certBag *safeB
     return
 }
 
-func makeSafeContents(rand io.Reader, bags []safeBag, password []byte) (ci contentInfo, err error) {
+func makeSafeContents(rand io.Reader, bags []safeBag, password []byte, cipher Cipher) (ci contentInfo, err error) {
     var data []byte
     if data, err = asn1.Marshal(bags); err != nil {
         return
@@ -720,19 +748,21 @@ func makeSafeContents(rand io.Reader, bags []safeBag, password []byte) (ci conte
             return
         }
 
-        var algo pkix.AlgorithmIdentifier
-        algo.Algorithm = oidPBEWithSHAAnd40BitRC2CBC
-        if algo.Parameters.FullBytes, err = asn1.Marshal(pbeParams{Salt: randomSalt, Iterations: 2048}); err != nil {
+        var encrypted, params []byte
+        encrypted, params, err = cipher.Encrypt(password, data)
+        if err != nil {
             return
         }
+
+        var algo pkix.AlgorithmIdentifier
+        algo.Algorithm = cipher.OID()
+        algo.Parameters.FullBytes = params
 
         var encryptedData encryptedData
         encryptedData.Version = 0
         encryptedData.EncryptedContentInfo.ContentType = oidDataContentType
         encryptedData.EncryptedContentInfo.ContentEncryptionAlgorithm = algo
-        if err = pbEncrypt(&encryptedData.EncryptedContentInfo, data, password); err != nil {
-            return
-        }
+        encryptedData.EncryptedContentInfo.EncryptedContent = encrypted
 
         ci.ContentType = oidEncryptedDataContentType
         ci.Content.Class = 2
@@ -742,5 +772,6 @@ func makeSafeContents(rand io.Reader, bags []safeBag, password []byte) (ci conte
             return
         }
     }
+
     return
 }

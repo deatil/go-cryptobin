@@ -3,8 +3,11 @@ package pkcs12
 import (
     "io"
     "errors"
-    "crypto/x509"
+    "encoding/pem"
     "encoding/asn1"
+
+    cryptobin_pkcs8 "github.com/deatil/go-cryptobin/pkcs8"
+    cryptobin_pkcs8pbe "github.com/deatil/go-cryptobin/pkcs8pbe"
 )
 
 var (
@@ -12,6 +15,7 @@ var (
     oidCertTypeX509Certificate = asn1.ObjectIdentifier([]int{1, 2, 840, 113549, 1, 9, 22, 1})
     oidPKCS8ShroundedKeyBag    = asn1.ObjectIdentifier([]int{1, 2, 840, 113549, 1, 12, 10, 1, 2})
     oidCertBag                 = asn1.ObjectIdentifier([]int{1, 2, 840, 113549, 1, 12, 10, 1, 3})
+    oidSecretKeyBag            = asn1.ObjectIdentifier([]int{1, 2, 840, 113549, 1, 12, 10, 1, 5})
 )
 
 type certBag struct {
@@ -20,14 +24,21 @@ type certBag struct {
 }
 
 func decodePkcs8ShroudedKeyBag(asn1Data, password []byte) (privateKey any, err error) {
-    pkinfo := new(encryptedPrivateKeyInfo)
-    if err = unmarshal(asn1Data, pkinfo); err != nil {
-        return nil, errors.New("pkcs12: error decoding PKCS#8 shrouded key bag: " + err.Error())
+    var pkData []byte
+
+    originalPassword, err := decodeBMPString(password)
+    if err != nil {
+        return nil, err
     }
 
-    pkData, err := pbDecrypt(pkinfo, password)
+    utf8Password := []byte(originalPassword)
+
+    pkData, err = cryptobin_pkcs8.DecryptPKCS8PrivateKey(asn1Data, utf8Password)
     if err != nil {
-        return nil, errors.New("pkcs12: error decrypting PKCS#8 shrouded key bag: " + err.Error())
+        pkData, err = cryptobin_pkcs8pbe.DecryptPKCS8PrivateKey(asn1Data, utf8Password)
+        if err != nil {
+            return nil, errors.New("pkcs12: error decrypting PKCS#8: " + err.Error())
+        }
     }
 
     ret := new(asn1.RawValue)
@@ -35,39 +46,43 @@ func decodePkcs8ShroudedKeyBag(asn1Data, password []byte) (privateKey any, err e
         return nil, errors.New("pkcs12: error unmarshaling decrypted private key: " + err.Error())
     }
 
-    if privateKey, err = x509.ParsePKCS8PrivateKey(pkData); err != nil {
-        return nil, errors.New("pkcs12: error parsing PKCS#8 private key: " + err.Error())
+    if privateKey, err = ParsePKCS8PrivateKey(pkData); err != nil {
+        return nil, err
     }
 
     return privateKey, nil
 }
 
-func encodePkcs8ShroudedKeyBag(rand io.Reader, privateKey any, password []byte) (asn1Data []byte, err error) {
+func encodePkcs8ShroudedKeyBag(
+    rand io.Reader,
+    privateKey any,
+    password []byte,
+    opt Opts,
+) (asn1Data []byte, err error) {
     var pkData []byte
-    if pkData, err = x509.MarshalPKCS8PrivateKey(privateKey); err != nil {
-        return nil, errors.New("pkcs12: error encoding PKCS#8 private key: " + err.Error())
+    if pkData, err = MarshalPKCS8PrivateKey(privateKey); err != nil {
+        return nil, err
     }
 
-    randomSalt := make([]byte, 8)
-    if _, err = rand.Read(randomSalt); err != nil {
-        return nil, errors.New("pkcs12: error reading random salt: " + err.Error())
-    }
-    var paramBytes []byte
-    if paramBytes, err = asn1.Marshal(pbeParams{Salt: randomSalt, Iterations: 2048}); err != nil {
-        return nil, errors.New("pkcs12: error encoding params: " + err.Error())
+    originalPassword, err := decodeBMPString(password)
+    if err != nil {
+        return nil, err
     }
 
-    var pkinfo encryptedPrivateKeyInfo
-    pkinfo.AlgorithmIdentifier.Algorithm = oidPBEWithSHAAnd3KeyTripleDESCBC
-    pkinfo.AlgorithmIdentifier.Parameters.FullBytes = paramBytes
+    utf8Password := []byte(originalPassword)
 
-    if err = pbEncrypt(&pkinfo, pkData, password); err != nil {
-        return nil, errors.New("pkcs12: error encrypting PKCS#8 shrouded key bag: " + err.Error())
+    var keyBlock *pem.Block
+
+    if opt.PKCS8KDFOpts != nil {
+        keyBlock, err = cryptobin_pkcs8.EncryptPKCS8PrivateKey(rand, "KEY", pkData, utf8Password, cryptobin_pkcs8.Opts{
+            opt.PKCS8Cipher,
+            opt.PKCS8KDFOpts,
+        })
+    } else {
+        keyBlock, err = cryptobin_pkcs8pbe.EncryptPKCS8PrivateKey(rand, "KEY", pkData, utf8Password, opt.PKCS8Cipher)
     }
 
-    if asn1Data, err = asn1.Marshal(pkinfo); err != nil {
-        return nil, errors.New("pkcs12: error encoding PKCS#8 shrouded key bag: " + err.Error())
-    }
+    asn1Data = keyBlock.Bytes
 
     return asn1Data, nil
 }

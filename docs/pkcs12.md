@@ -64,7 +64,7 @@ func MakePKCS12() error {
         GetPrivateKey()
 
     // [Encode] 兼容官方库
-    // pfxData, err := cryptobin_pkcs12.Encode(rand.Reader, privateKey, certificates[0], "123", cryptobin_pkcs12.Opts{
+    // pfxData, err := cryptobin_pkcs12.Encode(rand.Reader, privateKey, certificates[0], "123")
     // pfxData, err := cryptobin_pkcs12.EncodeChain(rand.Reader, privateKey, certificates[0], caCerts, "123")
     pfxData, err := cryptobin_pkcs12.EncodeChain(rand.Reader, privateKey, certificates[0], caCerts, "123", cryptobin_pkcs12.Opts{
         PKCS8Cipher: cryptobin_pkcs12.GetPKCS8PbeCipherFromName("SHA1AndRC2_40"),

@@ -106,6 +106,7 @@ func MakePKCS12() error {
 
     // 解析测试
     p12, _ := fs.Get(pkcs12File)
+    // priv, cert, err := cryptobin_pkcs12.Decode([]byte(p12), "123")
     priv, cert, caCerts, err := cryptobin_pkcs12.DecodeChain([]byte(p12), "123")
     if err != nil {
         fmt.Println("err =====")

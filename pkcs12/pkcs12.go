@@ -196,7 +196,11 @@ func convertAttribute(attribute *pkcs12Attribute) (key, value string, err error)
 // assumes that there is only one certificate and only one private key in the
 // pfxData.  Since PKCS#12 files often contain more than one certificate, you
 // probably want to use DecodeChain instead.
-func Decode(pfxData []byte, password string) (privateKey any, certificate *x509.Certificate, err error) {
+func Decode(pfxData []byte, password string) (
+    privateKey any,
+    certificate *x509.Certificate,
+    err error,
+) {
     var caCerts []*x509.Certificate
 
     privateKey, certificate, caCerts, err = DecodeChain(pfxData, password)
@@ -212,7 +216,12 @@ func Decode(pfxData []byte, password string) (privateKey any, certificate *x509.
 // and only one private key in the pfxData.  The first certificate is assumed to
 // be the leaf certificate, and subsequent certificates, if any, are assumed to
 // comprise the CA certificate chain.
-func DecodeChain(pfxData []byte, password string) (privateKey any, certificate *x509.Certificate, caCerts []*x509.Certificate, err error) {
+func DecodeChain(pfxData []byte, password string) (
+    privateKey any,
+    certificate *x509.Certificate,
+    caCerts []*x509.Certificate,
+    err error,
+) {
     encodedPassword, err := bmpStringZeroTerminated(password)
     if err != nil {
         return nil, nil, nil, err
@@ -449,7 +458,18 @@ func getSafeContents(p12Data, password []byte, expectedItems int) (bags []safeBa
     return bags, password, nil
 }
 
-// Encode produces pfxData containing one private key (privateKey), an
+// 兼容 go 默认包
+func Encode(
+    rand io.Reader,
+    privateKey any,
+    certificate *x509.Certificate,
+    password string,
+    opts ...Opts,
+) (pfxData []byte, err error) {
+    return EncodeChain(rand, privateKey, certificate, nil, password, opts...)
+}
+
+// EncodeChain produces pfxData containing one private key (privateKey), an
 // end-entity certificate (certificate), and any number of CA certificates
 // (caCerts).
 //
@@ -461,13 +481,13 @@ func getSafeContents(p12Data, password []byte, expectedItems int) (bags []safeBa
 // The rand argument is used to provide entropy for the encryption, and
 // can be set to rand.Reader from the crypto/rand package.
 //
-// Encode emulates the behavior of OpenSSL's PKCS12_create: it creates two
+// EncodeChain emulates the behavior of OpenSSL's PKCS12_create: it creates two
 // SafeContents: one that's encrypted with RC2 and contains the certificates,
 // and another that is unencrypted and contains the private key shrouded with
 // 3DES  The private key bag and the end-entity certificate bag have the
 // LocalKeyId attribute set to the SHA-1 fingerprint of the end-entity
 // certificate.
-func Encode(
+func EncodeChain(
     rand io.Reader,
     privateKey any,
     certificate *x509.Certificate,

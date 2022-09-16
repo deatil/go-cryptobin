@@ -8,39 +8,8 @@ import (
     "crypto"
 )
 
-type privateKeyEntryData struct {
-    date       time.Time
-    encodedKey []byte
-    certs      [][]byte
-}
-
-type trustedCertEntryData struct {
-    date time.Time
-    cert []byte
-}
-
-type secretKeyEntryData struct {
-    date       time.Time
-    encodedKey []byte
-}
-
-// 编码
-type JceksEncode struct {
-    // 私钥加证书
-    privateKeys  map[string]privateKeyEntryData
-
-    // 证书
-    trustedCerts map[string]trustedCertEntryData
-
-    // 密钥
-    secretKeys   map[string]secretKeyEntryData
-
-    // 数量统计
-    count        int
-}
-
 // 添加私钥
-func (this *JceksEncode) AddPrivateKey(
+func (this *JCEKS) AddPrivateKey(
     alias string,
     privateKey crypto.PrivateKey,
     password string,
@@ -53,7 +22,7 @@ func (this *JceksEncode) AddPrivateKey(
         return err
     }
 
-    data := privateKeyEntryData{}
+    data := privateKeyEntry{}
     data.date = time.Now()
     data.encodedKey = encodedKey
     data.certs = certs
@@ -65,12 +34,12 @@ func (this *JceksEncode) AddPrivateKey(
 }
 
 // 添加证书
-func (this *JceksEncode) AddTrustedCert(
+func (this *JCEKS) AddTrustedCert(
     alias string,
     cert []byte,
     cipher ...Cipher,
 ) error {
-    data := trustedCertEntryData{}
+    data := trustedCertEntry{}
     data.date = time.Now()
     data.cert = cert
 
@@ -81,7 +50,7 @@ func (this *JceksEncode) AddTrustedCert(
 }
 
 // 添加密钥
-func (this *JceksEncode) AddSecretKey(
+func (this *JCEKS) AddSecretKey(
     alias string,
     secretKey []byte,
     password string,
@@ -93,7 +62,7 @@ func (this *JceksEncode) AddSecretKey(
         return err
     }
 
-    data := secretKeyEntryData{}
+    data := secretKeyEntry{}
     data.date = time.Now()
     data.encodedKey = encodedKey
 
@@ -103,7 +72,7 @@ func (this *JceksEncode) AddSecretKey(
     return nil
 }
 
-func (this *JceksEncode) marshalPrivateKey(w io.Writer) error {
+func (this *JCEKS) marshalPrivateKey(w io.Writer) error {
     for alias, data := range this.privateKeys {
         certLen := len(data.certs)
         if certLen == 0 {
@@ -154,7 +123,7 @@ func (this *JceksEncode) marshalPrivateKey(w io.Writer) error {
     return nil
 }
 
-func (this *JceksEncode) marshalTrustedCert(w io.Writer) error {
+func (this *JCEKS) marshalTrustedCert(w io.Writer) error {
     for alias, data := range this.trustedCerts {
         var err error
 
@@ -187,7 +156,7 @@ func (this *JceksEncode) marshalTrustedCert(w io.Writer) error {
     return nil
 }
 
-func (this *JceksEncode) marshalSecretKey(w io.Writer) error {
+func (this *JCEKS) marshalSecretKey(w io.Writer) error {
     for alias, data := range this.secretKeys {
         var err error
 
@@ -215,7 +184,7 @@ func (this *JceksEncode) marshalSecretKey(w io.Writer) error {
     return nil
 }
 
-func (this *JceksEncode) Marshal(password string) ([]byte, error) {
+func (this *JCEKS) Marshal(password string) ([]byte, error) {
     buf := bytes.NewBuffer(nil)
 
     var err error

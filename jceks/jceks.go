@@ -5,9 +5,37 @@ import (
     "bytes"
 )
 
-// LoadFromReader loads the key store from the specified file.
-func LoadJceksFromReader(reader io.Reader, password string) (*JceksDecode, error) {
-    ks := &JceksDecode{
+// 编码
+type JCEKS struct {
+    // 私钥加证书
+    privateKeys  map[string]privateKeyEntry
+
+    // 证书
+    trustedCerts map[string]trustedCertEntry
+
+    // 密钥
+    secretKeys   map[string]secretKeyEntry
+
+    // 数量统计
+    count        int
+
+    // 解析后数据
+    entries      map[string]interface{}
+}
+
+// 构造函数
+func NewJCEKS() *JCEKS {
+    return &JCEKS{
+        privateKeys:  make(map[string]privateKeyEntry),
+        trustedCerts: make(map[string]trustedCertEntry),
+        secretKeys:   make(map[string]secretKeyEntry),
+        count:        0,
+    }
+}
+
+// LoadJceksFromReader loads the key store from the specified file.
+func LoadJceksFromReader(reader io.Reader, password string) (*JCEKS, error) {
+    ks := &JCEKS{
         entries: make(map[string]interface{}),
     }
 
@@ -19,24 +47,14 @@ func LoadJceksFromReader(reader io.Reader, password string) (*JceksDecode, error
     return ks, err
 }
 
-// LoadFromBytes loads the key store from the bytes data.
-func LoadJceksFromBytes(data []byte, password string) (*JceksDecode, error) {
+// LoadJceksFromBytes loads the key store from the bytes data.
+func LoadJceksFromBytes(data []byte, password string) (*JCEKS, error) {
     buf := bytes.NewReader(data)
 
     return LoadFromReader(buf, password)
 }
 
-// 构造函数
-func NewJceksEncode() *JceksEncode {
-    return &JceksEncode{
-        privateKeys:  make(map[string]privateKeyEntryData),
-        trustedCerts: make(map[string]trustedCertEntryData),
-        secretKeys:   make(map[string]secretKeyEntryData),
-        count:        0,
-    }
-}
-
 // 别名
 var LoadFromReader = LoadJceksFromReader
 var LoadFromBytes  = LoadJceksFromBytes
-var NewEncode      = NewJceksEncode
+var NewJceksEncode = NewJCEKS

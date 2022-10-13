@@ -14,7 +14,7 @@ type UBEROpts struct {
 
 // 默认配置
 var UBERDefaultOpts = UBEROpts{
-    SaltSize:       16,
+    SaltSize:       20,
     IterationCount: 10000,
 }
 
@@ -32,7 +32,7 @@ func (this *UBER) Marshal(password string, opts ...UBEROpts) ([]byte, error) {
 
     // 原始数据
     entryBuf := bytes.NewBuffer(nil)
-    this.marshalBksEntries(entryBuf)
+    this.marshalEntries(entryBuf)
     entryData := entryBuf.Bytes()
 
     h := sha1.New()

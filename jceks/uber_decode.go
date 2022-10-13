@@ -72,7 +72,7 @@ func (this *UBER) Parse(data []byte, password string, tryDecryptKey ...bool) err
 
     rr := bytes.NewReader(uberStore)
 
-    err = this.loadBksEntries(rr, password, tryDecryptKeys)
+    err = this.loadEntries(rr, password, tryDecryptKeys)
     if err != nil {
         return err
     }

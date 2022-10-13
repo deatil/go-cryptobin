@@ -13,7 +13,7 @@ import (
     "crypto/subtle"
 )
 
-func (this *BKS) readBksCert(r io.Reader) (*bksTrustedCertEntry, error) {
+func (this *BKS) readCert(r io.Reader) (*bksTrustedCertEntry, error) {
     certType, err := readUTF(r)
     if err != nil {
         return nil, err
@@ -31,7 +31,7 @@ func (this *BKS) readBksCert(r io.Reader) (*bksTrustedCertEntry, error) {
     return entry, nil
 }
 
-func (this *BKS) readBksKey(r io.Reader) (*bksKeyEntry, error) {
+func (this *BKS) readKey(r io.Reader) (*bksKeyEntry, error) {
     keyType, err := readUint8(r)
     if err != nil {
         return nil, err
@@ -61,7 +61,7 @@ func (this *BKS) readBksKey(r io.Reader) (*bksKeyEntry, error) {
     return entry, nil
 }
 
-func (this *BKS) readBksSecret(r io.Reader) (*bksSecretKeyEntry, error) {
+func (this *BKS) readSecret(r io.Reader) (*bksSecretKeyEntry, error) {
     secretData, err := readBytes(r)
     if err != nil {
         return nil, err
@@ -74,7 +74,7 @@ func (this *BKS) readBksSecret(r io.Reader) (*bksSecretKeyEntry, error) {
 }
 
 // 解密
-func (this *BKS) readBksSealed(r io.Reader) (*bksSealedKeyEntry, error) {
+func (this *BKS) readSealed(r io.Reader) (*bksSealedKeyEntry, error) {
     sealedData, err := readBytes(r)
     if err != nil {
         return nil, err
@@ -87,7 +87,7 @@ func (this *BKS) readBksSealed(r io.Reader) (*bksSealedKeyEntry, error) {
 }
 
 // 解析
-func (this *BKS) loadBksEntries(r io.Reader, password string, tryDecryptKeys bool) error {
+func (this *BKS) loadEntries(r io.Reader, password string, tryDecryptKeys bool) error {
     for {
         tag, err := readUint8(r)
         if err != nil {
@@ -115,7 +115,7 @@ func (this *BKS) loadBksEntries(r io.Reader, password string, tryDecryptKeys boo
 
         certChain := make([][]byte, 0)
         for i := 0; i < int(chainLength); i++ {
-            entry, err := this.readBksCert(r)
+            entry, err := this.readCert(r)
             if err != nil {
                 return err
             }
@@ -125,14 +125,14 @@ func (this *BKS) loadBksEntries(r io.Reader, password string, tryDecryptKeys boo
 
         var entry BksEntry
         switch int(tag) {
-            case 1:
-                entry, err = this.readBksCert(r)
-            case 2:
-                entry, err = this.readBksKey(r)
-            case 3:
-                entry, err = this.readBksSecret(r)
-            case 4:
-                entry, err = this.readBksSealed(r)
+            case bksEntryTypeCert:
+                entry, err = this.readCert(r)
+            case bksEntryTypeKey:
+                entry, err = this.readKey(r)
+            case bksEntryTypeSecret:
+                entry, err = this.readSecret(r)
+            case bksEntryTypeSealed:
+                entry, err = this.readSealed(r)
             default:
                 return fmt.Errorf("Unsupported BKS keystore type: %d", tag)
         }
@@ -198,7 +198,7 @@ func (this *BKS) Parse(r io.Reader, password string, tryDecryptKey ...bool) erro
 
     r = io.TeeReader(r, hmac)
 
-    err = this.loadBksEntries(r, password, tryDecryptKeys)
+    err = this.loadEntries(r, password, tryDecryptKeys)
     if err != nil {
         return err
     }
@@ -213,21 +213,6 @@ func (this *BKS) Parse(r io.Reader, password string, tryDecryptKey ...bool) erro
 
     if subtle.ConstantTimeCompare(computed, actual) != 1 {
         return fmt.Errorf("keystore was tampered with or password was incorrect")
-    }
-
-    return nil
-}
-
-// 解析
-func (this *BKS) Decrypt(alias string, password string) error {
-    entry, ok := this.entries[alias]
-    if !ok {
-        return errors.New("no data")
-    }
-
-    switch t := entry.(type) {
-        case BksEntry:
-            return t.Decrypt(password)
     }
 
     return nil
@@ -331,7 +316,7 @@ func (this *BKS) GetSecretKey(alias string) (
 }
 
 // GetSealedKeyType
-func (this *BKS) GetSealedKeyType(alias string) (keyType string, err error) {
+func (this *BKS) GetSealedKeyType(alias string, password string) (keyType string, err error) {
     entry, ok := this.entries[alias]
     if !ok {
         err = errors.New("no data")
@@ -340,6 +325,8 @@ func (this *BKS) GetSealedKeyType(alias string) (keyType string, err error) {
 
     switch t := entry.(type) {
         case *bksSealedKeyEntry:
+            t.Decrypt(password)
+
             keyType = t.nested.TypeString()
     }
 
@@ -347,7 +334,7 @@ func (this *BKS) GetSealedKeyType(alias string) (keyType string, err error) {
 }
 
 // GetSecretKey
-func (this *BKS) GetSealedKey(alias string) (
+func (this *BKS) GetSealedKey(alias string, password string) (
     privateKey crypto.PrivateKey,
     publicKey crypto.PublicKey,
     secret []byte,
@@ -361,6 +348,8 @@ func (this *BKS) GetSealedKey(alias string) (
 
     switch t := entry.(type) {
         case *bksSealedKeyEntry:
+            t.Decrypt(password)
+
             privateKey, publicKey, secret, err = t.nested.Recover()
             if err != nil {
                 return

@@ -9,10 +9,10 @@ const (
     BksVersionV1 = 1
     BksVersionV2 = 2
 
-    bksEntryTypeCertificate = 1
-    bksEntryTypeKey         = 2
-    bksEntryTypeSecret      = 3
-    bksEntryTypeSealed      = 4
+    bksEntryTypeCert   = 1
+    bksEntryTypeKey    = 2
+    bksEntryTypeSecret = 3
+    bksEntryTypeSealed = 4
 
     bksKeyTypePrivate = 0
     bksKeyTypePublic  = 1

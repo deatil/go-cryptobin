@@ -233,7 +233,7 @@ func (this *bksSealedKeyEntry) Decrypt(password string) error {
 
     bks := &BKS{}
 
-    keyEntry, err := bks.readBksKey(bytes.NewReader(decrypted))
+    keyEntry, err := bks.readKey(bytes.NewReader(decrypted))
     if err != nil {
         this.nested = &bksKeyEntry{}
 
@@ -254,7 +254,7 @@ func (this *bksSealedKeyEntry) Encrypt() ([]byte, error) {
 
     bks := &BKS{}
 
-    err = bks.marshalBksKey(bksBuf, this.nested)
+    err = bks.marshalKey(bksBuf, this.nested)
     if err != nil {
         return nil, err
     }

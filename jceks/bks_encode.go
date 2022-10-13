@@ -12,7 +12,7 @@ import (
 )
 
 // 添加
-func (this *BKS) AddBksCert(alias string, certData []byte, certChain [][]byte) error {
+func (this *BKS) AddCert(alias string, certData []byte, certChain [][]byte) error {
     entry := &bksTrustedCertEntry{}
     entry.cert = certData
     entry.certType = "X509"
@@ -25,7 +25,7 @@ func (this *BKS) AddBksCert(alias string, certData []byte, certChain [][]byte) e
 }
 
 // 添加私钥
-func (this *BKS) AddBksKeyPrivateKey(alias string, privateKey crypto.PrivateKey, password string, certChain [][]byte) error {
+func (this *BKS) AddKeyPrivateKey(alias string, privateKey crypto.PrivateKey, certChain [][]byte) error {
     priKey, err := MarshalPKCS8PrivateKey(privateKey)
     if err != nil {
         return err
@@ -38,31 +38,57 @@ func (this *BKS) AddBksKeyPrivateKey(alias string, privateKey crypto.PrivateKey,
 
     entry := &bksKeyEntry{}
     entry.keyType = bksKeyTypePrivate
-    entry.format = "PKCS8"
+    entry.format = "PKCS8" // PKCS8 | PKCS#8
     entry.algorithm = algorithm
     entry.encoded = priKey
 
-    if password != "" {
-        sealedEntry := &bksSealedKeyEntry{
-            nested:   entry,
-            password: password,
-        }
-        sealedEntry.WithData(alias, time.Now(), certChain)
+    entry.WithData(alias, time.Now(), certChain)
 
-        this.entries[alias] = sealedEntry
-    } else {
-        entry.alias = alias
-        entry.date = time.Now()
-        entry.certChain = certChain
+    this.entries[alias] = entry
 
-        this.entries[alias] = entry
+    return nil
+}
+
+// 添加私钥
+func (this *BKS) AddKeyPrivateKeyWithPassword(
+    alias string,
+    privateKey crypto.PrivateKey,
+    password string,
+    certChain [][]byte,
+) error {
+    priKey, err := MarshalPKCS8PrivateKey(privateKey)
+    if err != nil {
+        return err
     }
+
+    algorithm, err := GetPKCS8PrivateKeyAlgorithm(privateKey)
+    if err != nil {
+        return err
+    }
+
+    entry := &bksKeyEntry{}
+    entry.keyType = bksKeyTypePrivate
+    entry.format = "PKCS8" // PKCS8 | PKCS#8
+    entry.algorithm = algorithm
+    entry.encoded = priKey
+
+    sealedEntry := &bksSealedKeyEntry{
+        nested:   entry,
+        password: password,
+    }
+    sealedEntry.WithData(alias, time.Now(), certChain)
+
+    this.entries[alias] = sealedEntry
 
     return nil
 }
 
 // 添加公钥
-func (this *BKS) AddBksKeyPublicKey(alias string, publicKey crypto.PublicKey, password string, certChain [][]byte) error {
+func (this *BKS) AddKeyPublicKey(
+    alias string,
+    publicKey crypto.PublicKey,
+    certChain [][]byte,
+) error {
     pubKey, err := MarshalPKCS8PrivateKey(publicKey)
     if err != nil {
         return err
@@ -75,32 +101,75 @@ func (this *BKS) AddBksKeyPublicKey(alias string, publicKey crypto.PublicKey, pa
 
     entry := &bksKeyEntry{}
     entry.keyType = bksKeyTypePublic
-    entry.format = "X509"
+    entry.format = "X509" // X.509 | X509
     entry.algorithm = algorithm
     entry.encoded = pubKey
 
-    if password != "" {
-        sealedEntry := &bksSealedKeyEntry{
-            nested:   entry,
-            password: password,
-        }
-        sealedEntry.WithData(alias, time.Now(), certChain)
+    entry.WithData(alias, time.Now(), certChain)
 
-        this.entries[alias] = sealedEntry
-    } else {
-        entry.alias = alias
-        entry.date = time.Now()
-        entry.certChain = certChain
+    this.entries[alias] = entry
 
-        this.entries[alias] = entry
+    return nil
+}
+
+// 添加公钥
+func (this *BKS) AddKeyPublicKeyWithPassword(
+    alias string,
+    publicKey crypto.PublicKey,
+    password string,
+    certChain [][]byte,
+) error {
+    pubKey, err := MarshalPKCS8PrivateKey(publicKey)
+    if err != nil {
+        return err
     }
+
+    algorithm, err := GetPKCS8PublicKeyAlgorithm(publicKey)
+    if err != nil {
+        return err
+    }
+
+    entry := &bksKeyEntry{}
+    entry.keyType = bksKeyTypePublic
+    entry.format = "X509" // X.509 | X509
+    entry.algorithm = algorithm
+    entry.encoded = pubKey
+
+    sealedEntry := &bksSealedKeyEntry{
+        nested:   entry,
+        password: password,
+    }
+    sealedEntry.WithData(alias, time.Now(), certChain)
+
+    this.entries[alias] = sealedEntry
 
     return nil
 }
 
 // 添加密钥
 // algorithm = "AES"
-func (this *BKS) AddBksKeySecretKey(
+func (this *BKS) AddKeySecret(
+    alias string,
+    secret []byte,
+    algorithm string,
+    certChain [][]byte,
+) error {
+    entry := &bksKeyEntry{}
+    entry.keyType = bksKeyTypeSecret
+    entry.format = "RAW"
+    entry.algorithm = algorithm
+    entry.encoded = secret
+
+    entry.WithData(alias, time.Now(), certChain)
+
+    this.entries[alias] = entry
+
+    return nil
+}
+
+// 添加密钥
+// algorithm = "AES"
+func (this *BKS) AddKeySecretWithPassword(
     alias string,
     secret []byte,
     password string,
@@ -113,27 +182,23 @@ func (this *BKS) AddBksKeySecretKey(
     entry.algorithm = algorithm
     entry.encoded = secret
 
-    if password != "" {
-        sealedEntry := &bksSealedKeyEntry{
-            nested:   entry,
-            password: password,
-        }
-        sealedEntry.WithData(alias, time.Now(), certChain)
-
-        this.entries[alias] = sealedEntry
-    } else {
-        entry.alias = alias
-        entry.date = time.Now()
-        entry.certChain = certChain
-
-        this.entries[alias] = entry
+    sealedEntry := &bksSealedKeyEntry{
+        nested:   entry,
+        password: password,
     }
+    sealedEntry.WithData(alias, time.Now(), certChain)
+
+    this.entries[alias] = sealedEntry
 
     return nil
 }
 
 // 添加证书
-func (this *BKS) AddBksSecret(alias string, secretData []byte, certChain [][]byte) error {
+func (this *BKS) AddSecret(
+    alias string,
+    secretData []byte,
+    certChain [][]byte,
+) error {
     entry := &bksSecretKeyEntry{}
     entry.secret = secretData
 
@@ -144,7 +209,7 @@ func (this *BKS) AddBksSecret(alias string, secretData []byte, certChain [][]byt
     return nil
 }
 
-func (this *BKS) marshalBksCert(w io.Writer, data *bksTrustedCertEntry) error {
+func (this *BKS) marshalCert(w io.Writer, data *bksTrustedCertEntry) error {
     var err error
 
     err = writeUTF(w, data.certType)
@@ -160,7 +225,7 @@ func (this *BKS) marshalBksCert(w io.Writer, data *bksTrustedCertEntry) error {
     return nil
 }
 
-func (this *BKS) marshalBksKey(w io.Writer, data *bksKeyEntry) error {
+func (this *BKS) marshalKey(w io.Writer, data *bksKeyEntry) error {
     var err error
 
     err = writeUint8(w, uint8(data.keyType))
@@ -186,7 +251,7 @@ func (this *BKS) marshalBksKey(w io.Writer, data *bksKeyEntry) error {
     return nil
 }
 
-func (this *BKS) marshalBksSecret(w io.Writer, data *bksSecretKeyEntry) error {
+func (this *BKS) marshalSecret(w io.Writer, data *bksSecretKeyEntry) error {
     var err error
 
     err = writeBytes(w, data.secret)
@@ -197,7 +262,7 @@ func (this *BKS) marshalBksSecret(w io.Writer, data *bksSecretKeyEntry) error {
     return nil
 }
 
-func (this *BKS) marshalBksSealed(w io.Writer, data *bksSealedKeyEntry) error {
+func (this *BKS) marshalSealed(w io.Writer, data *bksSealedKeyEntry) error {
     var err error
 
     encrypted, err := data.Encrypt()
@@ -214,7 +279,7 @@ func (this *BKS) marshalBksSealed(w io.Writer, data *bksSealedKeyEntry) error {
 }
 
 // 包装
-func (this *BKS) marshalBksEntryData(
+func (this *BKS) marshalEntryData(
     w io.Writer,
     tag int,
     entry BksEntry,
@@ -246,7 +311,7 @@ func (this *BKS) marshalBksEntryData(
     }
 
     for i := 0; i < chainLength; i++ {
-        err := this.marshalBksCert(w, &bksTrustedCertEntry{
+        err := this.marshalCert(w, &bksTrustedCertEntry{
             cert: certChain[i],
             certType: "X509",
         })
@@ -259,39 +324,39 @@ func (this *BKS) marshalBksEntryData(
 }
 
 // 包装
-func (this *BKS) marshalBksEntries(w io.Writer) error {
+func (this *BKS) marshalEntries(w io.Writer) error {
     var err error
 
     for _, entry := range this.entries {
         switch e := entry.(type) {
             case *bksTrustedCertEntry:
-                err = this.marshalBksEntryData(w, 1, e)
+                err = this.marshalEntryData(w, bksEntryTypeCert, e)
                 if err != nil {
                     return err
                 }
 
-                err = this.marshalBksCert(w, e)
+                err = this.marshalCert(w, e)
             case *bksKeyEntry:
-                err = this.marshalBksEntryData(w, 2, e)
+                err = this.marshalEntryData(w, bksEntryTypeKey, e)
                 if err != nil {
                     return err
                 }
 
-                err = this.marshalBksKey(w, e)
+                err = this.marshalKey(w, e)
             case *bksSecretKeyEntry:
-                err = this.marshalBksEntryData(w, 3, e)
+                err = this.marshalEntryData(w, bksEntryTypeSecret, e)
                 if err != nil {
                     return err
                 }
 
-                err = this.marshalBksSecret(w, e)
+                err = this.marshalSecret(w, e)
             case *bksSealedKeyEntry:
-                err = this.marshalBksEntryData(w, 4, e)
+                err = this.marshalEntryData(w, bksEntryTypeSealed, e)
                 if err != nil {
                     return err
                 }
 
-                err = this.marshalBksSealed(w, e)
+                err = this.marshalSealed(w, e)
         }
     }
 
@@ -308,7 +373,7 @@ type BKSOpts struct {
 // 默认配置
 var BKSDefaultOpts = BKSOpts{
     Version:        1,
-    SaltSize:       16,
+    SaltSize:       20,
     IterationCount: 10000,
 }
 
@@ -350,7 +415,7 @@ func (this *BKS) Marshal(password string, opts ...BKSOpts) ([]byte, error) {
     }
 
     // 编码数据
-    this.marshalBksEntries(buf)
+    this.marshalEntries(buf)
 
     // 生成签名
     hmacFn := sha1.New

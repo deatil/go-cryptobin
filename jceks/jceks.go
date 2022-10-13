@@ -7,36 +7,21 @@ import (
 
 // 编码
 type JCEKS struct {
-    // 私钥加证书
-    privateKeys  map[string]privateKeyEntry
-
-    // 证书
-    trustedCerts map[string]trustedCertEntry
-
-    // 密钥
-    secretKeys   map[string]secretKeyEntry
-
-    // 数量统计
-    count        int
-
     // 解析后数据
-    entries      map[string]interface{}
+    entries      map[string]any
 }
 
 // 构造函数
 func NewJCEKS() *JCEKS {
     return &JCEKS{
-        privateKeys:  make(map[string]privateKeyEntry),
-        trustedCerts: make(map[string]trustedCertEntry),
-        secretKeys:   make(map[string]secretKeyEntry),
-        count:        0,
+        entries: make(map[string]any),
     }
 }
 
 // LoadJceksFromReader loads the key store from the specified file.
 func LoadJceksFromReader(reader io.Reader, password string) (*JCEKS, error) {
     ks := &JCEKS{
-        entries: make(map[string]interface{}),
+        entries: make(map[string]any),
     }
 
     err := ks.Parse(reader, password)
@@ -51,7 +36,7 @@ func LoadJceksFromReader(reader io.Reader, password string) (*JCEKS, error) {
 func LoadJceksFromBytes(data []byte, password string) (*JCEKS, error) {
     buf := bytes.NewReader(data)
 
-    return LoadFromReader(buf, password)
+    return LoadJceksFromReader(buf, password)
 }
 
 // 别名

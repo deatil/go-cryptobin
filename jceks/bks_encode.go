@@ -25,7 +25,11 @@ func (this *BKS) AddCert(alias string, certData []byte, certChain [][]byte) erro
 }
 
 // 添加私钥
-func (this *BKS) AddKeyPrivateKey(alias string, privateKey crypto.PrivateKey, certChain [][]byte) error {
+func (this *BKS) AddKeyPrivate(
+    alias string,
+    privateKey crypto.PrivateKey,
+    certChain [][]byte,
+) error {
     priKey, err := MarshalPKCS8PrivateKey(privateKey)
     if err != nil {
         return err
@@ -50,7 +54,7 @@ func (this *BKS) AddKeyPrivateKey(alias string, privateKey crypto.PrivateKey, ce
 }
 
 // 添加私钥
-func (this *BKS) AddKeyPrivateKeyWithPassword(
+func (this *BKS) AddKeyPrivateWithPassword(
     alias string,
     privateKey crypto.PrivateKey,
     password string,
@@ -84,12 +88,12 @@ func (this *BKS) AddKeyPrivateKeyWithPassword(
 }
 
 // 添加公钥
-func (this *BKS) AddKeyPublicKey(
+func (this *BKS) AddKeyPublic(
     alias string,
     publicKey crypto.PublicKey,
     certChain [][]byte,
 ) error {
-    pubKey, err := MarshalPKCS8PrivateKey(publicKey)
+    pubKey, err := MarshalPKCS8PublicKey(publicKey)
     if err != nil {
         return err
     }
@@ -113,13 +117,13 @@ func (this *BKS) AddKeyPublicKey(
 }
 
 // 添加公钥
-func (this *BKS) AddKeyPublicKeyWithPassword(
+func (this *BKS) AddKeyPublicWithPassword(
     alias string,
     publicKey crypto.PublicKey,
     password string,
     certChain [][]byte,
 ) error {
-    pubKey, err := MarshalPKCS8PrivateKey(publicKey)
+    pubKey, err := MarshalPKCS8PublicKey(publicKey)
     if err != nil {
         return err
     }
@@ -360,6 +364,13 @@ func (this *BKS) marshalEntries(w io.Writer) error {
         }
     }
 
+    if err != nil {
+        return err
+    }
+
+    // 添加间隔
+    err = writeUint8(w, uint8(0))
+
     return err
 }
 
@@ -414,8 +425,13 @@ func (this *BKS) Marshal(password string, opts ...BKSOpts) ([]byte, error) {
         return nil, err
     }
 
+    entryBuf := bytes.NewBuffer(nil)
+
     // 编码数据
-    this.marshalEntries(buf)
+    err = this.marshalEntries(entryBuf)
+    if err != nil {
+        return nil, err
+    }
 
     // 生成签名
     hmacFn := sha1.New
@@ -428,8 +444,13 @@ func (this *BKS) Marshal(password string, opts ...BKSOpts) ([]byte, error) {
     hmacKey := derivedHmacKey(password, string(salt), iterationCount, hmacKeySize/8, hmacFn)
 
     hmac := hmac.New(sha1.New, hmacKey)
-    hmac.Write(buf.Bytes())
+    hmac.Write(entryBuf.Bytes())
     computed := hmac.Sum([]byte{})
+
+    _, err = io.Copy(buf, entryBuf)
+    if err != nil {
+        return nil, err
+    }
 
     err = writeOnly(buf, computed)
     if err != nil {

@@ -4,6 +4,7 @@ import (
     "fmt"
     "time"
     "bytes"
+    "errors"
     "crypto"
     "encoding/asn1"
 )
@@ -86,8 +87,8 @@ func (this *bksKeyEntry) TypeString() string {
 }
 
 func (this *bksKeyEntry) Recover() (
-    privateKey crypto.PrivateKey,
-    publicKey crypto.PublicKey,
+    private crypto.PrivateKey,
+    public crypto.PublicKey,
     secret []byte,
     err error,
 ) {
@@ -100,7 +101,7 @@ func (this *bksKeyEntry) Recover() (
                 return
             }
 
-            privateKey, err = ParsePKCS8PrivateKey(this.encoded)
+            private, err = ParsePKCS8PrivateKey(this.encoded)
             return
 
         case bksKeyTypePublic:
@@ -109,7 +110,7 @@ func (this *bksKeyEntry) Recover() (
                 return
             }
 
-            publicKey, err = ParsePKCS8PublicKey(this.encoded)
+            public, err = ParsePKCS8PublicKey(this.encoded)
             return
 
         case bksKeyTypeSecret:
@@ -203,19 +204,19 @@ func (this *bksSealedKeyEntry) Decrypt(password string) error {
 
     salt, err := readBytes(rr)
     if err != nil {
-        return err
+        return errors.New("decrypt EOF")
     }
 
     iterationCount, err := readInt32(rr)
     if err != nil {
-        return err
+        return errors.New("decrypt EOF")
     }
 
     blobLen := len(sealedData) - (len(salt) + 4 + 4)
 
     encryptedBlob, err := readOnly(rr, int32(blobLen))
     if err != nil {
-        return err
+        return errors.New("decrypt EOF")
     }
 
     params, err := asn1.Marshal(pbeParam{
@@ -223,12 +224,12 @@ func (this *bksSealedKeyEntry) Decrypt(password string) error {
         IterationCount: int(iterationCount),
     })
     if err != nil {
-        return err
+        return errors.New("decrypt marshal error")
     }
 
     decrypted, err := CipherSHA1And3DESForBKS.Decrypt([]byte(password), params, encryptedBlob)
     if err != nil {
-        return err
+        return errors.New("decrypt EOF")
     }
 
     bks := &BKS{}
@@ -237,7 +238,7 @@ func (this *bksSealedKeyEntry) Decrypt(password string) error {
     if err != nil {
         this.nested = &bksKeyEntry{}
 
-        return err
+        return errors.New("decrypt EOF")
     }
 
     this.nested = keyEntry

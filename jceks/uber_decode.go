@@ -9,12 +9,7 @@ import (
 )
 
 // 解析
-func (this *UBER) Parse(data []byte, password string, tryDecryptKey ...bool) error {
-    tryDecryptKeys := true
-    if len(tryDecryptKey) > 0 {
-        tryDecryptKeys = tryDecryptKey[0]
-    }
-
+func (this *UBER) Parse(data []byte, password string) error {
     r := bytes.NewReader(data)
 
     version, err := readUint32(r)
@@ -72,7 +67,7 @@ func (this *UBER) Parse(data []byte, password string, tryDecryptKey ...bool) err
 
     rr := bytes.NewReader(uberStore)
 
-    err = this.loadEntries(rr, password, tryDecryptKeys)
+    err = this.loadEntries(rr, password)
     if err != nil {
         return err
     }

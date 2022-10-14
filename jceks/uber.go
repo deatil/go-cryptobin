@@ -20,8 +20,8 @@ func NewUBER() *UBER {
     return uber
 }
 
-// LoadUber loads the key store from the bytes data.
-func LoadUber(data []byte, password string) (*UBER, error) {
+// LoadUberFromBytes loads the key store from the bytes data.
+func LoadUberFromBytes(data []byte, password string) (*UBER, error) {
     uber := &UBER{
         BKS{
             entries: make(map[string]any),
@@ -37,4 +37,5 @@ func LoadUber(data []byte, password string) (*UBER, error) {
 }
 
 // 别名
+var LoadUber      = LoadUberFromBytes
 var NewUberEncode = NewUBER

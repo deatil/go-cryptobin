@@ -16,12 +16,12 @@ import (
 func (this *BKS) readCert(r io.Reader) (*bksTrustedCertEntry, error) {
     certType, err := readUTF(r)
     if err != nil {
-        return nil, err
+        return nil, errors.New("readCert EOF")
     }
 
     certData, err := readBytes(r)
     if err != nil {
-        return nil, err
+        return nil, errors.New("readCert EOF")
     }
 
     entry := &bksTrustedCertEntry{}
@@ -34,22 +34,22 @@ func (this *BKS) readCert(r io.Reader) (*bksTrustedCertEntry, error) {
 func (this *BKS) readKey(r io.Reader) (*bksKeyEntry, error) {
     keyType, err := readUint8(r)
     if err != nil {
-        return nil, err
+        return nil, errors.New("readKey EOF")
     }
 
     keyFormat, err := readUTF(r)
     if err != nil {
-        return nil, err
+        return nil, errors.New("readKey EOF")
     }
 
     keyAlgorithm, err := readUTF(r)
     if err != nil {
-        return nil, err
+        return nil, errors.New("readKey EOF")
     }
 
     keyEnc, err := readBytes(r)
     if err != nil {
-        return nil, err
+        return nil, errors.New("readKey EOF")
     }
 
     entry := &bksKeyEntry{}
@@ -64,7 +64,7 @@ func (this *BKS) readKey(r io.Reader) (*bksKeyEntry, error) {
 func (this *BKS) readSecret(r io.Reader) (*bksSecretKeyEntry, error) {
     secretData, err := readBytes(r)
     if err != nil {
-        return nil, err
+        return nil, errors.New("readSecret EOF")
     }
 
     entry := &bksSecretKeyEntry{}
@@ -77,7 +77,7 @@ func (this *BKS) readSecret(r io.Reader) (*bksSecretKeyEntry, error) {
 func (this *BKS) readSealed(r io.Reader) (*bksSealedKeyEntry, error) {
     sealedData, err := readBytes(r)
     if err != nil {
-        return nil, err
+        return nil, errors.New("readSealed EOF")
     }
 
     entry := &bksSealedKeyEntry{}
@@ -87,11 +87,11 @@ func (this *BKS) readSealed(r io.Reader) (*bksSealedKeyEntry, error) {
 }
 
 // 解析
-func (this *BKS) loadEntries(r io.Reader, password string, tryDecryptKeys bool) error {
+func (this *BKS) loadEntries(r io.Reader, password string) error {
     for {
         tag, err := readUint8(r)
         if err != nil {
-            return err
+            return errors.New("load EOF")
         }
 
         if int(tag) == 0 {
@@ -100,24 +100,24 @@ func (this *BKS) loadEntries(r io.Reader, password string, tryDecryptKeys bool) 
 
         alias, err := readUTF(r)
         if err != nil {
-            return err
+            return errors.New("load EOF")
         }
 
         date, err := readDate(r)
         if err != nil {
-            return err
+            return errors.New("load EOF")
         }
 
         chainLength, err := readInt32(r)
         if err != nil {
-            return err
+            return errors.New("load EOF")
         }
 
         certChain := make([][]byte, 0)
         for i := 0; i < int(chainLength); i++ {
             entry, err := this.readCert(r)
             if err != nil {
-                return err
+                return errors.New("load EOF")
             }
 
             certChain = append(certChain, entry.cert)
@@ -134,18 +134,14 @@ func (this *BKS) loadEntries(r io.Reader, password string, tryDecryptKeys bool) 
             case bksEntryTypeSealed:
                 entry, err = this.readSealed(r)
             default:
-                return fmt.Errorf("Unsupported BKS keystore type: %d", tag)
+                return fmt.Errorf("Unsupported keystore type: %d", tag)
         }
 
         if err != nil {
-            return fmt.Errorf("BKS keystore type: %d, err: %s", tag, err.Error())
+            return fmt.Errorf("Keystore type: %d, err: %s", tag, err.Error())
         }
 
         entry.WithData(alias, date, certChain)
-
-        if tryDecryptKeys {
-            entry.Decrypt(password)
-        }
 
         if isInArray[any](alias, this.entries) {
             return fmt.Errorf("Found duplicate alias '%s'", alias)
@@ -158,15 +154,10 @@ func (this *BKS) loadEntries(r io.Reader, password string, tryDecryptKeys bool) 
 }
 
 // 解析
-func (this *BKS) Parse(r io.Reader, password string, tryDecryptKey ...bool) error {
-    tryDecryptKeys := true
-    if len(tryDecryptKey) > 0 {
-        tryDecryptKeys = tryDecryptKey[0]
-    }
-
+func (this *BKS) Parse(r io.Reader, password string) error {
     version, err := readUint32(r)
     if err != nil {
-        return err
+        return errors.New("parse EOF")
     }
 
     if version != BksVersionV1 && version != BksVersionV2 {
@@ -178,12 +169,12 @@ func (this *BKS) Parse(r io.Reader, password string, tryDecryptKey ...bool) erro
 
     salt, err := readBytes(r)
     if err != nil {
-        return err
+        return errors.New("parse EOF")
     }
 
     iterationCount, err := readInt32(r)
     if err != nil {
-        return err
+        return errors.New("parse EOF")
     }
 
     hmacFn := sha1.New
@@ -198,7 +189,7 @@ func (this *BKS) Parse(r io.Reader, password string, tryDecryptKey ...bool) erro
 
     r = io.TeeReader(r, hmac)
 
-    err = this.loadEntries(r, password, tryDecryptKeys)
+    err = this.loadEntries(r, password)
     if err != nil {
         return err
     }
@@ -208,7 +199,7 @@ func (this *BKS) Parse(r io.Reader, password string, tryDecryptKey ...bool) erro
 
     actual, err := readOnly(r, int32(computedLen))
     if err != nil {
-        return err
+        return errors.New("parse EOF")
     }
 
     if subtle.ConstantTimeCompare(computed, actual) != 1 {
@@ -216,6 +207,48 @@ func (this *BKS) Parse(r io.Reader, password string, tryDecryptKey ...bool) erro
     }
 
     return nil
+}
+
+// GetKeyPrivate
+func (this *BKS) GetKeyPrivate(alias string) (private crypto.PrivateKey, err error) {
+    private, _, _, err = this.GetKey(alias)
+
+    return
+}
+
+// GetKeyPrivateWithPassword
+func (this *BKS) GetKeyPrivateWithPassword(alias string, password string) (private crypto.PrivateKey, err error) {
+    private, _, _, err = this.GetSealedKey(alias, password)
+
+    return
+}
+
+// GetKeyPublic
+func (this *BKS) GetKeyPublic(alias string) (public crypto.PublicKey, err error) {
+    _, public, _, err = this.GetKey(alias)
+
+    return
+}
+
+// GetKeyPublicWithPassword
+func (this *BKS) GetKeyPublicWithPassword(alias string, password string) (public crypto.PublicKey, err error) {
+    _, public, _, err = this.GetSealedKey(alias, password)
+
+    return
+}
+
+// GetKeySecret
+func (this *BKS) GetKeySecret(alias string) (secret []byte, err error) {
+    _, _, secret, err = this.GetKey(alias)
+
+    return
+}
+
+// GetKeySecretWithPassword
+func (this *BKS) GetKeySecretWithPassword(alias string, password string) (secret []byte, err error) {
+    _, _, secret, err = this.GetSealedKey(alias, password)
+
+    return
 }
 
 // GetKeyTypeString
@@ -234,10 +267,10 @@ func (this *BKS) GetKeyType(alias string) (keyType string, err error) {
     return
 }
 
-// GetKeys
+// GetKey
 func (this *BKS) GetKey(alias string) (
-    privateKey crypto.PrivateKey,
-    publicKey crypto.PublicKey,
+    private crypto.PrivateKey,
+    public crypto.PublicKey,
     secret []byte,
     err error,
 ) {
@@ -249,7 +282,7 @@ func (this *BKS) GetKey(alias string) (
 
     switch t := entry.(type) {
         case *bksKeyEntry:
-            privateKey, publicKey, secret, err = t.Recover()
+            private, public, secret, err = t.Recover()
             if err != nil {
                 return
             }
@@ -258,7 +291,7 @@ func (this *BKS) GetKey(alias string) (
     return
 }
 
-// GetCertTypeString
+// GetCertType
 func (this *BKS) GetCertType(alias string) (certType string, err error) {
     entry, ok := this.entries[alias]
     if !ok {
@@ -288,9 +321,25 @@ func (this *BKS) GetCert(alias string) (
     switch t := entry.(type) {
         case *bksTrustedCertEntry:
             cert, err = x509.ParseCertificate(t.cert)
-            if err != nil {
-                return
-            }
+    }
+
+    return
+}
+
+// GetCertBytes
+func (this *BKS) GetCertBytes(alias string) (
+    cert []byte,
+    err error,
+) {
+    entry, ok := this.entries[alias]
+    if !ok {
+        err = errors.New("no data")
+        return
+    }
+
+    switch t := entry.(type) {
+        case *bksTrustedCertEntry:
+            cert = t.cert
     }
 
     return
@@ -325,7 +374,10 @@ func (this *BKS) GetSealedKeyType(alias string, password string) (keyType string
 
     switch t := entry.(type) {
         case *bksSealedKeyEntry:
-            t.Decrypt(password)
+            err = t.Decrypt(password)
+            if err != nil {
+                return
+            }
 
             keyType = t.nested.TypeString()
     }
@@ -333,10 +385,10 @@ func (this *BKS) GetSealedKeyType(alias string, password string) (keyType string
     return
 }
 
-// GetSecretKey
+// GetSealedKey
 func (this *BKS) GetSealedKey(alias string, password string) (
-    privateKey crypto.PrivateKey,
-    publicKey crypto.PublicKey,
+    private crypto.PrivateKey,
+    public crypto.PublicKey,
     secret []byte,
     err error,
 ) {
@@ -348,12 +400,12 @@ func (this *BKS) GetSealedKey(alias string, password string) (
 
     switch t := entry.(type) {
         case *bksSealedKeyEntry:
-            t.Decrypt(password)
-
-            privateKey, publicKey, secret, err = t.nested.Recover()
+            err = t.Decrypt(password)
             if err != nil {
                 return
             }
+
+            private, public, secret, err = t.nested.Recover()
     }
 
     return
@@ -370,6 +422,22 @@ func (this *BKS) GetCertChain(alias string) (certChain []*x509.Certificate, err 
     switch t := entry.(type) {
         case BksDataEntry:
             certChain, err = parseCertChain(t.GetCertChain())
+    }
+
+    return
+}
+
+// GetCertChainBytes
+func (this *BKS) GetCertChainBytes(alias string) (certChain [][]byte, err error) {
+    entry, ok := this.entries[alias]
+    if !ok {
+        err = errors.New("no data")
+        return
+    }
+
+    switch t := entry.(type) {
+        case BksDataEntry:
+            certChain = t.GetCertChain()
     }
 
     return

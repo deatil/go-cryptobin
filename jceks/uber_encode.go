@@ -32,7 +32,9 @@ func (this *UBER) Marshal(password string, opts ...UBEROpts) ([]byte, error) {
 
     // 原始数据
     entryBuf := bytes.NewBuffer(nil)
+
     this.marshalEntries(entryBuf)
+
     entryData := entryBuf.Bytes()
 
     h := sha1.New()

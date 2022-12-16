@@ -41,21 +41,15 @@ func (this Rsa) FromPrivateKeyWithPassword(key []byte, password string) Rsa {
 
 // 公钥
 func (this Rsa) FromPublicKey(key []byte) Rsa {
-    publicKey, err := this.ParsePublicKeyFromPEM(key)
+    var publicKey *rsa.PublicKey
+    var err error
+
+    publicKey, err = this.ParsePKCS1PublicKeyFromPEM(key)
     if err != nil {
-        return this.AppendError(err)
-    }
-
-    this.publicKey = publicKey
-
-    return this
-}
-
-// PKCS1 公钥
-func (this Rsa) FromPKCS1PublicKey(key []byte) Rsa {
-    publicKey, err := this.ParsePKCS1PublicKeyFromPEM(key)
-    if err != nil {
-        return this.AppendError(err)
+        publicKey, err = this.ParsePKCS8PublicKeyFromPEM(key)
+        if err != nil {
+            return this.AppendError(err)
+        }
     }
 
     this.publicKey = publicKey
@@ -120,6 +114,18 @@ func (this Rsa) FromPKCS1PrivateKeyWithPassword(key []byte, password string) Rsa
     return this
 }
 
+// PKCS1 公钥
+func (this Rsa) FromPKCS1PublicKey(key []byte) Rsa {
+    publicKey, err := this.ParsePKCS1PublicKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = publicKey
+
+    return this
+}
+
 // Pkcs8
 func (this Rsa) FromPKCS8PrivateKey(key []byte) Rsa {
     privateKey, err := this.ParsePrivateKeyFromPEM(key)
@@ -140,6 +146,18 @@ func (this Rsa) FromPKCS8PrivateKeyWithPassword(key []byte, password string) Rsa
     }
 
     this.privateKey = privateKey
+
+    return this
+}
+
+// PKCS8 公钥
+func (this Rsa) FromPKCS8PublicKey(key []byte) Rsa {
+    publicKey, err := this.ParsePKCS8PublicKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = publicKey
 
     return this
 }

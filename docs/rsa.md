@@ -30,7 +30,8 @@ func main() {
         // CreatePKCS8PrivateKeyWithPassword("123", "AES256CBC", "SHA256").
         ToKeyString()
     objPubKey := obj.
-        CreatePublicKey().
+        CreatePKCS1PublicKey().
+        // CreatePKCS8PublicKey().
         ToKeyString()
     fs.Put("./runtime/key/rsa", objPriKey)
     fs.Put("./runtime/key/rsa.pub", objPubKey)
@@ -75,7 +76,8 @@ func main() {
         }).
         ToKeyString()
     objPubKey := obj.
-        CreatePublicKey().
+        CreatePKCS1PublicKey().
+        // CreatePKCS8PublicKey().
         ToKeyString()
     fs.Put("./runtime/key/rsa_pkcs8_en11", objPriKey)
     fs.Put("./runtime/key/rsa_pkcs8_en11.pub", objPubKey)
@@ -146,7 +148,7 @@ func main() {
         CreatePKCS1PrivateKey().
         ToKeyString()
     rsaPubKey22 := rsa22.
-        CreatePublicKey().
+        CreatePKCS1PublicKey().
         ToKeyString()
 
     // =====

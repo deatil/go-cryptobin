@@ -79,7 +79,7 @@ func (this Data) GetCreationDate() int64 {
 
 // 获取格式化后的创建时间
 func (this Data) GetCreationDateTime(tz ...string) time.Time {
-    timezone := "UTC"
+    timezone := "Local"
     if len(tz) > 0 {
         timezone = tz[0]
     }

@@ -284,3 +284,7 @@ func (this *Config) String() string {
 
     return string(data)
 }
+
+func (this *Config) Reset() {
+    this.data = make(map[string]any)
+}

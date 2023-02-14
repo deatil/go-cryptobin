@@ -60,6 +60,13 @@ func (this Cryptobin) WithConfig(config *cryptobin_tool.Config) Cryptobin {
     return this
 }
 
+// 设置配置
+func (this Cryptobin) SetConfig(data map[string]any) Cryptobin {
+    this.config.WithData(data)
+
+    return this
+}
+
 // 设置一个配置
 func (this Cryptobin) WithOneConfig(key string, value any) Cryptobin {
     this.config.Set(key, value)

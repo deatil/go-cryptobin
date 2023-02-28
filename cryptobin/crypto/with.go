@@ -61,14 +61,14 @@ func (this Cryptobin) WithConfig(config *cryptobin_tool.Config) Cryptobin {
 }
 
 // 设置配置
-func (this Cryptobin) SetConfig(data map[string]any) Cryptobin {
+func (this Cryptobin) SetConfigMap(data map[string]any) Cryptobin {
     this.config.WithData(data)
 
     return this
 }
 
 // 设置一个配置
-func (this Cryptobin) WithOneConfig(key string, value any) Cryptobin {
+func (this Cryptobin) SetConfig(key string, value any) Cryptobin {
     this.config.Set(key, value)
 
     return this
@@ -77,13 +77,6 @@ func (this Cryptobin) WithOneConfig(key string, value any) Cryptobin {
 // 设置错误
 func (this Cryptobin) WithErrors(errs []error) Cryptobin {
     this.Errors = errs
-
-    return this
-}
-
-// 添加错误
-func (this Cryptobin) AppendError(err ...error) Cryptobin {
-    this.Errors = append(this.Errors, err...)
 
     return this
 }

@@ -2,6 +2,8 @@ package ecdsa
 
 import (
     "testing"
+
+    cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
 var (
@@ -22,8 +24,8 @@ Vu0zCh5hkl/0r9vPzPeqGpHJv3eJw/zF+gZWxn2LvLcKkQTcGutSwVdVRQ==
 )
 
 func Test_SignASN1(t *testing.T) {
-    assertEmpty := assertEmptyT(t)
-    assertError := assertErrorT(t)
+    assertEmpty := cryptobin_test.AssertEmptyT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
 
     data := "test-pass"
     objSign := NewEcdsa().
@@ -36,8 +38,8 @@ func Test_SignASN1(t *testing.T) {
 }
 
 func Test_VerifyASN1(t *testing.T) {
-    assertError := assertErrorT(t)
-    assertBool := assertBoolT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertBoolT(t)
 
     data := "test-pass"
     sig := "MEUCIQDMFy5iaMybaRdfRBTWeHHipBdiOEIW1xK8qA6V3yYq2AIgBQZ+Dffhr822X37nRLKNbbnWH4ioVUCcPpBScoxQpVE="

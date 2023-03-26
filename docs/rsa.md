@@ -20,7 +20,7 @@ func main() {
     obj := cryptobin.
         NewRsa().
         GenerateKey(2048)
-		// GenerateMultiPrimeKey(nprimes int, bits int)
+        // GenerateMultiPrimeKey(nprimes int, bits int)
 
     objPriKey := obj.
         CreatePrivateKey().

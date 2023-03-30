@@ -1,39 +1,49 @@
 package crypto
 
+import (
+    "fmt"
+)
+
 // 加密
 func (this Cryptobin) Encrypt() Cryptobin {
-    guessMultiple := this.CheckGuessMultiple()
-    if guessMultiple {
-        return this.GuessEncrypt()
-    } else {
-        return this.CipherEncrypt()
+    if !UseEncrypt.Has(this.multiple) {
+        err := fmt.Errorf("Cryptobin: Multiple [%s] is error.", this.multiple)
+        return this.AppendError(err)
     }
+
+    // 类型
+    newEncrypt := UseEncrypt.Get(this.multiple)
+
+    dst, err := newEncrypt().Encrypt(this.data, NewConfig(this))
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    // 补码模式
+    this.parsedData = dst
+
+    return this
 }
 
 // 解密
 func (this Cryptobin) Decrypt() Cryptobin {
-    guessMultiple := this.CheckGuessMultiple()
-    if guessMultiple {
-        return this.GuessDecrypt()
-    } else {
-        return this.CipherDecrypt()
+    if !UseEncrypt.Has(this.multiple) {
+        err := fmt.Errorf("Cryptobin: Multiple [%s] is error.", this.multiple)
+        return this.AppendError(err)
     }
-}
 
-// 检测 guess 方式
-func (this Cryptobin) CheckGuessMultiple() bool {
-    switch this.multiple {
-        // 不通用的处理
-        case Chacha20,
-            Chacha20poly1305,
-            Chacha20poly1305X,
-            RC4,
-            Xts:
-            return true
-        // 默认通用
-        default:
-            return false
+    // 类型
+    newEncrypt := UseEncrypt.Get(this.multiple)
+
+    dst, err := newEncrypt().Decrypt(this.data, NewConfig(this))
+    if err != nil {
+        return this.AppendError(err)
     }
+
+    // 补码模式
+    this.parsedData = dst
+
+    return this
 }
 
 // ====================

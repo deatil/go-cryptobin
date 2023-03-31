@@ -12,7 +12,7 @@ func (this ZeroPaddinger) Padding(plainText []byte, blockSize int, opt IOption) 
 }
 
 // Unpadding 补码模式
-func (this ZeroPaddinger) Unpadding(cipherText []byte) []byte {
+func (this ZeroPaddinger) Unpadding(cipherText []byte, opt IOption) []byte {
     return tool.NewPadding().ZeroUnPadding(cipherText)
 }
 
@@ -26,7 +26,7 @@ func (this PKCS5Paddinger) Padding(plainText []byte, blockSize int, opt IOption)
 }
 
 // Unpadding 补码模式
-func (this PKCS5Paddinger) Unpadding(cipherText []byte) []byte {
+func (this PKCS5Paddinger) Unpadding(cipherText []byte, opt IOption) []byte {
     return tool.NewPadding().PKCS5UnPadding(cipherText)
 }
 
@@ -40,7 +40,7 @@ func (this PKCS7Paddinger) Padding(plainText []byte, blockSize int, opt IOption)
 }
 
 // Unpadding 补码模式
-func (this PKCS7Paddinger) Unpadding(cipherText []byte) []byte {
+func (this PKCS7Paddinger) Unpadding(cipherText []byte, opt IOption) []byte {
     return tool.NewPadding().PKCS7UnPadding(cipherText)
 }
 
@@ -54,7 +54,7 @@ func (this X923Paddinger) Padding(plainText []byte, blockSize int, opt IOption) 
 }
 
 // Unpadding 补码模式
-func (this X923Paddinger) Unpadding(cipherText []byte) []byte {
+func (this X923Paddinger) Unpadding(cipherText []byte, opt IOption) []byte {
     return tool.NewPadding().X923UnPadding(cipherText)
 }
 
@@ -68,7 +68,7 @@ func (this ISO10126Paddinger) Padding(plainText []byte, blockSize int, opt IOpti
 }
 
 // Unpadding 补码模式
-func (this ISO10126Paddinger) Unpadding(cipherText []byte) []byte {
+func (this ISO10126Paddinger) Unpadding(cipherText []byte, opt IOption) []byte {
     return tool.NewPadding().ISO10126UnPadding(cipherText)
 }
 
@@ -82,7 +82,7 @@ func (this ISO7816_4Paddinger) Padding(plainText []byte, blockSize int, opt IOpt
 }
 
 // Unpadding 补码模式
-func (this ISO7816_4Paddinger) Unpadding(cipherText []byte) []byte {
+func (this ISO7816_4Paddinger) Unpadding(cipherText []byte, opt IOption) []byte {
     return tool.NewPadding().ISO7816_4UnPadding(cipherText)
 }
 
@@ -96,7 +96,7 @@ func (this ISO97971Paddinger) Padding(plainText []byte, blockSize int, opt IOpti
 }
 
 // Unpadding 补码模式
-func (this ISO97971Paddinger) Unpadding(cipherText []byte) []byte {
+func (this ISO97971Paddinger) Unpadding(cipherText []byte, opt IOption) []byte {
     return tool.NewPadding().ISO97971UnPadding(cipherText)
 }
 
@@ -110,7 +110,7 @@ func (this TBCPaddinger) Padding(plainText []byte, blockSize int, opt IOption) [
 }
 
 // Unpadding 补码模式
-func (this TBCPaddinger) Unpadding(cipherText []byte) []byte {
+func (this TBCPaddinger) Unpadding(cipherText []byte, opt IOption) []byte {
     return tool.NewPadding().TBCUnPadding(cipherText)
 }
 
@@ -129,7 +129,7 @@ func (this PKCS1Paddinger) Padding(plainText []byte, blockSize int, opt IOption)
 }
 
 // Unpadding 补码模式
-func (this PKCS1Paddinger) Unpadding(cipherText []byte) []byte {
+func (this PKCS1Paddinger) Unpadding(cipherText []byte, opt IOption) []byte {
     return tool.NewPadding().PKCS1UnPadding(cipherText)
 }
 
@@ -143,9 +143,11 @@ func (this NoPaddinger) Padding(plainText []byte, blockSize int, opt IOption) []
 }
 
 // Unpadding 补码模式
-func (this NoPaddinger) Unpadding(cipherText []byte) []byte {
+func (this NoPaddinger) Unpadding(cipherText []byte, opt IOption) []byte {
     return cipherText
 }
+
+// ===================
 
 func init() {
     UsePadding.Add(ZeroPadding, func() IPadding {

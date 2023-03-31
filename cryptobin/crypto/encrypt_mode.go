@@ -274,6 +274,8 @@ func (this ModeCCM) Decrypt(data []byte, block cipher.Block, opt IOption) ([]byt
     return dst, err
 }
 
+// ===================
+
 func init() {
     UseMode.Add(ECB, func() IMode {
         return ModeECB{}

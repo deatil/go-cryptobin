@@ -4,17 +4,28 @@ import (
     "fmt"
 )
 
-// 加密
-func (this Cryptobin) Encrypt() Cryptobin {
-    if !UseEncrypt.Has(this.multiple) {
-        err := fmt.Errorf("Cryptobin: Multiple [%s] is error.", this.multiple)
-        return this.AppendError(err)
+// 获取加密解密方式
+func getEncrypt(m Multiple) (IEncrypt, error) {
+    if !UseEncrypt.Has(m) {
+        err := fmt.Errorf("Cryptobin: Multiple [%s] is error.", m)
+        return nil, err
     }
 
     // 类型
-    newEncrypt := UseEncrypt.Get(this.multiple)
+    newEncrypt := UseEncrypt.Get(m)
 
-    dst, err := newEncrypt().Encrypt(this.data, NewConfig(this))
+    return newEncrypt(), nil
+}
+
+// 加密
+func (this Cryptobin) Encrypt() Cryptobin {
+    // 加密解密
+    newEncrypt, err := getEncrypt(this.multiple)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    dst, err := newEncrypt.Encrypt(this.data, NewConfig(this))
     if err != nil {
         return this.AppendError(err)
     }
@@ -27,15 +38,13 @@ func (this Cryptobin) Encrypt() Cryptobin {
 
 // 解密
 func (this Cryptobin) Decrypt() Cryptobin {
-    if !UseEncrypt.Has(this.multiple) {
-        err := fmt.Errorf("Cryptobin: Multiple [%s] is error.", this.multiple)
+    // 加密解密
+    newEncrypt, err := getEncrypt(this.multiple)
+    if err != nil {
         return this.AppendError(err)
     }
 
-    // 类型
-    newEncrypt := UseEncrypt.Get(this.multiple)
-
-    dst, err := newEncrypt().Decrypt(this.data, NewConfig(this))
+    dst, err := newEncrypt.Decrypt(this.data, NewConfig(this))
     if err != nil {
         return this.AppendError(err)
     }

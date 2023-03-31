@@ -24,20 +24,6 @@ import (
     cryptobin_rc5 "github.com/deatil/go-cryptobin/cipher/rc5"
 )
 
-// 获取补码方式
-func getPadding(opt IOption) (IPadding, error) {
-    padding := opt.Padding()
-    if !UsePadding.Has(padding) {
-        err := errors.New(fmt.Sprintf("Cryptobin: the padding %s is not exists.", padding))
-        return nil, err
-    }
-
-    // 补码数据
-    newPadding := UsePadding.Get(padding)
-
-    return newPadding(), nil
-}
-
 // 获取模式方式
 func getMode(opt IOption) (IMode, error) {
     mode := opt.Mode()
@@ -50,6 +36,20 @@ func getMode(opt IOption) (IMode, error) {
     newMode := UseMode.Get(mode)
 
     return newMode(), nil
+}
+
+// 获取补码方式
+func getPadding(opt IOption) (IPadding, error) {
+    padding := opt.Padding()
+    if !UsePadding.Has(padding) {
+        err := errors.New(fmt.Sprintf("Cryptobin: the padding %s is not exists.", padding))
+        return nil, err
+    }
+
+    // 补码数据
+    newPadding := UsePadding.Get(padding)
+
+    return newPadding(), nil
 }
 
 // 加密
@@ -111,7 +111,7 @@ func BlockDecrypt(block cipher.Block, data []byte, opt IOption) ([]byte, error) 
     }
 
     // 去除补码数据
-    dst = newPadding.Unpadding(dst)
+    dst = newPadding.Unpadding(dst, opt)
 
     return dst, nil
 }
@@ -658,7 +658,7 @@ func (this EncryptXts) Encrypt(data []byte, opt IOption) ([]byte, error) {
 
     xc, err := xts.NewCipher(cipherFunc, opt.Key())
     if err != nil {
-        err := fmt.Errorf("Cryptobin: [GuessEncrypt()] xts.NewCipher(),error:%w", err)
+        err := fmt.Errorf("Cryptobin: xts.NewCipher(),error:%w", err)
         return nil, err
     }
 
@@ -715,10 +715,12 @@ func (this EncryptXts) Decrypt(data []byte, opt IOption) ([]byte, error) {
     }
 
     // 解码数据
-    dst = newPadding.Unpadding(dst)
+    dst = newPadding.Unpadding(dst, opt)
 
     return dst, nil
 }
+
+// ===================
 
 func init() {
     UseEncrypt.Add(Aes, func() IEncrypt {
@@ -748,6 +750,9 @@ func init() {
     UseEncrypt.Add(RC2, func() IEncrypt {
         return EncryptRC2{}
     })
+    UseEncrypt.Add(RC4, func() IEncrypt {
+        return EncryptRC4{}
+    })
     UseEncrypt.Add(RC5, func() IEncrypt {
         return EncryptRC5{}
     })
@@ -762,9 +767,6 @@ func init() {
     })
     UseEncrypt.Add(Chacha20poly1305X, func() IEncrypt {
         return EncryptChacha20poly1305X{}
-    })
-    UseEncrypt.Add(RC4, func() IEncrypt {
-        return EncryptRC4{}
     })
     UseEncrypt.Add(Xts, func() IEncrypt {
         return EncryptXts{}

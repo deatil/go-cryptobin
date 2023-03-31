@@ -51,5 +51,5 @@ type IPadding interface {
     Padding([]byte, int, IOption) []byte
 
     // 解密
-    Unpadding([]byte) []byte
+    Unpadding([]byte, IOption) []byte
 }

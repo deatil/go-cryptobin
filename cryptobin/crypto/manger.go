@@ -5,31 +5,39 @@ import (
 )
 
 // 加密解密
-var UseEncrypt = NewEncrypter()
+var UseEncrypt = NewManger[Multiple, IEncrypt]()
+// 模式
+var UseMode = NewManger[Mode, IMode]()
+// 补码
+var UsePadding = NewManger[Padding, IPadding]()
 
 // 构造函数
-func NewEncrypter() *Encrypter {
-    return &Encrypter{
-        data: make(map[Multiple]func() IEncrypt),
+func NewManger[N MangerName, M any]() *Manger[N, M] {
+    return &Manger[N, M]{
+        data: make(map[N]func() M),
     }
 }
 
+type MangerName interface {
+    Multiple | Mode | Padding
+}
+
 /**
- * 加密解密
+ * 管理
  *
- * @create 2023-3-30
+ * @create 2023-3-31
  * @author deatil
  */
-type Encrypter struct {
+type Manger[N MangerName, M any] struct {
     // 锁定
     mu sync.RWMutex
 
     // 数据
-    data map[Multiple]func() IEncrypt
+    data map[N]func() M
 }
 
 // 设置
-func (this *Encrypter) Add(name Multiple, data func() IEncrypt) *Encrypter {
+func (this *Manger[N, M]) Add(name N, data func() M) *Manger[N, M] {
     this.mu.Lock()
     defer this.mu.Unlock()
 
@@ -38,7 +46,7 @@ func (this *Encrypter) Add(name Multiple, data func() IEncrypt) *Encrypter {
     return this
 }
 
-func (this *Encrypter) Has(name Multiple) bool {
+func (this *Manger[N, M]) Has(name N) bool {
     this.mu.RLock()
     defer this.mu.RUnlock()
 
@@ -49,7 +57,7 @@ func (this *Encrypter) Has(name Multiple) bool {
     return false
 }
 
-func (this *Encrypter) Get(name Multiple) func() IEncrypt {
+func (this *Manger[N, M]) Get(name N) func() M {
     this.mu.RLock()
     defer this.mu.RUnlock()
 
@@ -61,7 +69,7 @@ func (this *Encrypter) Get(name Multiple) func() IEncrypt {
 }
 
 // 删除
-func (this *Encrypter) Remove(name Multiple) *Encrypter {
+func (this *Manger[N, M]) Remove(name N) *Manger[N, M] {
     this.mu.Lock()
     defer this.mu.Unlock()
 
@@ -70,8 +78,8 @@ func (this *Encrypter) Remove(name Multiple) *Encrypter {
     return this
 }
 
-func (this *Encrypter) Names() []Multiple {
-    names := make([]Multiple, 0)
+func (this *Manger[N, M]) Names() []N {
+    names := make([]N, 0)
     for name, _ := range this.data {
         names = append(names, name)
     }
@@ -79,6 +87,6 @@ func (this *Encrypter) Names() []Multiple {
     return names
 }
 
-func (this *Encrypter) Len() int {
+func (this *Manger[N, M]) Len() int {
     return len(this.data)
 }

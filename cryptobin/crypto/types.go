@@ -1,42 +1,42 @@
 package crypto
 
 import (
-    "sync"
     "strconv"
 )
 
 // 类型
-var TypeMultiple = NewTypes[Multiple, string](maxMultiple)
+var TypeMultiple = NewTypeSet[Multiple, string](maxMultiple)
+
 // 模式
-var TypeMode = NewTypes[Mode, string](maxMode)
+var TypeMode = NewTypeSet[Mode, string](maxMode)
+
 // 补码
-var TypePadding = NewTypes[Padding, string](maxPadding)
+var TypePadding = NewTypeSet[Padding, string](maxPadding)
 
 // 构造函数
-func NewTypes[N TypesName, D any](max N) *Types[N, D] {
-    return &Types[N, D]{
+func NewTypeSet[N TypeName, D any](max N) *TypeSet[N, D] {
+    return &TypeSet[N, D]{
         max:   max,
-        names: make(map[N]func() D),
+        names: NewDataSet[N, D](),
     }
 }
 
-type TypesName interface {
-    Multiple | Mode | Padding
+// 名称类型
+type TypeName interface {
+    ~uint | ~int
 }
 
-type Types[N TypesName, D any] struct {
-    // 锁定
-    mu sync.RWMutex
-
+// 类型数据
+type TypeSet[N TypeName, D any] struct {
     // 最大值
     max N
 
     // 数据
-    names map[N]func() D
+    names *DataSet[N, D]
 }
 
 // 生成新序列
-func (this *Types[N, D]) Generate() N {
+func (this *TypeSet[N, D]) Generate() N {
     old := this.max
     this.max++
 
@@ -44,49 +44,8 @@ func (this *Types[N, D]) Generate() N {
 }
 
 // 设置
-func (this *Types[N, D]) Add(name N, data func() D) *Types[N, D] {
-    this.mu.Lock()
-    defer this.mu.Unlock()
-
-    this.names[name] = data
-
-    return this
-}
-
-func (this *Types[N, D]) Has(name N) bool {
-    this.mu.RLock()
-    defer this.mu.RUnlock()
-
-    if _, ok := this.names[name]; ok {
-        return true
-    }
-
-    return false
-}
-
-func (this *Types[N, D]) Get(name N) func() D {
-    this.mu.RLock()
-    defer this.mu.RUnlock()
-
-    if data, ok := this.names[name]; ok {
-        return data
-    }
-
-    return nil
-}
-
-// 删除
-func (this *Types[N, D]) Remove(name N) *Types[N, D] {
-    this.mu.Lock()
-    defer this.mu.Unlock()
-
-    delete(this.names, name)
-
-    return this
-}
-
-func (this *Types[N, D]) Len() int {
-    return len(this.names)
+func (this *TypeSet[N, D]) Names() *DataSet[N, D] {
+    return this.names
 }
 
 // ===================
@@ -129,8 +88,8 @@ func (this Multiple) String() string {
         case Xts:
             return "Xts"
         default:
-            if TypeMultiple.Has(this) {
-                return (TypeMultiple.Get(this))()
+            if TypeMultiple.Names().Has(this) {
+                return (TypeMultiple.Names().Get(this))()
             }
 
             return "unknown multiple value " + strconv.Itoa(int(this))
@@ -183,8 +142,8 @@ func (this Mode) String() string {
         case CCM:
             return "CCM"
         default:
-            if TypeMode.Has(this) {
-                return (TypeMode.Get(this))()
+            if TypeMode.Names().Has(this) {
+                return (TypeMode.Names().Get(this))()
             }
 
             return "unknown mode value " + strconv.Itoa(int(this))
@@ -232,8 +191,8 @@ func (this Padding) String() string {
         case PKCS1Padding:
             return "PKCS1Padding"
         default:
-            if TypePadding.Has(this) {
-                return (TypePadding.Get(this))()
+            if TypePadding.Names().Has(this) {
+                return (TypePadding.Names().Get(this))()
             }
 
             return "unknown padding value " + strconv.Itoa(int(this))

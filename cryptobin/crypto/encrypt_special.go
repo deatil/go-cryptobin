@@ -14,10 +14,10 @@ var (
 )
 
 func init() {
-    TypeMultiple.Add(AesCFB, func() string {
+    TypeMultiple.Names().Add(AesCFB, func() string {
         return "AesCFB"
     })
-    TypeMultiple.Add(AesECB, func() string {
+    TypeMultiple.Names().Add(AesECB, func() string {
         return "AesECB"
     })
 }

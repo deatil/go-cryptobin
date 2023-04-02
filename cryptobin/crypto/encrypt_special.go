@@ -76,6 +76,7 @@ func init() {
 }
 
 // 特殊的 AesCFB 组合模式
+// 也可以使用: MultipleBy(AesCFB)
 func (this Cryptobin) AesCFB() Cryptobin {
     this.multiple = AesCFB
 
@@ -155,6 +156,7 @@ func init() {
 }
 
 // 特殊的 AesECB 组合模式
+// 也可以使用: MultipleBy(AesECB)
 func (this Cryptobin) AesECB() Cryptobin {
     this.multiple = AesECB
 

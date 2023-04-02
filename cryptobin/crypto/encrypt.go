@@ -39,7 +39,6 @@ func (this Cryptobin) Encrypt() Cryptobin {
         return this.AppendError(err)
     }
 
-    // 补码模式
     this.parsedData = dst
 
     return this
@@ -58,7 +57,6 @@ func (this Cryptobin) Decrypt() Cryptobin {
         return this.AppendError(err)
     }
 
-    // 补码模式
     this.parsedData = dst
 
     return this

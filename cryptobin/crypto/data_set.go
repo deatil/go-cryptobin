@@ -84,6 +84,15 @@ func (this *DataSet[N, M]) All() map[N]func() M {
     return this.data
 }
 
+func (this *DataSet[N, M]) Clean() {
+    this.mu.Lock()
+    defer this.mu.Unlock()
+
+    for name, _ := range this.data {
+        delete(this.data, name)
+    }
+}
+
 func (this *DataSet[N, M]) Len() int {
     return len(this.data)
 }

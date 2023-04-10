@@ -170,6 +170,21 @@ func ParseSM2RawPrivateKeyWithPassphrase(pemBytes, passphrase []byte) (any, erro
 
 // =============
 
+func ParseSM2PublicKey(in []byte) (out ssh.PublicKey, err error) {
+    algo, in, ok := parseString(in)
+    if !ok {
+        return nil, errors.New("ssh: short read")
+    }
+
+    var rest []byte
+    out, rest, err = parseSM2PubKey(in, string(algo))
+    if len(rest) > 0 {
+        return nil, errors.New("ssh: trailing junk in public key")
+    }
+
+    return out, err
+}
+
 func parseSM2PubKey(in []byte, algo string) (pubKey ssh.PublicKey, rest []byte, err error) {
     switch algo {
         case KeyAlgoSM2:
@@ -195,21 +210,6 @@ func parseString(in []byte) (out, rest []byte, ok bool) {
     ok = true
 
     return
-}
-
-func ParseSM2PublicKey(in []byte) (out ssh.PublicKey, err error) {
-    algo, in, ok := parseString(in)
-    if !ok {
-        return nil, errors.New("ssh: short read")
-    }
-
-    var rest []byte
-    out, rest, err = parseSM2PubKey(in, string(algo))
-    if len(rest) > 0 {
-        return nil, errors.New("ssh: trailing junk in public key")
-    }
-
-    return out, err
 }
 
 func parseSM2AuthorizedKey(in []byte) (out ssh.PublicKey, comment string, err error) {

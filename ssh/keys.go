@@ -39,6 +39,11 @@ func MarshalAuthorizedKeyWithComment(key ssh.PublicKey, comment string) []byte {
     return b.Bytes()
 }
 
+// RSA | DSA | SM2 | ECDSA | SKECDSA | ED25519 | SKEd25519
+// CertAlgoRSAv01 | CertAlgoDSAv01
+// CertAlgoECDSA256v01 | CertAlgoECDSA384v01
+// CertAlgoECDSA521v01 | CertAlgoSKECDSA256v01
+// CertAlgoED25519v01 | CertAlgoSKED25519v01
 func NewPublicKey(key any) (out ssh.PublicKey, err error) {
     switch k := key.(type) {
         case *sm2.PublicKey:

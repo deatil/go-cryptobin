@@ -18,6 +18,31 @@ import (
     "github.com/tjfoc/gmsm/x509"
 )
 
+// 解析方式
+type PubKeyParser = func([]byte) (ssh.PublicKey, []byte, error)
+
+var pubKeyParsers = make(map[string]PubKeyParser)
+
+// 添加解析方式方式
+func AddPubKeyParser(name string, parser PubKeyParser) {
+    pubKeyParsers[name] = parser
+}
+
+// 获取解析方式方式
+func GetPubKeyParser(name string) PubKeyParser {
+    if parser, ok := pubKeyParsers[name]; ok {
+        return parser
+    }
+
+    return nil
+}
+
+func init() {
+    AddPubKeyParser(KeyAlgoSM2, parseSM2)
+}
+
+// =============
+
 func NewSM2PublicKey(key *sm2.PublicKey) ssh.PublicKey {
     return (*sm2PublicKey)(key)
 }
@@ -25,7 +50,7 @@ func NewSM2PublicKey(key *sm2.PublicKey) ssh.PublicKey {
 type sm2PublicKey sm2.PublicKey
 
 func (r *sm2PublicKey) Type() string {
-    return "ssh-sm2"
+    return KeyAlgoSM2
 }
 
 func parseSM2(in []byte) (out ssh.PublicKey, rest []byte, err error) {
@@ -186,9 +211,9 @@ func ParseSM2PublicKey(in []byte) (out ssh.PublicKey, err error) {
 }
 
 func parseSM2PubKey(in []byte, algo string) (pubKey ssh.PublicKey, rest []byte, err error) {
-    switch algo {
-        case KeyAlgoSM2:
-            return parseSM2(in)
+    fn := GetPubKeyParser(algo)
+    if fn != nil {
+        return fn(in)
     }
 
     return nil, nil, fmt.Errorf("ssh: unknown key algorithm: %v", algo)

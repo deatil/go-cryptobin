@@ -83,3 +83,32 @@ func main() {
 }
 
 ~~~
+
+* ssh 生成公钥
+~~~go
+package main
+
+import (
+    "fmt"
+
+    "github.com/deatil/lakego-filesystem/filesystem"
+
+    "github.com/deatil/go-cryptobin/ssh"
+    cryptobin_rsa "github.com/deatil/go-cryptobin/cryptobin/rsa"
+)
+
+func main() {
+    fs := filesystem.New()
+
+    sshRsaPubKey := cryptobin_rsa.New().
+        GenerateKey().
+        GetPublicKey()
+    sshPubKey, _ := ssh.NewPublicKey(sshRsaPubKey)
+    sshAuthorizedKey := ssh.MarshalAuthorizedKeyWithComment(sshPubKey, "abc@email.com")
+
+    fs.Put("./runtime/key/ssh/pub/rsa.pub", string(sshAuthorizedKey))
+
+	fmt.Println("生成公钥成功")
+}
+
+~~~

@@ -31,9 +31,9 @@ func (x *cfb64) XORKeyStream(dst, src []byte) {
 
         out := x.out[:8]
         if x.decrypt {
-            out[7] = src[i]
+            out[0] = src[i]
         } else {
-            out[7] = dst[i]
+            out[0] = dst[i]
         }
 
         copy(x.in[len(x.in)-8:], out)

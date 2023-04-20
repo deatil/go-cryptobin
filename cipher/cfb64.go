@@ -13,6 +13,7 @@ type cfb64 struct {
     decrypt bool
 }
 
+// 每个块都进行异或
 func (x *cfb64) XORKeyStream(dst, src []byte) {
     if len(dst) < len(src) {
         panic("cipher/cfb64: output smaller than input")
@@ -22,21 +23,33 @@ func (x *cfb64) XORKeyStream(dst, src []byte) {
         panic("cipher/cfb64: invalid buffer overlap")
     }
 
-    for i := 0; i < len(src); i++ {
+    bs := 8
+    for i := 0; i < len(src); i += bs {
         x.b.Encrypt(x.out, x.in)
 
-        copy(x.in, x.in[8:])
-
-        dst[i] = src[i] ^ x.out[0]
-
-        out := x.out[:8]
-        if x.decrypt {
-            out[0] = src[i]
-        } else {
-            out[0] = dst[i]
+        end := i + bs
+        if end > len(src) {
+            end = len(src)
         }
 
-        copy(x.in[len(x.in)-8:], out)
+        xorBytes := make([]byte, 0)
+        srcBytes := make([]byte, 0)
+
+        for j := i; j < end; j++ {
+            xorBytes = append(xorBytes, src[j] ^ x.out[j-i])
+            srcBytes = append(srcBytes, src[j])
+        }
+
+        startIn := end - i
+        copy(x.in, x.in[startIn:])
+
+        if x.decrypt {
+            copy(x.in[startIn:], srcBytes)
+        } else {
+            copy(x.in[startIn:], xorBytes)
+        }
+
+        copy(dst[i:end], xorBytes)
     }
 }
 

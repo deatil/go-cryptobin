@@ -71,33 +71,22 @@ func (x *pcbcEncrypter) CryptBlocks(dst, src []byte) {
     }
 
     iv := x.iv
-    prevSrc := make([]byte, len(src))
 
-    i := 0
-    for len(src) > 0 {
-        // n = 1
-        subtle.XORBytes(dst[:x.blockSize], src[:x.blockSize], iv)
+    start := 0
+    end := start + x.blockSize
 
-        if i > 0 {
-            // n > 1
-            subtle.XORBytes(dst[:x.blockSize], dst[:x.blockSize], prevSrc[:x.blockSize])
+    for len(src) > start {
+        if start > 0 {
+            subtle.XORBytes(iv, src[start-x.blockSize:start], iv)
         }
 
-        x.b.Encrypt(dst[:x.blockSize], dst[:x.blockSize])
+        subtle.XORBytes(dst[start:end], src[start:end], iv)
+        x.b.Encrypt(dst[start:end], dst[start:end])
 
-        // P(n-1)
-        copy(prevSrc, src[:x.blockSize])
+        copy(iv, dst[start:end])
 
-        // Cn
-        iv = dst[:x.blockSize]
-
-        // Pn
-        src = src[x.blockSize:]
-
-        // P1 + P2 + ... + Pn
-        dst = dst[x.blockSize:]
-
-        i++
+        start = end
+        end += x.blockSize
     }
 
     copy(x.iv, iv)
@@ -145,50 +134,39 @@ func (x *pcbcDecrypter) CryptBlocks(dst, src []byte) {
     if len(src)%x.blockSize != 0 {
         panic("crypto/cipher: input not full blocks")
     }
+
     if len(dst) < len(src) {
         panic("crypto/cipher: output smaller than input")
     }
+
     if alias.InexactOverlap(dst[:len(src)], src) {
         panic("crypto/cipher: invalid buffer overlap")
     }
+
     if len(src) == 0 {
         return
     }
 
     iv := x.iv
 
-    tmpIv := make([]byte, x.blockSize)
-    prevDst := make([]byte, len(dst))
+    start := 0
+    end := start + x.blockSize
 
-    i := 0
+    for len(src) > start {
+        x.b.Decrypt(dst[start:end], src[start:end])
 
-    for len(src) > 0 {
-        tmpIv = src[:x.blockSize]
-
-        x.b.Decrypt(dst[:x.blockSize], src[:x.blockSize])
-
-        subtle.XORBytes(dst[:x.blockSize], dst[:x.blockSize], iv)
-
-        if i > 0 {
-            subtle.XORBytes(dst[:x.blockSize], dst[:x.blockSize], prevDst[:x.blockSize])
+        if start > 0 {
+            prev := start-x.blockSize
+            subtle.XORBytes(iv, dst[prev:start], src[prev:start])
         }
 
-        // P(n-1)
-        copy(prevDst, dst[:x.blockSize])
+        subtle.XORBytes(dst[start:end], dst[start:end], iv)
 
-        // Cn
-        copy(iv, tmpIv)
-
-        // Pn
-        src = src[x.blockSize:]
-
-        // P1 + P2 + ... + Pn
-        dst = dst[x.blockSize:]
-
-        i++
+        start = end
+        end += x.blockSize
     }
 
-    copy(x.iv, iv)
+    copy(x.iv, src[start-x.blockSize:start])
 }
 
 func (x *pcbcDecrypter) SetIV(iv []byte) {

@@ -358,17 +358,18 @@ func Test_AesPCBCPKCS7Padding(t *testing.T) {
     assert(data, cyptdeStr, "AesPCBCPKCS7Padding")
 
     // 具体数据
-    src := "5bBcL//A5nP2IplHg5cysQ=="
+    src := "3y41ewE+O/VnVNIdRw2fp5HrqLekui64UAyKeZ0D0IH/3qXABrRXcG/Noizyzy5kMUOCwGrXFpTu7YgYakadznidUPENgxV8IPwaHF/G0eFVKScRLWJsGEE0NAqp075ea1ZZDA0jpB6NYs/5Y3T0fMcaXOx3eq7Gbt/trP3fSuPURID8eK8yr2UL9wRK7LV0i4f0AtT3Z/kmO0D6npRmD4m6nXKPck5mE56yRTyNI05f67Ifa7wF97Uceb/JHQwUugIPamE3C+JUVz8B+UHP93A6rU45+tGBpIh/zIKYqKtr3nUGsVzxdxr4MT1ciWws1mef1kzbedLrn7SXLEaptQ=="
     cyptde2 := FromBase64String(src).
         SetKey("dfertf12dfertf12").
         SetIv("dfertf12dfertf12").
         Aes().
-        CBC().
+        PCBC().
         PKCS7Padding().
         Decrypt()
     cyptdeStr2 := cyptde2.ToString()
 
     assertError(cyptde2.Error(), "AesPCBCPKCS7Padding-Decode")
 
-    assert("test-pass", cyptdeStr2, "AesPCBCPKCS7Padding")
+    testdata := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
+    assert(testdata, cyptdeStr2, "AesPCBCPKCS7Padding")
 }

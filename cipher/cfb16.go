@@ -41,7 +41,7 @@ func (x *cfb16) XORKeyStream(dst, src []byte) {
         dstBytes := make([]byte, end-i)
         srcBytes := src[i:end]
 
-        subtle.XORBytes(dstBytes, srcBytes, x.out[0:end-i])
+        subtle.XORBytes(dstBytes, srcBytes, x.out[:])
 
         startIn := end - i
         copy(x.in, x.in[startIn:])

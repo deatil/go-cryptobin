@@ -18,7 +18,6 @@ type pcbc struct {
     b         cipher.Block
     blockSize int
     iv        []byte
-    tmp       []byte
 }
 
 func newPCBC(b cipher.Block, iv []byte) *pcbc {
@@ -26,7 +25,6 @@ func newPCBC(b cipher.Block, iv []byte) *pcbc {
         b:         b,
         blockSize: b.BlockSize(),
         iv:        bytes.Clone(iv),
-        tmp:       make([]byte, b.BlockSize()),
     }
 }
 
@@ -73,7 +71,7 @@ func (x *pcbcEncrypter) CryptBlocks(dst, src []byte) {
     }
 
     iv := x.iv
-    prevSrc := src
+    prevSrc := make([]byte, len(src))
 
     i := 0
     for len(src) > 0 {
@@ -88,7 +86,7 @@ func (x *pcbcEncrypter) CryptBlocks(dst, src []byte) {
         x.b.Encrypt(dst[:x.blockSize], dst[:x.blockSize])
 
         // P(n-1)
-        prevSrc = src
+        copy(prevSrc, src[:x.blockSize])
 
         // Cn
         iv = dst[:x.blockSize]
@@ -158,8 +156,8 @@ func (x *pcbcDecrypter) CryptBlocks(dst, src []byte) {
     }
 
     iv := x.iv
-    tmpIv := x.iv
 
+    tmpIv := make([]byte, x.blockSize)
     prevDst := make([]byte, len(dst))
 
     i := 0
@@ -167,19 +165,19 @@ func (x *pcbcDecrypter) CryptBlocks(dst, src []byte) {
     for len(src) > 0 {
         tmpIv = src[:x.blockSize]
 
-        x.b.Decrypt(src[:x.blockSize], src[:x.blockSize])
+        x.b.Decrypt(dst[:x.blockSize], src[:x.blockSize])
 
-        subtle.XORBytes(dst[:x.blockSize], src[:x.blockSize], iv)
+        subtle.XORBytes(dst[:x.blockSize], dst[:x.blockSize], iv)
 
         if i > 0 {
             subtle.XORBytes(dst[:x.blockSize], dst[:x.blockSize], prevDst[:x.blockSize])
         }
 
         // P(n-1)
-        prevDst = dst
+        copy(prevDst, dst[:x.blockSize])
 
         // Cn
-        iv = tmpIv
+        copy(iv, tmpIv)
 
         // Pn
         src = src[x.blockSize:]

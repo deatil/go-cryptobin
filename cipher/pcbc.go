@@ -76,14 +76,10 @@ func (x *pcbcEncrypter) CryptBlocks(dst, src []byte) {
     end := start + x.blockSize
 
     for len(src) > start {
-        if start > 0 {
-            subtle.XORBytes(iv, src[start-x.blockSize:start], iv)
-        }
-
         subtle.XORBytes(dst[start:end], src[start:end], iv)
         x.b.Encrypt(dst[start:end], dst[start:end])
 
-        copy(iv, dst[start:end])
+        subtle.XORBytes(iv, src[start:end], dst[start:end])
 
         start = end
         end += x.blockSize
@@ -154,13 +150,9 @@ func (x *pcbcDecrypter) CryptBlocks(dst, src []byte) {
 
     for len(src) > start {
         x.b.Decrypt(dst[start:end], src[start:end])
-
-        if start > 0 {
-            prev := start-x.blockSize
-            subtle.XORBytes(iv, dst[prev:start], src[prev:start])
-        }
-
         subtle.XORBytes(dst[start:end], dst[start:end], iv)
+
+        subtle.XORBytes(iv, dst[start:end], src[start:end])
 
         start = end
         end += x.blockSize

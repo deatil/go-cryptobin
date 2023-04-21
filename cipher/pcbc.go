@@ -72,20 +72,13 @@ func (x *pcbcEncrypter) CryptBlocks(dst, src []byte) {
 
     iv := x.iv
 
-    start := 0
-    end := start + x.blockSize
+    bs := x.blockSize
+    for i := 0; i < len(src); i += bs {
+        subtle.XORBytes(dst[i:i+bs], src[i:i+bs], iv)
+        x.b.Encrypt(dst[i:i+bs], dst[i:i+bs])
 
-    for len(src) > start {
-        subtle.XORBytes(dst[start:end], src[start:end], iv)
-        x.b.Encrypt(dst[start:end], dst[start:end])
-
-        subtle.XORBytes(iv, src[start:end], dst[start:end])
-
-        start = end
-        end += x.blockSize
+        subtle.XORBytes(iv, src[i:i+bs], dst[i:i+bs])
     }
-
-    copy(x.iv, iv)
 }
 
 func (x *pcbcEncrypter) SetIV(iv []byte) {
@@ -145,20 +138,13 @@ func (x *pcbcDecrypter) CryptBlocks(dst, src []byte) {
 
     iv := x.iv
 
-    start := 0
-    end := start + x.blockSize
+    bs := x.blockSize
+    for i := 0; i < len(src); i += bs {
+        x.b.Decrypt(dst[i:i+bs], src[i:i+bs])
+        subtle.XORBytes(dst[i:i+bs], dst[i:i+bs], iv)
 
-    for len(src) > start {
-        x.b.Decrypt(dst[start:end], src[start:end])
-        subtle.XORBytes(dst[start:end], dst[start:end], iv)
-
-        subtle.XORBytes(iv, dst[start:end], src[start:end])
-
-        start = end
-        end += x.blockSize
+        subtle.XORBytes(iv, dst[i:i+bs], src[i:i+bs])
     }
-
-    copy(x.iv, src[start-x.blockSize:start])
 }
 
 func (x *pcbcDecrypter) SetIV(iv []byte) {

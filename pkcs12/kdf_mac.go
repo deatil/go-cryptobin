@@ -40,14 +40,14 @@ var (
 )
 
 var (
-    oidSMd2   = asn1.ObjectIdentifier([]int{1, 2, 840, 113549, 2, 2})
-    oidSMd4   = asn1.ObjectIdentifier([]int{1, 2, 840, 113549, 2, 4})
-    oidSMd5   = asn1.ObjectIdentifier([]int{1, 2, 840, 113549, 2, 5})
-    oidSHA1   = asn1.ObjectIdentifier([]int{1, 3, 14, 3, 2, 26})
-    oidSHA224 = asn1.ObjectIdentifier([]int{2, 16, 840, 1, 101, 3, 4, 2, 4})
-    oidSHA256 = asn1.ObjectIdentifier([]int{2, 16, 840, 1, 101, 3, 4, 2, 1})
-    oidSHA384 = asn1.ObjectIdentifier([]int{2, 16, 840, 1, 101, 3, 4, 2, 2})
-    oidSHA512 = asn1.ObjectIdentifier([]int{2, 16, 840, 1, 101, 3, 4, 2, 3})
+    oidSMd2   = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 2}
+    oidSMd4   = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 4}
+    oidSMd5   = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 5}
+    oidSHA1   = asn1.ObjectIdentifier{1, 3, 14, 3, 2, 26}
+    oidSHA224 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 2, 4}
+    oidSHA256 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 2, 1}
+    oidSHA384 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 2, 2}
+    oidSHA512 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 2, 3}
     oidSM3    = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 401}
 )
 
@@ -191,7 +191,7 @@ func (this MacOpts) Compute(message []byte, password []byte) (data KDFParameters
 
     hashSize := h().Size()
 
-    key := cryptobin_pbkdf.Key(sha1.New, hashSize, 64, macSalt, password, this.IterationCount, 3, hashSize)
+    key := cryptobin_pbkdf.Key(h, hashSize, 64, macSalt, password, this.IterationCount, 3, hashSize)
 
     mac := hmac.New(h, key)
     mac.Write(message)

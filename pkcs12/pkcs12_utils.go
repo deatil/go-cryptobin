@@ -5,19 +5,12 @@ import (
     "errors"
     "encoding/asn1"
     "crypto/x509/pkix"
-
-    cryptobin_ber "github.com/deatil/go-cryptobin/tool/ber"
 )
 
 // unmarshal calls asn1.Unmarshal, but also returns an error if there is any
 // trailing data after unmarshaling.
 func unmarshal(in []byte, out any) error {
-    der, err := cryptobin_ber.Ber2der(in)
-    if err != nil {
-        return err
-    }
-
-    trailing, err := asn1.Unmarshal(der, out)
+    trailing, err := asn1.Unmarshal(in, out)
     if err != nil {
         return err
     }

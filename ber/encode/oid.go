@@ -34,11 +34,12 @@ func NewObjectIdentifier(root uint8, node []uint64) (*ObjectIdentifier, error) {
     }
 
     switch root {
-    case 0, 1:
-        if node[0] >= 40 {
-            return nil, fmt.Errorf("invalid node")
-        }
+        case 0, 1:
+            if node[0] >= 40 {
+                return nil, fmt.Errorf("invalid node")
+            }
     }
+
     return &ObjectIdentifier{root, node}, nil
 }
 
@@ -50,6 +51,7 @@ func (o *ObjectIdentifier) ToString() string {
             oidStr += "."
         }
     }
+
     return oidStr
 }
 

@@ -1,15 +1,5 @@
 package decode
 
-// ASN.1 is a syntax for specifying abstract objects and BER, DER, PER, XER etc
-// are different encoding formats for those objects. Here, we'll be dealing
-// with DER, the Distinguished Encoding Rules. DER is used in X.509 because
-// it's fast to parse and, unlike BER, has a unique encoding for every object.
-// When calculating hashes over objects, it's important that the resulting
-// bytes be the same at both ends and DER removes this margin of error.
-//
-// ASN.1 is very complex and this package doesn't attempt to implement
-// everything by any means.
-
 import (
     "errors"
     "fmt"

@@ -4,9 +4,9 @@ import "reflect"
 
 func encodeInt(value reflect.Value) ([]byte, error) {
     switch value.Kind() {
-    case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-    default:
-        return nil, invalidTypeError("integer", value)
+        case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+        default:
+            return nil, invalidTypeError("integer", value)
     }
 
     n := value.Int()

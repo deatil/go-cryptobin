@@ -4,6 +4,8 @@ package pkcs8
 var CipherMap = map[string]Cipher{
     "DESCBC":     DESCBC,
     "DESEDE3CBC": DESEDE3CBC,
+    "RC2CBC":     RC2CBC,
+    "RC5CBC":     RC5CBC,
 
     "AES128ECB":  AES128ECB,
     "AES128CBC":  AES128CBC,

@@ -45,9 +45,6 @@ func (this CipherBlockCBC) OID() asn1.ObjectIdentifier {
 
 // 加密
 func (this CipherBlockCBC) Encrypt(password, plaintext []byte) ([]byte, []byte, error) {
-    // 加密数据补码
-    plaintext = pkcs7Padding(plaintext, this.blockSize)
-
     salt, err := genRandom(this.saltSize)
     if err != nil {
         return nil, nil, errors.New(err.Error() + " failed to generate salt")
@@ -59,6 +56,9 @@ func (this CipherBlockCBC) Encrypt(password, plaintext []byte) ([]byte, []byte, 
     if err != nil {
         return nil, nil, errors.New("pkcs8:" + err.Error() + " failed to create cipher")
     }
+
+    // 加密数据补码
+    plaintext = pkcs7Padding(plaintext, this.blockSize)
 
     // 需要保存的加密数据
     encrypted := make([]byte, len(plaintext))

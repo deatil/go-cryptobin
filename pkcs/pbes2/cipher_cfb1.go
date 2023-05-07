@@ -1,4 +1,4 @@
-package encrypt
+package pbes2
 
 import (
     "errors"
@@ -66,7 +66,7 @@ func (this CipherCFB1) Decrypt(key, params, ciphertext []byte) ([]byte, error) {
     // 解析出 iv
     var iv cfb1Params
     if _, err := asn1.Unmarshal(params, &iv); err != nil {
-        return nil, errors.New("pkcs7: invalid iv parameters")
+        return nil, errors.New("pkcs8: invalid iv parameters")
     }
 
     plaintext := make([]byte, len(ciphertext))
@@ -80,10 +80,10 @@ func (this CipherCFB1) Decrypt(key, params, ciphertext []byte) ([]byte, error) {
     blockSize := block.BlockSize()
     dlen := len(ciphertext)
     if dlen == 0 || dlen%blockSize != 0 {
-        return nil, errors.New("pkcs7: invalid padding")
+        return nil, errors.New("pkcs8: invalid padding")
     }
 
-    mode := cryptobin_cipher.NewCFB1Encrypter(block, iv)
+    mode := cryptobin_cipher.NewCFB1Decrypter(block, iv)
     mode.XORKeyStream(plaintext, ciphertext)
 
     // 解析加密数据

@@ -97,12 +97,11 @@ func DecryptPEMBlock(block *pem.Block, password []byte) ([]byte, error) {
 
 func parseEncryptionScheme(encryptionScheme pkix.AlgorithmIdentifier) (PEMCipher, []byte, error) {
     oid := encryptionScheme.Algorithm.String()
-    cipher, ok := ciphers[oid]
-    if !ok {
+
+    newCipher, err := GetCipher(oid)
+    if err != nil {
         return nil, nil, fmt.Errorf("pkcs8: unsupported cipher (OID: %s)", oid)
     }
-
-    newCipher := cipher()
 
     params := encryptionScheme.Parameters.FullBytes
 

@@ -1,4 +1,4 @@
-package encrypt
+package pbes2
 
 import (
     "errors"
@@ -105,7 +105,7 @@ func (this CipherRC5CBC) Decrypt(key, params, ciphertext []byte) ([]byte, error)
 }
 
 // 设置 WordSize
-func (this CipherRC5CBC) WithSaltSize(wordSize uint) CipherRC5CBC {
+func (this CipherRC5CBC) WithWordSize(wordSize uint) CipherRC5CBC {
     this.wordSize = wordSize
 
     return this

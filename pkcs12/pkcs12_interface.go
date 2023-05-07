@@ -54,13 +54,6 @@ func AddKey(name string, key func() Key) {
     keys[name] = key
 }
 
-var ciphers = make(map[string]func() Cipher)
-
-// 添加加密
-func AddCipher(oid asn1.ObjectIdentifier, cipher func() Cipher) {
-    ciphers[oid.String()] = cipher
-}
-
 // ===============
 
 // KDF 设置接口

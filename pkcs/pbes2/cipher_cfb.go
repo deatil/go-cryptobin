@@ -1,4 +1,4 @@
-package encrypt
+package pbes2
 
 import (
     "errors"

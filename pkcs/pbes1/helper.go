@@ -1,4 +1,4 @@
-package pkcs8pbe
+package pbes1
 
 // PEMCipher 列表
 var PEMCipherMap = map[string]PEMCipher{

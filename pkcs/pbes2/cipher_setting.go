@@ -1,4 +1,4 @@
-package encrypt
+package pbes2
 
 import (
     "crypto/aes"
@@ -297,7 +297,7 @@ var SM4CFB = CipherCFB{
     blockSize:  sm4.BlockSize,
     identifier: oidSM4CFB,
 }
-// SM4CFB1 is the 128-bit key SM4 cipher in CFB1 mode.
+// SM4CFB1 is the 128-bit key SM4 cipher in CFB mode.
 var SM4CFB1 = CipherCFB1{
     cipherFunc: sm4.NewCipher,
     keySize:    16,
@@ -332,7 +332,7 @@ var SM4CCM = CipherCCM{
     nonceSize:  12,
     identifier: oidSM4CCM,
 }
-// SM4CCM is the 128-bit key SM4 cipher in CCM mode.
+// SM4CCMb is the 128-bit key SM4 cipher in CCM mode.
 var SM4CCMb = CipherCCMb{
     cipherFunc: sm4.NewCipher,
     keySize:    16,
@@ -427,6 +427,9 @@ func init() {
     })
     AddCipher(oidSM4CFB, func() Cipher {
         return SM4CFB
+    })
+    AddCipher(oidSM4CFB1, func() Cipher {
+        return SM4CFB1
     })
     AddCipher(oidSM4CFB8, func() Cipher {
         return SM4CFB8

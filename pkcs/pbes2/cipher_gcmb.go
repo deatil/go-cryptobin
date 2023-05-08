@@ -70,7 +70,7 @@ func (this CipherGCMb) Decrypt(key, param, ciphertext []byte) ([]byte, error) {
     var nonce gcmbParams
     _, err = asn1.Unmarshal(param, &nonce)
     if err != nil {
-        return nil, errors.New("pkcs8: invalid param type")
+        return nil, errors.New("pkcs/cipher: invalid param type")
     }
 
     aead, err := cipher.NewGCMWithNonceSize(block, len(nonce))

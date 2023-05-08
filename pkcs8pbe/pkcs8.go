@@ -24,7 +24,7 @@ func EncryptPKCS8PrivateKey(
     blockType string,
     data []byte,
     password []byte,
-    cipher PEMCipher,
+    cipher Cipher,
 ) (*pem.Block, error) {
     if cipher == nil {
         return nil, errors.New("failed to encrypt PEM: unknown cipher")
@@ -95,7 +95,7 @@ func DecryptPEMBlock(block *pem.Block, password []byte) ([]byte, error) {
     return nil, errors.New("unsupported encrypted PEM")
 }
 
-func parseEncryptionScheme(encryptionScheme pkix.AlgorithmIdentifier) (PEMCipher, []byte, error) {
+func parseEncryptionScheme(encryptionScheme pkix.AlgorithmIdentifier) (Cipher, []byte, error) {
     oid := encryptionScheme.Algorithm.String()
 
     newCipher, err := GetCipher(oid)

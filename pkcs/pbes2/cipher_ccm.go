@@ -87,7 +87,7 @@ func (this CipherCCM) Decrypt(key, param, ciphertext []byte) ([]byte, error) {
 
         _, err = asn1.Unmarshal(param, &nonce)
         if err != nil {
-            return nil, errors.New("pkcs8: invalid param type")
+            return nil, errors.New("pkcs/cipher: invalid param type")
         }
     } else {
         nonce = params.Nonce
@@ -100,7 +100,7 @@ func (this CipherCCM) Decrypt(key, param, ciphertext []byte) ([]byte, error) {
 
     if isGcmICV {
         if params.ICVLen != aead.Overhead() {
-            return nil, errors.New("pkcs8: invalid tag size")
+            return nil, errors.New("pkcs/cipher: invalid tag size")
         }
     }
 

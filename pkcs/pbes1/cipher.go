@@ -8,7 +8,7 @@ import(
 )
 
 // 加密接口
-type PEMCipher interface {
+type Cipher interface {
     // oid
     OID() asn1.ObjectIdentifier
 
@@ -22,18 +22,18 @@ type PEMCipher interface {
     Decrypt(key, params, ciphertext []byte) ([]byte, error)
 }
 
-var ciphers = make(map[string]func() PEMCipher)
+var ciphers = make(map[string]func() Cipher)
 
 // 添加加密
-func AddCipher(oid asn1.ObjectIdentifier, cipher func() PEMCipher) {
+func AddCipher(oid asn1.ObjectIdentifier, cipher func() Cipher) {
     ciphers[oid.String()] = cipher
 }
 
 // 获取加密
-func GetCipher(oid string) (PEMCipher, error) {
+func GetCipher(oid string) (Cipher, error) {
     cipher, ok := ciphers[oid]
     if !ok {
-        return nil, fmt.Errorf("pkcs: unsupported cipher (OID: %s)", oid)
+        return nil, fmt.Errorf("pkcs/cipher: unsupported cipher (OID: %s)", oid)
     }
 
     newCipher := cipher()

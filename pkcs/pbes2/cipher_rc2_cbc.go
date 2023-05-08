@@ -37,12 +37,12 @@ func (this CipherRC2CBC) Encrypt(key, plaintext []byte) ([]byte, []byte, error) 
     // 随机生成 iv
     iv := make(cbcParams, this.blockSize)
     if _, err := rand.Read(iv); err != nil {
-        return nil, nil, errors.New("pkcs8:" + err.Error() + " failed to generate IV")
+        return nil, nil, errors.New("pkcs/cipher:" + err.Error() + " failed to generate IV")
     }
 
     block, err := this.cipherFunc(key)
     if err != nil {
-        return nil, nil, errors.New("pkcs8:" + err.Error() + " failed to create cipher")
+        return nil, nil, errors.New("pkcs/cipher:" + err.Error() + " failed to create cipher")
     }
 
     // 加密数据补码
@@ -74,7 +74,7 @@ func (this CipherRC2CBC) Decrypt(key, params, ciphertext []byte) ([]byte, error)
     // 解析参数
     var param rc2CBCParams
     if _, err := asn1.Unmarshal(params, &param); err != nil {
-        return nil, errors.New("pkcs8: invalid parameters")
+        return nil, errors.New("pkcs/cipher: invalid parameters")
     }
 
     plaintext := make([]byte, len(ciphertext))
@@ -85,14 +85,14 @@ func (this CipherRC2CBC) Decrypt(key, params, ciphertext []byte) ([]byte, error)
     }
 
     if param.RC2Version > 1024 || param.RC2Version < 1 {
-        return nil, errors.New("pkcs8: invalid RC2Version parameters")
+        return nil, errors.New("pkcs/cipher: invalid RC2Version parameters")
     }
 
     // 判断数据是否为填充数据
     blockSize := block.BlockSize()
     dlen := len(ciphertext)
     if dlen == 0 || dlen%blockSize != 0 {
-        return nil, errors.New("pkcs8: invalid padding")
+        return nil, errors.New("pkcs/cipher: invalid padding")
     }
 
     mode := cipher.NewCBCDecrypter(block, param.IV)

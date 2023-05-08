@@ -33,7 +33,7 @@ func AddCipher(oid asn1.ObjectIdentifier, cipher func() Cipher) {
 func GetCipher(oid string) (Cipher, error) {
     cipher, ok := ciphers[oid]
     if !ok {
-        return nil, fmt.Errorf("pkcs: unsupported cipher (OID: %s)", oid)
+        return nil, fmt.Errorf("pkcs/cipher: unsupported cipher (OID: %s)", oid)
     }
 
     newCipher := cipher()

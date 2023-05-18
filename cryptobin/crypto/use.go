@@ -71,6 +71,13 @@ func (this Cryptobin) Cast5() Cryptobin {
     return this
 }
 
+// Idea
+func (this Cryptobin) Idea() Cryptobin {
+    this.multiple = Idea
+
+    return this
+}
+
 // SM4
 func (this Cryptobin) SM4() Cryptobin {
     this.multiple = SM4

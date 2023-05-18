@@ -23,6 +23,7 @@ import (
     cryptobin_des "github.com/deatil/go-cryptobin/cipher/des"
     cryptobin_rc2 "github.com/deatil/go-cryptobin/cipher/rc2"
     cryptobin_rc5 "github.com/deatil/go-cryptobin/cipher/rc5"
+    cryptobin_idea "github.com/deatil/go-cryptobin/cipher/idea"
 )
 
 // 获取模式方式
@@ -449,6 +450,36 @@ func (this EncryptRC5) Decrypt(data []byte, opt IOption) ([]byte, error) {
 
 // ===================
 
+type EncryptIdea struct {}
+
+// 加密
+func (this EncryptIdea) getBlock(opt IOption) (cipher.Block, error) {
+    // Idea only supports 128 bit (16 byte) keys.
+    return cryptobin_idea.NewCipher(opt.Key())
+}
+
+// 加密
+func (this EncryptIdea) Encrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := this.getBlock(opt)
+    if err != nil {
+        return nil, err
+    }
+
+    return BlockEncrypt(block, data, opt)
+}
+
+// 解密
+func (this EncryptIdea) Decrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := this.getBlock(opt)
+    if err != nil {
+        return nil, err
+    }
+
+    return BlockDecrypt(block, data, opt)
+}
+
+// ===================
+
 type EncryptSM4 struct {}
 
 // 加密
@@ -786,6 +817,9 @@ func init() {
     })
     UseEncrypt.Add(SM4, func() IEncrypt {
         return EncryptSM4{}
+    })
+    UseEncrypt.Add(Idea, func() IEncrypt {
+        return EncryptIdea{}
     })
     UseEncrypt.Add(Chacha20, func() IEncrypt {
         return EncryptChacha20{}

@@ -406,3 +406,33 @@ func Test_TwoDesCFBPKCS7Padding(t *testing.T) {
 
     assert(data, cyptdeStr, "TwoDesCFBPKCS7Padding")
 }
+
+func Test_IdeaCBCPKCS7Padding(t *testing.T) {
+    assert := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    data := "test-pass"
+    cypt := FromString(data).
+        SetKey("1234567890abcdef").
+        SetIv("jifu87uj").
+        Idea().
+        CBC().
+        PKCS7Padding().
+        Encrypt()
+    cyptStr := cypt.ToBase64String()
+
+    assertError(cypt.Error(), "IdeaCBCPKCS7Padding-Encode")
+
+    cyptde := FromBase64String(cyptStr).
+        SetKey("1234567890abcdef").
+        SetIv("jifu87uj").
+        Idea().
+        CBC().
+        PKCS7Padding().
+        Decrypt()
+    cyptdeStr := cyptde.ToString()
+
+    assertError(cyptde.Error(), "IdeaCBCPKCS7Padding-Decode")
+
+    assert(data, cyptdeStr, "IdeaCBCPKCS7Padding")
+}

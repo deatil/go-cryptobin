@@ -79,6 +79,8 @@ func (this Multiple) String() string {
             return "RC4"
         case RC5:
             return "RC5"
+        case Idea:
+            return "Idea"
         case SM4:
             return "SM4"
         case Chacha20:
@@ -111,6 +113,7 @@ const (
     RC2
     RC4
     RC5
+    Idea
     SM4
     Chacha20
     Chacha20poly1305

@@ -85,7 +85,7 @@ func (this Cryptobin) SM4() Cryptobin {
     return this
 }
 
-// Chacha20
+// Chacha20 | Chacha20IETF | XChacha20
 func (this Cryptobin) Chacha20(nonce string, counter ...uint32) Cryptobin {
     this.multiple = Chacha20
 
@@ -134,6 +134,13 @@ func (this Cryptobin) RC4() Cryptobin {
     return this
 }
 
+// RC4MD5
+func (this Cryptobin) RC4MD5() Cryptobin {
+    this.multiple = RC4MD5
+
+    return this
+}
+
 // RC5
 func (this Cryptobin) RC5(wordSize, rounds uint) Cryptobin {
     this.multiple = RC5
@@ -151,6 +158,40 @@ func (this Cryptobin) Xts(cipher string, sectorNum uint64) Cryptobin {
 
     this.config.Set("cipher", cipher)
     this.config.Set("sector_num", sectorNum)
+
+    return this
+}
+
+// Salsa20
+// key is 32 bytes, nonce is 16 bytes.
+func (this Cryptobin) Salsa20(nonce string) Cryptobin {
+    this.multiple = Salsa20
+
+    this.config.Set("nonce", []byte(nonce))
+
+    return this
+}
+
+// Seed
+// The key argument should be 16 bytes.
+func (this Cryptobin) Seed() Cryptobin {
+    this.multiple = Seed
+
+    return this
+}
+
+// Aria
+// key is 16, 24, or 32 bytes.
+func (this Cryptobin) Aria() Cryptobin {
+    this.multiple = Aria
+
+    return this
+}
+
+// Camellia
+// The key argument should be 16, 24, or 32 bytes.
+func (this Cryptobin) Camellia() Cryptobin {
+    this.multiple = Camellia
 
     return this
 }

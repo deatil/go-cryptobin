@@ -77,6 +77,8 @@ func (this Multiple) String() string {
             return "RC2"
         case RC4:
             return "RC4"
+        case RC4MD5:
+            return "RC4MD5"
         case RC5:
             return "RC5"
         case Idea:
@@ -91,6 +93,14 @@ func (this Multiple) String() string {
             return "Chacha20poly1305X"
         case Xts:
             return "Xts"
+        case Salsa20:
+            return "Salsa20"
+        case Seed:
+            return "Seed"
+        case Aria:
+            return "Aria"
+        case Camellia:
+            return "Camellia"
         default:
             if TypeMultiple.Names().Has(this) {
                 return (TypeMultiple.Names().Get(this))()
@@ -112,6 +122,7 @@ const (
     Cast5
     RC2
     RC4
+    RC4MD5
     RC5
     Idea
     SM4
@@ -119,6 +130,10 @@ const (
     Chacha20poly1305
     Chacha20poly1305X
     Xts
+    Salsa20
+    Seed
+    Aria
+    Camellia
     maxMultiple
 )
 

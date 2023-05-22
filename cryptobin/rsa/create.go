@@ -13,7 +13,7 @@ import (
 
 type (
     // 配置
-    Opts = cryptobin_pkcs8.Opts
+    Opts       = cryptobin_pkcs8.Opts
     // PBKDF2 配置
     PBKDF2Opts = cryptobin_pkcs8.PBKDF2Opts
     // Scrypt 配置

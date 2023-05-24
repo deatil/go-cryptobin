@@ -22,13 +22,24 @@ type Opts struct {
     KDFOpts KDFOpts
 }
 
+// 默认配置 PBKDF2
+var DefaultPBKDF2Opts = PBKDF2Opts{
+    SaltSize:       16,
+    IterationCount: 10000,
+}
+
+// 默认配置 Scrypt
+var DefaultScryptOpts = ScryptOpts{
+    SaltSize:                 16,
+    CostParameter:            1 << 2,
+    BlockSize:                8,
+    ParallelizationParameter: 1,
+}
+
 // 默认配置
 var DefaultOpts = Opts{
     Cipher:  AES256CBC,
-    KDFOpts: PBKDF2Opts{
-        SaltSize:       16,
-        IterationCount: 10000,
-    },
+    KDFOpts: DefaultPBKDF2Opts,
 }
 
 // 结构体数据可以查看以下文档

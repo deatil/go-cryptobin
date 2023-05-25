@@ -6,6 +6,7 @@ import (
     "crypto/x509"
     "encoding/pem"
 
+    cryptobin_tool "github.com/deatil/go-cryptobin/tool"
     cryptobin_rsa "github.com/deatil/go-cryptobin/rsa"
     cryptobin_pkcs8 "github.com/deatil/go-cryptobin/pkcs8"
     cryptobin_pkcs8s "github.com/deatil/go-cryptobin/pkcs8s"
@@ -77,8 +78,8 @@ func (this Rsa) CreatePKCS1PrivateKeyWithPassword(password string, opts ...strin
     }
 
     // 具体方式
-    cipher, ok := PEMCiphers[opt]
-    if !ok {
+    cipher, err := cryptobin_tool.GetPEMCipher(opt)
+    if err != nil {
         err := errors.New("Rsa: PEMCipher not exists.")
         return this.AppendError(err)
     }

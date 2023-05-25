@@ -6,6 +6,7 @@ import (
     "crypto/x509"
     "encoding/pem"
 
+    cryptobin_tool "github.com/deatil/go-cryptobin/tool"
     cryptobin_pkcs8 "github.com/deatil/go-cryptobin/pkcs8"
     cryptobin_pkcs8s "github.com/deatil/go-cryptobin/pkcs8s"
 )
@@ -80,8 +81,8 @@ func (this Ecdsa) CreatePKCS1PrivateKeyWithPassword(password string, opts ...str
     }
 
     // 具体方式
-    cipher, ok := PEMCiphers[opt]
-    if !ok {
+    cipher, err := cryptobin_tool.GetPEMCipher(opt)
+    if err != nil {
         err := errors.New("Ecdsa: PEMCipher not exists.")
         return this.AppendError(err)
     }

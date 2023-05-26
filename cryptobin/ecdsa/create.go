@@ -13,7 +13,7 @@ import (
 
 type (
     // 配置
-    Opts = cryptobin_pkcs8.Opts
+    Opts       = cryptobin_pkcs8.Opts
     // PBKDF2 配置
     PBKDF2Opts = cryptobin_pkcs8.PBKDF2Opts
     // Scrypt 配置
@@ -40,6 +40,8 @@ func (this Ecdsa) CreatePrivateKeyWithPassword(password string, opts ...string) 
     return this.CreatePKCS1PrivateKeyWithPassword(password, opts...)
 }
 
+// ====================
+
 // 生成私钥 pem 数据
 // 使用:
 // obj := New().WithCurve("P521").GenerateKey()
@@ -56,7 +58,7 @@ func (this Ecdsa) CreatePKCS1PrivateKey() Ecdsa {
     }
 
     privateBlock := &pem.Block{
-        Type: "EC PRIVATE KEY",
+        Type:  "EC PRIVATE KEY",
         Bytes: x509PrivateKey,
     }
 
@@ -67,20 +69,19 @@ func (this Ecdsa) CreatePKCS1PrivateKey() Ecdsa {
 
 // 生成私钥带密码 pem 数据
 // CreatePKCS1PrivateKeyWithPassword("123", "AES256CBC")
+// PEMCipher: DESCBC | DESEDE3CBC | AES128CBC | AES192CBC | AES256CBC
 func (this Ecdsa) CreatePKCS1PrivateKeyWithPassword(password string, opts ...string) Ecdsa {
     if this.privateKey == nil {
         err := errors.New("Ecdsa: privateKey error.")
         return this.AppendError(err)
     }
 
-    // DESCBC | DESEDE3CBC | AES128CBC
-    // AES192CBC | AES256CBC
     opt := "AES256CBC"
     if len(opts) > 0 {
         opt = opts[0]
     }
 
-    // 具体方式
+    // 加密方式
     cipher, err := cryptobin_tool.GetPEMCipher(opt)
     if err != nil {
         err := errors.New("Ecdsa: PEMCipher not exists.")
@@ -110,6 +111,8 @@ func (this Ecdsa) CreatePKCS1PrivateKeyWithPassword(password string, opts ...str
     return this
 }
 
+// ====================
+
 // 生成 PKCS8 私钥 pem 数据
 func (this Ecdsa) CreatePKCS8PrivateKey() Ecdsa {
     if this.privateKey == nil {
@@ -123,7 +126,7 @@ func (this Ecdsa) CreatePKCS8PrivateKey() Ecdsa {
     }
 
     privateBlock := &pem.Block{
-        Type: "PRIVATE KEY",
+        Type:  "PRIVATE KEY",
         Bytes: x509PrivateKey,
     }
 
@@ -140,13 +143,13 @@ func (this Ecdsa) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any
         return this.AppendError(err)
     }
 
-    // 生成私钥
-    x509PrivateKey, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
+    opt, err := cryptobin_pkcs8s.ParseOpts(opts...)
     if err != nil {
         return this.AppendError(err)
     }
 
-    opt, err := cryptobin_pkcs8s.ParseOpts(opts...)
+    // 生成私钥
+    x509PrivateKey, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -171,7 +174,7 @@ func (this Ecdsa) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any
 // 生成公钥 pem 数据
 func (this Ecdsa) CreatePublicKey() Ecdsa {
     if this.publicKey == nil {
-        err := errors.New("Ecdsa: privateKey error.")
+        err := errors.New("Ecdsa: publicKey error.")
         return this.AppendError(err)
     }
 
@@ -181,7 +184,7 @@ func (this Ecdsa) CreatePublicKey() Ecdsa {
     }
 
     publicBlock := &pem.Block{
-        Type: "PUBLIC KEY",
+        Type:  "PUBLIC KEY",
         Bytes: x509PublicKey,
     }
 

@@ -53,7 +53,7 @@ func (this Rsa) CreatePKCS1PrivateKey() Rsa {
     x509PrivateKey := x509.MarshalPKCS1PrivateKey(this.privateKey)
 
     privateBlock := &pem.Block{
-        Type: "RSA PRIVATE KEY",
+        Type:  "RSA PRIVATE KEY",
         Bytes: x509PrivateKey,
     }
 
@@ -64,20 +64,19 @@ func (this Rsa) CreatePKCS1PrivateKey() Rsa {
 
 // 生成 PKCS1 私钥带密码 pem 数据
 // CreatePKCS1PrivateKeyWithPassword("123", "AES256CBC")
+// PEMCipher: DESCBC | DESEDE3CBC | AES128CBC | AES192CBC | AES256CBC
 func (this Rsa) CreatePKCS1PrivateKeyWithPassword(password string, opts ...string) Rsa {
     if this.privateKey == nil {
         err := errors.New("Rsa: privateKey error.")
         return this.AppendError(err)
     }
 
-    // DESCBC | DESEDE3CBC | AES128CBC
-    // AES192CBC | AES256CBC
     opt := "AES256CBC"
     if len(opts) > 0 {
         opt = opts[0]
     }
 
-    // 具体方式
+    // 加密方式
     cipher, err := cryptobin_tool.GetPEMCipher(opt)
     if err != nil {
         err := errors.New("Rsa: PEMCipher not exists.")
@@ -107,14 +106,14 @@ func (this Rsa) CreatePKCS1PrivateKeyWithPassword(password string, opts ...strin
 // 生成 pcks1 公钥 pem 数据
 func (this Rsa) CreatePKCS1PublicKey() Rsa {
     if this.publicKey == nil {
-        err := errors.New("Rsa: privateKey error.")
+        err := errors.New("Rsa: publicKey error.")
         return this.AppendError(err)
     }
 
     x509PublicKey := x509.MarshalPKCS1PublicKey(this.publicKey)
 
     publicBlock := &pem.Block{
-        Type: "RSA PUBLIC KEY",
+        Type:  "RSA PUBLIC KEY",
         Bytes: x509PublicKey,
     }
 
@@ -138,7 +137,7 @@ func (this Rsa) CreatePKCS8PrivateKey() Rsa {
     }
 
     privateBlock := &pem.Block{
-        Type: "PRIVATE KEY",
+        Type:  "PRIVATE KEY",
         Bytes: x509PrivateKey,
     }
 
@@ -155,13 +154,13 @@ func (this Rsa) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any) 
         return this.AppendError(err)
     }
 
-    // 生成私钥
-    x509PrivateKey, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
+    opt, err := cryptobin_pkcs8s.ParseOpts(opts...)
     if err != nil {
         return this.AppendError(err)
     }
 
-    opt, err := cryptobin_pkcs8s.ParseOpts(opts...)
+    // 生成私钥
+    x509PrivateKey, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -186,7 +185,7 @@ func (this Rsa) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any) 
 // 生成公钥 pem 数据
 func (this Rsa) CreatePKCS8PublicKey() Rsa {
     if this.publicKey == nil {
-        err := errors.New("Rsa: privateKey error.")
+        err := errors.New("Rsa: publicKey error.")
         return this.AppendError(err)
     }
 
@@ -196,7 +195,7 @@ func (this Rsa) CreatePKCS8PublicKey() Rsa {
     }
 
     publicBlock := &pem.Block{
-        Type: "PUBLIC KEY",
+        Type:  "PUBLIC KEY",
         Bytes: x509PublicKey,
     }
 
@@ -227,7 +226,7 @@ func (this Rsa) CreateXMLPrivateKey() Rsa {
 // 生成公钥 xml 数据
 func (this Rsa) CreateXMLPublicKey() Rsa {
     if this.publicKey == nil {
-        err := errors.New("Rsa: privateKey error.")
+        err := errors.New("Rsa: publicKey error.")
         return this.AppendError(err)
     }
 

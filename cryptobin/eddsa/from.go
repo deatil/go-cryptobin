@@ -3,7 +3,7 @@ package eddsa
 import (
     "crypto/rand"
     "crypto/ed25519"
-    
+
     cryptobin_tool "github.com/deatil/go-cryptobin/tool"
 )
 
@@ -43,13 +43,15 @@ func (this EdDSA) FromPublicKey(key []byte) EdDSA {
     return this
 }
 
+// ==========
+
 // 生成密钥
 func (this EdDSA) GenerateKey() EdDSA {
     publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
     if err != nil {
         return this.AppendError(err)
     }
-    
+
     this.publicKey  = publicKey
     this.privateKey = privateKey
 
@@ -86,6 +88,6 @@ func (this EdDSA) FromHexString(data string) EdDSA {
     newData, err := cryptobin_tool.NewEncoding().HexDecode(data)
 
     this.data = newData
-    
+
     return this.AppendError(err)
 }

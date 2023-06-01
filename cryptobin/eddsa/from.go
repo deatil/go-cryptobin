@@ -45,6 +45,15 @@ func (this EdDSA) FromPublicKey(key []byte) EdDSA {
 
 // ==========
 
+// 私钥 Seed
+func (this EdDSA) FromPrivateKeySeed(seed []byte) EdDSA {
+    this.privateKey = ed25519.NewKeyFromSeed(seed)
+
+    return this
+}
+
+// ==========
+
 // 生成密钥
 func (this EdDSA) GenerateKey() EdDSA {
     publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)

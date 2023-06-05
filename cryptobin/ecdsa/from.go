@@ -115,6 +115,51 @@ func (this Ecdsa) FromPublicKey(key []byte) Ecdsa {
 
 // ==========
 
+// DER 私钥
+func (this Ecdsa) FromPKCS1PrivateKeyDer(der []byte) Ecdsa {
+    key := cryptobin_tool.EncodeDerToPem(der, "EC PRIVATE KEY")
+
+    privateKey, err := this.ParsePKCS1PrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+
+    return this
+}
+
+// DER 私钥
+func (this Ecdsa) FromPKCS8PrivateKeyDer(der []byte) Ecdsa {
+    key := cryptobin_tool.EncodeDerToPem(der, "PRIVATE KEY")
+
+    privateKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+
+    return this
+}
+
+// DER 公钥
+func (this Ecdsa) FromPublicKeyDer(der []byte) Ecdsa {
+    key := cryptobin_tool.EncodeDerToPem(der, "PUBLIC KEY")
+
+    publicKey, err := this.ParsePublicKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = publicKey
+
+    return this
+}
+
+
+// ==========
+
 // 生成密钥
 func (this Ecdsa) GenerateKey() Ecdsa {
     privateKey, err := ecdsa.GenerateKey(this.curve, rand.Reader)

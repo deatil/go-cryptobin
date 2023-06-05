@@ -173,6 +173,92 @@ func (this DSA) FromPKCS8PublicKey(key []byte) DSA {
 
 // ==========
 
+// Pkcs1 DER 私钥
+func (this DSA) FromPKCS1PrivateKeyDer(der []byte) DSA {
+    key := cryptobin_tool.EncodeDerToPem(der, "DSA PRIVATE KEY")
+
+    parsedKey, err := this.ParsePKCS1PrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = parsedKey
+
+    return this
+}
+
+// PKCS1 DER 公钥
+func (this DSA) FromPKCS1PublicKeyDer(der []byte) DSA {
+    key := cryptobin_tool.EncodeDerToPem(der, "DSA PUBLIC KEY")
+
+    parsedKey, err := this.ParsePKCS1PublicKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = parsedKey
+
+    return this
+}
+
+// ==========
+
+// Pkcs8 DER 私钥
+func (this DSA) FromPKCS8PrivateKeyDer(der []byte) DSA {
+    key := cryptobin_tool.EncodeDerToPem(der, "PRIVATE KEY")
+
+    parsedKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = parsedKey
+
+    return this
+}
+
+// PKCS8 DER 公钥
+func (this DSA) FromPKCS8PublicKeyDer(der []byte) DSA {
+    key := cryptobin_tool.EncodeDerToPem(der, "PUBLIC KEY")
+
+    parsedKey, err := this.ParsePKCS8PublicKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = parsedKey
+
+    return this
+}
+
+// ==========
+
+// XML 私钥
+func (this DSA) FromXMLPrivateKey(key []byte) DSA {
+    privateKey, err := this.ParsePrivateKeyFromXML(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+
+    return this
+}
+
+// XML 公钥
+func (this DSA) FromXMLPublicKey(key []byte) DSA {
+    publicKey, err := this.ParsePublicKeyFromXML(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = publicKey
+
+    return this
+}
+
+// ==========
+
 // 字节
 func (this DSA) FromBytes(data []byte) DSA {
     this.data = data

@@ -190,6 +190,66 @@ func (this Rsa) FromPKCS8PublicKey(key []byte) Rsa {
 
 // ==========
 
+// Pkcs1 DER
+func (this Rsa) FromPKCS1PrivateKeyDer(der []byte) Rsa {
+    key := cryptobin_tool.EncodeDerToPem(der, "RSA PRIVATE KEY")
+
+    privateKey, err := this.ParsePKCS1PrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+
+    return this
+}
+
+// PKCS1 DER 公钥
+func (this Rsa) FromPKCS1PublicKeyDer(der []byte) Rsa {
+    key := cryptobin_tool.EncodeDerToPem(der, "RSA PUBLIC KEY")
+
+    publicKey, err := this.ParsePKCS1PublicKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = publicKey
+
+    return this
+}
+
+// ==========
+
+// Pkcs8 DER
+func (this Rsa) FromPKCS8PrivateKeyDer(der []byte) Rsa {
+    key := cryptobin_tool.EncodeDerToPem(der, "PRIVATE KEY")
+
+    privateKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+
+    return this
+}
+
+// PKCS8 DER 公钥
+func (this Rsa) FromPKCS8PublicKeyDer(der []byte) Rsa {
+    key := cryptobin_tool.EncodeDerToPem(der, "PUBLIC KEY")
+
+    publicKey, err := this.ParsePKCS8PublicKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = publicKey
+
+    return this
+}
+
+// ==========
+
 // XML 私钥
 func (this Rsa) FromXMLPrivateKey(key []byte) Rsa {
     privateKey, err := this.ParsePrivateKeyFromXML(key)

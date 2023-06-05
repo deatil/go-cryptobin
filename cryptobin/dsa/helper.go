@@ -40,6 +40,17 @@ func FromPKCS8PublicKey(key []byte) DSA {
 
 // ==========
 
+// XML 私钥
+func FromXMLPrivateKey(key []byte) DSA {
+    return NewDSA().FromXMLPrivateKey(key)
+}
+
+// XML 公钥
+func FromXMLPublicKey(key []byte) DSA {
+    return NewDSA().FromXMLPublicKey(key)
+}
+// ==========
+
 // 字节
 func FromBytes(data []byte) DSA {
     return NewDSA().FromBytes(data)

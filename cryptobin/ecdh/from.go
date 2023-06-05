@@ -3,6 +3,8 @@ package ecdh
 import (
     "crypto/rand"
     "crypto/ecdh"
+
+    cryptobin_tool "github.com/deatil/go-cryptobin/tool"
 )
 
 // 私钥
@@ -40,6 +42,38 @@ func (this Ecdh) FromPublicKey(key []byte) Ecdh {
 
     return this
 }
+
+// ==========
+
+// DER 私钥
+func (this Ecdh) FromPrivateKeyDer(der []byte) Ecdh {
+    key := cryptobin_tool.EncodeDerToPem(der, "PRIVATE KEY")
+
+    parsedKey, err := this.ParsePrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = parsedKey.(*ecdh.PrivateKey)
+
+    return this
+}
+
+// DER 公钥
+func (this Ecdh) FromPublicKeyDer(der []byte) Ecdh {
+    key := cryptobin_tool.EncodeDerToPem(der, "PUBLIC KEY")
+
+    parsedKey, err := this.ParsePublicKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = parsedKey.(*ecdh.PublicKey)
+
+    return this
+}
+
+// ==========
 
 // 生成密钥
 func (this Ecdh) GenerateKey() Ecdh {

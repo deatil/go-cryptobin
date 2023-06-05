@@ -52,6 +52,36 @@ func (this SM2) FromPublicKey(key []byte) SM2 {
 
 // ==========
 
+// DER 私钥
+func (this SM2) FromPrivateKeyDer(der []byte) SM2 {
+    key := cryptobin_tool.EncodeDerToPem(der, "PRIVATE KEY")
+
+    privateKey, err := this.ParsePrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+
+    return this
+}
+
+// DER 公钥
+func (this SM2) FromPublicKeyDer(der []byte) SM2 {
+    key := cryptobin_tool.EncodeDerToPem(der, "PUBLIC KEY")
+
+    publicKey, err := this.ParsePublicKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = publicKey
+
+    return this
+}
+
+// ==========
+
 // 生成密钥
 func (this SM2) GenerateKey() SM2 {
     privateKey, err := sm2.GenerateKey(rand.Reader)

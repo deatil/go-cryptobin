@@ -3,8 +3,8 @@ package ecdh
 import (
     "crypto/rand"
 
+    "github.com/deatil/go-cryptobin/tool"
     "github.com/deatil/go-cryptobin/dh/ecdh"
-    cryptobin_tool "github.com/deatil/go-cryptobin/tool"
 )
 
 // 私钥
@@ -43,9 +43,11 @@ func (this Ecdh) FromPublicKey(key []byte) Ecdh {
     return this
 }
 
+// ==========
+
 // 根据私钥 x, y 生成
 func (this Ecdh) FromKeyXYHexString(xString string, yString string) Ecdh {
-    encoding := cryptobin_tool.NewEncoding()
+    encoding := tool.NewEncoding()
 
     x, _ := encoding.HexDecode(xString)
     y, _ := encoding.HexDecode(yString)
@@ -63,7 +65,7 @@ func (this Ecdh) FromKeyXYHexString(xString string, yString string) Ecdh {
 
 // 根据私钥 x 生成
 func (this Ecdh) FromPrivateKeyXHexString(xString string) Ecdh {
-    encoding := cryptobin_tool.NewEncoding()
+    encoding := tool.NewEncoding()
 
     x, _ := encoding.HexDecode(xString)
 
@@ -81,7 +83,7 @@ func (this Ecdh) FromPrivateKeyXHexString(xString string) Ecdh {
 
 // 根据公钥 y 生成
 func (this Ecdh) FromPublicKeyYHexString(yString string) Ecdh {
-    encoding := cryptobin_tool.NewEncoding()
+    encoding := tool.NewEncoding()
 
     y, _ := encoding.HexDecode(yString)
 
@@ -93,6 +95,38 @@ func (this Ecdh) FromPublicKeyYHexString(yString string) Ecdh {
 
     return this
 }
+
+// ==========
+
+// DER 私钥
+func (this Ecdh) FromPrivateKeyDer(der []byte) Ecdh {
+    key := tool.EncodeDerToPem(der, "PRIVATE KEY")
+
+    parsedKey, err := this.ParsePrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = parsedKey.(*ecdh.PrivateKey)
+
+    return this
+}
+
+// DER 公钥
+func (this Ecdh) FromPublicKeyDer(der []byte) Ecdh {
+    key := tool.EncodeDerToPem(der, "PUBLIC KEY")
+
+    parsedKey, err := this.ParsePublicKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = parsedKey.(*ecdh.PublicKey)
+
+    return this
+}
+
+// ==========
 
 // 生成密钥
 func (this Ecdh) GenerateKey() Ecdh {

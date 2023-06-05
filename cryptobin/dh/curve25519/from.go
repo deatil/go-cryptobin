@@ -43,6 +43,8 @@ func (this Curve25519) FromPublicKey(key []byte) Curve25519 {
     return this
 }
 
+// ==========
+
 // 根据私钥 x, y 生成
 func (this Curve25519) FromKeyXYHexString(xString string, yString string) Curve25519 {
     encoding := tool.NewEncoding()
@@ -90,6 +92,38 @@ func (this Curve25519) FromPublicKeyYHexString(yString string) Curve25519 {
 
     return this
 }
+
+// ==========
+
+// DER 私钥
+func (this Curve25519) FromPrivateKeyDer(der []byte) Curve25519 {
+    key := tool.EncodeDerToPem(der, "PRIVATE KEY")
+
+    parsedKey, err := this.ParsePrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = parsedKey.(*curve25519.PrivateKey)
+
+    return this
+}
+
+// DER 公钥
+func (this Curve25519) FromPublicKeyDer(der []byte) Curve25519 {
+    key := tool.EncodeDerToPem(der, "PUBLIC KEY")
+
+    parsedKey, err := this.ParsePublicKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = parsedKey.(*curve25519.PublicKey)
+
+    return this
+}
+
+// ==========
 
 // 生成密钥
 func (this Curve25519) GenerateKey() Curve25519 {

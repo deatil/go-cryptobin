@@ -45,6 +45,36 @@ func (this EdDSA) FromPublicKey(key []byte) EdDSA {
 
 // ==========
 
+// DER 私钥
+func (this EdDSA) FromPrivateKeyDer(der []byte) EdDSA {
+    key := cryptobin_tool.EncodeDerToPem(der, "PRIVATE KEY")
+
+    parsedKey, err := this.ParsePrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = parsedKey.(ed25519.PrivateKey)
+
+    return this
+}
+
+// DER 公钥
+func (this EdDSA) FromPublicKeyDer(der []byte) EdDSA {
+    key := cryptobin_tool.EncodeDerToPem(der, "PUBLIC KEY")
+
+    parsedKey, err := this.ParsePublicKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = parsedKey.(ed25519.PublicKey)
+
+    return this
+}
+
+// ==========
+
 // 私钥 Seed
 func (this EdDSA) FromPrivateKeySeed(seed []byte) EdDSA {
     this.privateKey = ed25519.NewKeyFromSeed(seed)

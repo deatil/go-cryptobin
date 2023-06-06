@@ -1,7 +1,14 @@
 package ca
 
 import (
+    "errors"
     "crypto/x509"
+    "crypto/ecdsa"
+
+    "github.com/tjfoc/gmsm/sm2"
+    sm2_pkcs12 "github.com/tjfoc/gmsm/pkcs12"
+
+    cryptobin_pkcs12 "github.com/deatil/go-cryptobin/pkcs12"
 )
 
 // 证书
@@ -54,6 +61,64 @@ func (this CA) FromPrivateKey(key any) CA {
 // 可用 [*rsa.PublicKey | *ecdsa.PublicKey | ed25519.PublicKey | *sm2.PublicKey]
 func (this CA) FromPublicKey(key any) CA {
     this.publicKey = key
+
+    return this
+}
+
+// =======================
+
+// pkcs12
+func (this CA) FromSM2PKCS12Cert(pfxData []byte, password string) CA {
+    pv, certs, err := sm2_pkcs12.DecodeAll(pfxData, password)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    switch k := pv.(type) {
+        case *ecdsa.PrivateKey:
+            switch k.Curve {
+                case sm2.P256Sm2():
+                    sm2pub := &sm2.PublicKey{
+                        Curve: k.Curve,
+                        X:     k.X,
+                        Y:     k.Y,
+                    }
+
+                    sm2Pri := &sm2.PrivateKey{
+                        PublicKey: *sm2pub,
+                        D:         k.D,
+                    }
+
+                    if !k.IsOnCurve(k.X, k.Y) {
+                        err := errors.New("error while validating SM2 private key: %v")
+                        return this.AppendError(err)
+                    }
+
+                    this.privateKey = sm2Pri
+                    this.cert = certs[0]
+
+                    return this
+                default:
+                    // other
+            }
+        default:
+            // other
+    }
+
+    err = errors.New("unexpected type for p12 private key")
+
+    return this.AppendError(err)
+}
+
+// pkcs12
+func (this CA) FromPKCS12Cert(pfxData []byte, password string) CA {
+    privateKey, cert, err := cryptobin_pkcs12.Decode(pfxData, password)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+    this.cert = cert
 
     return this
 }

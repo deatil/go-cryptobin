@@ -2,8 +2,12 @@ package ca
 
 import (
     "errors"
+    "crypto/rsa"
     "crypto/x509"
     "crypto/ecdsa"
+    "crypto/ed25519"
+    "crypto/elliptic"
+    "crypto/rand"
 
     "github.com/tjfoc/gmsm/sm2"
     sm2_pkcs12 "github.com/tjfoc/gmsm/pkcs12"
@@ -68,8 +72,21 @@ func (this CA) FromPublicKey(key any) CA {
 // =======================
 
 // pkcs12
+func (this CA) FromPKCS12Cert(pfxData []byte, password string) CA {
+    privateKey, cert, err := cryptobin_pkcs12.Decode(pfxData, password)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+    this.cert = cert
+
+    return this
+}
+
+// pkcs12
 func (this CA) FromSM2PKCS12Cert(pfxData []byte, password string) CA {
-    pv, certs, err := sm2_pkcs12.DecodeAll(pfxData, password)
+    pv, cert, err := sm2_pkcs12.Decode(pfxData, password)
     if err != nil {
         return this.AppendError(err)
     }
@@ -95,7 +112,7 @@ func (this CA) FromSM2PKCS12Cert(pfxData []byte, password string) CA {
                     }
 
                     this.privateKey = sm2Pri
-                    this.cert = certs[0]
+                    this.cert = cert
 
                     return this
                 default:
@@ -110,15 +127,82 @@ func (this CA) FromSM2PKCS12Cert(pfxData []byte, password string) CA {
     return this.AppendError(err)
 }
 
-// pkcs12
-func (this CA) FromPKCS12Cert(pfxData []byte, password string) CA {
-    privateKey, cert, err := cryptobin_pkcs12.Decode(pfxData, password)
+// =======================
+
+// 生成密钥 RSA
+// bits = 512 | 1024 | 2048 | 4096
+func (this CA) GenerateRSAKey(bits int) CA {
+    // 生成私钥
+    privateKey, err := rsa.GenerateKey(rand.Reader, bits)
     if err != nil {
         return this.AppendError(err)
     }
 
     this.privateKey = privateKey
-    this.cert = cert
+
+    // 生成公钥
+    this.publicKey = &privateKey.PublicKey
+
+    return this
+}
+
+// 生成密钥 Ecdsa
+// 可选 [P521 | P384 | P256 | P224]
+func (this CA) GenerateECDSAKey(curve string) CA {
+    var useCurve elliptic.Curve
+
+    switch {
+        case curve == "P521":
+            useCurve = elliptic.P521()
+        case curve == "P384":
+            useCurve = elliptic.P384()
+        case curve == "P256":
+            useCurve = elliptic.P256()
+        case curve == "P224":
+            useCurve = elliptic.P224()
+        default:
+            useCurve = elliptic.P256()
+    }
+
+    // 生成私钥
+    privateKey, err := ecdsa.GenerateKey(useCurve, rand.Reader)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+
+    // 生成公钥
+    this.publicKey = &privateKey.PublicKey
+
+    return this
+}
+
+// 生成密钥 EdDSA
+func (this CA) GenerateEdDSAKey() CA {
+    publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey  = publicKey
+    this.privateKey = privateKey
+
+    return this
+}
+
+// 生成密钥 SM2
+func (this CA) GenerateSM2Key() CA {
+    // 生成私钥
+    privateKey, err := sm2.GenerateKey(rand.Reader)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+
+    // 生成公钥
+    this.publicKey = &privateKey.PublicKey
 
     return this
 }

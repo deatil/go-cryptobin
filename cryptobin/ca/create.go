@@ -12,9 +12,6 @@ import (
 
     "github.com/tjfoc/gmsm/sm2"
     sm2_x509 "github.com/tjfoc/gmsm/x509"
-    sm2_pkcs12 "github.com/tjfoc/gmsm/pkcs12"
-
-    cryptobin_pkcs12 "github.com/deatil/go-cryptobin/pkcs12"
 )
 
 // 证书请求
@@ -201,7 +198,7 @@ func (this CA) CreatePrivateKey() CA {
             }
 
             privateBlock = &pem.Block{
-                Type: "ED PRIVATE KEY",
+                Type: "PRIVATE KEY",
                 Bytes: x509PrivateKey,
             }
 
@@ -225,57 +222,3 @@ func (this CA) CreatePrivateKey() CA {
     return this
 }
 
-// =======================
-
-// pkcs12 密钥
-// caCerts 通常保留为空
-// 支持 [rsa | ecdsa | sm2]
-func (this CA) CreatePKCS12Cert(caCerts []*x509.Certificate, pwd string) CA {
-    if this.privateKey == nil {
-        err := errors.New("privateKey error.")
-        return this.AppendError(err)
-    }
-
-    var pfxData []byte
-    var err error
-
-    switch privateKey := this.privateKey.(type) {
-        case *sm2.PrivateKey:
-            cert, ok := this.cert.(*sm2_x509.Certificate)
-            if !ok {
-                err := errors.New("sm2 cert error.")
-                return this.AppendError(err)
-            }
-
-            pfxData, err = sm2_pkcs12.Encode(privateKey, cert, caCerts, pwd)
-
-        default:
-            cert, ok := this.cert.(*x509.Certificate)
-            if !ok {
-                err := errors.New("cert error.")
-                return this.AppendError(err)
-            }
-
-            pfxData, err = cryptobin_pkcs12.EncodeChain(rand.Reader, privateKey, cert, caCerts, pwd)
-    }
-
-    if err != nil {
-        return this.AppendError(err)
-    }
-
-    this.keyData = pfxData
-
-    return this
-}
-
-// pkcs12 密钥
-func (this CA) CreatePKCS12CertTrustStore(certs []*x509.Certificate, password string) CA {
-    pfxData, err := cryptobin_pkcs12.EncodeTrustStore(rand.Reader, certs, password)
-    if err != nil {
-        return this.AppendError(err)
-    }
-
-    this.keyData = pfxData
-
-    return this
-}

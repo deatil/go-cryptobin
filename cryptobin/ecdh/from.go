@@ -19,6 +19,11 @@ func (this Ecdh) FromPrivateKey(key []byte) Ecdh {
     return this
 }
 
+// 私钥
+func FromPrivateKey(key []byte) Ecdh {
+    return defaultECDH.FromPrivateKey(key)
+}
+
 // 私钥带密码
 func (this Ecdh) FromPrivateKeyWithPassword(key []byte, password string) Ecdh {
     parsedKey, err := this.ParsePrivateKeyFromPEMWithPassword(key, password)
@@ -31,6 +36,11 @@ func (this Ecdh) FromPrivateKeyWithPassword(key []byte, password string) Ecdh {
     return this
 }
 
+// 私钥
+func FromPrivateKeyWithPassword(key []byte, password string) Ecdh {
+    return defaultECDH.FromPrivateKeyWithPassword(key, password)
+}
+
 // 公钥
 func (this Ecdh) FromPublicKey(key []byte) Ecdh {
     parsedKey, err := this.ParsePublicKeyFromPEM(key)
@@ -41,6 +51,11 @@ func (this Ecdh) FromPublicKey(key []byte) Ecdh {
     this.publicKey = parsedKey.(*ecdh.PublicKey)
 
     return this
+}
+
+// 公钥
+func FromPublicKey(key []byte) Ecdh {
+    return defaultECDH.FromPublicKey(key)
 }
 
 // ==========
@@ -86,4 +101,9 @@ func (this Ecdh) GenerateKey() Ecdh {
     this.publicKey  = privateKey.PublicKey()
 
     return this
+}
+
+// 生成密钥
+func GenerateKey() Ecdh {
+    return defaultECDH.GenerateKey()
 }

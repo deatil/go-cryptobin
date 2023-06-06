@@ -20,6 +20,11 @@ func (this Dh) FromPrivateKey(key []byte) Dh {
     return this
 }
 
+// 私钥
+func FromPrivateKey(key []byte) Dh {
+    return defaultDH.FromPrivateKey(key)
+}
+
 // 私钥带密码
 func (this Dh) FromPrivateKeyWithPassword(key []byte, password string) Dh {
     parsedKey, err := this.ParsePrivateKeyFromPEMWithPassword(key, password)
@@ -32,6 +37,11 @@ func (this Dh) FromPrivateKeyWithPassword(key []byte, password string) Dh {
     return this
 }
 
+// 私钥
+func FromPrivateKeyWithPassword(key []byte, password string) Dh {
+    return defaultDH.FromPrivateKeyWithPassword(key, password)
+}
+
 // 公钥
 func (this Dh) FromPublicKey(key []byte) Dh {
     parsedKey, err := this.ParsePublicKeyFromPEM(key)
@@ -42,6 +52,11 @@ func (this Dh) FromPublicKey(key []byte) Dh {
     this.publicKey = parsedKey.(*dh.PublicKey)
 
     return this
+}
+
+// 公钥
+func FromPublicKey(key []byte) Dh {
+    return defaultDH.FromPublicKey(key)
 }
 
 // ==========
@@ -69,6 +84,11 @@ func (this Dh) FromKeyXYHexString(xString string, yString string) Dh {
     return this
 }
 
+// 根据私钥 x, y 生成
+func FromKeyXYHexString(xString string, yString string) Dh {
+    return defaultDH.FromKeyXYHexString(xString, yString)
+}
+
 // 根据私钥 x 生成
 func (this Dh) FromPrivateKeyXHexString(xString string) Dh {
     x, _ := new(big.Int).SetString(xString[:], 16)
@@ -92,6 +112,11 @@ func (this Dh) FromPrivateKeyXHexString(xString string) Dh {
     return this
 }
 
+// 根据私钥 x 生成
+func FromPrivateKeyXHexString(xString string) Dh {
+    return defaultDH.FromPrivateKeyXHexString(xString)
+}
+
 // 根据公钥 y 生成
 func (this Dh) FromPublicKeyYHexString(yString string) Dh {
     y, _ := new(big.Int).SetString(yString[:], 16)
@@ -110,6 +135,11 @@ func (this Dh) FromPublicKeyYHexString(yString string) Dh {
     this.publicKey = public
 
     return this
+}
+
+// 根据公钥 y 生成
+func FromPublicKeyYHexString(yString string) Dh {
+    return defaultDH.FromPublicKeyYHexString(yString)
 }
 
 // ==========
@@ -152,4 +182,9 @@ func (this Dh) GenerateKey() Dh {
     this.publicKey  = publicKey
 
     return this.AppendError(err)
+}
+
+// 生成密钥
+func GenerateKey() Dh {
+    return defaultDH.GenerateKey()
 }

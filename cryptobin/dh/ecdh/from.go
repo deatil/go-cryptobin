@@ -19,6 +19,11 @@ func (this Ecdh) FromPrivateKey(key []byte) Ecdh {
     return this
 }
 
+// 私钥
+func FromPrivateKey(key []byte) Ecdh {
+    return defaultECDH.FromPrivateKey(key)
+}
+
 // 私钥带密码
 func (this Ecdh) FromPrivateKeyWithPassword(key []byte, password string) Ecdh {
     parsedKey, err := this.ParsePrivateKeyFromPEMWithPassword(key, password)
@@ -31,6 +36,11 @@ func (this Ecdh) FromPrivateKeyWithPassword(key []byte, password string) Ecdh {
     return this
 }
 
+// 私钥
+func FromPrivateKeyWithPassword(key []byte, password string) Ecdh {
+    return defaultECDH.FromPrivateKeyWithPassword(key, password)
+}
+
 // 公钥
 func (this Ecdh) FromPublicKey(key []byte) Ecdh {
     parsedKey, err := this.ParsePublicKeyFromPEM(key)
@@ -41,6 +51,11 @@ func (this Ecdh) FromPublicKey(key []byte) Ecdh {
     this.publicKey = parsedKey.(*ecdh.PublicKey)
 
     return this
+}
+
+// 公钥
+func FromPublicKey(key []byte) Ecdh {
+    return defaultECDH.FromPublicKey(key)
 }
 
 // ==========
@@ -63,6 +78,11 @@ func (this Ecdh) FromKeyXYHexString(xString string, yString string) Ecdh {
     return this
 }
 
+// 根据私钥 x, y 生成
+func FromKeyXYHexString(xString string, yString string) Ecdh {
+    return defaultECDH.FromKeyXYHexString(xString, yString)
+}
+
 // 根据私钥 x 生成
 func (this Ecdh) FromPrivateKeyXHexString(xString string) Ecdh {
     encoding := tool.NewEncoding()
@@ -81,6 +101,11 @@ func (this Ecdh) FromPrivateKeyXHexString(xString string) Ecdh {
     return this
 }
 
+// 根据私钥 x 生成
+func FromPrivateKeyXHexString(xString string) Ecdh {
+    return defaultECDH.FromPrivateKeyXHexString(xString)
+}
+
 // 根据公钥 y 生成
 func (this Ecdh) FromPublicKeyYHexString(yString string) Ecdh {
     encoding := tool.NewEncoding()
@@ -94,6 +119,11 @@ func (this Ecdh) FromPublicKeyYHexString(yString string) Ecdh {
     this.publicKey = public
 
     return this
+}
+
+// 根据公钥 y 生成
+func FromPublicKeyYHexString(yString string) Ecdh {
+    return defaultECDH.FromPublicKeyYHexString(yString)
 }
 
 // ==========
@@ -136,4 +166,9 @@ func (this Ecdh) GenerateKey() Ecdh {
     this.publicKey  = publicKey
 
     return this.AppendError(err)
+}
+
+// 生成密钥
+func GenerateKey() Ecdh {
+    return defaultECDH.GenerateKey()
 }

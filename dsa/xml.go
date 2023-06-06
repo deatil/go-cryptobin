@@ -10,7 +10,7 @@ import (
 
 // 私钥
 type xmlPrivateKey struct {
-    XMLName xml.Name `xml:"RSAKeyValue"`
+    XMLName xml.Name `xml:"DSAKeyValue"`
     P       string   `xml:"P"`
     Q       string   `xml:"Q"`
     G       string   `xml:"G"`
@@ -20,7 +20,7 @@ type xmlPrivateKey struct {
 
 // 公钥
 type xmlPublicKey struct {
-    XMLName xml.Name `xml:"RSAKeyValue"`
+    XMLName xml.Name `xml:"DSAKeyValue"`
     P       string   `xml:"P"`
     Q       string   `xml:"Q"`
     G       string   `xml:"G"`

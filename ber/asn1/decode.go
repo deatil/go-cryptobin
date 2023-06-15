@@ -9,7 +9,6 @@ import (
     "reflect"
     "unicode/utf8"
     "unicode/utf16"
-    "encoding/asn1"
 )
 
 // We start by dealing with each of the primitive types in turn.
@@ -537,7 +536,7 @@ func parseSequenceOf(bytes []byte, sliceType reflect.Type, elemType reflect.Type
 var (
     enumeratedType  = reflect.TypeOf(Enumerated(0))
     flagType        = reflect.TypeOf(Flag(false))
-    rawValueType    = reflect.TypeOf(asn1.RawValue{})
+    rawValueType    = reflect.TypeOf(RawValue{})
     rawContentsType = reflect.TypeOf(RawContent(nil))
     bigIntType      = reflect.TypeOf(new(big.Int))
 )
@@ -766,7 +765,7 @@ func parseFieldContents(t tagAndLength, v reflect.Value, universalTag int, bytes
     // We deal with the structures defined in this package first.
     switch fieldType {
         case rawValueType:
-            result := asn1.RawValue{t.class, t.tag, t.isCompound, innerBytes, bytes}
+            result := RawValue{t.class, t.tag, t.isCompound, innerBytes, bytes}
             v.Set(reflect.ValueOf(result))
             return
         case objectIdentifierType:

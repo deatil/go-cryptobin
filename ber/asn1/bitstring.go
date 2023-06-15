@@ -32,6 +32,10 @@ func NewBitString(b []byte, paddingBits int) (BitString, error) {
 
 type bitStringEncoder BitString
 
+func (b bitStringEncoder) length() int {
+    return len(b.Bytes) + 1
+}
+
 func (e bitStringEncoder) encode() ([]byte, error) {
     buf := make([]byte, len(e.Bytes)+1)
     buf[0] = byte(e.PaddingBits)

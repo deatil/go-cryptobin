@@ -7,6 +7,10 @@ type Flag bool
 
 type boolEncoder bool
 
+func (b boolEncoder) length() int {
+    return 1
+}
+
 func (e boolEncoder) encode() ([]byte, error) {
     if e {
         return []byte{0xff}, nil

@@ -2,7 +2,6 @@ package asn1
 
 import (
     "bytes"
-    "encoding/asn1"
     "encoding/hex"
     "fmt"
     "math"
@@ -11,12 +10,6 @@ import (
     "strings"
     "testing"
     "time"
-)
-
-// Compatibility vars for ber_asn1_test.go
-var (
-    NullRawValue = asn1.NullRawValue
-    NullBytes    = asn1.NullBytes
 )
 
 type boolTest struct {
@@ -437,7 +430,7 @@ var unmarshalTestData = []struct {
     out interface{}
 }{
     {[]byte{0x02, 0x01, 0x42}, newInt(0x42)},
-    {[]byte{0x05, 0x00}, &asn1.RawValue{0, 5, false, []byte{}, []byte{0x05, 0x00}}},
+    {[]byte{0x05, 0x00}, &RawValue{0, 5, false, []byte{}, []byte{0x05, 0x00}}},
     {[]byte{0x30, 0x08, 0x06, 0x06, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d}, &TestObjectIdentifierStruct{[]int{1, 2, 840, 113549}}},
     {[]byte{0x03, 0x04, 0x06, 0x6e, 0x5d, 0xc0}, &BitString{[]byte{110, 93, 192}, 6}},
     {[]byte{0x30, 0x09, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02, 0x02, 0x01, 0x03}, &[]int{1, 2, 3}},
@@ -446,8 +439,8 @@ var unmarshalTestData = []struct {
     {[]byte{0x16, 0x04, 't', 'e', 's', 't'}, newString("test")},
     // Ampersand is allowed in PrintableString due to mistakes by major CAs.
     {[]byte{0x13, 0x05, 't', 'e', 's', 't', '&'}, newString("test&")},
-    {[]byte{0x16, 0x04, 't', 'e', 's', 't'}, &asn1.RawValue{0, 22, false, []byte("test"), []byte("\x16\x04test")}},
-    {[]byte{0x04, 0x04, 1, 2, 3, 4}, &asn1.RawValue{0, 4, false, []byte{1, 2, 3, 4}, []byte{4, 4, 1, 2, 3, 4}}},
+    {[]byte{0x16, 0x04, 't', 'e', 's', 't'}, &RawValue{0, 22, false, []byte("test"), []byte("\x16\x04test")}},
+    {[]byte{0x04, 0x04, 1, 2, 3, 4}, &RawValue{0, 4, false, []byte{1, 2, 3, 4}, []byte{4, 4, 1, 2, 3, 4}}},
     {[]byte{0x30, 0x03, 0x81, 0x01, 0x01}, &TestContextSpecificTags{1}},
     {[]byte{0x30, 0x08, 0xa1, 0x03, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02}, &TestContextSpecificTags2{1, 2}},
     {[]byte{0x30, 0x03, 0x81, 0x01, '@'}, &TestContextSpecificTags3{"@"}},
@@ -481,7 +474,7 @@ type Certificate struct {
 
 type TBSCertificate struct {
     Version            int `asn1:"optional,explicit,default:0,tag:0"`
-    SerialNumber       asn1.RawValue
+    SerialNumber       RawValue
     SignatureAlgorithm AlgorithmIdentifier
     Issuer             RDNSequence
     Validity           Validity
@@ -593,7 +586,7 @@ func TestObjectIdentifierEqual(t *testing.T) {
 var derEncodedSelfSignedCert = Certificate{
     TBSCertificate: TBSCertificate{
         Version:            0,
-        SerialNumber:       asn1.RawValue{Class: 0, Tag: 2, IsCompound: false, Bytes: []uint8{0x0, 0x8c, 0xc3, 0x37, 0x92, 0x10, 0xec, 0x2c, 0x98}, FullBytes: []byte{2, 9, 0x0, 0x8c, 0xc3, 0x37, 0x92, 0x10, 0xec, 0x2c, 0x98}},
+        SerialNumber:       RawValue{Class: 0, Tag: 2, IsCompound: false, Bytes: []uint8{0x0, 0x8c, 0xc3, 0x37, 0x92, 0x10, 0xec, 0x2c, 0x98}, FullBytes: []byte{2, 9, 0x0, 0x8c, 0xc3, 0x37, 0x92, 0x10, 0xec, 0x2c, 0x98}},
         SignatureAlgorithm: AlgorithmIdentifier{Algorithm: ObjectIdentifier{1, 2, 840, 113549, 1, 1, 5}},
         Issuer: RDNSequence{
             RelativeDistinguishedNameSET{AttributeTypeAndValue{Type: ObjectIdentifier{2, 5, 4, 6}, Value: "XX"}},
@@ -966,7 +959,7 @@ func TestUnexportedStructField(t *testing.T) {
 }
 
 func TestNull(t *testing.T) {
-    unmarshaled := asn1.RawValue{}
+    unmarshaled := RawValue{}
     if _, err := Unmarshal(NullBytes, &unmarshaled); err != nil {
         t.Fatal(err)
     }
@@ -984,7 +977,7 @@ func TestNull(t *testing.T) {
 
 func TestExplicitTagRawValueStruct(t *testing.T) {
     type foo struct {
-        A asn1.RawValue `asn1:"optional,explicit,tag:5"`
+        A RawValue `asn1:"optional,explicit,tag:5"`
         B []byte        `asn1:"optional,explicit,tag:6"`
     }
     before := foo{B: []byte{1, 2, 3}}
@@ -1007,10 +1000,10 @@ func TestExplicitTagRawValueStruct(t *testing.T) {
 
 func TestTaggedRawValue(t *testing.T) {
     type taggedRawValue struct {
-        A asn1.RawValue `asn1:"tag:5"`
+        A RawValue `asn1:"tag:5"`
     }
     type untaggedRawValue struct {
-        A asn1.RawValue
+        A RawValue
     }
     const isCompound = 0x20
     const tag = 5
@@ -1019,11 +1012,11 @@ func TestTaggedRawValue(t *testing.T) {
         shouldMatch bool
         derBytes    []byte
     }{
-        {false, []byte{0x30, 3, asn1.TagInteger, 1, 1}},
-        {true, []byte{0x30, 3, (asn1.ClassContextSpecific << 6) | tag, 1, 1}},
-        {true, []byte{0x30, 3, (asn1.ClassContextSpecific << 6) | tag | isCompound, 1, 1}},
-        {false, []byte{0x30, 3, (asn1.ClassApplication << 6) | tag | isCompound, 1, 1}},
-        {false, []byte{0x30, 3, (asn1.ClassPrivate << 6) | tag | isCompound, 1, 1}},
+        {false, []byte{0x30, 3, byte(TagInteger), 1, 1}},
+        {true, []byte{0x30, 3, (byte(TagClassContextSpecific) << 6) | tag, 1, 1}},
+        {true, []byte{0x30, 3, (byte(TagClassContextSpecific) << 6) | tag | isCompound, 1, 1}},
+        {false, []byte{0x30, 3, (byte(TagClassApplication) << 6) | tag | isCompound, 1, 1}},
+        {false, []byte{0x30, 3, (byte(TagClassPrivate) << 6) | tag | isCompound, 1, 1}},
     }
 
     for i, test := range tests {

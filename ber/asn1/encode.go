@@ -467,10 +467,10 @@ func (t *taggedEncoder) encode() ([]byte, error) {
         return nil, err
     }
 
-    dst := make([]byte, t.tag.length() + t.body.length())
+    dst := make([]byte, 0)
 
-    copy(dst[:t.tag.length()], tagBytes)
-    copy(dst[t.tag.length():], bodyBytes)
+    dst = append(dst, tagBytes...)
+    dst = append(dst, bodyBytes...)
 
     return dst, nil
 }

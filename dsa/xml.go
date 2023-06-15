@@ -10,21 +10,27 @@ import (
 
 // 私钥
 type xmlPrivateKey struct {
-    XMLName xml.Name `xml:"DSAKeyValue"`
-    P       string   `xml:"P"`
-    Q       string   `xml:"Q"`
-    G       string   `xml:"G"`
-    Y       string   `xml:"Y"`
-    X       string   `xml:"X"`
+    XMLName     xml.Name `xml:"DSAKeyValue"`
+    P           string   `xml:"P"`
+    Q           string   `xml:"Q"`
+    G           string   `xml:"G"`
+    Y           string   `xml:"Y"`
+    J           string   `xml:"J,omitempty"`
+    Seed        string   `xml:"Seed,omitempty"`
+    PgenCounter string   `xml:"PgenCounter,omitempty"`
+    X           string   `xml:"X"`
 }
 
 // 公钥
 type xmlPublicKey struct {
-    XMLName xml.Name `xml:"DSAKeyValue"`
-    P       string   `xml:"P"`
-    Q       string   `xml:"Q"`
-    G       string   `xml:"G"`
-    Y       string   `xml:"Y"`
+    XMLName     xml.Name `xml:"DSAKeyValue"`
+    P           string   `xml:"P"`
+    Q           string   `xml:"Q"`
+    G           string   `xml:"G"`
+    Y           string   `xml:"Y"`
+    J           string   `xml:"J,omitempty"`
+    Seed        string   `xml:"Seed,omitempty"`
+    PgenCounter string   `xml:"PgenCounter,omitempty"`
 }
 
 var (
@@ -69,9 +75,9 @@ func MarshalXMLPublicKey(key *dsa.PublicKey) ([]byte, error) {
 }
 
 // 解析公钥
-func (this XMLKey) ParsePublicKey(der []byte) (*dsa.PublicKey, error) {
+func (this XMLKey) ParsePublicKey(data []byte) (*dsa.PublicKey, error) {
     var pub xmlPublicKey
-    err := xml.Unmarshal(der, &pub)
+    err := xml.Unmarshal(data, &pub)
     if err != nil {
         return nil, err
     }
@@ -137,9 +143,9 @@ func MarshalXMLPrivateKey(key *dsa.PrivateKey) ([]byte, error) {
 }
 
 // 解析私钥
-func (this XMLKey) ParsePrivateKey(der []byte) (*dsa.PrivateKey, error) {
+func (this XMLKey) ParsePrivateKey(data []byte) (*dsa.PrivateKey, error) {
     var priv xmlPrivateKey
-    err := xml.Unmarshal(der, &priv)
+    err := xml.Unmarshal(data, &priv)
     if err != nil {
         return nil, err
     }

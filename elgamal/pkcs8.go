@@ -16,11 +16,6 @@ var (
     oidPublicKeyEIGamal = asn1.ObjectIdentifier{1, 3, 14, 7, 2, 1, 1}
 )
 
-// elgamal Parameters
-type elgamalAlgorithmParameters struct {
-    G, P *big.Int
-}
-
 // 私钥 - 包装
 type pkcs8 struct {
     Version    int

@@ -132,17 +132,19 @@ func parseBigInt(bytes []byte) (*big.Int, error) {
 // parseBitString parses an ASN.1 bit string from the given byte slice and returns it.
 func parseBitString(bytes []byte) (ret BitString, err error) {
     if len(bytes) == 0 {
-        err = SyntaxError{Msg: "zero length BIT STRING"}
+        err = SyntaxError{"zero length BIT STRING"}
         return
     }
 
     paddingBits := int(bytes[0])
-    if paddingBits > 7 || len(bytes) == 1 && paddingBits > 0 {
-        err = SyntaxError{Msg: "invalid padding bits in BIT STRING"}
+    if paddingBits > 7 ||
+        len(bytes) == 1 && paddingBits > 0 ||
+        bytes[len(bytes)-1]&((1<<bytes[0])-1) != 0 {
+        err = SyntaxError{"invalid padding bits in BIT STRING"}
         return
     }
 
-    ret.PaddingBits = paddingBits
+    ret.BitLength = (len(bytes)-1)*8 - paddingBits
     ret.Bytes = bytes[1:]
 
     return

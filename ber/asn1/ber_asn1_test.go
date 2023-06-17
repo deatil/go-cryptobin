@@ -154,8 +154,8 @@ type bitStringTest struct {
 var bitStringTestData = []bitStringTest{
     {[]byte{}, false, []byte{}, 0},
     {[]byte{0x00}, true, []byte{}, 0},
-    {[]byte{0x07, 0x00}, true, []byte{0x00}, 7},
-    {[]byte{0x07, 0x40}, true, []byte{0x40}, 7},
+    {[]byte{0x07, 0x00}, true, []byte{0x00}, 1},
+    {[]byte{0x07, 0x40}, false, []byte{0x40}, 7},
     {[]byte{0x08, 0x00}, false, []byte{}, 0},
 }
 
@@ -166,7 +166,7 @@ func TestBitString(t *testing.T) {
             t.Errorf("#%d: Incorrect error result (did fail? %v, expected: %v)", i, err == nil, test.ok)
         }
         if err == nil {
-            if test.bitLength != ret.PaddingBits || !bytes.Equal(ret.Bytes, test.out) {
+            if test.bitLength != ret.BitLength || !bytes.Equal(ret.Bytes, test.out) {
                 t.Errorf("#%d: Bad result: %v (expected %v %v)", i, ret, test.out, test.bitLength)
             }
         }
@@ -432,7 +432,7 @@ var unmarshalTestData = []struct {
     {[]byte{0x02, 0x01, 0x42}, newInt(0x42)},
     {[]byte{0x05, 0x00}, &RawValue{0, 5, false, []byte{}, []byte{0x05, 0x00}}},
     {[]byte{0x30, 0x08, 0x06, 0x06, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d}, &TestObjectIdentifierStruct{[]int{1, 2, 840, 113549}}},
-    {[]byte{0x03, 0x04, 0x06, 0x6e, 0x5d, 0xc0}, &BitString{[]byte{110, 93, 192}, 6}},
+    {[]byte{0x03, 0x04, 0x06, 0x6e, 0x5d, 0xc0}, &BitString{[]byte{110, 93, 192}, 18}},
     {[]byte{0x30, 0x09, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02, 0x02, 0x01, 0x03}, &[]int{1, 2, 3}},
     {[]byte{0x02, 0x01, 0x10}, newInt(16)},
     {[]byte{0x13, 0x04, 't', 'e', 's', 't'}, newString("test")},
@@ -620,7 +620,7 @@ var derEncodedSelfSignedCert = Certificate{
                     0x2a, 0xf7, 0x58, 0x9c, 0xf2, 0xc7, 0x70, 0x45, 0xdc, 0x8f, 0xde, 0xec,
                     0x35, 0x7d, 0x2, 0x3, 0x1, 0x0, 0x1,
                 },
-                PaddingBits: 0,
+                BitLength: 592,
             },
         },
     },
@@ -634,7 +634,7 @@ var derEncodedSelfSignedCert = Certificate{
             0xd9, 0x1e, 0xde, 0x14, 0xa5, 0xed, 0x76, 0xbf, 0x11, 0x6f, 0xe3, 0x60, 0xaa,
             0xfa, 0x88, 0x21, 0x49, 0x4, 0x35,
         },
-        PaddingBits: 0,
+        BitLength: 512,
     },
 }
 

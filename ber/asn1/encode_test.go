@@ -236,12 +236,12 @@ var marshalTests = []marshalTest{
     {time.Date(1991, time.May, 6, 23, 45, 40, 0, time.UTC), "17113931303530363233343534302b30303030"},
 
     // BIT STRING
-    {BitString{[]byte{0x80}, 1}, "03020780"},
-    {BitString{[]byte{0x81, 0xf0}, 4}, "03030481f0"},
-    {BitString{[]byte{0b01101110, 0b01011101, 0b11000000}, len([]byte{0b01101110, 0b01011101, 0b11000000})*8}, "0304006e5dc0"},
+    {BitString{[]byte{0x80}, 8}, "03020080"},
+    {BitString{[]byte{0x81, 0xf0}, 16}, "03030081f0"},
+    {BitString{[]byte{0b01101110, 0b01011101, 0b11000000}, 24}, "0304006e5dc0"},
     {BitString{[]byte{}, 0}, "030100"},
-    {BitString{[]byte{0x40}, 4}, "03020440"},
-    {BitString{[]byte{0x80}, len([]byte{0x80})*8}, "03020080"},
+    {BitString{[]byte{0x40}, 8}, "03020040"},
+    {BitString{[]byte{0x80}, 8}, "03020080"},
 
     // omitempty
     {omitEmptyTest{[]string{}}, "3000"},
@@ -344,7 +344,7 @@ var marshalWithOptionsTests = []marshalWithOptionsTest{
     // explicit
     {true, "a2030101ff", "tag:2,explicit"},
     {1, "a203020101", "tag:2,explicit"},
-    {BitString{[]byte{0x56}, 7}, "a20403020156", "tag:2,explicit"},
+    {BitString{[]byte{0x56}, 8}, "a20403020056", "tag:2,explicit"},
     {[]byte{0x56}, "a203040156", "tag:2,explicit"},
     {"Jones", "1a054a6f6e6573", "visible"},
     {"Jones", "43054a6f6e6573", "visible,application,tag:3"},

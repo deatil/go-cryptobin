@@ -430,7 +430,7 @@ var unmarshalTestData = []struct {
     out interface{}
 }{
     {[]byte{0x02, 0x01, 0x42}, newInt(0x42)},
-    {[]byte{0x05, 0x00}, &RawValue{0, 5, false, []byte{}, []byte{0x05, 0x00}}},
+    {[]byte{0x05, 0x00}, &RawValue{0, 5, false, false, []byte{}, []byte{0x05, 0x00}}},
     {[]byte{0x30, 0x08, 0x06, 0x06, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d}, &TestObjectIdentifierStruct{[]int{1, 2, 840, 113549}}},
     {[]byte{0x03, 0x04, 0x06, 0x6e, 0x5d, 0xc0}, &BitString{[]byte{110, 93, 192}, 18}},
     {[]byte{0x30, 0x09, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02, 0x02, 0x01, 0x03}, &[]int{1, 2, 3}},
@@ -439,8 +439,8 @@ var unmarshalTestData = []struct {
     {[]byte{0x16, 0x04, 't', 'e', 's', 't'}, newString("test")},
     // Ampersand is allowed in PrintableString due to mistakes by major CAs.
     {[]byte{0x13, 0x05, 't', 'e', 's', 't', '&'}, newString("test&")},
-    {[]byte{0x16, 0x04, 't', 'e', 's', 't'}, &RawValue{0, 22, false, []byte("test"), []byte("\x16\x04test")}},
-    {[]byte{0x04, 0x04, 1, 2, 3, 4}, &RawValue{0, 4, false, []byte{1, 2, 3, 4}, []byte{4, 4, 1, 2, 3, 4}}},
+    {[]byte{0x16, 0x04, 't', 'e', 's', 't'}, &RawValue{0, 22, false, false, []byte("test"), []byte("\x16\x04test")}},
+    {[]byte{0x04, 0x04, 1, 2, 3, 4}, &RawValue{0, 4, false, false, []byte{1, 2, 3, 4}, []byte{4, 4, 1, 2, 3, 4}}},
     {[]byte{0x30, 0x03, 0x81, 0x01, 0x01}, &TestContextSpecificTags{1}},
     {[]byte{0x30, 0x08, 0xa1, 0x03, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02}, &TestContextSpecificTags2{1, 2}},
     {[]byte{0x30, 0x03, 0x81, 0x01, '@'}, &TestContextSpecificTags3{"@"}},
@@ -460,6 +460,7 @@ func TestUnmarshal(t *testing.T) {
         if err != nil {
             t.Errorf("Unmarshal failed at index %d %v", i, err)
         }
+
         if !reflect.DeepEqual(val, test.out) {
             t.Errorf("#%d:\nhave %#v\nwant %#v", i, val, test.out)
         }

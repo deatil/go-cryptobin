@@ -154,8 +154,17 @@ func (e Encoder) encode() (encodedContents []byte, err error) {
 
         t := new(taggedEncoder)
 
-        t.tag = bytesEncoder(appendTagAndLength(t.scratch[:0], tagAndLength{rv.Class, rv.Tag, len(rv.Bytes), rv.IsCompound, false}))
-        t.body = bytesEncoder(rv.Bytes)
+        t.tag = bytesEncoder(appendTagAndLength(t.scratch[:0], tagAndLength{rv.Class, rv.Tag, len(rv.Bytes), rv.IsCompound, rv.IsIndefinite}))
+
+        bodyBytes := rv.Bytes
+
+        // it is Indefinite
+        // 非定长模式
+        if rv.IsIndefinite {
+            bodyBytes = append(bodyBytes, []byte{0x00, 0x00}...)
+        }
+
+        t.body = bytesEncoder(bodyBytes)
 
         return t.encode()
     }
@@ -381,10 +390,11 @@ func encodeLength(length int) []byte {
 
 // A RawValue represents an undecoded ASN.1 object.
 type RawValue struct {
-    Class, Tag int
-    IsCompound bool
-    Bytes      []byte
-    FullBytes  []byte // includes the tag and length
+    Class, Tag   int
+    IsCompound   bool
+    IsIndefinite bool
+    Bytes        []byte
+    FullBytes    []byte // includes the tag and length
 }
 
 // RawContent is used to signal that the undecoded, DER data needs to be
@@ -397,7 +407,6 @@ var NullRawValue = RawValue{Tag: int(TagNull)}
 
 // NullBytes contains bytes representing the BER-encoded ASN.1 NULL type.
 var NullBytes = []byte{byte(TagNull), 0}
-
 
 type multiEncoder []encoder
 
@@ -490,12 +499,18 @@ func appendTagAndLength(dst []byte, t tagAndLength) []byte {
         dst = append(dst, b)
     }
 
-    if t.length >= 128 {
-        l := lengthLength(t.length)
-        dst = append(dst, 0x80|byte(l))
-        dst = appendLength(dst, t.length)
+    // it is Indefinite
+    // 非定长模式
+    if t.isIndefinite {
+        dst = append(dst, byte(0x80))
     } else {
-        dst = append(dst, byte(t.length))
+        if t.length >= 128 {
+            l := lengthLength(t.length)
+            dst = append(dst, 0x80|byte(l))
+            dst = appendLength(dst, t.length)
+        } else {
+            dst = append(dst, byte(t.length))
+        }
     }
 
     return dst

@@ -767,7 +767,7 @@ func parseFieldContents(t tagAndLength, v reflect.Value, universalTag int, bytes
     // We deal with the structures defined in this package first.
     switch fieldType {
         case rawValueType:
-            result := RawValue{t.class, t.tag, t.isCompound, innerBytes, bytes}
+            result := RawValue{t.class, t.tag, t.isCompound, t.isIndefinite, innerBytes, bytes}
             v.Set(reflect.ValueOf(result))
             return
         case objectIdentifierType:

@@ -59,14 +59,8 @@ func (this PKCS8Key) MarshalPublicKey(key *PublicKey) ([]byte, error) {
     var publicKeyAlgorithm pkix.AlgorithmIdentifier
     var err error
 
-    // 创建数据
-    paramBytes, err := asn1.Marshal([]byte(""))
-    if err != nil {
-        return nil, errors.New("elgamal: failed to marshal algo param: " + err.Error())
-    }
-
     publicKeyAlgorithm.Algorithm = oidPublicKeyEIGamal
-    publicKeyAlgorithm.Parameters.FullBytes = paramBytes
+    publicKeyAlgorithm.Parameters = asn1.NullRawValue
 
     var p cryptobyte.Builder
     p.AddASN1(cryptobyte_asn1.SEQUENCE, func(b *cryptobyte.Builder) {
@@ -150,17 +144,9 @@ func ParsePKCS8PublicKey(derBytes []byte) (*PublicKey, error) {
 func (this PKCS8Key) MarshalPrivateKey(key *PrivateKey) ([]byte, error) {
     var privKey pkcs8
 
-    // 创建数据
-    paramBytes, err := asn1.Marshal([]byte(""))
-    if err != nil {
-        return nil, errors.New("elgamal: failed to marshal algo param: " + err.Error())
-    }
-
     privKey.Algo = pkix.AlgorithmIdentifier{
         Algorithm:  oidPublicKeyEIGamal,
-        Parameters: asn1.RawValue{
-            FullBytes: paramBytes,
-        },
+        Parameters: asn1.NullRawValue,
     }
 
     var p cryptobyte.Builder

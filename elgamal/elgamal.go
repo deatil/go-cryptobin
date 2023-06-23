@@ -7,10 +7,10 @@ import (
     "math/big"
     "crypto"
     "crypto/rand"
-    "crypto/sha256"
     "crypto/subtle"
 
     mathrand "math/rand"
+    go_asn1 "encoding/asn1"
 
     "golang.org/x/crypto/cryptobyte"
     "golang.org/x/crypto/cryptobyte/asn1"
@@ -99,6 +99,26 @@ func (pub *PublicKey) Encrypt(random io.Reader, message []byte) ([]byte, []byte,
     return c1.Bytes(), c2.Bytes(), nil
 }
 
+// c1 and c2 data
+type elgamalEncryptData struct {
+    C1, C2 []byte
+}
+
+// Encrypt encrypts a plain text represented as a byte array.
+func (pub *PublicKey) EncryptAsn1(random io.Reader, message []byte) ([]byte, error) {
+    c1, c2, err := pub.Encrypt(random, message)
+    if err != nil {
+        return nil, err
+    }
+
+    encryptData, err := go_asn1.Marshal(elgamalEncryptData{c1, c2})
+    if err != nil {
+        return nil, err
+    }
+
+    return encryptData, nil
+}
+
 // Equal reports whether pub and x have the same value.
 func (pub *PublicKey) Equal(x crypto.PublicKey) bool {
     xx, ok := x.(*PublicKey)
@@ -134,6 +154,22 @@ func (priv *PrivateKey) Decrypt(cipher1, cipher2 []byte) ([]byte, error) {
     )
 
     return m.Bytes(), nil
+}
+
+// Decrypt decrypts the passed cipher text.
+func (priv *PrivateKey) DecryptAsn1(cipherData []byte) ([]byte, error) {
+    var encryptData elgamalEncryptData
+    _, err := go_asn1.Unmarshal(cipherData, &encryptData)
+    if err != nil {
+        return nil, err
+    }
+
+    deData, err := priv.Decrypt(encryptData.C1, encryptData.C2)
+    if err != nil {
+        return nil, err
+    }
+
+    return deData, nil
 }
 
 // Public returns the public key corresponding to priv.
@@ -228,9 +264,9 @@ func (pub *PublicKey) HommorphicEncMultiple(ciphertext [][2][]byte) ([]byte, []b
     return C1.Bytes(), C2.Bytes(), nil
 }
 
-// Signature generates signature over the given message. It returns signature
+// Signature generates signature over the given hash. It returns signature
 // value consisting of two parts "r" and "s" as byte arrays.
-func (priv *PrivateKey) Sign(random io.Reader, message []byte) ([]byte, []byte, error) {
+func (priv *PrivateKey) Sign(random io.Reader, hash []byte) ([]byte, []byte, error) {
     k := new(big.Int)
     gcd := new(big.Int)
 
@@ -254,10 +290,8 @@ func (priv *PrivateKey) Sign(random io.Reader, message []byte) ([]byte, []byte, 
         }
     }
 
-    // taking SHA256 of the message
-    hashofm := sha256.Sum256(message)
     // m as H(m)
-    m := new(big.Int).SetBytes(hashofm[:])
+    m := new(big.Int).SetBytes(hash)
 
     // r = g^k mod p
     r := new(big.Int).Exp(priv.G, k, priv.P)
@@ -281,10 +315,10 @@ func (priv *PrivateKey) Sign(random io.Reader, message []byte) ([]byte, []byte, 
     return r.Bytes(), s.Bytes(), nil
 }
 
-// Verify verifies signature over the given message and signature values (r & s).
+// Verify verifies signature over the given hash and signature values (r & s).
 // It returns true as a boolean value if signature is verify correctly. Otherwise
 // it returns false along with error message.
-func (pub *PublicKey) Verify(r, s, message []byte) (bool, error) {
+func (pub *PublicKey) Verify(r, s, hash []byte) (bool, error) {
     // verify that 0 < r < p
     signr := new(big.Int).SetBytes(r)
     if signr.Cmp(zero) == -1 {
@@ -300,10 +334,8 @@ func (pub *PublicKey) Verify(r, s, message []byte) (bool, error) {
         return false, errors.New("s is larger than public key p")
     }
 
-    // taking SHA256 of the message
-    hashofm := sha256.Sum256(message)
     // m as H(m)
-    m := new(big.Int).SetBytes(hashofm[:])
+    m := new(big.Int).SetBytes(hash)
     // ghashm = g^[H(m)] mod p
     ghashm := new(big.Int).Exp(pub.G, m, pub.P)
 
@@ -324,6 +356,29 @@ func (pub *PublicKey) Verify(r, s, message []byte) (bool, error) {
     return false, errors.New("signature is not verified")
 }
 
+// Sign hash
+func Sign(rand io.Reader, priv *PrivateKey, hash []byte) ([]byte, []byte, error) {
+    if priv == nil {
+        return nil, nil, errors.New("Private Key is error")
+    }
+
+    return priv.Sign(rand, hash)
+}
+
+// Verify hash
+func Verify(pub *PublicKey, hash, r, s []byte) (bool, error) {
+    if pub == nil {
+        return false, errors.New("Public Key is error")
+    }
+
+    ok, err := pub.Verify(r, s, hash)
+    if err != nil {
+        return false, err
+    }
+
+    return ok, nil
+}
+
 // SignASN1 signs a hash (which should be the result of hashing a larger message)
 // using the private key, priv. If the hash is longer than the bit-length of the
 // private key's curve order, the hash will be truncated to that length. It
@@ -339,15 +394,18 @@ func SignASN1(rand io.Reader, priv *PrivateKey, hash []byte) ([]byte, error) {
 
 // VerifyASN1 verifies the ASN.1 encoded signature, sig, of hash using the
 // public key, pub. Its return value records whether the signature is valid.
-func VerifyASN1(pub *PublicKey, message, sig []byte) bool {
+func VerifyASN1(pub *PublicKey, hash, sig []byte) (bool, error) {
     rBytes, sBytes, err := parseSignature(sig)
     if err != nil {
-        return false
+        return false, err
     }
 
-    ok, _ := pub.Verify(rBytes, sBytes, message)
+    ok, err := pub.Verify(rBytes, sBytes, hash)
+    if err != nil {
+        return false, err
+    }
 
-    return ok
+    return ok, nil
 }
 
 func encodeSignature(r, s []byte) ([]byte, error) {

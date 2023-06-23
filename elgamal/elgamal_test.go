@@ -3,6 +3,7 @@ package elgamal
 import (
     "testing"
     "crypto/rand"
+    "crypto/sha256"
 
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
@@ -42,6 +43,28 @@ func Test_Encrypt(t *testing.T) {
     assertEqual(string(de), data, "Encrypt-Dedata")
 }
 
+func Test_EncryptAsn1(t *testing.T) {
+    assertEqual := cryptobin_test.AssertEqualT(t)
+    assertEmpty := cryptobin_test.AssertEmptyT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
+    pub := &pri.PublicKey
+
+    assertError(err, "Encrypt-Error")
+    assertEmpty(pri, "Encrypt")
+
+    data := "123tesfd!df"
+
+    c, err := pub.EncryptAsn1(rand.Reader, []byte(data))
+    assertError(err, "Encrypt-Encrypt-Error")
+
+    de, err := pri.DecryptAsn1(c)
+    assertError(err, "Encrypt-Decrypt-Error")
+
+    assertEqual(string(de), data, "Encrypt-Dedata")
+}
+
 func Test_Sign(t *testing.T) {
     assertBool := cryptobin_test.AssertBoolT(t)
     assertEmpty := cryptobin_test.AssertEmptyT(t)
@@ -54,11 +77,12 @@ func Test_Sign(t *testing.T) {
     assertEmpty(pri, "Sign")
 
     data := "123tesfd!dfsign"
+    hash := sha256.Sum256([]byte(data))
 
-    sig, err := SignASN1(rand.Reader, pri, []byte(data))
+    sig, err := SignASN1(rand.Reader, pri, hash[:])
     assertError(err, "Sign-sig-Error")
 
-    veri := VerifyASN1(pub, []byte(data), sig)
+    veri, _ := VerifyASN1(pub, hash[:], sig)
     assertBool(veri, "Sign-veri")
 }
 

@@ -685,8 +685,8 @@ func parseField(v reflect.Value, bytes []byte, initOffset int, params fieldParam
     if universalTag == tagPrintableString {
         if t.class == classUniversal {
             switch t.tag {
-            case tagIA5String, tagGeneralString, tagT61String, tagUTF8String, tagNumericString, tagBMPString:
-                universalTag = t.tag
+                case tagIA5String, tagGeneralString, tagT61String, tagUTF8String, tagNumericString, tagBMPString:
+                    universalTag = t.tag
             }
         } else if params.stringType != 0 {
             universalTag = params.stringType
@@ -880,10 +880,12 @@ func parseFieldContents(t tagAndLength, v reflect.Value, universalTag int, bytes
                 reflect.Copy(val, reflect.ValueOf(innerBytes))
                 return
             }
+
             newSlice, err1 := parseSequenceOf(innerBytes, sliceType, sliceType.Elem())
             if err1 == nil {
                 val.Set(newSlice)
             }
+
             err = err1
             return
         case reflect.String:
@@ -930,13 +932,16 @@ func setDefaultValue(v reflect.Value, params fieldParameters) (ok bool) {
     if !params.optional {
         return
     }
+
     ok = true
     if params.defaultValue == nil {
         return
     }
+
     if canHaveDefaultValue(v.Kind()) {
         v.SetInt(*params.defaultValue)
     }
+
     return
 }
 
@@ -1001,9 +1006,11 @@ func Unmarshal(b []byte, val any) (rest []byte, err error) {
 // top-level element. The form of the params is the same as the field tags.
 func UnmarshalWithParams(b []byte, val any, params string) (rest []byte, err error) {
     v := reflect.ValueOf(val).Elem()
+
     offset, err := parseField(v, b, 0, parseFieldParameters(params))
     if err != nil {
         return nil, err
     }
+
     return b[offset:], nil
 }

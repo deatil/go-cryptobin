@@ -2,6 +2,7 @@ package asn1
 
 import (
     "math"
+    // "bytes"
     "errors"
     "unicode/utf16"
     "testing"
@@ -174,18 +175,37 @@ func Test_SM2Pkcs12(t *testing.T) {
         t.Errorf("Unmarshal2 err: %v", err)
     }
 
+    data := pfx.AuthSafe.Content.Bytes
+    // data = bytes.TrimRight(data, string([]byte{0}))
+
+    var authenticatedSafes = make([]RawValue, 0)
+
+    for {
+        var authenticatedSafe RawValue
+        data, err = Unmarshal(data, &authenticatedSafe)
+        if err != nil {
+            t.Errorf("Unmarshal octet err: %v", err)
+        }
+
+        authenticatedSafes = append(authenticatedSafes, authenticatedSafe)
+
+        if len(data) == 0 {
+            break
+        }
+    }
+
     password := "12345678"
     newPassword, err := testBmpStringZeroTerminated(password)
     if err != nil {
         t.Errorf("password err: %v", err)
     }
 
-    checked := pfx.MacData.Verify(pfx.AuthSafe.Content.Bytes, newPassword)
+    checked := pfx.MacData.Verify(data, newPassword)
     if !checked {
         // t.Errorf("password is error")
     }
 
-    // t.Errorf("Version err: %#v", pfx.AuthSafe)
+    // t.Errorf("authenticatedSafes data: %#v", authenticatedSafes)
 
 }
 

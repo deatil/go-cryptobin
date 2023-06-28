@@ -196,6 +196,26 @@ func (this Cryptobin) Camellia() Cryptobin {
     return this
 }
 
+// Gost
+// The key argument should be 32 bytes.
+// sbox is [DESDerivedSbox | TestSbox | CryptoProSbox | SboxIdtc26gost28147paramZ]
+// or set [][]byte data
+func (this Cryptobin) Gost(sbox any) Cryptobin {
+    this.multiple = Gost
+
+    this.config.Set("sbox", sbox)
+
+    return this
+}
+
+// Kuznyechik
+// The key argument should be 32 bytes.
+func (this Cryptobin) Kuznyechik() Cryptobin {
+    this.multiple = Kuznyechik
+
+    return this
+}
+
 // 使用类型
 func (this Cryptobin) MultipleBy(multiple Multiple, cfg ...map[string]any) Cryptobin {
     this.multiple = multiple

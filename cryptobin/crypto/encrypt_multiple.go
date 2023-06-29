@@ -31,6 +31,8 @@ import (
     cryptobin_camellia "github.com/deatil/go-cryptobin/cipher/camellia"
     cryptobin_gost "github.com/deatil/go-cryptobin/cipher/gost"
     cryptobin_kuznyechik "github.com/deatil/go-cryptobin/cipher/kuznyechik"
+    cryptobin_skipjack "github.com/deatil/go-cryptobin/cipher/skipjack"
+    cryptobin_serpent "github.com/deatil/go-cryptobin/cipher/serpent"
 )
 
 // 获取模式方式
@@ -1038,6 +1040,60 @@ func (this EncryptKuznyechik) Decrypt(data []byte, opt IOption) ([]byte, error) 
 
 // ===================
 
+// Skipjack key is 10 bytes.
+type EncryptSkipjack struct {}
+
+// 加密
+func (this EncryptSkipjack) Encrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_skipjack.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: Skipjack %w", err)
+        return nil, err
+    }
+
+    return BlockEncrypt(block, data, opt)
+}
+
+// 解密
+func (this EncryptSkipjack) Decrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_skipjack.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: Skipjack %w", err)
+        return nil, err
+    }
+
+    return BlockDecrypt(block, data, opt)
+}
+
+// ===================
+
+// Serpent key is 16, 24, 32 bytes.
+type EncryptSerpent struct {}
+
+// 加密
+func (this EncryptSerpent) Encrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_serpent.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: Serpent %w", err)
+        return nil, err
+    }
+
+    return BlockEncrypt(block, data, opt)
+}
+
+// 解密
+func (this EncryptSerpent) Decrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_serpent.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: Serpent %w", err)
+        return nil, err
+    }
+
+    return BlockDecrypt(block, data, opt)
+}
+
+// ===================
+
 func init() {
     UseEncrypt.Add(Aes, func() IEncrypt {
         return EncryptAes{}
@@ -1113,5 +1169,11 @@ func init() {
     })
     UseEncrypt.Add(Kuznyechik, func() IEncrypt {
         return EncryptKuznyechik{}
+    })
+    UseEncrypt.Add(Skipjack, func() IEncrypt {
+        return EncryptSkipjack{}
+    })
+    UseEncrypt.Add(Serpent, func() IEncrypt {
+        return EncryptSerpent{}
     })
 }

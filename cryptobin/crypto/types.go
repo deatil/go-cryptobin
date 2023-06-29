@@ -105,6 +105,10 @@ func (this Multiple) String() string {
             return "Gost"
         case Kuznyechik:
             return "Kuznyechik"
+        case Skipjack:
+            return "Skipjack"
+        case Serpent:
+            return "Serpent"
         default:
             if TypeMultiple.Names().Has(this) {
                 return (TypeMultiple.Names().Get(this))()
@@ -140,6 +144,8 @@ const (
     Camellia
     Gost
     Kuznyechik
+    Skipjack
+    Serpent
     maxMultiple
 )
 

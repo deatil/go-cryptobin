@@ -649,3 +649,63 @@ func Test_KuznyechikCFBPKCS7Padding(t *testing.T) {
 
     assert(data, cyptdeStr, "KuznyechikCFBPKCS7Padding")
 }
+
+func Test_SkipjackCFBPKCS7Padding(t *testing.T) {
+    assert := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
+    cypt := FromString(data).
+        SetKey("dfertf12df").
+        SetIv("jifu87uj").
+        Skipjack().
+        CFB().
+        PKCS7Padding().
+        Encrypt()
+    cyptStr := cypt.ToBase64String()
+
+    assertError(cypt.Error(), "SkipjackCFBPKCS7Padding-Encode")
+
+    cyptde := FromBase64String(cyptStr).
+        SetKey("dfertf12df").
+        SetIv("jifu87uj").
+        Skipjack().
+        CFB().
+        PKCS7Padding().
+        Decrypt()
+    cyptdeStr := cyptde.ToString()
+
+    assertError(cyptde.Error(), "SkipjackCFBPKCS7Padding-Decode")
+
+    assert(data, cyptdeStr, "SkipjackCFBPKCS7Padding")
+}
+
+func Test_SerpentCFBPKCS7Padding(t *testing.T) {
+    assert := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
+    cypt := FromString(data).
+        SetKey("dfertf12dfertf12").
+        SetIv("jifu87ujjifu87uj").
+        Serpent().
+        CFB().
+        PKCS7Padding().
+        Encrypt()
+    cyptStr := cypt.ToBase64String()
+
+    assertError(cypt.Error(), "SerpentCFBPKCS7Padding-Encode")
+
+    cyptde := FromBase64String(cyptStr).
+        SetKey("dfertf12dfertf12").
+        SetIv("jifu87ujjifu87uj").
+        Serpent().
+        CFB().
+        PKCS7Padding().
+        Decrypt()
+    cyptdeStr := cyptde.ToString()
+
+    assertError(cyptde.Error(), "SerpentCFBPKCS7Padding-Decode")
+
+    assert(data, cyptdeStr, "SerpentCFBPKCS7Padding")
+}

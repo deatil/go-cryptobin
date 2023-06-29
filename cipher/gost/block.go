@@ -17,7 +17,7 @@ type gostCipher struct {
 // 64 byte substitution table, represented as a two-dimensional array of 8 rows
 // of 16 4-bit integers.
 func NewCipher(key []byte, sbox [][]byte) (cipher.Block, error) {
-    if len(key) != (256 / 8) {
+    if len(key) != 32 {
         return nil, KeySizeError(len(key))
     }
 

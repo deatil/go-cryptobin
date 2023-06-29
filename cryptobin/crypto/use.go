@@ -216,6 +216,22 @@ func (this Cryptobin) Kuznyechik() Cryptobin {
     return this
 }
 
+// Skipjack
+// The key argument should be 10 bytes.
+func (this Cryptobin) Skipjack() Cryptobin {
+    this.multiple = Skipjack
+
+    return this
+}
+
+// Serpent
+// The key argument should be 16, 24, 32 bytes.
+func (this Cryptobin) Serpent() Cryptobin {
+    this.multiple = Serpent
+
+    return this
+}
+
 // 使用类型
 func (this Cryptobin) MultipleBy(multiple Multiple, cfg ...map[string]any) Cryptobin {
     this.multiple = multiple

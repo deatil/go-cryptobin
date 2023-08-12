@@ -29,6 +29,14 @@ func AssertEmptyT(t *testing.T) func(any, string) {
     }
 }
 
+func AssertNotEmptyT(t *testing.T) func(any, string) {
+    return func(data any, msg string) {
+        if !isEmpty(data) {
+            t.Errorf("Failed %s: error: data not empty", msg)
+        }
+    }
+}
+
 func AssertBoolT(t *testing.T) func(bool, string) {
     return func(data bool, msg string) {
         if !data {

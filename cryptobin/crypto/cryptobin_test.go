@@ -712,7 +712,7 @@ func Test_SerpentCFBPKCS7Padding(t *testing.T) {
 
 func Test_OnError(t *testing.T) {
     assertBool := cryptobin_test.AssertBoolT(t)
-    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+    assertEmpty := cryptobin_test.AssertEmptyT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cyptStr := FromString(data).
@@ -726,7 +726,7 @@ func Test_OnError(t *testing.T) {
         PKCS7Padding().
         Encrypt().
         ToBase64String()
-    assertNotEmpty(cyptStr, "OnError-Encrypt Not Empty")
+    assertEmpty(cyptStr, "OnError-Encrypt Empty")
 
     cyptdeStr := FromBase64String(cyptStr).
         SetKey("dfertf12dfertf123").
@@ -740,5 +740,5 @@ func Test_OnError(t *testing.T) {
         Decrypt().
         ToString()
 
-    assertNotEmpty(cyptdeStr, "OnError-Decrypt Not Empty")
+    assertEmpty(cyptdeStr, "OnError-Decrypt Empty")
 }

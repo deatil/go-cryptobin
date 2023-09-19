@@ -6,6 +6,7 @@ import (
 
     "github.com/deatil/go-cryptobin/cipher/ocb"
     "github.com/deatil/go-cryptobin/cipher/eax"
+    "github.com/deatil/go-cryptobin/cipher/ccm"
     cryptobin_cipher "github.com/deatil/go-cryptobin/cipher"
 )
 
@@ -371,7 +372,7 @@ func (this ModeCCM) Encrypt(plain []byte, block cipher.Block, opt IOption) ([]by
         return nil, err
     }
 
-    aead, err := cryptobin_cipher.NewCCMWithNonceSize(block, len(nonceBytes))
+    aead, err := ccm.NewCCMWithNonceSize(block, len(nonceBytes))
     if err != nil {
         err = fmt.Errorf("Cryptobin: cipher.NewCCMWithNonceSize(),error:%w", err)
         return nil, err
@@ -393,7 +394,7 @@ func (this ModeCCM) Decrypt(data []byte, block cipher.Block, opt IOption) ([]byt
         return nil, err
     }
 
-    aead, err := cryptobin_cipher.NewCCMWithNonceSize(block, len(nonceBytes))
+    aead, err := ccm.NewCCMWithNonceSize(block, len(nonceBytes))
     if err != nil {
         err = fmt.Errorf("Cryptobin: cipher.NewCCMWithNonceSize(),error:%w", err)
         return nil, err

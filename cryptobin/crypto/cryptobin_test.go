@@ -145,7 +145,7 @@ func Test_AesECB(t *testing.T) {
 
     data := "test-pass"
     cypt := FromString(data).
-        SetKey("dfertf12dfertf12").
+        SetKey("dfertf12dfertf12rtgthytr").
         AesECB().
         Encrypt()
     cyptStr := cypt.ToBase64String()
@@ -153,7 +153,7 @@ func Test_AesECB(t *testing.T) {
     assertError(cypt.Error(), "AesECB-Encode")
 
     cyptde := FromBase64String(cyptStr).
-        SetKey("dfertf12dfertf12").
+        SetKey("dfertf12dfertf12rtgthytr").
         AesECB().
         Decrypt()
     cyptdeStr := cyptde.ToString()

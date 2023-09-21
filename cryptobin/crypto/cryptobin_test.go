@@ -833,3 +833,58 @@ func Test_AesCCMPKCS7Padding(t *testing.T) {
     assert(data, cyptdeStr, "AesCCMPKCS7Padding")
 }
 
+func Test_AesOCFBPKCS7Padding(t *testing.T) {
+    assert := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    data := "test-pass"
+    cypt := FromString(data).
+        SetKey("dfertf12dfertf12").
+        Aes().
+        OCFB(true).
+        NoPadding().
+        Encrypt()
+    cyptStr := cypt.ToBase64String()
+
+    assertError(cypt.Error(), "AesOCFBPKCS7Padding-Encode")
+
+    cyptde := FromBase64String(cyptStr).
+        SetKey("dfertf12dfertf12").
+        Aes().
+        OCFB(true).
+        NoPadding().
+        Decrypt()
+    cyptdeStr := cyptde.ToString()
+
+    assertError(cyptde.Error(), "AesOCFBPKCS7Padding-Decode")
+
+    assert(data, cyptdeStr, "AesOCFBPKCS7Padding")
+}
+
+func Test_AesOCFBPKCS7PaddingFalse(t *testing.T) {
+    assert := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    data := "test-pass"
+    cypt := FromString(data).
+        SetKey("dfertf12dfertf12").
+        Aes().
+        OCFB(false).
+        NoPadding().
+        Encrypt()
+    cyptStr := cypt.ToBase64String()
+
+    assertError(cypt.Error(), "AesOCFBPKCS7PaddingFalse-Encode")
+
+    cyptde := FromBase64String(cyptStr).
+        SetKey("dfertf12dfertf12").
+        Aes().
+        OCFB(false).
+        NoPadding().
+        Decrypt()
+    cyptdeStr := cyptde.ToString()
+
+    assertError(cyptde.Error(), "AesOCFBPKCS7PaddingFalse-Decode")
+
+    assert(data, cyptdeStr, "AesOCFBPKCS7PaddingFalse")
+}

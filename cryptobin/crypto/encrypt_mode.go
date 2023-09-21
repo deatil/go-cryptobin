@@ -2,8 +2,10 @@ package crypto
 
 import (
     "fmt"
+    "errors"
     "crypto/cipher"
 
+    "github.com/deatil/go-cryptobin/tool"
     "github.com/deatil/go-cryptobin/cipher/ocb"
     "github.com/deatil/go-cryptobin/cipher/eax"
     "github.com/deatil/go-cryptobin/cipher/ccm"
@@ -454,6 +456,68 @@ func init() {
     })
     UseMode.Add(CCM, func() IMode {
         return ModeCCM{}
+    })
+}
+
+// ===================
+
+// OCFB 模式不需要补码
+// 默认 prefix 放置在结果数据之前
+type ModeOCFB struct {}
+
+// 加密
+func (this ModeOCFB) Encrypt(plain []byte, block cipher.Block, opt IOption) ([]byte, error) {
+    blockSize := block.BlockSize()
+
+    randData, _ := tool.GenRandom(blockSize)
+
+    resync := opt.Config().GetBool("resync")
+
+    mode, prefix := cryptobin_cipher.NewOCFBEncrypter(block, randData, cryptobin_cipher.OCFBResyncOption(resync))
+    if mode == nil {
+        return nil, errors.New("cipher: OCFB randData length is not eq blockSize.")
+    }
+
+    // prefix 长度
+    prefixLen := blockSize+2
+
+    cryptText := make([]byte, len(plain) + prefixLen)
+    mode.XORKeyStream(cryptText[prefixLen:], plain)
+
+    copy(cryptText[:prefixLen], prefix)
+
+    return cryptText, nil
+}
+
+// 解密
+func (this ModeOCFB) Decrypt(data []byte, block cipher.Block, opt IOption) ([]byte, error) {
+    blockSize := block.BlockSize()
+
+    // prefix 长度
+    prefixLen := blockSize+2
+
+    if len(data) < prefixLen {
+        return nil, errors.New("cipher: data is too short.")
+    }
+
+    prefix := data[:prefixLen]
+
+    resync := opt.Config().GetBool("resync")
+
+    mode := cryptobin_cipher.NewOCFBDecrypter(block, prefix, cryptobin_cipher.OCFBResyncOption(resync))
+    if mode == nil {
+        return nil, errors.New("cipher: OCFB prefix length is not eq blockSize + 2.")
+    }
+
+    dst := make([]byte, len(data) - prefixLen)
+    mode.XORKeyStream(dst, data[prefixLen:])
+
+    return dst, nil
+}
+
+func init() {
+    UseMode.Add(OCFB, func() IMode {
+        return ModeOCFB{}
     })
 }
 

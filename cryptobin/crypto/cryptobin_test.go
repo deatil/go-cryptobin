@@ -833,7 +833,7 @@ func Test_AesCCMPKCS7Padding(t *testing.T) {
     assert(data, cyptdeStr, "AesCCMPKCS7Padding")
 }
 
-func Test_AesOCFBPKCS7Padding(t *testing.T) {
+func Test_AesOCFB(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
     assertError := cryptobin_test.AssertErrorT(t)
 
@@ -842,49 +842,45 @@ func Test_AesOCFBPKCS7Padding(t *testing.T) {
         SetKey("dfertf12dfertf12").
         Aes().
         OCFB(true).
-        NoPadding().
         Encrypt()
     cyptStr := cypt.ToBase64String()
 
-    assertError(cypt.Error(), "AesOCFBPKCS7Padding-Encode")
+    assertError(cypt.Error(), "AesOCFB-Encode")
 
     cyptde := FromBase64String(cyptStr).
         SetKey("dfertf12dfertf12").
         Aes().
         OCFB(true).
-        NoPadding().
         Decrypt()
     cyptdeStr := cyptde.ToString()
 
-    assertError(cyptde.Error(), "AesOCFBPKCS7Padding-Decode")
+    assertError(cyptde.Error(), "AesOCFB-Decode")
 
-    assert(data, cyptdeStr, "AesOCFBPKCS7Padding")
+    assert(data, cyptdeStr, "AesOCFB")
 }
 
-func Test_AesOCFBPKCS7PaddingFalse(t *testing.T) {
+func Test_AesOCFBFalse(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
     assertError := cryptobin_test.AssertErrorT(t)
 
-    data := "test-pass"
+    data := "test-pass12trtrt7yh"
     cypt := FromString(data).
-        SetKey("dfertf12dfertf12").
+        SetKey("dfertf12dfertf12dfertf12").
         Aes().
         OCFB(false).
-        NoPadding().
         Encrypt()
     cyptStr := cypt.ToBase64String()
 
-    assertError(cypt.Error(), "AesOCFBPKCS7PaddingFalse-Encode")
+    assertError(cypt.Error(), "AesOCFBFalse-Encode")
 
     cyptde := FromBase64String(cyptStr).
-        SetKey("dfertf12dfertf12").
+        SetKey("dfertf12dfertf12dfertf12").
         Aes().
         OCFB(false).
-        NoPadding().
         Decrypt()
     cyptdeStr := cyptde.ToString()
 
-    assertError(cyptde.Error(), "AesOCFBPKCS7PaddingFalse-Decode")
+    assertError(cyptde.Error(), "AesOCFBFalse-Decode")
 
-    assert(data, cyptdeStr, "AesOCFBPKCS7PaddingFalse")
+    assert(data, cyptdeStr, "AesOCFBFalse")
 }

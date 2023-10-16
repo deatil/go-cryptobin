@@ -55,7 +55,14 @@ func GenerateKeyWithSeed(reader io.Reader) SM2 {
 
 // 私钥
 func (this SM2) FromPrivateKey(key []byte) SM2 {
-    privateKey, err := this.ParsePrivateKeyFromPEM(key)
+    privateKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
+    if err == nil {
+        this.privateKey = privateKey
+
+        return this
+    }
+
+    privateKey, err = this.ParsePKCS1PrivateKeyFromPEM(key)
     if err != nil {
         return this.AppendError(err)
     }
@@ -72,6 +79,92 @@ func FromPrivateKey(key []byte) SM2 {
 
 // 私钥带密码
 func (this SM2) FromPrivateKeyWithPassword(key []byte, password string) SM2 {
+    privateKey, err := this.ParsePrivateKeyFromPEMWithPassword(key, password)
+    if err == nil {
+        this.privateKey = privateKey
+
+        return this
+    }
+
+    privateKey, err = this.ParsePKCS8PrivateKeyFromPEMWithPassword(key, password)
+    if err == nil {
+        this.privateKey = privateKey
+
+        return this
+    }
+
+    privateKey, err = this.ParsePKCS1PrivateKeyFromPEMWithPassword(key, password)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+
+    return this
+}
+
+// 私钥带密码
+func FromPrivateKeyWithPassword(key []byte, password string) SM2 {
+    return defaultSM2.FromPrivateKeyWithPassword(key, password)
+}
+
+// ==========
+
+// PKCS1 私钥
+func (this SM2) FromPKCS1PrivateKey(key []byte) SM2 {
+    privateKey, err := this.ParsePKCS1PrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+
+    return this
+}
+
+// PKCS1 私钥
+func FromPKCS1PrivateKey(key []byte) SM2 {
+    return defaultSM2.FromPKCS1PrivateKey(key)
+}
+
+// PKCS1 私钥带密码
+func (this SM2) FromPKCS1PrivateKeyWithPassword(key []byte, password string) SM2 {
+    privateKey, err := this.ParsePKCS1PrivateKeyFromPEMWithPassword(key, password)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+
+    return this
+}
+
+// PKCS1 私钥带密码
+func FromPKCS1PrivateKeyWithPassword(key []byte, password string) SM2 {
+    return defaultSM2.FromPKCS1PrivateKeyWithPassword(key, password)
+}
+
+// ==========
+
+// PKCS8 私钥
+func (this SM2) FromPKCS8PrivateKey(key []byte) SM2 {
+    privateKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+
+    return this
+}
+
+// PKCS8 私钥
+func FromPKCS8PrivateKey(key []byte) SM2 {
+    return defaultSM2.FromPKCS8PrivateKey(key)
+}
+
+// PKCS8 私钥带密码
+func (this SM2) FromPKCS8PrivateKeyWithPassword(key []byte, password string) SM2 {
     var err error
 
     var privateKey *sm2.PrivateKey
@@ -86,12 +179,14 @@ func (this SM2) FromPrivateKeyWithPassword(key []byte, password string) SM2 {
     return this
 }
 
-// 私钥带密码
-func FromPrivateKeyWithPassword(key []byte, password string) SM2 {
-    return defaultSM2.FromPrivateKeyWithPassword(key, password)
+// PKCS8 私钥带密码
+func FromPKCS8PrivateKeyWithPassword(key []byte, password string) SM2 {
+    return defaultSM2.FromPKCS8PrivateKeyWithPassword(key, password)
 }
 
-// 公钥
+// ==========
+
+// 公钥，默认只有一种类型
 func (this SM2) FromPublicKey(key []byte) SM2 {
     publicKey, err := this.ParsePublicKeyFromPEM(key)
     if err != nil {
@@ -103,18 +198,32 @@ func (this SM2) FromPublicKey(key []byte) SM2 {
     return this
 }
 
-// 公钥
+// 公钥，默认只有一种类型
 func FromPublicKey(key []byte) SM2 {
     return defaultSM2.FromPublicKey(key)
 }
 
 // ==========
 
-// DER 私钥
-func (this SM2) FromPrivateKeyDer(der []byte) SM2 {
+// PKCS1 编码 DER 私钥
+func (this SM2) FromPKCS1PrivateKeyDer(der []byte) SM2 {
+    key := cryptobin_tool.EncodeDerToPem(der, "SM2 PRIVATE KEY")
+
+    privateKey, err := this.ParsePKCS1PrivateKeyFromPEM(key)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = privateKey
+
+    return this
+}
+
+// PKCS8 编码 DER 私钥
+func (this SM2) FromPKCS8PrivateKeyDer(der []byte) SM2 {
     key := cryptobin_tool.EncodeDerToPem(der, "PRIVATE KEY")
 
-    privateKey, err := this.ParsePrivateKeyFromPEM(key)
+    privateKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
     if err != nil {
         return this.AppendError(err)
     }

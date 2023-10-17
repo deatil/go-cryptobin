@@ -25,6 +25,10 @@ func main() {
         CreatePrivateKey().
         // CreatePrivateKeyWithPassword("123").
         // CreatePrivateKeyWithPassword("123", "AES256CBC").
+        // CreatePKCS1PrivateKey().
+        // CreatePKCS1PrivateKeyWithPassword("123", "AES256CBC").
+        // CreatePKCS8PrivateKey().
+        // CreatePKCS8PrivateKeyWithPassword("123", "AES256CBC", "SHA256").
         ToKeyString()
     objPubKey := obj.
         CreatePublicKey().
@@ -40,6 +44,10 @@ func main() {
         FromString("test-pass").
         FromPrivateKey([]byte(obj2Pri)).
         // FromPrivateKeyWithPassword([]byte(obj2Pri), "123").
+        // FromPKCS1PrivateKey([]byte(obj2Pri)).
+        // FromPKCS1PrivateKeyWithPassword([]byte(obj2Pri), "123").
+        // FromPKCS8PrivateKey([]byte(obj2Pri)).
+        // FromPKCS8PrivateKeyWithPassword([]byte(obj2Pri), "123").
         Sign().
         ToBase64String()
     obj2Pub, _ := fs.Get("./runtime/key/sm2.pub")

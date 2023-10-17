@@ -16,7 +16,7 @@ func (this SM2) GetPrivateKeyCurve() elliptic.Curve {
     return this.privateKey.Curve
 }
 
-// 获取 PrivateKeyX
+// 获取 PrivateKeyXHex
 func (this SM2) GetPrivateKeyXHexString() string {
     data := this.privateKey.X
 
@@ -27,13 +27,20 @@ func (this SM2) GetPrivateKeyXHexString() string {
     return dataHex
 }
 
-// 获取 PrivateKeyY
+// 获取 PrivateKeyYHex
 func (this SM2) GetPrivateKeyYHexString() string {
     data := this.privateKey.Y
 
     dataHex := cryptobin_tool.
         NewEncoding().
         HexEncode(data.Bytes())
+
+    return dataHex
+}
+
+// 获取 PrivateKeyXYHex
+func (this SM2) GetPrivateKeyXYHexString() string {
+    dataHex := "04" + this.GetPrivateKeyXHexString() + this.GetPrivateKeyYHexString()
 
     return dataHex
 }
@@ -59,7 +66,7 @@ func (this SM2) GetPublicKeyCurve() elliptic.Curve {
     return this.publicKey.Curve
 }
 
-// 获取 PublicKeyX
+// 获取 PublicKeyXHex
 func (this SM2) GetPublicKeyXHexString() string {
     data := this.publicKey.X
 
@@ -70,13 +77,20 @@ func (this SM2) GetPublicKeyXHexString() string {
     return dataHex
 }
 
-// 获取 PublicKeyY
+// 获取 PublicKeyYHex
 func (this SM2) GetPublicKeyYHexString() string {
     data := this.publicKey.Y
 
     dataHex := cryptobin_tool.
         NewEncoding().
         HexEncode(data.Bytes())
+
+    return dataHex
+}
+
+// 获取 PublicKeyXYHex
+func (this SM2) GetPublicKeyXYHexString() string {
+    dataHex := "04" + this.GetPublicKeyXHexString() + this.GetPublicKeyYHexString()
 
     return dataHex
 }

@@ -137,15 +137,17 @@ func main() {
     sm2 := cryptobin_sm2.NewSM2()
 
     dekey2, _ := fs.Get("./runtime/key/sm2_key")
-    x := sm2.
-        FromPrivateKey([]byte(dekey2)).
-        GetPrivateKeyXHexString()
-    y := sm2.
-        FromPrivateKey([]byte(dekey2)).
-        GetPrivateKeyYHexString()
     d := sm2.
         FromPrivateKey([]byte(dekey2)).
         GetPrivateKeyDHexString()
+    x := sm2.
+        FromPrivateKey([]byte(dekey2)).
+        MakePublicKey().
+        GetPublicKeyXHexString()
+    y := sm2.
+        FromPrivateKey([]byte(dekey2)).
+        MakePublicKey().
+        GetPublicKeyYHexString()
 
     // =====
 
@@ -160,7 +162,6 @@ func main() {
         CreatePublicKey().
         ToKeyString()
     sm2PubKey := sm2.
-        FromPublicKeyXYString(sm2PublicKeyX, sm2PublicKeyY).
         FromPrivateKeyString(sm2PrivateKeyD).
         CreatePrivateKey().
         ToKeyString()

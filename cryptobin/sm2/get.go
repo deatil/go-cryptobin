@@ -3,6 +3,7 @@ package sm2
 import (
     "crypto/elliptic"
     "github.com/tjfoc/gmsm/sm2"
+
     cryptobin_tool "github.com/deatil/go-cryptobin/tool"
 )
 
@@ -16,35 +17,6 @@ func (this SM2) GetPrivateKeyCurve() elliptic.Curve {
     return this.privateKey.Curve
 }
 
-// 获取 PrivateKeyXHex
-func (this SM2) GetPrivateKeyXHexString() string {
-    data := this.privateKey.X
-
-    dataHex := cryptobin_tool.
-        NewEncoding().
-        HexEncode(data.Bytes())
-
-    return dataHex
-}
-
-// 获取 PrivateKeyYHex
-func (this SM2) GetPrivateKeyYHexString() string {
-    data := this.privateKey.Y
-
-    dataHex := cryptobin_tool.
-        NewEncoding().
-        HexEncode(data.Bytes())
-
-    return dataHex
-}
-
-// 获取 PrivateKeyXYHex
-func (this SM2) GetPrivateKeyXYHexString() string {
-    dataHex := "04" + this.GetPrivateKeyXHexString() + this.GetPrivateKeyYHexString()
-
-    return dataHex
-}
-
 // 获取 PrivateKeyD
 func (this SM2) GetPrivateKeyDHexString() string {
     data := this.privateKey.D
@@ -54,6 +26,11 @@ func (this SM2) GetPrivateKeyDHexString() string {
         HexEncode(data.Bytes())
 
     return dataHex
+}
+
+// 获取私钥明文
+func (this SM2) GetPrivateKeyString() string {
+    return this.GetPrivateKeyDHexString()
 }
 
 // 获取 PublicKey
@@ -90,9 +67,29 @@ func (this SM2) GetPublicKeyYHexString() string {
 
 // 获取 PublicKeyXYHex
 func (this SM2) GetPublicKeyXYHexString() string {
+    dataHex := this.GetPublicKeyXHexString() + this.GetPublicKeyYHexString()
+
+    return dataHex
+}
+
+// 获取未压缩公钥
+func (this SM2) GetPublicKeyUncompressString() string {
     dataHex := "04" + this.GetPublicKeyXHexString() + this.GetPublicKeyYHexString()
 
     return dataHex
+}
+
+// 获取压缩公钥
+func (this SM2) GetPublicKeyCompressString() string {
+    data := sm2.Compress(this.publicKey)
+
+    dataHex := cryptobin_tool.
+        NewEncoding().
+        HexEncode(data)
+
+    pre := getPrefix(dataHex[:2])
+
+    return pre + dataHex[2:]
 }
 
 // 获取 keyData

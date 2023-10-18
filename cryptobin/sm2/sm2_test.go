@@ -157,3 +157,32 @@ func Test_PKCS1Encrypt(t *testing.T) {
 
     assertEqual(data, deData, "PKCS1Encrypt-Dedata")
 }
+
+var (
+    testSM2PublicKeyX  = "a4b75c4c8c44d11687bdd93c0883e630c895234beb685910efbe27009ad911fa"
+    testSM2PublicKeyY  = "d521f5e8249de7a405f254a9888cbb8e651fd60c50bd22bd182a4bc7d1261c94"
+    testSM2PrivateKeyD = "0f495b5445eb59ddecf0626f5ca0041c550584f0189e89d95f8d4c52499ff838"
+)
+
+func Test_CreateKey(t *testing.T) {
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    pub := New().
+        FromPublicKeyXYString(testSM2PublicKeyX, testSM2PublicKeyY).
+        CreatePublicKey()
+    pubData := pub.ToKeyString()
+
+    assertError(pub.Error(), "CreateKey-pub")
+    assertNotEmpty(pubData, "CreateKey-pub")
+
+    // ======
+
+    pri := New().
+        FromPrivateKeyString(testSM2PrivateKeyD).
+        CreatePrivateKey()
+    priData := pri.ToKeyString()
+
+    assertError(pri.Error(), "CreateKey-pri")
+    assertNotEmpty(priData, "CreateKey-pri")
+}

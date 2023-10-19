@@ -154,11 +154,9 @@ func (this Padding) ISO10126Padding(text []byte, blockSize int) []byte {
 
     // 补位 blockSize 值
     paddingSize := blockSize - n%blockSize
+    paddingText := this.RandomBytes(uint(paddingSize - 1))
 
-    for i := 0; i < paddingSize - 1; i++ {
-        text = append(text, this.RandomBytes(1)...)
-    }
-
+    text = append(text, paddingText...)
     text = append(text, byte(paddingSize))
 
     return text

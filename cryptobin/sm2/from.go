@@ -310,12 +310,12 @@ func (this SM2) FromPublicKeyCompressString(key string) SM2 {
         return this.AppendError(err)
     }
 
-    pre := formatFromPublicKeyCompressPrefix(key[:2])
-    key = pre + key[2:]
-
     d, _ := new(big.Int).SetString(key[:], 16)
 
-    this.publicKey = sm2.Decompress(d.Bytes())
+    y := d.Bytes()
+    y[0] &= 1
+
+    this.publicKey = sm2.Decompress(y)
 
     return this
 }

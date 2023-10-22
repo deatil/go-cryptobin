@@ -2,6 +2,7 @@ package rsa
 
 import (
     "io"
+    "errors"
     "math/big"
     "crypto/rsa"
     "crypto/rand"
@@ -173,7 +174,11 @@ func FromPublicKey(key []byte) Rsa {
 // 模数、指数生成公钥
 // 指数默认为 10001
 func (this Rsa) FromPublicKeyNE(nString string, e int) Rsa {
-    n, _ := new(big.Int).SetString(nString[:], 16)
+    n, ok := new(big.Int).SetString(nString[:], 16)
+    if !ok {
+        err := errors.New("RSA: n is error")
+        return this.AppendError(err)
+    }
 
     this.publicKey = &rsa.PublicKey{
         N: n,
@@ -181,6 +186,11 @@ func (this Rsa) FromPublicKeyNE(nString string, e int) Rsa {
     }
 
     return this
+}
+
+// 公钥
+func FromPublicKeyNE(nString string, e int) Rsa {
+    return defaultRSA.FromPublicKeyNE(nString, e)
 }
 
 // ==========

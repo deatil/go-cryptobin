@@ -21,9 +21,7 @@ func (this Rsa) GetPublicKey() *rsa.PublicKey {
 func (this Rsa) GetPublicKeyNHexString() string {
     data := this.publicKey.N
 
-    dataHex := cryptobin_tool.
-        NewEncoding().
-        HexEncode(data.Bytes())
+    dataHex := cryptobin_tool.HexEncode(data.Bytes())
 
     return dataHex
 }

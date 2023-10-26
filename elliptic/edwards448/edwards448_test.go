@@ -3,7 +3,7 @@ package edwards448
 import (
     "testing"
 
-    "github.com/deatil/go-cryptobin/tool/edwards448/field"
+    "github.com/deatil/go-cryptobin/elliptic/edwards448/field"
 )
 
 func TestSetBytes(t *testing.T) {

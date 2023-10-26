@@ -11,7 +11,7 @@ import (
     "crypto/subtle"
     cryptorand "crypto/rand"
 
-    "github.com/deatil/go-cryptobin/tool/edwards448/field"
+    "github.com/deatil/go-cryptobin/elliptic/edwards448/field"
 )
 
 var basepoint []byte = []byte{

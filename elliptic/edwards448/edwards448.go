@@ -3,7 +3,7 @@ package edwards448
 import (
     "errors"
 
-    "github.com/deatil/go-cryptobin/tool/edwards448/field"
+    "github.com/deatil/go-cryptobin/elliptic/edwards448/field"
 )
 
 var feOne = new(field.Element).One()

@@ -18,7 +18,7 @@ import (
 
     "golang.org/x/crypto/sha3"
 
-    "github.com/deatil/go-cryptobin/tool/edwards448"
+    "github.com/deatil/go-cryptobin/elliptic/edwards448"
 )
 
 const (

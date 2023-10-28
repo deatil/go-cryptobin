@@ -88,12 +88,12 @@ func (this CipherRC2CBC) Decrypt(key, params, ciphertext []byte) ([]byte, error)
 
     blockSize := block.BlockSize()
 
-    if len(ciphertext)%blockSize != 0 {
-        return nil, errors.New("pkcs/cipher: encrypted PEM data is not a multiple of the block size")
+    if len(param.IV) != blockSize {
+        return nil, errors.New("pkcs/cipher: incorrect IV size")
     }
 
-    if len(param.IV) != blockSize {
-        return nil, errors.New("pkcs/cipher: invalid iv length")
+    if len(ciphertext)%blockSize != 0 {
+        return nil, errors.New("pkcs/cipher: encrypted PEM data is not a multiple of the block size")
     }
 
     plaintext := make([]byte, len(ciphertext))

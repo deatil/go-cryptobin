@@ -71,6 +71,10 @@ func (this CipherCFB8) Decrypt(key, params, ciphertext []byte) ([]byte, error) {
         return nil, err
     }
 
+    if len(iv) != block.BlockSize() {
+        return nil, errors.New("pkcs/cipher: incorrect IV size")
+    }
+
     plaintext := make([]byte, len(ciphertext))
 
     mode := cryptobin_cipher.NewCFB8Decrypter(block, iv)

@@ -79,7 +79,7 @@ func (this CipherCBC) Decrypt(key, params, ciphertext []byte) ([]byte, error) {
     }
 
     if len(iv) != blockSize {
-        return nil, errors.New("pkcs/cipher: invalid iv length")
+        return nil, errors.New("pkcs/cipher: incorrect IV size")
     }
 
     plaintext := make([]byte, len(ciphertext))

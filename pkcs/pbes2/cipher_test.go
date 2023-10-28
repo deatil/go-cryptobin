@@ -35,25 +35,25 @@ func Test_Ciphers(t *testing.T) {
     test_cipher(t, AES128OFB, "AES128OFB", []byte("ssdfrt5tssdfrt5t"))
     test_cipher(t, AES128CFB, "AES128CFB", []byte("ssdfrt5tssdfrt5t"))
     test_cipher(t, AES128GCM, "AES128GCM", []byte("ssdfrt5tssdfrt5t"))
-    test_cipher(t, AES128GCMb, "AES128GCMb", []byte("ssdfrt5tssdfrt5t"))
+    test_cipher(t, AES128GCMIv, "AES128GCMIv", []byte("ssdfrt5tssdfrt5t"))
     test_cipher(t, AES128CCM, "AES128CCM", []byte("ssdfrt5tssdfrt5t"))
-    test_cipher(t, AES128CCMb, "AES128CCMb", []byte("ssdfrt5tssdfrt5t"))
+    test_cipher(t, AES128CCMIv, "AES128CCMIv", []byte("ssdfrt5tssdfrt5t"))
 
     test_cipher(t, AES192CBC, "AES192CBC", []byte("ssdfrt5tssdfrt5tssdfrt5t"))
     test_cipher(t, AES192OFB, "AES192OFB", []byte("ssdfrt5tssdfrt5tssdfrt5t"))
     test_cipher(t, AES192CFB, "AES192CFB", []byte("ssdfrt5tssdfrt5tssdfrt5t"))
     test_cipher(t, AES192GCM, "AES192GCM", []byte("ssdfrt5tssdfrt5tssdfrt5t"))
-    test_cipher(t, AES192GCMb, "AES192GCMb", []byte("ssdfrt5tssdfrt5tssdfrt5t"))
+    test_cipher(t, AES192GCMIv, "AES192GCMIv", []byte("ssdfrt5tssdfrt5tssdfrt5t"))
     test_cipher(t, AES192CCM, "AES192CCM", []byte("ssdfrt5tssdfrt5tssdfrt5t"))
-    test_cipher(t, AES192CCMb, "AES192CCMb", []byte("ssdfrt5tssdfrt5tssdfrt5t"))
+    test_cipher(t, AES192CCMIv, "AES192CCMIv", []byte("ssdfrt5tssdfrt5tssdfrt5t"))
 
     test_cipher(t, AES256CBC, "AES256CBC", []byte("ghiolkjmssdfrt5tssdfrt5tssdfrt5t"))
     test_cipher(t, AES256OFB, "AES256OFB", []byte("ghiolkjmssdfrt5tssdfrt5tssdfrt5t"))
     test_cipher(t, AES256CFB, "AES256CFB", []byte("ghiolkjmssdfrt5tssdfrt5tssdfrt5t"))
     test_cipher(t, AES256GCM, "AES256GCM", []byte("ghiolkjmssdfrt5tssdfrt5tssdfrt5t"))
-    test_cipher(t, AES256GCMb, "AES256GCMb", []byte("ghiolkjmssdfrt5tssdfrt5tssdfrt5t"))
+    test_cipher(t, AES256GCMIv, "AES256GCMIv", []byte("ghiolkjmssdfrt5tssdfrt5tssdfrt5t"))
     test_cipher(t, AES256CCM, "AES256CCM", []byte("ghiolkjmssdfrt5tssdfrt5tssdfrt5t"))
-    test_cipher(t, AES256CCMb, "AES256CCMb", []byte("ghiolkjmssdfrt5tssdfrt5tssdfrt5t"))
+    test_cipher(t, AES256CCMIv, "AES256CCMIv", []byte("ghiolkjmssdfrt5tssdfrt5tssdfrt5t"))
 
     test_cipher(t, SM4CBC, "SM4CBC", []byte("ghdfrt5tssdfrt5t"))
     test_cipher(t, SM4OFB, "SM4OFB", []byte("ghdfrt5tssdfrt5t"))
@@ -61,9 +61,9 @@ func Test_Ciphers(t *testing.T) {
     test_cipher(t, SM4CFB1, "SM4CFB1", []byte("ghdfrt5tssdfrt5t"))
     test_cipher(t, SM4CFB8, "SM4CFB8", []byte("ghdfrt5tssdfrt5t"))
     test_cipher(t, SM4GCM, "SM4GCM", []byte("ghdfrt5tssdfrt5t"))
-    test_cipher(t, SM4GCMb, "SM4GCMb", []byte("ghdfrt5tssdfrt5t"))
+    test_cipher(t, SM4GCMIv, "SM4GCMIv", []byte("ghdfrt5tssdfrt5t"))
     test_cipher(t, SM4CCM, "SM4CCM", []byte("ghdfrt5tssdfrt5t"))
-    test_cipher(t, SM4CCMb, "SM4CCMb", []byte("ghdfrt5tssdfrt5t"))
+    test_cipher(t, SM4CCMIv, "SM4CCMIv", []byte("ghdfrt5tssdfrt5t"))
 
 }
 

@@ -10,6 +10,9 @@ import (
     "github.com/deatil/go-cryptobin/ecdh"
 )
 
+// 私钥和公钥生成， OID 包含 ECDH 的 OID 和 EC 曲线的 OID，
+// 非 EC 曲线单独证书
+
 var (
     // ECDH
     oidPublicKeyECDH      = asn1.ObjectIdentifier{1, 3, 132, 1, 12}
@@ -30,8 +33,13 @@ var (
     oidNamedCurveX448   = asn1.ObjectIdentifier{1, 3, 101, 111}
 )
 
-// 私钥和公钥生成， OID 包含 ECDH 的 OID 和 EC 曲线的 OID，
-// 非 EC 曲线单独证书
+func init() {
+    AddNamedCurve(ecdh.P256(), oidNamedCurveP256)
+    AddNamedCurve(ecdh.P384(), oidNamedCurveP384)
+    AddNamedCurve(ecdh.P521(), oidNamedCurveP521)
+    AddNamedCurve(ecdh.X25519(), oidNamedCurveX25519)
+    AddNamedCurve(ecdh.X448(), oidNamedCurveX448)
+}
 
 // 私钥 - 包装
 type pkcs8 struct {
@@ -59,7 +67,7 @@ func MarshalPublicKey(key *ecdh.PublicKey) ([]byte, error) {
     var publicKeyAlgorithm pkix.AlgorithmIdentifier
     var err error
 
-    oid, ok := oidFromNamedCurve(key.Curve())
+    oid, ok := OidFromNamedCurve(key.Curve())
     if !ok {
         return nil, errors.New("x509: unsupported ecdh curve")
     }
@@ -114,7 +122,7 @@ func ParsePublicKey(derBytes []byte) (pub *ecdh.PublicKey, err error) {
         return nil, errors.New("ecdh: invalid ECDH parameters")
     }
 
-    namedCurve := namedCurveFromOid(*namedCurveOID)
+    namedCurve := NamedCurveFromOid(*namedCurveOID)
     if namedCurve == nil {
         err = errors.New("ecdh: unsupported ecdh curve")
         return
@@ -136,7 +144,7 @@ func ParsePublicKey(derBytes []byte) (pub *ecdh.PublicKey, err error) {
 func MarshalPrivateKey(key *ecdh.PrivateKey) ([]byte, error) {
     var privKey pkcs8
 
-    oid, ok := oidFromNamedCurve(key.Curve())
+    oid, ok := OidFromNamedCurve(key.Curve())
     if !ok {
         return nil, errors.New("x509: unsupported ecdh curve")
     }
@@ -181,7 +189,7 @@ func ParsePrivateKey(derBytes []byte) (*ecdh.PrivateKey, error) {
         return nil, errors.New("ecdh: invalid ECDH parameters")
     }
 
-    namedCurve := namedCurveFromOid(*namedCurveOID)
+    namedCurve := NamedCurveFromOid(*namedCurveOID)
     if namedCurve == nil {
         err = errors.New("ecdh: unsupported ecdh curve")
         return nil, err
@@ -194,40 +202,3 @@ func ParsePrivateKey(derBytes []byte) (*ecdh.PrivateKey, error) {
 
     return priv, nil
 }
-
-// ====================
-
-func namedCurveFromOid(oid asn1.ObjectIdentifier) ecdh.Curve {
-    switch {
-        case oid.Equal(oidNamedCurveP256):
-            return ecdh.P256()
-        case oid.Equal(oidNamedCurveP384):
-            return ecdh.P384()
-        case oid.Equal(oidNamedCurveP521):
-            return ecdh.P521()
-        case oid.Equal(oidNamedCurveX25519):
-            return ecdh.X25519()
-        case oid.Equal(oidNamedCurveX448):
-            return ecdh.X448()
-    }
-
-    return nil
-}
-
-func oidFromNamedCurve(curve ecdh.Curve) (asn1.ObjectIdentifier, bool) {
-    switch curve {
-        case ecdh.P256():
-            return oidNamedCurveP256, true
-        case ecdh.P384():
-            return oidNamedCurveP384, true
-        case ecdh.P521():
-            return oidNamedCurveP521, true
-        case ecdh.X25519():
-            return oidNamedCurveX25519, true
-        case ecdh.X448():
-            return oidNamedCurveX448, true
-    }
-
-    return asn1.ObjectIdentifier{}, false
-}
-

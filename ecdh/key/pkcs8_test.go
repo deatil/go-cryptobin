@@ -17,6 +17,7 @@ func TestEqual(t *testing.T) {
     testOneCurve(t, ecdh.P521())
     testOneCurve(t, ecdh.X25519())
     testOneCurve(t, ecdh.X448())
+    testOneCurve(t, ecdh.GmSM2())
 
     testOneCurve(t, test_curue.X448D())
 }

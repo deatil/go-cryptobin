@@ -31,6 +31,7 @@ var (
     oidNamedCurveP521   = asn1.ObjectIdentifier{1, 3, 132, 0, 35}
     oidNamedCurveX25519 = asn1.ObjectIdentifier{1, 3, 101, 110}
     oidNamedCurveX448   = asn1.ObjectIdentifier{1, 3, 101, 111}
+    oidNamedCurveGmSM2  = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 301}
 )
 
 func init() {
@@ -39,6 +40,7 @@ func init() {
     AddNamedCurve(ecdh.P521(), oidNamedCurveP521)
     AddNamedCurve(ecdh.X25519(), oidNamedCurveX25519)
     AddNamedCurve(ecdh.X448(), oidNamedCurveX448)
+    AddNamedCurve(ecdh.GmSM2(), oidNamedCurveGmSM2)
 }
 
 // 私钥 - 包装

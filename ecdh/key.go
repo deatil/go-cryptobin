@@ -3,17 +3,24 @@ package ecdh
 import (
     "fmt"
     "errors"
+    "math/big"
     "encoding/asn1"
     "crypto/ecdsa"
     "crypto/x509"
     "crypto/x509/pkix"
+    "crypto/elliptic"
     crypto_ecdh "crypto/ecdh"
 
     "golang.org/x/crypto/cryptobyte"
+
+    "github.com/tjfoc/gmsm/sm2"
+    gmsm_x509 "github.com/tjfoc/gmsm/x509"
 )
 
 var (
-    oidPublicKeyX448 = asn1.ObjectIdentifier{1, 3, 101, 111}
+    oidPublicKeyECDSA = asn1.ObjectIdentifier{1, 2, 840, 10045, 2, 1}
+    oidPublicKeyX448  = asn1.ObjectIdentifier{1, 3, 101, 111}
+    oidPublicKeyGmSM2 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 301}
 )
 
 // 私钥 - 包装
@@ -36,37 +43,58 @@ type publicKeyInfo struct {
     PublicKey asn1.BitString
 }
 
+type ecPrivateKey struct {
+    Version       int
+    PrivateKey    []byte
+    NamedCurveOID asn1.ObjectIdentifier `asn1:"optional,explicit,tag:0"`
+    PublicKey     asn1.BitString        `asn1:"optional,explicit,tag:1"`
+}
+
 // 包装公钥
 func MarshalPublicKey(pub *PublicKey) ([]byte, error) {
-    if pub.Curve() == X448() {
-        var publicKeyBytes []byte
-        var publicKeyAlgorithm pkix.AlgorithmIdentifier
+    switch pub.Curve() {
+        case X448():
+            var publicKeyBytes []byte
+            var publicKeyAlgorithm pkix.AlgorithmIdentifier
 
-        publicKeyBytes = pub.Bytes()
-        publicKeyAlgorithm.Algorithm = oidPublicKeyX448
+            publicKeyBytes = pub.Bytes()
+            publicKeyAlgorithm.Algorithm = oidPublicKeyX448
 
-        pkix := pkixPublicKey{
-            Algo: publicKeyAlgorithm,
-            BitString: asn1.BitString{
-                Bytes:     publicKeyBytes,
-                BitLength: 8 * len(publicKeyBytes),
-            },
-        }
+            pkix := pkixPublicKey{
+                Algo: publicKeyAlgorithm,
+                BitString: asn1.BitString{
+                    Bytes:     publicKeyBytes,
+                    BitLength: 8 * len(publicKeyBytes),
+                },
+            }
 
-        ret, _ := asn1.Marshal(pkix)
-        return ret, nil
-    } else {
-        pubkey, err := ToPublicKey(pub)
-        if err != nil {
-            return nil, fmt.Errorf("x509: failed to marshal public key: %v", err)
-        }
+            ret, _ := asn1.Marshal(pkix)
+            return ret, nil
+        case GmSM2():
+            c := sm2.P256Sm2()
 
-        public, err := x509.MarshalPKIXPublicKey(pubkey)
-        if err != nil {
-            return nil, fmt.Errorf("x509: failed to marshal public key: %v", err)
-        }
+            pubblic := new(sm2.PublicKey)
+            pubblic.Curve = c
+            pubblic.X, pubblic.Y = elliptic.Unmarshal(c, pub.Bytes())
 
-        return public, nil
+            pubkey, err := gmsm_x509.MarshalSm2PublicKey(pubblic)
+            if err != nil {
+                return nil, errors.New("ecdsa: failed to marshal algo param: " + err.Error())
+            }
+
+            return pubkey, nil
+        default:
+            pubkey, err := ToPublicKey(pub)
+            if err != nil {
+                return nil, fmt.Errorf("ecdh: failed to marshal public key: %v", err)
+            }
+
+            public, err := x509.MarshalPKIXPublicKey(pubkey)
+            if err != nil {
+                return nil, fmt.Errorf("ecdh: failed to marshal public key: %v", err)
+            }
+
+            return public, nil
     }
 }
 
@@ -76,7 +104,7 @@ func ParsePublicKey(derBytes []byte) (*PublicKey, error) {
     if rest, err := asn1.Unmarshal(derBytes, &pki); err != nil {
         return nil, err
     } else if len(rest) != 0 {
-        return nil, errors.New("x509: trailing data after ASN.1 of public-key")
+        return nil, errors.New("ecdh: trailing data after ASN.1 of public-key")
     }
 
     keyData := &pki
@@ -88,11 +116,28 @@ func ParsePublicKey(derBytes []byte) (*PublicKey, error) {
     switch {
         case oid.Equal(oidPublicKeyX448):
             if len(params.FullBytes) != 0 {
-                return nil, errors.New("x509: X25519 key encoded with illegal parameters")
+                return nil, errors.New("ecdh: X25519 key encoded with illegal parameters")
             }
 
             return X448().NewPublicKey(der)
         default:
+            // 先判断 SM2 证书
+            if oid.Equal(oidPublicKeyECDSA) {
+                paramsDer := cryptobyte.String(params.FullBytes)
+
+                namedCurveOID := new(asn1.ObjectIdentifier)
+                if !paramsDer.ReadASN1ObjectIdentifier(namedCurveOID) {
+                    return nil, errors.New("ecdh: invalid ECDH parameters")
+                }
+
+                if oidPublicKeyGmSM2.Equal(*namedCurveOID) {
+                    if pubkey, err := gmsm_x509.ParseSm2PublicKey(derBytes); err == nil {
+                        return SM2PublicKeyToECDH(pubkey)
+                    }
+                }
+            }
+
+            // 其他 EC 曲线
             key, err := x509.ParsePKIXPublicKey(derBytes)
             if err != nil {
                 return nil, err
@@ -113,7 +158,7 @@ func ParsePublicKey(derBytes []byte) (*PublicKey, error) {
                     }
             }
 
-            return nil, errors.New("x509: unknown public key algorithm")
+            return nil, errors.New("ecdh: unknown public key algorithm")
     }
 
 }
@@ -124,26 +169,43 @@ func ParsePublicKey(derBytes []byte) (*PublicKey, error) {
 func MarshalPrivateKey(key *PrivateKey) ([]byte, error) {
     var privKey pkcs8
 
-    if key.Curve() == X448() {
-        privKey.Algo = pkix.AlgorithmIdentifier{
-            Algorithm: oidPublicKeyX448,
-        }
-        var err error
-        if privKey.PrivateKey, err = asn1.Marshal(key.Bytes()); err != nil {
-            return nil, fmt.Errorf("x509: failed to marshal private key: %v", err)
-        }
-    } else {
-        prikey, err := ToPrivateKey(key)
-        if err != nil {
-            return nil, fmt.Errorf("x509: failed to marshal private key: %v", err)
-        }
+    switch key.Curve() {
+        case X448():
+            privKey.Algo = pkix.AlgorithmIdentifier{
+                Algorithm: oidPublicKeyX448,
+            }
+            var err error
+            if privKey.PrivateKey, err = asn1.Marshal(key.Bytes()); err != nil {
+                return nil, fmt.Errorf("ecdh: failed to marshal private key: %v", err)
+            }
+        case GmSM2():
+            c := sm2.P256Sm2()
 
-        private, err := x509.MarshalPKCS8PrivateKey(prikey)
-        if err != nil {
-            return nil, fmt.Errorf("x509: failed to marshal private key: %v", err)
-        }
+            k := new(big.Int).SetBytes(key.Bytes())
 
-        return private, nil
+            pri := new(sm2.PrivateKey)
+            pri.PublicKey.Curve = c
+            pri.D = k
+            pri.PublicKey.X, pri.PublicKey.Y = c.ScalarBaseMult(k.Bytes())
+
+            private, err := gmsm_x509.MarshalSm2UnecryptedPrivateKey(pri)
+            if err != nil {
+                return nil, errors.New("ecdsa: failed to marshal algo param: " + err.Error())
+            }
+
+            return private, nil
+        default:
+            prikey, err := ToPrivateKey(key)
+            if err != nil {
+                return nil, fmt.Errorf("ecdh: failed to marshal private key: %v", err)
+            }
+
+            private, err := x509.MarshalPKCS8PrivateKey(prikey)
+            if err != nil {
+                return nil, fmt.Errorf("ecdh: failed to marshal private key: %v", err)
+            }
+
+            return private, nil
     }
 
     return asn1.Marshal(privKey)
@@ -159,16 +221,33 @@ func ParsePrivateKey(der []byte) (*PrivateKey, error) {
     switch {
         case privKey.Algo.Algorithm.Equal(oidPublicKeyX448):
             if l := len(privKey.Algo.Parameters.FullBytes); l != 0 {
-                return nil, errors.New("x509: invalid X448 private key parameters")
+                return nil, errors.New("ecdh: invalid X448 private key parameters")
             }
 
             var curvePrivateKey []byte
             if _, err := asn1.Unmarshal(privKey.PrivateKey, &curvePrivateKey); err != nil {
-                return nil, fmt.Errorf("x509: invalid X448 private key: %v", err)
+                return nil, fmt.Errorf("ecdh: invalid X448 private key: %v", err)
             }
 
             return X448().NewPrivateKey(curvePrivateKey)
         default:
+            // 先判断 SM2 证书
+            if privKey.Algo.Algorithm.Equal(oidPublicKeyECDSA) {
+                bytes := privKey.Algo.Parameters.FullBytes
+
+                namedCurveOID := new(asn1.ObjectIdentifier)
+                if _, err := asn1.Unmarshal(bytes, namedCurveOID); err != nil {
+                    namedCurveOID = nil
+                }
+
+                if oidPublicKeyGmSM2.Equal(*namedCurveOID) {
+                    if pkey, err := gmsm_x509.ParsePKCS8UnecryptedPrivateKey(der); err == nil {
+                        return SM2PrivateKeyToECDH(pkey)
+                    }
+                }
+            }
+
+            // 其他 EC 曲线
             key, err := x509.ParsePKCS8PrivateKey(der)
             if err != nil {
                 return nil, err
@@ -188,7 +267,7 @@ func ParsePrivateKey(der []byte) (*PrivateKey, error) {
                     }
             }
 
-            return nil, fmt.Errorf("x509: PKCS#8 wrapping contained private key with unknown algorithm: %v", privKey.Algo.Algorithm)
+            return nil, fmt.Errorf("ecdh: PKCS#8 wrapping contained private key with unknown algorithm: %v", privKey.Algo.Algorithm)
     }
 }
 

@@ -129,14 +129,25 @@ func convertBag(bag *safeBag, password []byte) (*pem.Block, error) {
         block.Headers[k] = v
     }
 
+    var err error
+
     switch {
         case bag.Id.Equal(oidCertBag):
             block.Type = certificateType
-            certsData, err := decodeCertBag(bag.Value.Bytes)
+
+            block.Bytes, err = decodeCertBag(bag.Value.Bytes)
             if err != nil {
                 return nil, err
             }
-            block.Bytes = certsData
+
+        case bag.Id.Equal(oidKeyBag):
+            block.Type = privateKeyType
+
+            block.Bytes, err = MarshalPrivateKey(bag.Value.Bytes)
+            if err != nil {
+                return nil, errors.New("found unknown private key type in PKCS#8 wrapping: " + err.Error())
+            }
+
         case bag.Id.Equal(oidPKCS8ShroundedKeyBag):
             block.Type = privateKeyType
 
@@ -147,8 +158,9 @@ func convertBag(bag *safeBag, password []byte) (*pem.Block, error) {
 
             block.Bytes, err = MarshalPrivateKey(key)
             if err != nil {
-                    return nil, errors.New("found unknown private key type in PKCS#8 wrapping: " + err.Error())
+                return nil, errors.New("found unknown private key type in PKCS#8 wrapping: " + err.Error())
             }
+
         default:
             return nil, errors.New("don't know how to convert a safe bag of type " + bag.Id.String())
     }
@@ -252,6 +264,16 @@ func DecodeChain(pfxData []byte, password string) (
                     certificate = certs[0]
                 } else {
                     caCerts = append(caCerts, certs[0])
+                }
+
+            case bag.Id.Equal(oidKeyBag):
+                if privateKey != nil {
+                    err = errors.New("pkcs12: expected exactly one key bag")
+                    return nil, nil, nil, err
+                }
+
+                if privateKey, err = ParsePKCS8PrivateKey(bag.Value.Bytes); err != nil {
+                    return nil, nil, nil, err
                 }
 
             case bag.Id.Equal(oidPKCS8ShroundedKeyBag):
@@ -500,21 +522,6 @@ func EncodeChain(
         opt = opts[0]
     }
 
-    cipher := opt.Cipher
-    if cipher == nil {
-        return nil, errors.New("pkcs12: unknown opts cipher")
-    }
-
-    kdfOpts := opt.KDFOpts
-    if kdfOpts == nil {
-        return nil, errors.New("pkcs12: unknown opts kdfOpts")
-    }
-
-    pkcs8Cipher := opt.PKCS8Cipher
-    if pkcs8Cipher == nil {
-        return nil, errors.New("pkcs12: unknown opts pkcs8Cipher")
-    }
-
     encodedPassword, err := bmpStringZeroTerminated(password)
     if err != nil {
         return nil, err
@@ -548,20 +555,29 @@ func EncodeChain(
     }
 
     var keyBag safeBag
-    keyBag.Id = oidPKCS8ShroundedKeyBag
     keyBag.Value.Class = 2
     keyBag.Value.Tag = 0
     keyBag.Value.IsCompound = true
-    if keyBag.Value.Bytes, err = encodePkcs8ShroudedKeyBag(rand, privateKey, encodedPassword, opt); err != nil {
-        return nil, err
+
+    if opt.KeyCipher != nil {
+        keyBag.Id = oidPKCS8ShroundedKeyBag
+        if keyBag.Value.Bytes, err = encodePkcs8ShroudedKeyBag(rand, privateKey, encodedPassword, opt); err != nil {
+            return nil, err
+        }
+    } else {
+        keyBag.Id = oidKeyBag
+        if keyBag.Value.Bytes, err = MarshalPKCS8PrivateKey(privateKey); err != nil {
+            return nil, err
+        }
     }
+
     keyBag.Attributes = append(keyBag.Attributes, localKeyIdAttr)
 
     // Construct an authenticated safe with two SafeContents.
     // The first SafeContents is encrypted and contains the cert bags.
     // The second SafeContents is unencrypted and contains the shrouded key bag.
     var authenticatedSafe [2]contentInfo
-    if authenticatedSafe[0], err = makeSafeContents(rand, certBags, encodedPassword, opt.Cipher); err != nil {
+    if authenticatedSafe[0], err = makeSafeContents(rand, certBags, encodedPassword, opt.CertCipher); err != nil {
         return nil, err
     }
     if authenticatedSafe[1], err = makeSafeContents(rand, []safeBag{keyBag}, nil, nil); err != nil {
@@ -573,14 +589,16 @@ func EncodeChain(
         return nil, err
     }
 
-    // compute the MAC
-    var kdfMacData KDFParameters
-    kdfMacData, err = opt.KDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
-    if err != nil {
-        return nil, err
-    }
+    if opt.CertKDFOpts != nil {
+        // compute the MAC
+        var kdfMacData CertKDFParameters
+        kdfMacData, err = opt.CertKDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
+        if err != nil {
+            return nil, err
+        }
 
-    pfx.MacData = kdfMacData.(macData)
+        pfx.MacData = kdfMacData.(macData)
+    }
 
     pfx.AuthSafe.ContentType = oidDataContentType
     pfx.AuthSafe.Content.Class = 2
@@ -670,16 +688,6 @@ func EncodeTrustStoreEntries(
         opt = opts[0]
     }
 
-    cipher := opt.Cipher
-    if cipher == nil {
-        return nil, errors.New("pkcs12: unknown opts cipher")
-    }
-
-    kdfOpts := opt.KDFOpts
-    if kdfOpts == nil {
-        return nil, errors.New("pkcs12: unknown opts kdfOpts")
-    }
-
     encodedPassword, err := bmpStringZeroTerminated(password)
     if err != nil {
         return nil, err
@@ -745,7 +753,7 @@ func EncodeTrustStoreEntries(
     // Construct an authenticated safe with one SafeContent.
     // The SafeContents is encrypted and contains the cert bags.
     var authenticatedSafe [1]contentInfo
-    if authenticatedSafe[0], err = makeSafeContents(rand, certBags, encodedPassword, opt.Cipher); err != nil {
+    if authenticatedSafe[0], err = makeSafeContents(rand, certBags, encodedPassword, opt.CertCipher); err != nil {
         return nil, err
     }
 
@@ -754,14 +762,16 @@ func EncodeTrustStoreEntries(
         return nil, err
     }
 
-    // compute the MAC
-    var kdfMacData KDFParameters
-    kdfMacData, err = opt.KDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
-    if err != nil {
-        return nil, err
-    }
+    if opt.CertKDFOpts != nil {
+        // compute the MAC
+        var kdfMacData CertKDFParameters
+        kdfMacData, err = opt.CertKDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
+        if err != nil {
+            return nil, err
+        }
 
-    pfx.MacData = kdfMacData.(macData)
+        pfx.MacData = kdfMacData.(macData)
+    }
 
     pfx.AuthSafe.ContentType = oidDataContentType
     pfx.AuthSafe.Content.Class = 2
@@ -783,21 +793,6 @@ func EncodeSecret(rand io.Reader, secretKey []byte, password string, opts ...Opt
     var opt = DefaultOpts
     if len(opts) > 0 {
         opt = opts[0]
-    }
-
-    cipher := opt.Cipher
-    if cipher == nil {
-        return nil, errors.New("pkcs12: unknown opts cipher")
-    }
-
-    kdfOpts := opt.KDFOpts
-    if kdfOpts == nil {
-        return nil, errors.New("pkcs12: unknown opts kdfOpts")
-    }
-
-    pkcs8Cipher := opt.PKCS8Cipher
-    if pkcs8Cipher == nil {
-        return nil, errors.New("pkcs12: unknown opts pkcs8Cipher")
     }
 
     encodedPassword, err := bmpStringZeroTerminated(password)
@@ -838,14 +833,16 @@ func EncodeSecret(rand io.Reader, secretKey []byte, password string, opts ...Opt
         return nil, err
     }
 
-    // compute the MAC
-    var kdfMacData KDFParameters
-    kdfMacData, err = opt.KDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
-    if err != nil {
-        return nil, err
-    }
+    if opt.CertKDFOpts != nil {
+        // compute the MAC
+        var kdfMacData CertKDFParameters
+        kdfMacData, err = opt.CertKDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
+        if err != nil {
+            return nil, err
+        }
 
-    pfx.MacData = kdfMacData.(macData)
+        pfx.MacData = kdfMacData.(macData)
+    }
 
     pfx.AuthSafe.ContentType = oidDataContentType
     pfx.AuthSafe.Content.Class = 2
@@ -892,6 +889,11 @@ func makeSafeContents(rand io.Reader, bags []safeBag, password []byte, cipher Ci
             return
         }
     } else {
+        if cipher == nil {
+            err = errors.New("pkcs12: unknown opts cipher")
+            return
+        }
+
         var encrypted, params []byte
         encrypted, params, err = cipher.Encrypt(password, data)
         if err != nil {

@@ -6,16 +6,16 @@ import (
     "crypto/sha1"
     "crypto/x509"
     "crypto/x509/pkix"
-    "encoding/asn1"
     "encoding/hex"
     "encoding/pem"
+    "encoding/asn1"
 )
 
-// DefaultPassword is the string "changeit", a commonly-used password for
+// DefaultPassword is the string "cryptobin", a commonly-used password for
 // PKCS#12 files. Due to the weak encryption used by PKCS#12, it is
 // RECOMMENDED that you use DefaultPassword when encoding PKCS#12 files,
 // and protect the PKCS#12 files using other means.
-const DefaultPassword = "changeit"
+const DefaultPassword = "cryptobin"
 
 var (
     oidDataContentType          = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 1}
@@ -181,6 +181,17 @@ func convertAttribute(attribute *pkcs12Attribute) (key, value string, err error)
             // This key is chosen to match OpenSSL.
             key = "Microsoft CSP Name"
             isString = true
+        case attribute.Id.Equal(oidJavaTrustStore):
+            key = "javaTrustStore"
+
+            storeOID := new(asn1.ObjectIdentifier)
+            if _, err := asn1.Unmarshal(attribute.Value.Bytes, storeOID); err != nil {
+                return "", "", err
+            }
+
+            value = (*storeOID).String()
+
+            return
         default:
             return "", "", errors.New("pkcs12: unknown attribute with OID " + attribute.Id.String())
     }
@@ -318,10 +329,12 @@ func DecodeTrustStore(pfxData []byte, password string) (certs []*x509.Certificat
                 if !bag.hasAttribute(oidJavaTrustStore) {
                     return nil, errors.New("pkcs12: trust store contains a certificate that is not marked as trusted")
                 }
+
                 certsData, err := decodeCertBag(bag.Value.Bytes)
                 if err != nil {
                     return nil, err
                 }
+
                 parsedCerts, err := x509.ParseCertificates(certsData)
                 if err != nil {
                     return nil, err
@@ -342,7 +355,67 @@ func DecodeTrustStore(pfxData []byte, password string) (certs []*x509.Certificat
     return
 }
 
-// 解析出 Secret
+// DecodeTrustStoreEntries extracts the certificates from pfxData, which must be a DER-encoded
+func DecodeTrustStoreEntries(pfxData []byte, password string) (trustStoreKeys []TrustStoreKey, err error) {
+    encodedPassword, err := bmpStringZeroTerminated(password)
+    if err != nil {
+        return nil, err
+    }
+
+    bags, encodedPassword, err := getSafeContents(pfxData, encodedPassword, 1)
+    if err != nil {
+        return nil, err
+    }
+
+    for _, bag := range bags {
+        switch {
+            case bag.Id.Equal(oidCertBag):
+                trustkey := &trustStoreKey{
+                    attrs: make(map[string]string),
+                }
+
+                for _, attr := range bag.Attributes {
+                    attr := attr
+                    k, v, err := convertAttribute(&attr)
+                    if err != nil {
+                        return nil, err
+                    }
+
+                    trustkey.attrs[k] = v
+                }
+
+                if !bag.hasAttribute(oidJavaTrustStore) {
+                    return nil, errors.New("pkcs12: trust store contains a certificate that is not marked as trusted")
+                }
+
+                certsData, err := decodeCertBag(bag.Value.Bytes)
+                if err != nil {
+                    return nil, err
+                }
+
+                parsedCerts, err := x509.ParseCertificates(certsData)
+                if err != nil {
+                    return nil, err
+                }
+
+                if len(parsedCerts) != 1 {
+                    err = errors.New("pkcs12: expected exactly one certificate in the certBag")
+                    return nil, err
+                }
+
+                trustkey.cert = parsedCerts[0]
+
+                trustStoreKeys = append(trustStoreKeys, trustkey)
+
+            default:
+                return nil, errors.New("pkcs12: expected only certificate bags")
+        }
+    }
+
+    return
+}
+
+// DecodeSecret extracts the Secret key from pfxData, which must be a DER-encoded
 func DecodeSecret(pfxData []byte, password string) (secretKeys []SecretKey, err error) {
     encodedPassword, err := bmpStringZeroTerminated(password)
     if err != nil {
@@ -480,7 +553,7 @@ func getSafeContents(p12Data, password []byte, expectedItems int) (bags []safeBa
     return bags, password, nil
 }
 
-// 兼容 go 默认包
+// for go
 func Encode(
     rand io.Reader,
     privateKey any,
@@ -611,6 +684,7 @@ func EncodeChain(
     if pfxData, err = asn1.Marshal(pfx); err != nil {
         return nil, errors.New("pkcs12: error writing P12 data: " + err.Error())
     }
+
     return
 }
 
@@ -747,6 +821,7 @@ func EncodeTrustStoreEntries(
         if err != nil {
             return nil, err
         }
+
         certBags = append(certBags, *certBag)
     }
 
@@ -788,7 +863,7 @@ func EncodeTrustStoreEntries(
     return
 }
 
-// 编码 Secret
+// Encode Secret with der
 func EncodeSecret(rand io.Reader, secretKey []byte, password string, opts ...Opts) (pfxData []byte, err error) {
     var opt = DefaultOpts
     if len(opts) > 0 {
@@ -880,7 +955,7 @@ func makeSafeContents(rand io.Reader, bags []safeBag, password []byte, cipher Ci
         return
     }
 
-    if password == nil {
+    if cipher == nil {
         ci.ContentType = oidDataContentType
         ci.Content.Class = 2
         ci.Content.Tag = 0
@@ -889,11 +964,6 @@ func makeSafeContents(rand io.Reader, bags []safeBag, password []byte, cipher Ci
             return
         }
     } else {
-        if cipher == nil {
-            err = errors.New("pkcs12: unknown opts cipher")
-            return
-        }
-
         var encrypted, params []byte
         encrypted, params, err = cipher.Encrypt(password, data)
         if err != nil {

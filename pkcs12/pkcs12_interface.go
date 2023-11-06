@@ -34,15 +34,15 @@ type Key interface {
 }
 
 // 数据接口
-type CertKDFParameters interface {
+type MacKDFParameters interface {
     // 验证
     Verify(message []byte, password []byte) (err error)
 }
 
 // KDF 设置接口
-type CertKDFOpts interface {
+type MacKDFOpts interface {
     // 构造
-    Compute(message []byte, password []byte) (data CertKDFParameters, err error)
+    Compute(message []byte, password []byte) (data MacKDFParameters, err error)
 }
 
 var keys = make(map[string]func() Key)

@@ -9,6 +9,8 @@ import (
     "encoding/hex"
     "encoding/pem"
     "encoding/asn1"
+
+    pkcs8_pbes2 "github.com/deatil/go-cryptobin/pkcs8/pbes2"
 )
 
 // DefaultPassword is the string "cryptobin", a commonly-used password for
@@ -27,6 +29,8 @@ var (
 
     oidJavaTrustStore      = asn1.ObjectIdentifier{2, 16, 840, 1, 113894, 746875, 1, 1}
     oidAnyExtendedKeyUsage = asn1.ObjectIdentifier{2, 5, 29, 37, 0}
+
+    errUnknownAttributeOID = errors.New("pkcs12: unknown attribute OID")
 )
 
 type contentInfo struct {
@@ -109,6 +113,7 @@ func ToPEM(pfxData []byte, password string) ([]*pem.Block, error) {
         if err != nil {
             return nil, err
         }
+
         blocks = append(blocks, block)
     }
 
@@ -122,6 +127,10 @@ func convertBag(bag *safeBag, password []byte) (*pem.Block, error) {
 
     for _, attribute := range bag.Attributes {
         k, v, err := convertAttribute(&attribute)
+        if err == errUnknownAttributeOID {
+            continue
+        }
+
         if err != nil {
             return nil, err
         }
@@ -193,7 +202,7 @@ func convertAttribute(attribute *pkcs12Attribute) (key, value string, err error)
 
             return
         default:
-            return "", "", errors.New("pkcs12: unknown attribute with OID " + attribute.Id.String())
+            return "", "", errUnknownAttributeOID
     }
 
     if isString {
@@ -529,14 +538,30 @@ func getSafeContents(p12Data, password []byte, expectedItems int) (bags []safeBa
                 encryptedContent := encryptedContentInfo.EncryptedContent
                 contentEncryptionAlgorithm := encryptedContentInfo.ContentEncryptionAlgorithm
 
-                newCipher, enParams, err := parseContentEncryptionAlgorithm(contentEncryptionAlgorithm)
-                if err != nil {
-                    return nil, nil, err
-                }
+                // pbse2
+                if pkcs8_pbes2.IsPBES2(contentEncryptionAlgorithm.Algorithm) {
+                    // change type to utf-8
+                    passwordString, err := decodeBMPString(password)
+                    if err != nil {
+                        return nil, nil, err
+                    }
 
-                data, err = newCipher.Decrypt(password, enParams, encryptedContent)
-                if err != nil {
-                    return nil, nil, err
+                    password = []byte(passwordString)
+
+                    data, err = pkcs8_pbes2.PBES2Decrypt(encryptedContent, contentEncryptionAlgorithm, password)
+                    if err != nil {
+                        return nil, nil, err
+                    }
+                } else {
+                    newCipher, enParams, err := parseContentEncryptionAlgorithm(contentEncryptionAlgorithm)
+                    if err != nil {
+                        return nil, nil, err
+                    }
+
+                    data, err = newCipher.Decrypt(password, enParams, encryptedContent)
+                    if err != nil {
+                        return nil, nil, err
+                    }
                 }
             default:
                 return nil, nil, NotImplementedError("only data and encryptedData content types are supported in authenticated safe")
@@ -650,10 +675,10 @@ func EncodeChain(
     // The first SafeContents is encrypted and contains the cert bags.
     // The second SafeContents is unencrypted and contains the shrouded key bag.
     var authenticatedSafe [2]contentInfo
-    if authenticatedSafe[0], err = makeSafeContents(rand, certBags, encodedPassword, opt.CertCipher); err != nil {
+    if authenticatedSafe[0], err = makeSafeContents(rand, certBags, encodedPassword, opt); err != nil {
         return nil, err
     }
-    if authenticatedSafe[1], err = makeSafeContents(rand, []safeBag{keyBag}, nil, nil); err != nil {
+    if authenticatedSafe[1], err = makeSafeContents(rand, []safeBag{keyBag}, nil, Opts{}); err != nil {
         return nil, err
     }
 
@@ -662,10 +687,10 @@ func EncodeChain(
         return nil, err
     }
 
-    if opt.CertKDFOpts != nil {
+    if opt.MacKDFOpts != nil {
         // compute the MAC
-        var kdfMacData CertKDFParameters
-        kdfMacData, err = opt.CertKDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
+        var kdfMacData MacKDFParameters
+        kdfMacData, err = opt.MacKDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
         if err != nil {
             return nil, err
         }
@@ -828,7 +853,7 @@ func EncodeTrustStoreEntries(
     // Construct an authenticated safe with one SafeContent.
     // The SafeContents is encrypted and contains the cert bags.
     var authenticatedSafe [1]contentInfo
-    if authenticatedSafe[0], err = makeSafeContents(rand, certBags, encodedPassword, opt.CertCipher); err != nil {
+    if authenticatedSafe[0], err = makeSafeContents(rand, certBags, encodedPassword, opt); err != nil {
         return nil, err
     }
 
@@ -837,10 +862,10 @@ func EncodeTrustStoreEntries(
         return nil, err
     }
 
-    if opt.CertKDFOpts != nil {
+    if opt.MacKDFOpts != nil {
         // compute the MAC
-        var kdfMacData CertKDFParameters
-        kdfMacData, err = opt.CertKDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
+        var kdfMacData MacKDFParameters
+        kdfMacData, err = opt.MacKDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
         if err != nil {
             return nil, err
         }
@@ -899,7 +924,7 @@ func EncodeSecret(rand io.Reader, secretKey []byte, password string, opts ...Opt
     keyBag.Attributes = append(keyBag.Attributes, localKeyIdAttr)
 
     var authenticatedSafe [1]contentInfo
-    if authenticatedSafe[0], err = makeSafeContents(rand, []safeBag{keyBag}, nil, nil); err != nil {
+    if authenticatedSafe[0], err = makeSafeContents(rand, []safeBag{keyBag}, nil, Opts{}); err != nil {
         return nil, err
     }
 
@@ -908,10 +933,10 @@ func EncodeSecret(rand io.Reader, secretKey []byte, password string, opts ...Opt
         return nil, err
     }
 
-    if opt.CertKDFOpts != nil {
+    if opt.MacKDFOpts != nil {
         // compute the MAC
-        var kdfMacData CertKDFParameters
-        kdfMacData, err = opt.CertKDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
+        var kdfMacData MacKDFParameters
+        kdfMacData, err = opt.MacKDFOpts.Compute(authenticatedSafeBytes, encodedPassword)
         if err != nil {
             return nil, err
         }
@@ -949,13 +974,13 @@ func makeCertBag(certBytes []byte, attributes []pkcs12Attribute) (certBag *safeB
     return
 }
 
-func makeSafeContents(rand io.Reader, bags []safeBag, password []byte, cipher Cipher) (ci contentInfo, err error) {
+func makeSafeContents(rand io.Reader, bags []safeBag, password []byte, opts Opts) (ci contentInfo, err error) {
     var data []byte
     if data, err = asn1.Marshal(bags); err != nil {
         return
     }
 
-    if cipher == nil {
+    if opts.CertCipher == nil {
         ci.ContentType = oidDataContentType
         ci.Content.Class = 2
         ci.Content.Tag = 0
@@ -964,15 +989,40 @@ func makeSafeContents(rand io.Reader, bags []safeBag, password []byte, cipher Ci
             return
         }
     } else {
-        var encrypted, params []byte
-        encrypted, params, err = cipher.Encrypt(password, data)
-        if err != nil {
-            return
-        }
+        cipher := opts.CertCipher
 
         var algo pkix.AlgorithmIdentifier
-        algo.Algorithm = cipher.OID()
-        algo.Parameters.FullBytes = params
+        var encrypted []byte
+
+        // when pbse2
+        if pkcs8_pbes2.CheckCipher(cipher) {
+            var passwordString string
+
+            // change type to utf-8
+            passwordString, err = decodeBMPString(password)
+            if err != nil {
+                return
+            }
+
+            password = []byte(passwordString)
+
+            encrypted, algo, err = pkcs8_pbes2.PBES2Encrypt(rand, data, password, &pkcs8_pbes2.Opts{
+                opts.CertCipher,
+                opts.CertKDFOpts,
+            })
+            if err != nil {
+                return
+            }
+        } else {
+            var params []byte
+            encrypted, params, err = cipher.Encrypt(password, data)
+            if err != nil {
+                return
+            }
+
+            algo.Algorithm = cipher.OID()
+            algo.Parameters.FullBytes = params
+        }
 
         var encryptedData encryptedData
         encryptedData.Version = 0

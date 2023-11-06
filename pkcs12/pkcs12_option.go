@@ -1,30 +1,31 @@
 package pkcs12
 
 import (
-    cryptobin_pbes1 "github.com/deatil/go-cryptobin/pkcs8/pbes1"
-    cryptobin_pbes2 "github.com/deatil/go-cryptobin/pkcs8/pbes2"
+    pkcs8_pbes1 "github.com/deatil/go-cryptobin/pkcs8/pbes1"
+    pkcs8_pbes2 "github.com/deatil/go-cryptobin/pkcs8/pbes2"
 )
 
 type (
     // PBKDF2 配置
-    PBKDF2Opts = cryptobin_pbes2.PBKDF2Opts
+    PBKDF2Opts = pkcs8_pbes2.PBKDF2Opts
     // Scrypt 配置
-    ScryptOpts = cryptobin_pbes2.ScryptOpts
+    ScryptOpts = pkcs8_pbes2.ScryptOpts
 
     // KDF 设置接口
-    KeyKDFOpts = cryptobin_pbes2.KDFOpts
+    KeyKDFOpts  = pkcs8_pbes2.KDFOpts
+    CertKDFOpts = pkcs8_pbes2.KDFOpts
 )
 
 var (
     // 获取 Cipher 类型
-    GetPbes1CipherFromName   = cryptobin_pbes1.GetCipherFromName
+    GetPbes1CipherFromName   = pkcs8_pbes1.GetCipherFromName
     // 检测 Cipher 类型
-    CheckPbes1CipherFromName = cryptobin_pbes1.CheckCipherFromName
+    CheckPbes1CipherFromName = pkcs8_pbes1.CheckCipherFromName
 
     // 获取 Cipher 类型
-    GetPbes2CipherFromName = cryptobin_pbes2.GetCipherFromName
+    GetPbes2CipherFromName = pkcs8_pbes2.GetCipherFromName
     // 获取 hash 类型
-    GetPbes2HashFromName   = cryptobin_pbes2.GetHashFromName
+    GetPbes2HashFromName   = pkcs8_pbes2.GetHashFromName
 )
 
 // 配置
@@ -33,6 +34,7 @@ type Opts struct {
     KeyKDFOpts  KeyKDFOpts
     CertCipher  Cipher
     CertKDFOpts CertKDFOpts
+    MacKDFOpts  MacKDFOpts
 }
 
 func (this Opts) WithKeyCipher(cipher Cipher) Opts {
@@ -59,11 +61,17 @@ func (this Opts) WithCertKDFOpts(opts CertKDFOpts) Opts {
     return this
 }
 
+func (this Opts) WithMacKDFOpts(opts MacKDFOpts) Opts {
+    this.MacKDFOpts = opts
+
+    return this
+}
+
 // LegacyRC2
 var LegacyRC2Opts = Opts{
-    KeyCipher:  cryptobin_pbes1.SHA1And3DES,
+    KeyCipher:  pkcs8_pbes1.SHA1And3DES,
     CertCipher: CipherSHA1AndRC2_40,
-    CertKDFOpts: MacOpts{
+    MacKDFOpts: MacOpts{
         SaltSize: 8,
         IterationCount: 1,
         HMACHash: SHA1,
@@ -72,9 +80,9 @@ var LegacyRC2Opts = Opts{
 
 // LegacyDES
 var LegacyDESOpts = Opts{
-    KeyCipher:  cryptobin_pbes1.SHA1And3DES,
+    KeyCipher:  pkcs8_pbes1.SHA1And3DES,
     CertCipher: CipherSHA1And3DES,
-    CertKDFOpts: MacOpts{
+    MacKDFOpts: MacOpts{
         SaltSize: 8,
         IterationCount: 1,
         HMACHash: SHA1,
@@ -85,18 +93,22 @@ var LegacyDESOpts = Opts{
 var PasswordlessOpts = Opts{
     KeyCipher:  nil,
     CertCipher: nil,
-    CertKDFOpts: nil,
+    MacKDFOpts: nil,
 }
 
 // Modern2023
 var Modern2023Opts = Opts{
-    KeyCipher:  cryptobin_pbes2.AES256CBC,
-    KeyKDFOpts: cryptobin_pbes2.PBKDF2Opts{
+    KeyCipher:  pkcs8_pbes2.AES256CBC,
+    KeyKDFOpts: PBKDF2Opts{
         SaltSize:       16,
         IterationCount: 2048,
     },
-    CertCipher: cryptobin_pbes2.AES256CBC,
-    CertKDFOpts: MacOpts{
+    CertCipher:  pkcs8_pbes2.AES256CBC,
+    CertKDFOpts: PBKDF2Opts{
+        SaltSize:       16,
+        IterationCount: 2048,
+    },
+    MacKDFOpts: MacOpts{
         SaltSize: 16,
         IterationCount: 2048,
         HMACHash: SHA256,

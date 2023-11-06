@@ -538,7 +538,7 @@ func getSafeContents(p12Data, password []byte, expectedItems int) (bags []safeBa
                 encryptedContent := encryptedContentInfo.EncryptedContent
                 contentEncryptionAlgorithm := encryptedContentInfo.ContentEncryptionAlgorithm
 
-                // pbse2
+                // pbes2
                 if pkcs8_pbes2.IsPBES2(contentEncryptionAlgorithm.Algorithm) {
                     // change type to utf-8
                     passwordString, err := decodeBMPString(password)
@@ -994,7 +994,7 @@ func makeSafeContents(rand io.Reader, bags []safeBag, password []byte, opts Opts
         var algo pkix.AlgorithmIdentifier
         var encrypted []byte
 
-        // when pbse2
+        // when pbes2
         if pkcs8_pbes2.CheckCipher(cipher) {
             var passwordString string
 

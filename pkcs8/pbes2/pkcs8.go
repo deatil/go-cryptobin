@@ -154,7 +154,7 @@ func PBES2Encrypt(rand io.Reader, data []byte, password []byte, opt *Opts) (encr
         return
     }
 
-    encrypted, encryptedParams, err := cipher.Encrypt(key, data)
+    encrypted, encryptedParams, err := cipher.Encrypt(rand, key, data)
     if err != nil {
         return
     }

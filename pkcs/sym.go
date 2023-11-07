@@ -1,6 +1,7 @@
 package pkcs
 
 import(
+    "io"
     "errors"
     "encoding/asn1"
 )
@@ -14,7 +15,7 @@ type Cipher interface {
     KeySize() int
 
     // 加密, 返回: [加密后数据, 参数, error]
-    Encrypt(key, plaintext []byte) ([]byte, []byte, error)
+    Encrypt(rand io.Reader, key, plaintext []byte) ([]byte, []byte, error)
 
     // 解密
     Decrypt(key, params, ciphertext []byte) ([]byte, error)
@@ -42,7 +43,7 @@ func (this *Sym[T]) OID() asn1.ObjectIdentifier {
 }
 
 // 加密
-func (this *Sym[T]) Encrypt(key, plaintext []byte) (encrypted []byte, params T, err error) {
+func (this *Sym[T]) Encrypt(rand io.Reader, key, plaintext []byte) (encrypted []byte, params T, err error) {
     if this.cipher == nil {
         err = errors.New("pkcs: invalid cipher")
         return
@@ -50,7 +51,7 @@ func (this *Sym[T]) Encrypt(key, plaintext []byte) (encrypted []byte, params T, 
 
     var paramBytes []byte
 
-    encrypted, paramBytes, err = this.cipher.Encrypt(key, plaintext)
+    encrypted, paramBytes, err = this.cipher.Encrypt(rand, key, plaintext)
     if err != nil {
         return
     }

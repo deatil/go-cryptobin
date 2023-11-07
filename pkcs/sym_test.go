@@ -5,8 +5,8 @@ import (
     "testing"
     "crypto/rand"
 
-    pkcs8_pbes1 "github.com/deatil/go-cryptobin/pkcs8/pbes1"
-    pkcs8_pbes2 "github.com/deatil/go-cryptobin/pkcs8/pbes2"
+    pkcs_pbes1 "github.com/deatil/go-cryptobin/pkcs/pbes1"
+    pkcs_pbes2 "github.com/deatil/go-cryptobin/pkcs/pbes2"
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
@@ -24,9 +24,9 @@ func Test_AES256CBC(t *testing.T) {
 
     data := []byte("1awersdf")
 
-    c := NewSym[testCbcParams](pkcs8_pbes2.AES256CBC)
+    c := NewSym[testCbcParams](pkcs_pbes2.AES256CBC)
 
-    endata, parm, err := c.Encrypt(pass, data)
+    endata, parm, err := c.Encrypt(rand.Reader, pass, data)
     assertError(err, "En")
     assertNotEmpty(endata, "En")
 
@@ -54,9 +54,9 @@ func Test_MD5AndDES(t *testing.T) {
 
     data := []byte("1awersdf")
 
-    c := NewSym[testPbeCBCParams](pkcs8_pbes1.MD5AndDES)
+    c := NewSym[testPbeCBCParams](pkcs_pbes1.MD5AndDES)
 
-    endata, parm, err := c.Encrypt(pass, data)
+    endata, parm, err := c.Encrypt(rand.Reader, pass, data)
     assertError(err, "En")
     assertNotEmpty(endata, "En")
 

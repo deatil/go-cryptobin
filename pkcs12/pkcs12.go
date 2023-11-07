@@ -550,7 +550,7 @@ func getSafeContents(p12Data, password []byte, expectedItems int) (bags []safeBa
 
                     data, err = pkcs8_pbes2.PBES2Decrypt(encryptedContent, contentEncryptionAlgorithm, password)
                     if err != nil {
-                        return nil, nil, err
+                        return nil, nil, errors.New("pkcs12: " + err.Error())
                     }
                 } else {
                     newCipher, enParams, err := parseContentEncryptionAlgorithm(contentEncryptionAlgorithm)
@@ -1011,11 +1011,12 @@ func makeSafeContents(rand io.Reader, bags []safeBag, password []byte, opts Opts
                 opts.CertKDFOpts,
             })
             if err != nil {
+                err = errors.New("pkcs12: " + err.Error())
                 return
             }
         } else {
             var params []byte
-            encrypted, params, err = cipher.Encrypt(password, data)
+            encrypted, params, err = cipher.Encrypt(rand, password, data)
             if err != nil {
                 return
             }

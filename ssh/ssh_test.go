@@ -146,6 +146,7 @@ func Test_ParseSSHKey_EcdsaEn(t *testing.T) {
     assertError(err, "ParseSSHKey_EcdsaEn-privateKey")
 
     block, err := MarshalOpenSSHPrivateKeyWithPassword(
+        rand.Reader,
         privateKey,
         "ssh",
         []byte("123"),
@@ -177,7 +178,7 @@ func Test_ParseSSHKey_Ecdsa(t *testing.T) {
     privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
     assertError(err, "ParseSSHKey_Ecdsa-privateKey")
 
-    block, err := MarshalOpenSSHPrivateKey(privateKey, "test-ssh")
+    block, err := MarshalOpenSSHPrivateKey(rand.Reader, privateKey, "test-ssh")
     assertError(err, "ParseSSHKey_Ecdsa-Marshal")
 
     blockkeyData := pem.EncodeToMemory(block)

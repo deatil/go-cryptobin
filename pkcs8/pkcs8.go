@@ -14,7 +14,7 @@ import (
 
 // 加密方式
 var (
-    // pkcs12 模式
+    // pkcs12
     SHA1And3DES    = pbes1.SHA1And3DES
     SHA1And2DES    = pbes1.SHA1And2DES
     SHA1AndRC2_128 = pbes1.SHA1AndRC2_128
@@ -22,7 +22,7 @@ var (
     SHA1AndRC4_128 = pbes1.SHA1AndRC4_128
     SHA1AndRC4_40  = pbes1.SHA1AndRC4_40
 
-    // pkcs5-v1.5 模式
+    // PBES1
     MD2AndDES     = pbes1.MD2AndDES
     MD2AndRC2_64  = pbes1.MD2AndRC2_64
     MD5AndDES     = pbes1.MD5AndDES

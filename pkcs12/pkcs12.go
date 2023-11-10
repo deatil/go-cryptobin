@@ -102,7 +102,6 @@ func ToPEM(pfxData []byte, password string) ([]*pem.Block, error) {
     }
 
     bags, encodedPassword, err := getSafeContents(pfxData, encodedPassword, 2)
-
     if err != nil {
         return nil, err
     }

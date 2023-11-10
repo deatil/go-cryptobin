@@ -24,24 +24,30 @@ type Cipher interface {
     Decrypt(key, params, ciphertext []byte) ([]byte, error)
 }
 
+// ===============
+
 // 默认
 var defaultCiphers = NewCiphers()
 
+// 方法
+type CipherFunc = func() Cipher
+
+// Ciphers
 type Ciphers struct {
     // 锁定
     mu sync.RWMutex
 
-    ciphers map[string]func() Cipher
+    ciphers map[string]CipherFunc
 }
 
 func NewCiphers() *Ciphers {
     return &Ciphers {
-        ciphers: make(map[string]func() Cipher),
+        ciphers: make(map[string]CipherFunc),
     }
 }
 
 // 添加加密
-func (this *Ciphers) AddCipher(oid asn1.ObjectIdentifier, cipher func() Cipher) {
+func (this *Ciphers) AddCipher(oid asn1.ObjectIdentifier, cipher CipherFunc) {
     this.mu.Lock()
     defer this.mu.Unlock()
 
@@ -49,7 +55,7 @@ func (this *Ciphers) AddCipher(oid asn1.ObjectIdentifier, cipher func() Cipher) 
 }
 
 // 添加加密
-func AddCipher(oid asn1.ObjectIdentifier, cipher func() Cipher) {
+func AddCipher(oid asn1.ObjectIdentifier, cipher CipherFunc) {
     defaultCiphers.AddCipher(oid, cipher)
 }
 
@@ -71,6 +77,19 @@ func (this *Ciphers) GetCipher(oid string) (Cipher, error) {
 // 获取加密
 func GetCipher(oid string) (Cipher, error) {
     return defaultCiphers.GetCipher(oid)
+}
+
+// 全部
+func (this *Ciphers) All() map[string]CipherFunc {
+    this.mu.RLock()
+    defer this.mu.RUnlock()
+
+    return this.ciphers
+}
+
+// 全部
+func AllCipher() map[string]CipherFunc {
+    return defaultCiphers.All()
 }
 
 // 克隆

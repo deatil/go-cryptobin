@@ -32,7 +32,7 @@ func EncryptPKCS8PrivateKey(
 
     if IsPKCS12Cipher(cipher) {
         var err error
-        password, err = bmpStringZeroTerminated(string(password))
+        password, err = BmpStringZeroTerminated(string(password))
         if err != nil {
             return nil, err
         }
@@ -81,7 +81,7 @@ func DecryptPKCS8PrivateKey(data, password []byte) ([]byte, error) {
 
     if IsPKCS12Cipher(cipher) {
         var err error
-        password, err = bmpStringZeroTerminated(string(password))
+        password, err = BmpStringZeroTerminated(string(password))
         if err != nil {
             return nil, err
         }

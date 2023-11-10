@@ -5,8 +5,8 @@ import(
     "github.com/deatil/go-cryptobin/pkcs/pbes1"
 )
 
-// bmpStringZeroTerminated returns s encoded in UCS-2 with a zero terminator.
-var bmpStringZeroTerminated = tool.BmpStringZeroTerminated
+// BmpStringZeroTerminated returns s encoded in UCS-2 with a zero terminator.
+var BmpStringZeroTerminated = tool.BmpStringZeroTerminated
 
 // 别名
 type (
@@ -24,7 +24,7 @@ var (
     CheckCipher         = pbes1.CheckCipher
 
     // 检测是否是 pkcs12 的加密方式
-    IsPKCS12Cipher      = pbes1.IsPKCS12Cipher
+    IsPKCS12Cipher = pbes1.IsPKCS12Cipher
 )
 
 // 加密方式

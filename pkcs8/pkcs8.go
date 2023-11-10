@@ -103,6 +103,8 @@ var DefaultScryptOpts = cryptobin_pbes2.DefaultScryptOpts
 var DefaultOpts = cryptobin_pbes2.DefaultOpts
 
 // 解析设置
+// opt, err := ParseOpts("AES256CBC", "SHA256")
+// block, err := EncryptPEMBlock(rand.Reader, "ENCRYPTED PRIVATE KEY", data, password, opt)
 func ParseOpts(opts ...any) (any, error) {
     var opt any
     var err error
@@ -126,6 +128,8 @@ func ParseOpts(opts ...any) (any, error) {
 }
 
 // 加密
+// block, err := EncryptPEMBlock(rand.Reader, "ENCRYPTED PRIVATE KEY", data, password, DESCBC)
+// block, err := EncryptPEMBlock(rand.Reader, "ENCRYPTED PRIVATE KEY", data, password, DefaultOpts)
 func EncryptPEMBlock(
     rand      io.Reader,
     blockType string,
@@ -156,6 +160,7 @@ func EncryptPEMBlock(
 }
 
 // 解密
+// de, err := DecryptPEMBlock(block, password)
 func DecryptPEMBlock(block *pem.Block, password []byte) ([]byte, error) {
     if block.Headers["Proc-Type"] == "4,ENCRYPTED" {
         return x509.DecryptPEMBlock(block, password)

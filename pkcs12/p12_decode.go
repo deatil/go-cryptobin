@@ -447,8 +447,8 @@ func (this *PKCS12) ToPEM() ([]*pem.Block, error) {
     }
 
     // JAVA 证书链
-    trustStoreEntries := this.GetTrustStoreEntries()
-    for _, entry := range trustStoreEntries {
+    trustStores := this.GetTrustStoreEntries()
+    for _, entry := range trustStores {
         entryBlock := this.convertBag(CertificateType, entry.Cert.Raw, entry.Attrs)
 
         blocks = append(blocks, entryBlock)

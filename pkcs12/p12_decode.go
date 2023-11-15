@@ -16,7 +16,7 @@ func (this *PKCS12) getSafeContents(p12Data, password []byte) (bags []SafeBag, u
         return nil, nil, errors.New("pkcs12: error reading P12 data: " + err.Error())
     }
 
-    if pfx.Version != 3 {
+    if pfx.Version != PKCS12Version {
         return nil, nil, NotImplementedError("can only decode v3 PFX PDU's")
     }
 
@@ -180,7 +180,7 @@ func (this *PKCS12) parseCertBag(bag *SafeBag) error {
         default:
             bagData := NewSafeBagDataWithAttrs(parsedCerts[0], bag.Attributes)
 
-            this.parsedData["caCerts"] = append(this.parsedData["caCerts"], bagData)
+            this.parsedData["caCert"] = append(this.parsedData["caCert"], bagData)
 
     }
 
@@ -234,6 +234,8 @@ func (this *PKCS12) Parse(pfxData []byte, password string) (*PKCS12, error) {
     return this, nil
 }
 
+//===============
+
 func (this *PKCS12) GetPrivateKey() (crypto.PrivateKey, PKCS12Attributes) {
     privateKeys, ok := this.parsedData["privateKey"]
     if !ok {
@@ -271,7 +273,7 @@ func (this *PKCS12) GetCert() (*x509.Certificate, PKCS12Attributes) {
 }
 
 func (this *PKCS12) GetCaCerts() []*x509.Certificate {
-    certs, ok := this.parsedData["caCerts"]
+    certs, ok := this.parsedData["caCert"]
     if !ok {
         return nil
     }
@@ -360,4 +362,39 @@ func (this *PKCS12) GetSecretKey() ([]byte, PKCS12Attributes) {
     }
 
     return key, keys[0].Attrs()
+}
+
+//===============
+
+func (this *PKCS12) hasData(name string) bool {
+    datas, ok := this.parsedData[name]
+    if !ok {
+        return false
+    }
+
+    if len(datas) == 0 {
+        return false
+    }
+
+    return true
+}
+
+func (this *PKCS12) HasPrivateKey() bool {
+    return this.hasData("privateKey")
+}
+
+func (this *PKCS12) HasCert() bool {
+    return this.hasData("cert")
+}
+
+func (this *PKCS12) HasCaCert() bool {
+    return this.hasData("caCert")
+}
+
+func (this *PKCS12) HasTrustStore() bool {
+    return this.hasData("trustStore")
+}
+
+func (this *PKCS12) HasSecretKey() bool {
+    return this.hasData("secretKey")
 }

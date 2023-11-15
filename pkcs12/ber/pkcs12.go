@@ -1,6 +1,8 @@
 package ber
 
 import (
+    "io"
+    "bytes"
     "errors"
     "encoding/asn1"
     "crypto/x509"
@@ -307,4 +309,26 @@ func DecodeSecret(pfxData []byte, password string) (secretKeys []cryptobin_pkcs1
     }
 
     return cryptobin_pkcs12.DecodeSecret(data, password)
+}
+
+// LoadPKCS12FromReader loads the key store from the specified file.
+func LoadPKCS12FromReader(reader io.Reader, password string) (*cryptobin_pkcs12.PKCS12, error) {
+    buf := bytes.NewBuffer(nil)
+
+    // 保存
+    if _, err := io.Copy(buf, reader); err != nil {
+        return nil, err
+    }
+
+    return LoadPKCS12FromBytes(buf.Bytes(), password)
+}
+
+// LoadPKCS12FromBytes loads the key store from the bytes data.
+func LoadPKCS12FromBytes(pfxData []byte, password string) (*cryptobin_pkcs12.PKCS12, error) {
+    data, err := Parse(pfxData, []byte(password))
+    if err != nil {
+        return nil, err
+    }
+
+    return cryptobin_pkcs12.LoadPKCS12FromBytes(data, password)
 }

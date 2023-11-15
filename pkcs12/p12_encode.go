@@ -74,8 +74,10 @@ func (this *PKCS12) AddSecretKey(secretKey []byte) *PKCS12 {
     return this
 }
 
+//===============
+
 // 获取证书签名
-func (this *PKCS12) getCertLocalKeyIdAttr(cert []byte) (PKCS12Attribute, error) {
+func (this *PKCS12) makeCertLocalKeyIdAttr(cert []byte) (PKCS12Attribute, error) {
     var certFingerprint = sha1.Sum(cert)
 
     sha1Data, err := asn1.Marshal(certFingerprint[:])
@@ -120,7 +122,7 @@ func (this *PKCS12) marshalPrivateKey(rand io.Reader, password []byte, opt Opts)
     }
 
     // 额外数据
-    localKeyIdAttr, err := this.getCertLocalKeyIdAttr(this.cert.Raw)
+    localKeyIdAttr, err := this.makeCertLocalKeyIdAttr(this.cert.Raw)
     if err != nil {
         err = errors.New("PKCS12: " + err.Error())
         return
@@ -136,7 +138,7 @@ func (this *PKCS12) marshalCert(rand io.Reader, password []byte, opt Opts) (ci C
     certificate := this.cert
 
     // 额外数据
-    localKeyIdAttr, err := this.getCertLocalKeyIdAttr(certificate.Raw)
+    localKeyIdAttr, err := this.makeCertLocalKeyIdAttr(certificate.Raw)
     if err != nil {
         err = errors.New("PKCS12: " + err.Error())
         return

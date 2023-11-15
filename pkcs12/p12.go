@@ -65,5 +65,5 @@ func LoadPKCS12FromBytes(data []byte, password string) (*PKCS12, error) {
     return pkcs12, err
 }
 
-// alias
+// 别名
 var NewPKCS12Encode = NewPKCS12

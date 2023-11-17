@@ -548,7 +548,7 @@ func (this *PKCS12) ToPEM() ([]*pem.Block, error) {
     // 证书链
     caCerts, _ := this.GetCaCerts()
     for _, caCert := range caCerts {
-        caCertBlock := this.makeBlock(CertificateType, caCert.Raw, EmptyPKCS12Attributes())
+        caCertBlock := this.makeBlock(CertificateType, caCert.Raw, NewPKCS12AttributesEmpty())
 
         blocks = append(blocks, caCertBlock)
     }
@@ -587,7 +587,7 @@ func (this *PKCS12) ToOriginalPEM() ([]*pem.Block, error) {
     // 证书链
     caCerts, _ := this.GetCaCertsBytes()
     for _, caCert := range caCerts {
-        caCertBlock := this.makeBlock(CertificateType, caCert, EmptyPKCS12Attributes())
+        caCertBlock := this.makeBlock(CertificateType, caCert, NewPKCS12AttributesEmpty())
 
         blocks = append(blocks, caCertBlock)
     }

@@ -6,6 +6,7 @@ import (
     "crypto/x509"
     "crypto/x509/pkix"
     "encoding/pem"
+    "encoding/asn1"
 
     gmsm_x509 "github.com/tjfoc/gmsm/x509"
 )
@@ -106,6 +107,23 @@ func (this *PKCS12) parseSecretBag(bag *SafeBag, password []byte) error {
     return nil
 }
 
+func (this *PKCS12) parseUnknowBag(bag *SafeBag) error {
+    bag.Attributes = append(bag.Attributes, PKCS12Attribute{
+        Id: bag.Id,
+        Value: asn1.RawValue{
+            Bytes: []byte("unknowOid"),
+        },
+    })
+
+    bagData := &SafeBagData{}
+    bagData.data = bag.Value.Bytes
+    bagData.attrs = NewPKCS12Attributes(bag.Attributes)
+
+    this.parsedData["unknow"] = append(this.parsedData["unknow"], bagData)
+
+    return nil
+}
+
 // 解析
 func (this *PKCS12) Parse(pfxData []byte, password string) (*PKCS12, error) {
     encodedPassword, err := bmpStringZeroTerminated(password)
@@ -134,6 +152,9 @@ func (this *PKCS12) Parse(pfxData []byte, password string) (*PKCS12, error) {
 
             case bag.Id.Equal(oidSecretBag):
                 this.parseSecretBag(&bag, encodedPassword)
+
+            default:
+                this.parseUnknowBag(&bag)
         }
     }
 
@@ -430,6 +451,33 @@ func (this *PKCS12) GetSecretKey() (secretKey []byte, attrs PKCS12Attributes, er
     return keys[0].Data(), keys[0].Attrs(), nil
 }
 
+type unknowDataBytes struct {
+    Attrs PKCS12Attributes
+    Data  []byte
+}
+
+func (this *PKCS12) GetUnknowsBytes() (unknowDatas []unknowDataBytes, err error) {
+    unknows, ok := this.parsedData["unknow"]
+    if !ok {
+        err = errors.New("no data")
+        return
+    }
+
+    if len(unknows) == 0 {
+        err = errors.New("no data")
+        return
+    }
+
+    for _, unknow := range unknows {
+        unknowDatas = append(unknowDatas, unknowDataBytes{
+            Attrs: unknow.Attrs(),
+            Data:  unknow.Data(),
+        })
+    }
+
+    return unknowDatas, nil
+}
+
 //===============
 
 func (this *PKCS12) hasData(name string) bool {
@@ -471,6 +519,10 @@ func (this *PKCS12) HasCRL() bool {
 
 func (this *PKCS12) HasSecretKey() bool {
     return this.hasData("secretKey")
+}
+
+func (this *PKCS12) HasUnknow() bool {
+    return this.hasData("unknow")
 }
 
 //===============

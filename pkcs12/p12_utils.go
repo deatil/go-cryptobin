@@ -108,6 +108,30 @@ func (this PKCS12Attributes) Attributes() []PKCS12Attribute {
     return this.attributes
 }
 
+// 判断
+func (this PKCS12Attributes) HasAttr(name string) bool {
+    attrs := this.ToArray()
+
+    _, ok := attrs[name]
+    if !ok {
+        return false
+    }
+
+    return true
+}
+
+// 获取
+func (this PKCS12Attributes) GetAttr(name string) string {
+    attrs := this.ToArray()
+
+    value, ok := attrs[name]
+    if !ok {
+        return ""
+    }
+
+    return value
+}
+
 // 验证签名数据
 func (this PKCS12Attributes) Verify(data []byte) bool {
     attrs := this.ToArray()

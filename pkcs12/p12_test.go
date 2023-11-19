@@ -161,6 +161,10 @@ func Test_P12_EncodeSecret(t *testing.T) {
     newpass2 := attrs.ToArray()
 
     assertEqual(newpass2["localKeyId"], hex.EncodeToString(oldpass2[:]), "secretKey")
+    assertEqual(attrs.GetAttr("localKeyId"), hex.EncodeToString(oldpass2[:]), "secretKey")
+
+    assertBool(attrs.HasAttr("localKeyId"), "P12_EncodeSecret-HasAttr")
+    assertNotBool(attrs.HasAttr("localKeyId22222"), "P12_EncodeSecret-HasAttr")
 
     assertNotBool(pp12.HasPrivateKey(), "P12_EncodeSecret-HasPrivateKey")
     assertNotBool(pp12.HasCert(), "P12_EncodeSecret-HasCert")
@@ -843,4 +847,33 @@ func Test_P12_Enveloped_Check(t *testing.T) {
 
     assertEqual(privateKey2, privateKey, "P12_Enveloped_Check-privateKey2")
     assertEqual(certificate2, certificates[0], "P12_Enveloped_Check-certificate2")
+}
+
+var testUnknowP12Pem = `-----BEGIN CERTIFICATE-----
+MIH6AgEDMIHFBgkqhkiG9w0BBwGggbcEgbQwgbEwga4GCSqGSIb3DQEHBqC
+BoDCBnQIBADCBlwYJKoZIhvcNAQcBMCgGCiqGSIb3DQEMAQYwGgQU/YpCt9kpY8/1qIuCRvkq3Dt6TII
+CAggAgGASH1n+TRDvsr4KWH04sn57+C6QEcHegUHihcZLXiJmjKuyTbmqGQ5TbB67uwQr6lPzIj7bAe6
+uDhsyootKEcJwJK2kl9fiv57aDAMKdb05+HVYXFoLSAAqr0hwAl8+YRcwLTAhMAkGBSsOAwIaBQAEFO+
+PqfooLirjlapSJekxacudIazDBAhNN4STa9QHCA==
+-----END CERTIFICATE-----`
+
+func Test_P12_UnknowOid_Check(t *testing.T) {
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    pfxData := decodePEM(testUnknowP12Pem)
+
+    password := "passpass word"
+
+    p12, err := LoadPKCS12FromBytes(pfxData, password)
+    assertError(err, "P12_UnknowOid_Check-pfxData")
+
+    unknows, err := p12.GetUnknowsBytes()
+    assertError(err, "P12_UnknowOid_Check-GetUnknowsBytes")
+    assertNotEmpty(unknows, "P12_UnknowOid_Check-GetUnknowsBytes")
+
+    for _, unknow := range unknows{
+        assertNotEmpty(unknow.Data, "P12_UnknowOid_Check-Data")
+        assertNotEmpty(unknow.Attrs.ToArray(), "P12_UnknowOid_Check-Attrs")
+    }
 }

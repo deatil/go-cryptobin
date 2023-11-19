@@ -150,3 +150,54 @@ func unmarshal(in []byte, out any) error {
 
     return nil
 }
+
+func convertAttribute(attribute *PKCS12Attribute) (key, value string, err error) {
+    isString := false
+
+    switch {
+        case attribute.Id.Equal(oidFriendlyName):
+            key = "friendlyName"
+            isString = true
+        case attribute.Id.Equal(oidLocalKeyID):
+            key = "localKeyId"
+        case attribute.Id.Equal(oidMicrosoftCSPName):
+            // This key is chosen to match OpenSSL.
+            key = "Microsoft CSP Name"
+            isString = true
+        case attribute.Id.Equal(oidJavaTrustStore):
+            key = "javaTrustStore"
+
+            storeOID := new(asn1.ObjectIdentifier)
+            if _, err := asn1.Unmarshal(attribute.Value.Bytes, storeOID); err != nil {
+                return "", "", err
+            }
+
+            value = (*storeOID).String()
+
+            return
+        default:
+            key = attribute.Id.String()
+            value = hex.EncodeToString(attribute.Value.Bytes)
+            err = errUnknownAttributeOID
+
+            return
+    }
+
+    if isString {
+        if err := unmarshal(attribute.Value.Bytes, &attribute.Value); err != nil {
+            return "", "", err
+        }
+        if value, err = decodeBMPString(attribute.Value.Bytes); err != nil {
+            return "", "", err
+        }
+    } else {
+        var id []byte
+        if err := unmarshal(attribute.Value.Bytes, &id); err != nil {
+            return "", "", err
+        }
+
+        value = hex.EncodeToString(id)
+    }
+
+    return key, value, nil
+}

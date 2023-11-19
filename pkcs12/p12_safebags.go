@@ -13,6 +13,32 @@ import (
     "github.com/deatil/go-cryptobin/pkcs12/enveloped"
 )
 
+// https://tools.ietf.org/html/rfc7292#section-4.2.5
+// SecretBag ::= SEQUENCE {
+//   secretTypeId   BAG-TYPE.&id ({SecretTypes}),
+//   secretValue    [0] EXPLICIT BAG-TYPE.&Type ({SecretTypes}
+//                     {@secretTypeId})
+// }
+type secretBag struct {
+    SecretTypeID asn1.ObjectIdentifier
+    SecretValue  []byte `asn1:"tag:0,explicit"`
+}
+
+type secretValue struct {
+    AlgorithmIdentifier pkix.AlgorithmIdentifier
+    EncryptedContent    []byte
+}
+
+func (this secretValue) Algorithm() pkix.AlgorithmIdentifier {
+    return this.AlgorithmIdentifier
+}
+
+func (this secretValue) Data() []byte {
+    return this.EncryptedContent
+}
+
+// ============
+
 func (this *PKCS12) makeSafeContents(rand io.Reader, bags []SafeBag, password []byte, opts Opts) (ci ContentInfo, err error) {
     var data []byte
     if data, err = asn1.Marshal(bags); err != nil {

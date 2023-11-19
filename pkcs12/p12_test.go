@@ -132,14 +132,6 @@ func Test_P12_EncodeChain(t *testing.T) {
     caCerts2, _ := pp12.GetCaCerts()
     assertNotEmpty(caCerts2, "P12Decode-caCerts2")
     assertEqual(caCerts2, caCerts, "P12_EncodeChain-caCerts2")
-
-    // 旧版本解析
-    privateKey2, certificate2, caCerts2, err = DecodeChain(pfxData, password)
-    assertError(err, "DecodeChain-pfxData")
-
-    assertEqual(privateKey2, privateKey, "P12_EncodeChain-privateKey2")
-    assertEqual(certificate2, certificates[0], "P12_EncodeChain-certificate2")
-    assertEqual(caCerts2, caCerts, "P12_EncodeChain-caCerts2")
 }
 
 func Test_P12_EncodeSecret(t *testing.T) {
@@ -170,21 +162,6 @@ func Test_P12_EncodeSecret(t *testing.T) {
     newpass2 := attrs.ToArray()
 
     assertEqual(newpass2["localKeyId"], hex.EncodeToString(oldpass2[:]), "secretKey")
-
-    // 旧版本
-    secretKeys, err := DecodeSecret(pfxData, password)
-    assertError(err, "P12_EncodeSecret")
-
-    if len(secretKeys) != 1 {
-        t.Error("P12_EncodeSecret Error")
-    }
-
-    oldpass := sha1.Sum(secretKey)
-    newpass := secretKeys[0].Attributes()
-
-    assertEqual(newpass["localKeyId"], hex.EncodeToString(oldpass[:]), "secretKey")
-
-    assertEqual(secretKeys[0].Key(), secretKey, "P12_EncodeSecret")
 
     assertNotBool(pp12.HasPrivateKey(), "P12_EncodeSecret-HasPrivateKey")
     assertNotBool(pp12.HasCert(), "P12_EncodeSecret-HasCert")
@@ -227,12 +204,6 @@ func Test_P12_EncodeTrustStore(t *testing.T) {
     certificates2, _ := pp12.GetTrustStores()
     assertNotEmpty(certificates2, "P12_EncodeTrustStore-certificates2")
     assertEqual(certificates2, certificates, "P12_EncodeTrustStore-certificates2")
-
-    // 旧版本
-    certs, err := DecodeTrustStore(pfxData, password)
-    assertError(err, "P12_DecodeTrustStore-pfxData")
-
-    assertEqual(certs, certificates, "P12_DecodeTrustStore-certs")
 }
 
 func Test_P12_EncodeTrustStoreEntries(t *testing.T) {
@@ -278,17 +249,6 @@ func Test_P12_EncodeTrustStoreEntries(t *testing.T) {
 
     assertEqual(attrs2["friendlyName"], "FriendlyName-Test", "P12_EncodeTrustStoreEntries-friendlyName")
     assertEqual(attrs2["javaTrustStore"], "2.5.29.37.0", "P12_EncodeTrustStoreEntries-friendlyName")
-
-    // 旧版本
-    certificate2, err := DecodeTrustStoreEntries(pfxData, password)
-    assertError(err, "P12_EncodeTrustStoreEntries-pfxData2")
-
-    attrs := certificate2[0].Attributes()
-
-    assertEqual(certificate2[0].Cert(), certificates[0], "P12_EncodeTrustStoreEntries-certificate2")
-
-    assertEqual(attrs["friendlyName"], "FriendlyName-Test", "P12_EncodeTrustStoreEntries-friendlyName")
-    assertEqual(attrs["javaTrustStore"], "2.5.29.37.0", "P12_EncodeTrustStoreEntries-friendlyName")
 }
 
 func Test_P12_EncodePbes2_Check(t *testing.T) {
@@ -521,20 +481,6 @@ func Test_P12_EncodeSecret_SetLocalKeyId(t *testing.T) {
     newpass2 := attrs.ToArray()
 
     assertEqual(newpass2["localKeyId"], localKeyIdHex, "P12_EncodeSecret_SetLocalKeyId-localKeyId")
-
-    // 旧版本
-    secretKeys, err := DecodeSecret(pfxData, password)
-    assertError(err, "P12_EncodeSecret_SetLocalKeyId")
-
-    if len(secretKeys) != 1 {
-        t.Error("P12_EncodeSecret_SetLocalKeyId Error")
-    }
-
-    newpass := secretKeys[0].Attributes()
-
-    assertEqual(newpass["localKeyId"], localKeyIdHex, "P12_EncodeSecret_SetLocalKeyId-localKeyId2")
-
-    assertEqual(secretKeys[0].Key(), secretKey, "P12_EncodeSecret_SetLocalKeyId")
 
     assertNotBool(pp12.HasPrivateKey(), "P12_EncodeSecret_SetLocalKeyId-HasPrivateKey")
     assertNotBool(pp12.HasCert(), "P12_EncodeSecret_SetLocalKeyId-HasCert")

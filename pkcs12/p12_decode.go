@@ -261,7 +261,7 @@ func (this *PKCS12) GetCaCertsBytes() (caCerts [][]byte, err error) {
     return caCerts, nil
 }
 
-func (this *PKCS12) GetTrustStores() (caCerts []*x509.Certificate, err error) {
+func (this *PKCS12) GetTrustStores() (trustStores []*x509.Certificate, err error) {
     certs, ok := this.parsedData["trustStore"]
     if !ok {
         err = errors.New("no data")
@@ -279,13 +279,13 @@ func (this *PKCS12) GetTrustStores() (caCerts []*x509.Certificate, err error) {
             return nil, err
         }
 
-        caCerts = append(caCerts, parsedCerts[0])
+        trustStores = append(trustStores, parsedCerts[0])
     }
 
-    return caCerts, nil
+    return trustStores, nil
 }
 
-func (this *PKCS12) GetTrustStoresBytes() (caCerts [][]byte, err error) {
+func (this *PKCS12) GetTrustStoresBytes() (trustStores [][]byte, err error) {
     certs, ok := this.parsedData["trustStore"]
     if !ok {
         err = errors.New("no data")
@@ -298,10 +298,10 @@ func (this *PKCS12) GetTrustStoresBytes() (caCerts [][]byte, err error) {
     }
 
     for _, cert := range certs {
-        caCerts = append(caCerts, cert.Data())
+        trustStores = append(trustStores, cert.Data())
     }
 
-    return caCerts, nil
+    return trustStores, nil
 }
 
 type trustStoreKeyData struct {
@@ -309,7 +309,7 @@ type trustStoreKeyData struct {
     Cert  *x509.Certificate
 }
 
-func (this *PKCS12) GetTrustStoreEntries() (caCerts []trustStoreKeyData, err error) {
+func (this *PKCS12) GetTrustStoreEntries() (trustStores []trustStoreKeyData, err error) {
     certs, ok := this.parsedData["trustStore"]
     if !ok {
         err = errors.New("no data")
@@ -327,13 +327,13 @@ func (this *PKCS12) GetTrustStoreEntries() (caCerts []trustStoreKeyData, err err
             return nil, err
         }
 
-        caCerts = append(caCerts, trustStoreKeyData{
+        trustStores = append(trustStores, trustStoreKeyData{
             Attrs: cert.Attrs(),
             Cert:  parsedCerts[0],
         })
     }
 
-    return caCerts, nil
+    return trustStores, nil
 }
 
 type trustStoreKeyDataBytes struct {
@@ -341,7 +341,7 @@ type trustStoreKeyDataBytes struct {
     Cert  []byte
 }
 
-func (this *PKCS12) GetTrustStoreEntriesBytes() (caCerts []trustStoreKeyDataBytes, err error) {
+func (this *PKCS12) GetTrustStoreEntriesBytes() (trustStores []trustStoreKeyDataBytes, err error) {
     certs, ok := this.parsedData["trustStore"]
     if !ok {
         err = errors.New("no data")
@@ -354,13 +354,13 @@ func (this *PKCS12) GetTrustStoreEntriesBytes() (caCerts []trustStoreKeyDataByte
     }
 
     for _, cert := range certs {
-        caCerts = append(caCerts, trustStoreKeyDataBytes{
+        trustStores = append(trustStores, trustStoreKeyDataBytes{
             Attrs: cert.Attrs(),
             Cert:  cert.Data(),
         })
     }
 
-    return caCerts, nil
+    return trustStores, nil
 }
 
 func (this *PKCS12) GetSdsiCertBytes() (cert []byte, attrs PKCS12Attributes, err error) {

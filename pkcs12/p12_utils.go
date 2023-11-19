@@ -1,6 +1,7 @@
 package pkcs12
 
 import (
+    "io"
     "errors"
     "crypto/sha1"
     "crypto/x509"
@@ -9,6 +10,27 @@ import (
     "encoding/json"
     "encoding/asn1"
 )
+
+var EnvelopedCipher = envelopedCipher{}
+
+// envelopedCipher
+type envelopedCipher struct {}
+
+func (this envelopedCipher) OID() asn1.ObjectIdentifier {
+    return asn1.ObjectIdentifier{}
+}
+
+func (this envelopedCipher) KeySize() int {
+    return 0
+}
+
+func (this envelopedCipher) Encrypt(rand io.Reader, key, plaintext []byte) ([]byte, []byte, error) {
+    return nil, nil, errors.New("error")
+}
+
+func (this envelopedCipher) Decrypt(key, params, ciphertext []byte) ([]byte, error) {
+    return nil, errors.New("error")
+}
 
 // https://tools.ietf.org/html/rfc7292#section-4.2.5
 // SecretBag ::= SEQUENCE {

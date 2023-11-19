@@ -4,10 +4,35 @@ import (
     "errors"
     "crypto/sha1"
     "crypto/x509"
+    "crypto/x509/pkix"
     "encoding/hex"
     "encoding/json"
     "encoding/asn1"
 )
+
+// https://tools.ietf.org/html/rfc7292#section-4.2.5
+// SecretBag ::= SEQUENCE {
+//   secretTypeId   BAG-TYPE.&id ({SecretTypes}),
+//   secretValue    [0] EXPLICIT BAG-TYPE.&Type ({SecretTypes}
+//                     {@secretTypeId})
+// }
+type secretBag struct {
+    SecretTypeID asn1.ObjectIdentifier
+    SecretValue  []byte `asn1:"tag:0,explicit"`
+}
+
+type secretValue struct {
+    AlgorithmIdentifier pkix.AlgorithmIdentifier
+    EncryptedContent    []byte
+}
+
+func (this secretValue) Algorithm() pkix.AlgorithmIdentifier {
+    return this.AlgorithmIdentifier
+}
+
+func (this secretValue) Data() []byte {
+    return this.EncryptedContent
+}
 
 // TrustStoreData represents an entry in a Java TrustStore.
 type TrustStoreData struct {

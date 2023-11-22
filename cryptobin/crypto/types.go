@@ -111,6 +111,8 @@ func (this Multiple) String() string {
             return "Skipjack"
         case Serpent:
             return "Serpent"
+        case Loki97:
+            return "Loki97"
         default:
             if TypeMultiple.Names().Has(this) {
                 return (TypeMultiple.Names().Get(this))()
@@ -149,6 +151,7 @@ const (
     Kuznyechik
     Skipjack
     Serpent
+    Loki97
     maxMultiple
 )
 

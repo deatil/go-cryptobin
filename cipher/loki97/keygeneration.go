@@ -4,11 +4,11 @@ const NUM_SUBKEYS = 48
 var DELTA = ULONG64{0x9E3779B9, 0x7F4A7C15}
 
 func makeKey(k []byte) [NUM_SUBKEYS]ULONG64 {
-    var SK [NUM_SUBKEYS]ULONG64   // array of subkeys
+    var SK [NUM_SUBKEYS]ULONG64 // array of subkeys
 
     var deltan ULONG64 = DELTA  // multiples of delta
 
-    var i int32 = 0             // index into key input
+    var i int16 = 0             // index into key input
     var k4, k3, k2, k1 ULONG64  // key schedule 128-bit entities
     var f_out ULONG64           // fn f output value for debug
     var t1, t2 ULONG64
@@ -22,8 +22,8 @@ func makeKey(k []byte) [NUM_SUBKEYS]ULONG64 {
     }
 
     // pack key into 128-bit entities: k4, k3, k2, k1
-    k4.l = tmp >> 32
-    k4.r = tmp
+    k4.l = uint32(tmp >> 32)
+    k4.r = uint32(tmp)
 
     tmp = 0
     for i = 8; i < 16; i++ {
@@ -31,10 +31,10 @@ func makeKey(k []byte) [NUM_SUBKEYS]ULONG64 {
         tmp |= uint64(k[i])
     }
 
-    k3.l = tmp >> 32
-    k3.r = tmp
+    k3.l = uint32(tmp >> 32)
+    k3.r = uint32(tmp)
 
-    if (len(k) == 16) {
+    if len(k) == 16 {
         // 128-bit key - call fn f twice to gen 256 bits
         k2 = compute(k3, k4)
         k1 = compute(k4, k3)
@@ -46,10 +46,10 @@ func makeKey(k []byte) [NUM_SUBKEYS]ULONG64 {
         }
 
         // 192 or 256-bit key - pack k2 from key data
-        k2.l = tmp >> 32
-        k2.r = tmp
+        k2.l = uint32(tmp >> 32)
+        k2.r = uint32(tmp)
 
-        if (len(k) == 24) {
+        if len(k) == 24 {
             // 192-bit key - call fn f once to gen 256 bits
             k1 = compute(k4, k3)
         } else {
@@ -60,8 +60,8 @@ func makeKey(k []byte) [NUM_SUBKEYS]ULONG64 {
             }
 
             // 256-bit key - pack k1 from key data
-            k1.l = tmp >> 32
-            k1.r = tmp
+            k1.l = uint32(tmp >> 32)
+            k1.r = uint32(tmp)
         }
     }
 

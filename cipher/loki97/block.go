@@ -13,8 +13,8 @@ func blockDecrypt(in []byte, sessionKey []ULONG64) []byte {
 
     // compute all rounds for this 1 block
     var nR, f_out ULONG64
-    var k int32 = NUM_SUBKEYS - 1
-    var i int32
+    var k int16 = NUM_SUBKEYS - 1
+    var i int16
 
     for i = 0; i < ROUNDS; i++ {
         nR = sub64(R, SK[k])
@@ -53,8 +53,8 @@ func blockEncrypt(in []byte, sessionKey []ULONG64) []byte {
 
     // compute all rounds for this 1 block
     var nR, f_out ULONG64
-    var k int32 = 0
-    var i int32
+    var k int16 = 0
+    var i int16
 
     for i = 0; i < ROUNDS; i++ {
         nR = add64(R, SK[k])

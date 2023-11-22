@@ -239,6 +239,14 @@ func (this Cryptobin) Serpent() Cryptobin {
     return this
 }
 
+// Loki97
+// The key argument should be 16, 24, 32 bytes.
+func (this Cryptobin) Loki97() Cryptobin {
+    this.multiple = Loki97
+
+    return this
+}
+
 // 使用类型
 func (this Cryptobin) MultipleBy(multiple Multiple, cfg ...map[string]any) Cryptobin {
     this.multiple = multiple

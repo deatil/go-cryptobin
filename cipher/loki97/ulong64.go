@@ -1,8 +1,12 @@
 package loki97
 
+import (
+    "encoding/binary"
+)
+
 type ULONG64 struct {
-    l uint64
-    r uint64
+    l uint32
+    r uint32
 }
 
 func add64(a ULONG64, b ULONG64) ULONG64 {
@@ -34,15 +38,8 @@ func sub64(a ULONG64, b ULONG64) ULONG64 {
 func byteToULONG64(inp []byte) ULONG64 {
     var I ULONG64
 
-    I.l  = uint64(inp[0]) << 24
-    I.l |= uint64(inp[1]) << 16
-    I.l |= uint64(inp[2]) << 8
-    I.l |= uint64(inp[3])
-
-    I.r  = uint64(inp[4]) << 24
-    I.r |= uint64(inp[5]) << 16
-    I.r |= uint64(inp[6]) << 8
-    I.r |= uint64(inp[7])
+    I.l = binary.BigEndian.Uint32(inp[0:])
+    I.r = binary.BigEndian.Uint32(inp[4:])
 
     return I
 }
@@ -50,15 +47,8 @@ func byteToULONG64(inp []byte) ULONG64 {
 func ULONG64ToBYTE(I ULONG64) [8]byte {
     var sav [8]byte
 
-    sav[0] = byte(I.l >> 24)
-    sav[1] = byte(I.l >> 16)
-    sav[2] = byte(I.l >> 8)
-    sav[3] = byte(I.l)
-
-    sav[4] = byte(I.r >> 24)
-    sav[5] = byte(I.r >> 16)
-    sav[6] = byte(I.r >> 8)
-    sav[7] = byte(I.r)
+    binary.BigEndian.PutUint32(sav[0:], I.l)
+    binary.BigEndian.PutUint32(sav[4:], I.r)
 
     return sav
 }

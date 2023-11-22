@@ -88,7 +88,7 @@ func compute(A ULONG64, B ULONG64) ULONG64 {
           (S2[int16(((e.r >> 24) & 0xFF) | ((B.l >> 5) &  0x700))]) << 24 |
           (S2[int16(((e.r >> 16) & 0xFF) | ((B.l >> 2) &  0x700))]) << 16 |
           (S1[int16(((e.r >>  8) & 0xFF) | ((B.l << 3) & 0x1F00))]) <<  8 |
-          (S1[int16(( e.r        & 0xFF) | ((B.r << 8) & 0x1F00))]))
+          (S1[int16(( e.r        & 0xFF) | ((B.l << 8) & 0x1F00))]))
 
     return f
 }

@@ -188,6 +188,10 @@ func (this Mode) String() string {
             return "OFB"
         case OFB8:
             return "OFB8"
+        case NCFB:
+            return "NCFB"
+        case NOFB:
+            return "NOFB"
         case CTR:
             return "CTR"
         case GCM:
@@ -221,6 +225,8 @@ const (
     OCFB
     OFB
     OFB8
+    NCFB
+    NOFB
     CTR
     GCM
     CCM

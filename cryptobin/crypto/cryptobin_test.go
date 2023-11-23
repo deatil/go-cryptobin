@@ -1125,3 +1125,59 @@ func test_Loki97PKCS7Padding_Check(t *testing.T) {
 
     assert(cyptdeStr, oldData, "Loki97PKCS7Padding_Check-res")
 }
+
+func Test_AesNCFB(t *testing.T) {
+    assert := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    data := "test-pass"
+    cypt := FromString(data).
+        SetKey("dfertf12dfertf12").
+        SetIv("dfertf12ghnjhyuj").
+        Aes().
+        NCFB().
+        Encrypt()
+    cyptStr := cypt.ToBase64String()
+
+    assertError(cypt.Error(), "AesNCFB-Encode")
+
+    cyptde := FromBase64String(cyptStr).
+        SetKey("dfertf12dfertf12").
+        SetIv("dfertf12ghnjhyuj").
+        Aes().
+        NCFB().
+        Decrypt()
+    cyptdeStr := cyptde.ToString()
+
+    assertError(cyptde.Error(), "AesNCFB-Decode")
+
+    assert(data, cyptdeStr, "AesNCFB")
+}
+
+func Test_AesNOFB(t *testing.T) {
+    assert := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    data := "test-pass"
+    cypt := FromString(data).
+        SetKey("dfertf12dfertf12").
+        SetIv("dfertf12ghnjhyuj").
+        Aes().
+        NOFB().
+        Encrypt()
+    cyptStr := cypt.ToBase64String()
+
+    assertError(cypt.Error(), "AesNOFB-Encode")
+
+    cyptde := FromBase64String(cyptStr).
+        SetKey("dfertf12dfertf12").
+        SetIv("dfertf12ghnjhyuj").
+        Aes().
+        NOFB().
+        Decrypt()
+    cyptdeStr := cyptde.ToString()
+
+    assertError(cyptde.Error(), "AesNOFB-Decode")
+
+    assert(data, cyptdeStr, "AesNOFB")
+}

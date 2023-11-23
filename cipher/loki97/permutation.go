@@ -46,7 +46,7 @@ func compute(A ULONG64, B ULONG64) ULONG64 {
     e.l = P[s].l >> 7
     e.r = P[s].r >> 7
 
-    s = int16(S1[int16((d.l >> 16) & 0x7FF)])
+    s = int16(S2[int16((d.l >> 16) & 0x7FF)])
     e.l |= P[s].l >> 6
     e.r |= P[s].r >> 6
 
@@ -54,11 +54,11 @@ func compute(A ULONG64, B ULONG64) ULONG64 {
     e.l |= P[s].l >> 5
     e.r |= P[s].r >> 5
 
-    s = int16(S1[int16(d.l & 0x7FF)])
+    s = int16(S2[int16(d.l & 0x7FF)])
     e.l |= P[s].l >> 4
     e.r |= P[s].r >> 4
 
-    s = int16(S1[int16((d.r >> 24 | d.l << 8) & 0x7FF)])
+    s = int16(S2[int16((d.r >> 24 | d.l << 8) & 0x7FF)])
     e.l |= P[s].l >> 3
     e.r |= P[s].r >> 3
 
@@ -66,7 +66,7 @@ func compute(A ULONG64, B ULONG64) ULONG64 {
     e.l |= P[s].l >> 2
     e.r |= P[s].r >> 2
 
-    s = int16(S1[int16((d.r >> 8) & 0x7FF)])
+    s = int16(S2[int16((d.r >> 8) & 0x7FF)])
     e.l |= P[s].l >> 1
     e.r |= P[s].r >> 1
 

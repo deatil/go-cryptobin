@@ -417,6 +417,20 @@ func (this Cryptobin) EAX(nonce string, additional ...string) Cryptobin {
     return this
 }
 
+// NCFB
+func (this Cryptobin) NCFB() Cryptobin {
+    this.mode = NCFB
+
+    return this
+}
+
+// NOFB
+func (this Cryptobin) NOFB() Cryptobin {
+    this.mode = NOFB
+
+    return this
+}
+
 // 使用模式
 func (this Cryptobin) ModeBy(mode Mode, cfg ...map[string]any) Cryptobin {
     this.mode = mode

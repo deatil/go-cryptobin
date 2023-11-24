@@ -13,55 +13,24 @@ func makeKey(k []byte) [NUM_SUBKEYS]ULONG64 {
     var f_out ULONG64           // fn f output value for debug
     var t1, t2 ULONG64
 
-    var tmp uint64
-
-    tmp = 0
-    for i = 0; i < 8; i++ {
-        tmp = (tmp << 8)
-        tmp |= uint64(k[i])
-    }
-
     // pack key into 128-bit entities: k4, k3, k2, k1
-    k4.l = uint32(tmp >> 32)
-    k4.r = uint32(tmp)
-
-    tmp = 0
-    for i = 8; i < 16; i++ {
-        tmp = (tmp << 8)
-        tmp |= uint64(k[i])
-    }
-
-    k3.l = uint32(tmp >> 32)
-    k3.r = uint32(tmp)
+    k4 = byteToULONG64(k[0:8])
+    k3 = byteToULONG64(k[8:16])
 
     if len(k) == 16 {
         // 128-bit key - call fn f twice to gen 256 bits
         k2 = compute(k3, k4)
         k1 = compute(k4, k3)
     } else {
-        tmp = 0
-        for i = 16; i < 24; i++ {
-            tmp = (tmp << 8)
-            tmp |= uint64(k[i])
-        }
-
         // 192 or 256-bit key - pack k2 from key data
-        k2.l = uint32(tmp >> 32)
-        k2.r = uint32(tmp)
+        k2 = byteToULONG64(k[16:24])
 
         if len(k) == 24 {
             // 192-bit key - call fn f once to gen 256 bits
             k1 = compute(k4, k3)
         } else {
-            tmp = 0
-            for i = 24; i < 32; i++ {
-                tmp = (tmp << 8)
-                tmp |= uint64(k[i])
-            }
-
             // 256-bit key - pack k1 from key data
-            k1.l = uint32(tmp >> 32)
-            k1.r = uint32(tmp)
+            k1 = byteToULONG64(k[24:32])
         }
     }
 

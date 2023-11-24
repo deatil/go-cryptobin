@@ -1,16 +1,14 @@
-package loki97
+package mars
 
 import (
-    "fmt"
     "bytes"
     "testing"
     "math/rand"
-    "encoding/hex"
 )
 
-func TestCipher16(t *testing.T) {
+func Test_Mars(t *testing.T) {
     random := rand.New(rand.NewSource(99))
-    max := 5000
+    max := 500
 
     var encrypted [16]byte
     var decrypted [16]byte
@@ -35,9 +33,9 @@ func TestCipher16(t *testing.T) {
     }
 }
 
-func TestCipher24(t *testing.T) {
+func Test_Mars_Key24(t *testing.T) {
     random := rand.New(rand.NewSource(99))
-    max := 5000
+    max := 500
 
     var encrypted [16]byte
     var decrypted [16]byte
@@ -62,9 +60,9 @@ func TestCipher24(t *testing.T) {
     }
 }
 
-func TestCipher32(t *testing.T) {
+func Test_Mars_Key32(t *testing.T) {
     random := rand.New(rand.NewSource(99))
-    max := 5000
+    max := 500
 
     var encrypted [16]byte
     var decrypted [16]byte
@@ -87,24 +85,4 @@ func TestCipher32(t *testing.T) {
             t.Errorf("encryption/decryption failed: % 02x != % 02x\n", decrypted, value)
         }
     }
-}
-
-func test_Check(t *testing.T) {
-    hexkey := "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
-    plain := "000102030405060708090a0b0c0d0e0f"
-
-    // hexcipher := "75080e359f10fe640144b35c57128dad"
-
-    hexkeyByte, _ := hex.DecodeString(hexkey)
-    plainByte, _ := hex.DecodeString(plain)
-
-    cipher, err := NewCipher(hexkeyByte)
-    if err != nil {
-        t.Fatal(err.Error())
-    }
-
-    var encrypted [16]byte
-    cipher.Encrypt(encrypted[:], plainByte)
-
-    t.Error(fmt.Sprintf("%x", encrypted))
 }

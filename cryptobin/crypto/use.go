@@ -247,6 +247,14 @@ func (this Cryptobin) Loki97() Cryptobin {
     return this
 }
 
+// Saferplus
+// The key argument should be 8, 16 bytes.
+func (this Cryptobin) Saferplus() Cryptobin {
+    this.multiple = Saferplus
+
+    return this
+}
+
 // 使用类型
 func (this Cryptobin) MultipleBy(multiple Multiple, cfg ...map[string]any) Cryptobin {
     this.multiple = multiple

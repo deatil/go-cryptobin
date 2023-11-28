@@ -35,6 +35,7 @@ import (
     cryptobin_skipjack "github.com/deatil/go-cryptobin/cipher/skipjack"
     cryptobin_serpent "github.com/deatil/go-cryptobin/cipher/serpent"
     cryptobin_loki97 "github.com/deatil/go-cryptobin/cipher/loki97"
+    cryptobin_saferplus "github.com/deatil/go-cryptobin/cipher/saferplus"
 )
 
 // 获取模式方式
@@ -1244,5 +1245,38 @@ func (this EncryptLoki97) Decrypt(data []byte, opt IOption) ([]byte, error) {
 func init() {
     UseEncrypt.Add(Loki97, func() IEncrypt {
         return EncryptLoki97{}
+    })
+}
+
+// ===================
+
+// Saferplus key is 8, 16 bytes.
+type EncryptSaferplus struct {}
+
+// 加密
+func (this EncryptSaferplus) Encrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_saferplus.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: %w", err)
+        return nil, err
+    }
+
+    return BlockEncrypt(block, data, opt)
+}
+
+// 解密
+func (this EncryptSaferplus) Decrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_saferplus.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: %w", err)
+        return nil, err
+    }
+
+    return BlockDecrypt(block, data, opt)
+}
+
+func init() {
+    UseEncrypt.Add(Saferplus, func() IEncrypt {
+        return EncryptSaferplus{}
     })
 }

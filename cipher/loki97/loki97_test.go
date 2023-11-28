@@ -110,3 +110,29 @@ func Test_Check(t *testing.T) {
         t.Error("Encrypt error")
     }
 }
+
+func test_Check2(t *testing.T) {
+    var key [32]byte
+
+    for i := 0; i < 32; i++ {
+        key[i] = byte((i * 2 + 10) % 256)
+    }
+
+    ciphertext := "8cb28c958024bae27a94c698f96f12a9"
+    plaintext := "000102030405060708090a0b0c0d0e0f"
+
+    // cipherBytes, _ := hex.DecodeString(ciphertext)
+    plainBytes, _ := hex.DecodeString(plaintext)
+
+    cipher, err := NewCipher(key[:])
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+
+    var encrypted [16]byte
+    cipher.Encrypt(encrypted[:], plainBytes)
+
+    if ciphertext != fmt.Sprintf("%x", encrypted) {
+        t.Errorf("Encrypt error: act=%x, old=%s\n", encrypted, ciphertext)
+    }
+}

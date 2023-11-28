@@ -198,7 +198,7 @@ func (this *saferplusCipher) encrypt(dst, src []byte) {
         ciphertext[i] = uint8(text)
     }
 
-    rnd = uint32(len(key))
+    rnd = uint32(key[0])
 
     if SAFER_MAX_NOF_ROUNDS < rnd {
         rnd = SAFER_MAX_NOF_ROUNDS;
@@ -299,7 +299,7 @@ func (this *saferplusCipher) decrypt(dst, src []byte) {
         plaintext[i] = uint8(text)
     }
 
-    rnd = uint32(len(key))
+    rnd = uint32(key[0])
 
     if SAFER_MAX_NOF_ROUNDS < rnd {
         rnd = SAFER_MAX_NOF_ROUNDS

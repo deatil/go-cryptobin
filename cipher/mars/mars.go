@@ -7,9 +7,7 @@ import (
     "encoding/binary"
 )
 
-const (
-    BlockSize = 16
-)
+const BlockSize = 16
 
 type marsCipher struct {
     key [40]uint32

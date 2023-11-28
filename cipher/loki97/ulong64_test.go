@@ -18,5 +18,4 @@ func TestULONG64(t *testing.T) {
     if !bytes.Equal(de[:], key[:]) {
         t.Errorf("byteToULONG64/ULONG64ToBYTE failed: % 02x != % 02x\n", de, key)
     }
-
 }

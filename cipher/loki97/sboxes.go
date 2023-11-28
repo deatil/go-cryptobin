@@ -1,18 +1,18 @@
 package loki97
 
-const S1_GEN int16 = 0x2911 // 10513
-const S1_SIZE int16 = 0x2000 // 8192
+const S1_GEN = 0x2911 // 10513
+const S1_SIZE = 0x2000 // 8192
 
-const S2_GEN int16 = 0xAA7 // 2727
-const S2_SIZE int16 = 0x800 // 2048
+const S2_GEN = 0xAA7 // 2727
+const S2_SIZE = 0x800 // 2048
 
 func generationS1Box() [S1_SIZE]byte {
     var S1 [S1_SIZE]byte
 
-    var S1_MASK int16 = S1_SIZE - 1;
+    var S1_MASK uint32 = S1_SIZE - 1;
 
-    var i int16
-    var b int16
+    var i uint32
+    var b uint32
 
     for i = 0; i < S1_SIZE; i++ {
         b = i ^ S1_MASK
@@ -25,10 +25,10 @@ func generationS1Box() [S1_SIZE]byte {
 func generationS2Box() [S2_SIZE]byte {
     var S2 [S2_SIZE]byte
 
-    var S2_MASK int16 = S2_SIZE - 1;
+    var S2_MASK uint32 = S2_SIZE - 1;
 
-    var i int16
-    var b int16
+    var i uint32
+    var b uint32
 
     for i = 0; i < S2_SIZE; i++ {
         b = i ^ S2_MASK;
@@ -38,20 +38,20 @@ func generationS2Box() [S2_SIZE]byte {
     return S2
 }
 
-func exp3(b, g, n int16) byte {
+func exp3(b, g, n uint32) byte {
     if b == 0 {
         return 0
     }
 
-    var r int16 = b      // r = b ** 1
+    var r uint32 = b     // r = b ** 1
     b = mult(r, b, g, n) // r = b ** 2
     r = mult(r, b, g, n) // r = b ** 3
 
     return byte(r)
 }
 
-func mult(a, b, g, n int16) int16 {
-    var p int16 = 0
+func mult(a, b, g, n uint32) uint32 {
+    var p uint32 = 0
 
     for b != 0 {
         if (b & 0x01) != 0 {

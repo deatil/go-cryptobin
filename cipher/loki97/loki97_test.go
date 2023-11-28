@@ -89,11 +89,11 @@ func TestCipher32(t *testing.T) {
     }
 }
 
-func test_Check(t *testing.T) {
+func Test_Check(t *testing.T) {
     hexkey := "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
     plain := "000102030405060708090a0b0c0d0e0f"
 
-    // hexcipher := "75080e359f10fe640144b35c57128dad"
+    hexcipher := "75080e359f10fe640144b35c57128dad"
 
     hexkeyByte, _ := hex.DecodeString(hexkey)
     plainByte, _ := hex.DecodeString(plain)
@@ -106,5 +106,7 @@ func test_Check(t *testing.T) {
     var encrypted [16]byte
     cipher.Encrypt(encrypted[:], plainByte)
 
-    t.Error(fmt.Sprintf("%x", encrypted))
+    if hexcipher != fmt.Sprintf("%x", encrypted) {
+        t.Error("Encrypt error")
+    }
 }

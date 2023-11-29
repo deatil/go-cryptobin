@@ -1,6 +1,7 @@
 package loki97
 
 import (
+    "sync"
     "unsafe"
     "strconv"
     "crypto/cipher"
@@ -11,13 +12,15 @@ const (
 )
 
 var (
+    once sync.Once
+
     S1 [S1_SIZE]byte
     S2 [S2_SIZE]byte
 
     P [PERMUTATION_SIZE]ULONG64
 )
 
-func init() {
+func initAll() {
     S1 = generationS1Box()
     S2 = generationS2Box()
 
@@ -29,6 +32,8 @@ type loki97Cipher struct {
 }
 
 // NewCipher creates and returns a new cipher.Block.
+// data bytes use BigEndian, if is LittleEndian
+// please change BigEndian bytes
 func NewCipher(key []byte) (cipher.Block, error) {
     k := len(key)
     switch k {
@@ -37,6 +42,8 @@ func NewCipher(key []byte) (cipher.Block, error) {
         default:
             return nil, KeySizeError(len(key))
     }
+
+    once.Do(initAll)
 
     newKey := makeKey(key)
 

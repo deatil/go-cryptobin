@@ -62,7 +62,7 @@ func Test_Saferplus_Key16(t *testing.T) {
     }
 }
 
-func Test_Check_64byte(t *testing.T) {
+func Test_Check_Key8(t *testing.T) {
     var key [8]byte
 
     for i := 0; i < 8; i++ {
@@ -95,7 +95,7 @@ func Test_Check_64byte(t *testing.T) {
     }
 }
 
-func Test_Check_128byte(t *testing.T) {
+func Test_Check_Key16(t *testing.T) {
     var key [16]byte
 
     for i := 0; i < 16; i++ {

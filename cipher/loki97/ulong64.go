@@ -52,3 +52,23 @@ func ULONG64ToBYTE(I ULONG64) [8]byte {
 
     return sav
 }
+
+// 小端
+func byteToULONG64LE(inp []byte) ULONG64 {
+    var I ULONG64
+
+    I.l = binary.LittleEndian.Uint32(inp[0:])
+    I.r = binary.LittleEndian.Uint32(inp[4:])
+
+    return I
+}
+
+// 小端
+func ULONG64ToBYTELE(I ULONG64) [8]byte {
+    var sav [8]byte
+
+    binary.LittleEndian.PutUint32(sav[0:], I.l)
+    binary.LittleEndian.PutUint32(sav[4:], I.r)
+
+    return sav
+}

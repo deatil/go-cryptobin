@@ -36,6 +36,7 @@ import (
     cryptobin_serpent "github.com/deatil/go-cryptobin/cipher/serpent"
     cryptobin_loki97 "github.com/deatil/go-cryptobin/cipher/loki97"
     cryptobin_saferplus "github.com/deatil/go-cryptobin/cipher/saferplus"
+    cryptobin_mars "github.com/deatil/go-cryptobin/cipher/mars"
 )
 
 // 获取模式方式
@@ -1278,5 +1279,38 @@ func (this EncryptSaferplus) Decrypt(data []byte, opt IOption) ([]byte, error) {
 func init() {
     UseEncrypt.Add(Saferplus, func() IEncrypt {
         return EncryptSaferplus{}
+    })
+}
+
+// ===================
+
+// Mars key is 16, 24, 32 bytes.
+type EncryptMars struct {}
+
+// 加密
+func (this EncryptMars) Encrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_mars.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: %w", err)
+        return nil, err
+    }
+
+    return BlockEncrypt(block, data, opt)
+}
+
+// 解密
+func (this EncryptMars) Decrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_mars.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: %w", err)
+        return nil, err
+    }
+
+    return BlockDecrypt(block, data, opt)
+}
+
+func init() {
+    UseEncrypt.Add(Mars, func() IEncrypt {
+        return EncryptMars{}
     })
 }

@@ -8,7 +8,7 @@ import (
     "encoding/hex"
 )
 
-func TestCipher16(t *testing.T) {
+func Test_Key16(t *testing.T) {
     random := rand.New(rand.NewSource(99))
     max := 5000
 
@@ -35,7 +35,7 @@ func TestCipher16(t *testing.T) {
     }
 }
 
-func TestCipher24(t *testing.T) {
+func Test_Key24(t *testing.T) {
     random := rand.New(rand.NewSource(99))
     max := 5000
 
@@ -62,7 +62,7 @@ func TestCipher24(t *testing.T) {
     }
 }
 
-func TestCipher32(t *testing.T) {
+func Test_Key32(t *testing.T) {
     random := rand.New(rand.NewSource(99))
     max := 5000
 
@@ -111,6 +111,9 @@ func Test_Check(t *testing.T) {
     }
 }
 
+// 该测试数据为小端
+// 包默认使用大端
+// 如果加密数据为使用小端结果，请注意转换为大端
 func test_Check2(t *testing.T) {
     var key [32]byte
 

@@ -255,6 +255,14 @@ func (this Cryptobin) Saferplus() Cryptobin {
     return this
 }
 
+// Mars
+// The key argument should be 16, 24, 32 bytes.
+func (this Cryptobin) Mars() Cryptobin {
+    this.multiple = Mars
+
+    return this
+}
+
 // 使用类型
 func (this Cryptobin) MultipleBy(multiple Multiple, cfg ...map[string]any) Cryptobin {
     this.multiple = multiple

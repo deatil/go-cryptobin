@@ -81,112 +81,6 @@ func (this *saferplusCipher) Decrypt(dst, src []byte) {
     this.decrypt(dst, src)
 }
 
-func (this *saferplusCipher) init() {
-    var exp_val uint = 1;
-
-    for i := 0; i < TAB_LEN; i++ {
-        this.exp_tab[i] = uint8(exp_val & 0xFF);
-        this.log_tab[uint(this.exp_tab[i])] = uint8(i);
-
-        exp_val = exp_val * 45 % 257;
-    }
-}
-
-func (this *saferplusCipher) reset() {
-    var j uint32
-    var ka [9]uint8
-    var kb [9]uint8
-    var key = this.local_key
-    var key_buffer [16]uint8
-
-    var xi uint32 = 0
-
-    strengthened := 1
-    nofRounds := 8
-
-    for k, v := range this.key {
-        key_buffer[k] = v
-    }
-
-    if SAFER_MAX_NOF_ROUNDS < nofRounds {
-        nofRounds = SAFER_MAX_NOF_ROUNDS;
-    }
-
-    key[xi] = uint8(nofRounds)
-    xi++
-
-    ka[SAFER_BLOCK_LEN] = 0;
-    kb[SAFER_BLOCK_LEN] = 0;
-
-    for j = 0; j < SAFER_BLOCK_LEN; j++ {
-        ka[j] = rotl8(key_buffer[j], 5)
-        ka[SAFER_BLOCK_LEN] ^= ka[j];
-
-        if len(this.key) > 8 {
-            key[xi] = key_buffer[j + 8]
-            kb[j] = key[xi]
-            xi++
-        } else {
-            key[xi] = key_buffer[j]
-            kb[j] = key[xi]
-            xi++
-        }
-
-        kb[SAFER_BLOCK_LEN] ^= kb[j]
-    }
-
-    var i uint
-    for i = 1; i <= uint(nofRounds); i++ {
-
-        var j uint
-        for j = 0; j < SAFER_BLOCK_LEN + 1; j++ {
-            ka[j] = rotl8(ka[j], 6)
-            kb[j] = rotl8(kb[j], 6)
-        }
-
-        for j = 0; j < SAFER_BLOCK_LEN; j++ {
-
-            if strengthened == 1 {
-                key[xi] =
-                    (ka[(j + 2 * i - 1) % (SAFER_BLOCK_LEN + 1)] +
-                     this.exp_tab[this.exp_tab[18 * i + j + 1]]) &
-                    0xFF
-                xi++
-            } else {
-                key[xi] =
-                    (ka[j] + this.exp_tab[this.exp_tab[18 * i + j + 1]]) &
-                    0xFF
-                xi++
-            }
-
-        }
-
-        for j = 0; j < SAFER_BLOCK_LEN; j++ {
-
-            if strengthened == 1 {
-                key[xi] =
-                    (kb[(j + 2 * i) % (SAFER_BLOCK_LEN + 1)] +
-                     this.exp_tab[this.exp_tab[18 * i + j + 10]]) &
-                    0xFF
-                xi++
-            } else {
-                key[xi] =
-                    (kb[j] + this.exp_tab[this.exp_tab[18 * i + j + 10]]) &
-                    0xFF
-                xi++
-            }
-
-        }
-    }
-
-    for j = 0; j < SAFER_BLOCK_LEN + 1; j++ {
-        ka[j] = 0
-        kb[j] = 0
-    }
-
-    this.local_key = key
-}
-
 func (this *saferplusCipher) encrypt(dst, src []byte) {
     var t uint8
     var rnd uint32
@@ -387,6 +281,112 @@ func (this *saferplusCipher) decrypt(dst, src []byte) {
     for iii, kkk := range plaintext {
         dst[iii] = byte(kkk)
     }
+}
+
+func (this *saferplusCipher) init() {
+    var exp_val uint = 1;
+
+    for i := 0; i < TAB_LEN; i++ {
+        this.exp_tab[i] = uint8(exp_val & 0xFF);
+        this.log_tab[uint(this.exp_tab[i])] = uint8(i);
+
+        exp_val = exp_val * 45 % 257;
+    }
+}
+
+func (this *saferplusCipher) reset() {
+    var j uint32
+    var ka [9]uint8
+    var kb [9]uint8
+    var key = this.local_key
+    var key_buffer [16]uint8
+
+    var xi uint32 = 0
+
+    strengthened := 1
+    nofRounds := 8
+
+    for k, v := range this.key {
+        key_buffer[k] = v
+    }
+
+    if SAFER_MAX_NOF_ROUNDS < nofRounds {
+        nofRounds = SAFER_MAX_NOF_ROUNDS;
+    }
+
+    key[xi] = uint8(nofRounds)
+    xi++
+
+    ka[SAFER_BLOCK_LEN] = 0;
+    kb[SAFER_BLOCK_LEN] = 0;
+
+    for j = 0; j < SAFER_BLOCK_LEN; j++ {
+        ka[j] = rotl8(key_buffer[j], 5)
+        ka[SAFER_BLOCK_LEN] ^= ka[j];
+
+        if len(this.key) > 8 {
+            key[xi] = key_buffer[j + 8]
+            kb[j] = key[xi]
+            xi++
+        } else {
+            key[xi] = key_buffer[j]
+            kb[j] = key[xi]
+            xi++
+        }
+
+        kb[SAFER_BLOCK_LEN] ^= kb[j]
+    }
+
+    var i uint
+    for i = 1; i <= uint(nofRounds); i++ {
+
+        var j uint
+        for j = 0; j < SAFER_BLOCK_LEN + 1; j++ {
+            ka[j] = rotl8(ka[j], 6)
+            kb[j] = rotl8(kb[j], 6)
+        }
+
+        for j = 0; j < SAFER_BLOCK_LEN; j++ {
+
+            if strengthened == 1 {
+                key[xi] =
+                    (ka[(j + 2 * i - 1) % (SAFER_BLOCK_LEN + 1)] +
+                     this.exp_tab[this.exp_tab[18 * i + j + 1]]) &
+                    0xFF
+                xi++
+            } else {
+                key[xi] =
+                    (ka[j] + this.exp_tab[this.exp_tab[18 * i + j + 1]]) &
+                    0xFF
+                xi++
+            }
+
+        }
+
+        for j = 0; j < SAFER_BLOCK_LEN; j++ {
+
+            if strengthened == 1 {
+                key[xi] =
+                    (kb[(j + 2 * i) % (SAFER_BLOCK_LEN + 1)] +
+                     this.exp_tab[this.exp_tab[18 * i + j + 10]]) &
+                    0xFF
+                xi++
+            } else {
+                key[xi] =
+                    (kb[j] + this.exp_tab[this.exp_tab[18 * i + j + 10]]) &
+                    0xFF
+                xi++
+            }
+
+        }
+    }
+
+    for j = 0; j < SAFER_BLOCK_LEN + 1; j++ {
+        ka[j] = 0
+        kb[j] = 0
+    }
+
+    this.local_key = key
 }
 
 // anyOverlap reports whether x and y share memory at any (not necessarily

@@ -91,7 +91,7 @@ func Test_Check_Key8(t *testing.T) {
     cipher.Decrypt(decrypted[:], cipherBytes)
 
     if plaintext != fmt.Sprintf("%x", decrypted) {
-        t.Errorf("Decrypt error: act=%x, old=%s\n", encrypted, ciphertext)
+        t.Errorf("Decrypt error: act=%x, old=%s\n", decrypted, plaintext)
     }
 }
 
@@ -124,6 +124,6 @@ func Test_Check_Key16(t *testing.T) {
     cipher.Decrypt(decrypted[:], cipherBytes)
 
     if plaintext != fmt.Sprintf("%x", decrypted) {
-        t.Errorf("Decrypt error: act=%x, old=%s\n", encrypted, ciphertext)
+        t.Errorf("Decrypt error: act=%x, old=%s\n", decrypted, plaintext)
     }
 }

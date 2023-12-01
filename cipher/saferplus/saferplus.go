@@ -15,8 +15,6 @@ const (
 )
 
 type saferplusCipher struct {
-    key []uint8
-
     exp_tab [256]uint8
     log_tab [256]uint8
 
@@ -35,12 +33,7 @@ func NewCipher(key []byte) (cipher.Block, error) {
 
     c := new(saferplusCipher)
     c.init()
-
-    c.key = make([]uint8, k)
-
-    copy(c.key, key)
-
-    c.reset()
+    c.setKey(key)
 
     return c, nil
 }
@@ -294,7 +287,7 @@ func (this *saferplusCipher) init() {
     }
 }
 
-func (this *saferplusCipher) reset() {
+func (this *saferplusCipher) setKey(keyData []uint8) {
     var j uint32
     var ka [9]uint8
     var kb [9]uint8
@@ -306,7 +299,7 @@ func (this *saferplusCipher) reset() {
     strengthened := 1
     nofRounds := 8
 
-    for k, v := range this.key {
+    for k, v := range keyData {
         key_buffer[k] = v
     }
 
@@ -324,7 +317,7 @@ func (this *saferplusCipher) reset() {
         ka[j] = rotl8(key_buffer[j], 5)
         ka[SAFER_BLOCK_LEN] ^= ka[j];
 
-        if len(this.key) > 8 {
+        if len(keyData) > 8 {
             key[xi] = key_buffer[j + 8]
             kb[j] = key[xi]
             xi++

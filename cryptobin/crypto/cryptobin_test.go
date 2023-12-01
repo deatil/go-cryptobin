@@ -1216,3 +1216,59 @@ func Test_MarsPKCS7Padding(t *testing.T) {
 
     assert(data, cyptdeStr, "MarsPKCS7Padding-res")
 }
+
+func Test_WakeNoPadding(t *testing.T) {
+    assert := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
+    cypt := FromString(data).
+        SetKey("dfertf12dfertf12").
+        Wake().
+        ECB().
+        NoPadding().
+        Encrypt()
+    cyptStr := cypt.ToBase64String()
+
+    assertError(cypt.Error(), "WakeNoPadding-Encode")
+
+    cyptde := FromBase64String(cyptStr).
+        SetKey("dfertf12dfertf12").
+        Wake().
+        ECB().
+        NoPadding().
+        Decrypt()
+    cyptdeStr := cyptde.ToString()
+
+    assertError(cyptde.Error(), "WakeNoPadding-Decode")
+
+    assert(data, cyptdeStr, "WakeNoPadding-res")
+}
+
+func Test_EnigmaNoPadding(t *testing.T) {
+    assert := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
+    cypt := FromString(data).
+        SetKey("dfertf12dfert").
+        Enigma().
+        ECB().
+        NoPadding().
+        Encrypt()
+    cyptStr := cypt.ToBase64String()
+
+    assertError(cypt.Error(), "EnigmaNoPadding-Encode")
+
+    cyptde := FromBase64String(cyptStr).
+        SetKey("dfertf12dfert").
+        Enigma().
+        ECB().
+        NoPadding().
+        Decrypt()
+    cyptdeStr := cyptde.ToString()
+
+    assertError(cyptde.Error(), "EnigmaNoPadding-Decode")
+
+    assert(data, cyptdeStr, "EnigmaNoPadding-res")
+}

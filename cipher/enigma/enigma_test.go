@@ -10,7 +10,7 @@ import (
 
 func Test_Enigma(t *testing.T) {
     random := rand.New(rand.NewSource(99))
-    max := 2
+    max := 5000
 
     var encrypted [12]byte
     var decrypted [12]byte
@@ -41,8 +41,11 @@ func Test_Enigma(t *testing.T) {
     }
 }
 
-func test_Check(t *testing.T) {
-    key := []byte("enadyotr00000")
+func Test_Check(t *testing.T) {
+    var key [13]byte
+
+    key2 := []byte("enadyotr")
+    copy(key[:8], key2)
 
     ciphertext := "f3edda7da20f8975884600f014d32c7a08e59d7b"
     plaintext := "000102030405060708090a0b0c0d0e0f10111213"
@@ -50,20 +53,25 @@ func test_Check(t *testing.T) {
     cipherBytes, _ := hex.DecodeString(ciphertext)
     plainBytes, _ := hex.DecodeString(plaintext)
 
-    cipher, err := NewCipher(key)
+    cipher, err := NewCipher(key[:])
     if err != nil {
         t.Fatal(err.Error())
     }
 
-    var encrypted []byte = make([]byte, len(plainBytes))
+    encrypted := make([]byte, len(plainBytes))
     cipher.Encrypt(encrypted, plainBytes)
 
     if ciphertext != fmt.Sprintf("%x", encrypted) {
         t.Errorf("Encrypt error: act=%x, old=%s\n", encrypted, ciphertext)
     }
 
-    var decrypted []byte = make([]byte, len(cipherBytes))
-    cipher.Decrypt(decrypted, cipherBytes)
+    cipher2, err := NewCipher(key[:])
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+
+    decrypted := make([]byte, len(cipherBytes))
+    cipher2.Decrypt(decrypted, cipherBytes)
 
     if plaintext != fmt.Sprintf("%x", decrypted) {
         t.Errorf("Decrypt error: act=%x, old=%s\n", decrypted, plaintext)

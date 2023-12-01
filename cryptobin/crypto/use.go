@@ -263,6 +263,22 @@ func (this Cryptobin) Mars() Cryptobin {
     return this
 }
 
+// Wake
+// The key argument should be 16 bytes.
+func (this Cryptobin) Wake() Cryptobin {
+    this.multiple = Wake
+
+    return this
+}
+
+// Enigma
+// The key argument should be 13 bytes.
+func (this Cryptobin) Enigma() Cryptobin {
+    this.multiple = Enigma
+
+    return this
+}
+
 // 使用类型
 func (this Cryptobin) MultipleBy(multiple Multiple, cfg ...map[string]any) Cryptobin {
     this.multiple = multiple

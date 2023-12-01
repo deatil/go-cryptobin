@@ -10,13 +10,13 @@ import (
 
 func Test_Wake(t *testing.T) {
     random := rand.New(rand.NewSource(99))
-    max := 2
+    max := 5000
 
     var encrypted [12]byte
     var decrypted [12]byte
 
     for i := 0; i < max; i++ {
-        key := make([]byte, 32)
+        key := make([]byte, 16)
         random.Read(key)
         value := make([]byte, 12)
         random.Read(value)
@@ -41,10 +41,10 @@ func Test_Wake(t *testing.T) {
     }
 }
 
-func test_Check(t *testing.T) {
-    var key [32]byte
+func Test_Check(t *testing.T) {
+    var key [16]byte
 
-    for i := 0; i < 32; i++ {
+    for i := 0; i < 16; i++ {
         key[i] = byte((i * 5 + 10) % 0xff)
     }
 
@@ -54,7 +54,7 @@ func test_Check(t *testing.T) {
     cipherBytes, _ := hex.DecodeString(ciphertext)
     plainBytes, _ := hex.DecodeString(plaintext)
 
-    cipher, err := NewCipher(key)
+    cipher, err := NewCipher(key[:])
     if err != nil {
         t.Fatal(err.Error())
     }
@@ -68,7 +68,7 @@ func test_Check(t *testing.T) {
 
     // ==========
 
-    cipher2, err := NewCipher(key)
+    cipher2, err := NewCipher(key[:])
     if err != nil {
         t.Fatal(err.Error())
     }

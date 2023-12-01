@@ -37,6 +37,8 @@ import (
     cryptobin_loki97 "github.com/deatil/go-cryptobin/cipher/loki97"
     cryptobin_saferplus "github.com/deatil/go-cryptobin/cipher/saferplus"
     cryptobin_mars "github.com/deatil/go-cryptobin/cipher/mars"
+    cryptobin_enigma "github.com/deatil/go-cryptobin/cipher/enigma"
+    cryptobin_wake "github.com/deatil/go-cryptobin/cipher/wake"
 )
 
 // 获取模式方式
@@ -1312,5 +1314,71 @@ func (this EncryptMars) Decrypt(data []byte, opt IOption) ([]byte, error) {
 func init() {
     UseEncrypt.Add(Mars, func() IEncrypt {
         return EncryptMars{}
+    })
+}
+
+// ===================
+
+// Wake key is 16 bytes.
+type EncryptWake struct {}
+
+// 加密
+func (this EncryptWake) Encrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_wake.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: %w", err)
+        return nil, err
+    }
+
+    return BlockEncrypt(block, data, opt)
+}
+
+// 解密
+func (this EncryptWake) Decrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_wake.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: %w", err)
+        return nil, err
+    }
+
+    return BlockDecrypt(block, data, opt)
+}
+
+func init() {
+    UseEncrypt.Add(Wake, func() IEncrypt {
+        return EncryptWake{}
+    })
+}
+
+// ===================
+
+// Enigma key is 13 bytes.
+type EncryptEnigma struct {}
+
+// 加密
+func (this EncryptEnigma) Encrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_enigma.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: %w", err)
+        return nil, err
+    }
+
+    return BlockEncrypt(block, data, opt)
+}
+
+// 解密
+func (this EncryptEnigma) Decrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_enigma.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: %w", err)
+        return nil, err
+    }
+
+    return BlockDecrypt(block, data, opt)
+}
+
+func init() {
+    UseEncrypt.Add(Enigma, func() IEncrypt {
+        return EncryptEnigma{}
     })
 }

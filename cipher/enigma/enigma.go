@@ -12,8 +12,6 @@ const MASK uint32 = 0377;
 const BlockSize = 1
 
 type enigmaCipher struct {
-    key []byte
-
     t1 [ROTORSZ]int8
     t2 [ROTORSZ]int8
     t3 [ROTORSZ]int8
@@ -33,9 +31,7 @@ func NewCipher(key []byte) (cipher.Block, error) {
     }
 
     c := new(enigmaCipher)
-    c.key = key
-
-    c.reset()
+    c.setKey(key)
 
     return c, nil
 }
@@ -73,7 +69,7 @@ func (this *enigmaCipher) Decrypt(dst, src []byte) {
 }
 
 func (this *enigmaCipher) encrypt(dst, src []byte) {
-    var i, j int32
+    var i int32
     var secureflg int32 = 0
 
     var ciphertext []byte = make([]byte, len(src))
@@ -82,9 +78,7 @@ func (this *enigmaCipher) encrypt(dst, src []byte) {
 
     var kk int32
 
-    var textlen int32 = int32(len(ciphertext))
-
-    for j = 0; j < textlen; j++ {
+    for j := 0; j < len(ciphertext); j++ {
         i = int32(ciphertext[j])
 
         if secureflg == 1 {
@@ -124,7 +118,7 @@ func (this *enigmaCipher) encrypt(dst, src []byte) {
 }
 
 func (this *enigmaCipher) decrypt(dst, src []byte) {
-    var i, j int32
+    var i int32
     var secureflg int32 = 0
 
     var plaintext []byte = make([]byte, len(src))
@@ -133,9 +127,7 @@ func (this *enigmaCipher) decrypt(dst, src []byte) {
 
     var kk int32
 
-    var textlen int32 = int32(len(plaintext))
-
-    for j = 0; j < textlen; j++ {
+    for j := 0; j < len(plaintext); j++ {
         i = int32(plaintext[j])
 
         if secureflg == 1 {
@@ -174,12 +166,17 @@ func (this *enigmaCipher) decrypt(dst, src []byte) {
     copy(dst, plaintext)
 }
 
-func (this *enigmaCipher) reset() {
+func (this *enigmaCipher) setKey(key []byte) {
     var ic, i, k, temp int32
     var random uint32
     var seed int32
 
-    for ik, vk := range this.key {
+    this.n1 = 0
+    this.n2 = 0
+    this.nr1 = 0
+    this.nr2 = 0
+
+    for ik, vk := range key {
         this.cbuf[ik] = int8(vk)
     }
 
@@ -198,7 +195,7 @@ func (this *enigmaCipher) reset() {
         random = uint32(seed % 65521)
 
         k = ROTORSZ - 1 - i
-        ic = int32(uint32(random) & MASK) % (k + 1)
+        ic = int32((random & MASK) % uint32(k + 1))
 
         random >>= 8
 
@@ -210,7 +207,7 @@ func (this *enigmaCipher) reset() {
             continue
         }
 
-        ic = int32(uint32(random) & MASK) % k
+        ic = int32((random & MASK) % uint32(k))
         for this.t3[ic] != 0 {
             ic = (ic + 1) % k
         }
@@ -231,17 +228,15 @@ func (this *enigmaCipher) shuffle() {
 
     for i = 0; i < ROTORSZ; i++ {
         seed = 5 * seed + int32(this.cbuf[i % 13])
-
         random = uint32(seed % 65521)
 
         k = ROTORSZ - 1 - i
-        ic = int32(uint32(random) & MASK) % (k + 1)
+        ic = int32((random & MASK) % uint32(k + 1))
 
         temp = int32(this.deck[k])
         this.deck[k] = this.deck[ic]
         this.deck[ic] = int8(temp)
     }
-
 }
 
 // anyOverlap reports whether x and y share memory at any (not necessarily

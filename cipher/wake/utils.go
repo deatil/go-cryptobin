@@ -37,3 +37,17 @@ func Uint32sToBytes(blk [4]uint32) [16]byte {
 
     return sav
 }
+
+func bytesToUint32(inp []byte) uint32 {
+    blk := binary.BigEndian.Uint32(inp[0:])
+
+    return blk
+}
+
+func Uint32ToBytes(blk uint32) [4]byte {
+    var sav [4]byte
+
+    binary.BigEndian.PutUint32(sav[0:], blk)
+
+    return sav
+}

@@ -9,33 +9,27 @@ import (
 const BlockSize = 1
 
 type wakeCipher struct {
-    key []uint32
-
     t [257]uint32
     r [4]uint32
     counter int32
 }
 
 // NewCipher creates and returns a new cipher.Block.
+// key is 16 bytes, so 32 bytes is used half bytes.
+// so the cipher use 16 bytes key.
 func NewCipher(key []byte) (cipher.Block, error) {
     k := len(key)
     switch k {
-        case 32:
+        case 16:
             break
         default:
             return nil, KeySizeError(len(key))
     }
 
-    var in_key []uint32
-
-    keyints := bytesToUint32s(key[:16])
-    in_key = append(in_key, keyints[:]...)
-
-    keyints = bytesToUint32s(key[16:])
-    in_key = append(in_key, keyints[:]...)
+    in_key := bytesToUint32s(key)
 
     c := new(wakeCipher)
-    c.setKey(in_key)
+    c.setKey(in_key[:])
 
     return c, nil
 }
@@ -88,10 +82,14 @@ func (this *wakeCipher) encrypt(dst, src []byte) {
     for i = 0; i < int32(len(input)); i++ {
         /* R1 = V[n] = V[n] XOR R6 - here we do it per byte --sloooow */
         /* R1 is ignored */
-        input[i] ^= byte(r6 >> (this.counter * 4))
+        r6Bytes := Uint32ToBytes(r6)
+        input[i] ^= r6Bytes[this.counter]
 
         /* R2 = V[n] = R1 - per byte also */
-        r2 |= uint32(input[i] >> (this.counter * 4))
+        r2Bytes := Uint32ToBytes(r2)
+        r2Bytes[this.counter] = input[i]
+        r2 = bytesToUint32(r2Bytes[:])
+
         this.counter++;
 
         if (this.counter == 4) { /* r6 was used - update it! */
@@ -133,11 +131,15 @@ func (this *wakeCipher) decrypt(dst, src []byte) {
 
     for i = 0; i < int32(len(input)); i++ {
         /* R1 = V[n] */
-        r1 = uint32(input[i] >> (this.counter * 4))
+        r1Bytes := Uint32ToBytes(r1)
+        r1Bytes[this.counter] = input[i]
+        r1 = bytesToUint32(r1Bytes[:])
 
         /* R2 = V[n] = V[n] ^ R6 */
         /* R2 is ignored */
-        input[i] ^= byte(r6 >> (this.counter * 4))
+        r6Bytes := Uint32ToBytes(r6)
+        input[i] ^= r6Bytes[this.counter]
+
         this.counter++;
 
         if (this.counter == 4) {

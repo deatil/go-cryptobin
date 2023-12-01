@@ -71,6 +71,14 @@ func (this Cryptobin) Cast5() Cryptobin {
     return this
 }
 
+// Cast256
+// The key argument should be 32 bytes.
+func (this Cryptobin) Cast256() Cryptobin {
+    this.multiple = Cast256
+
+    return this
+}
+
 // Idea
 func (this Cryptobin) Idea() Cryptobin {
     this.multiple = Idea

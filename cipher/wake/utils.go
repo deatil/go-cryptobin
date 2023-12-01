@@ -1,15 +1,16 @@
 package wake
 
 import (
+    "math/bits"
     "encoding/binary"
 )
 
 func rotl32(x, n uint32) uint32 {
-    return (x << n) | (x >> (32 - n))
+    return bits.RotateLeft32(x, int(n))
 }
 
 func rotr32(x, n uint32) uint32 {
-    return (x >> n) | (x << (32 - n))
+    return rotl32(x, 32 - n);
 }
 
 func byteswap32(x uint32) uint32 {

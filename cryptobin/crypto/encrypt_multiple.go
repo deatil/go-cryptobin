@@ -39,6 +39,7 @@ import (
     cryptobin_mars "github.com/deatil/go-cryptobin/cipher/mars"
     cryptobin_enigma "github.com/deatil/go-cryptobin/cipher/enigma"
     cryptobin_wake "github.com/deatil/go-cryptobin/cipher/wake"
+    cryptobin_cast256 "github.com/deatil/go-cryptobin/cipher/cast256"
 )
 
 // 获取模式方式
@@ -1380,5 +1381,38 @@ func (this EncryptEnigma) Decrypt(data []byte, opt IOption) ([]byte, error) {
 func init() {
     UseEncrypt.Add(Enigma, func() IEncrypt {
         return EncryptEnigma{}
+    })
+}
+
+// ===================
+
+// Cast256 key is 32 bytes.
+type EncryptCast256 struct {}
+
+// 加密
+func (this EncryptCast256) Encrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_cast256.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: %w", err)
+        return nil, err
+    }
+
+    return BlockEncrypt(block, data, opt)
+}
+
+// 解密
+func (this EncryptCast256) Decrypt(data []byte, opt IOption) ([]byte, error) {
+    block, err := cryptobin_cast256.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: %w", err)
+        return nil, err
+    }
+
+    return BlockDecrypt(block, data, opt)
+}
+
+func init() {
+    UseEncrypt.Add(Cast256, func() IEncrypt {
+        return EncryptCast256{}
     })
 }

@@ -73,6 +73,8 @@ func (this Multiple) String() string {
             return "Xtea"
         case Cast5:
             return "Cast5"
+        case Cast256:
+            return "Cast256"
         case RC2:
             return "RC2"
         case RC4:
@@ -140,6 +142,7 @@ const (
     Tea
     Xtea
     Cast5
+    Cast256
     RC2
     RC4
     RC4MD5

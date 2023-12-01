@@ -5,9 +5,6 @@ import (
     "crypto/cipher"
 )
 
-// code from github.com/hallazzang/aria-go
-
-// BlockSize is the ARIA block size in bytes.
 const BlockSize = 16
 
 // KeySizeError is returned when key size in bytes
@@ -31,10 +28,10 @@ type ariaCipher struct {
 func NewCipher(key []byte) (cipher.Block, error) {
     k := len(key)
     switch k {
+        case 16, 24, 32:
+            break
         default:
             return nil, KeySizeError(k)
-        case 128 / 8, 192 / 8, 256 / 8:
-            break
     }
 
     n := k + 36

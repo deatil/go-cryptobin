@@ -287,6 +287,22 @@ func (this Cryptobin) Enigma() Cryptobin {
     return this
 }
 
+// Hight
+// The key argument should be 16 bytes.
+func (this Cryptobin) Hight() Cryptobin {
+    this.multiple = Hight
+
+    return this
+}
+
+// Lea
+// The key argument should be 16, 24, 32 bytes.
+func (this Cryptobin) Lea() Cryptobin {
+    this.multiple = Lea
+
+    return this
+}
+
 // 使用类型
 func (this Cryptobin) MultipleBy(multiple Multiple, cfg ...map[string]any) Cryptobin {
     this.multiple = multiple

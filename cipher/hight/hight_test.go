@@ -1,4 +1,4 @@
-package enigma
+package hight
 
 import (
     "fmt"
@@ -8,17 +8,17 @@ import (
     "encoding/hex"
 )
 
-func Test_Enigma(t *testing.T) {
+func Test_Hight(t *testing.T) {
     random := rand.New(rand.NewSource(99))
     max := 5000
 
-    var encrypted [12]byte
-    var decrypted [12]byte
+    var encrypted [8]byte
+    var decrypted [8]byte
 
     for i := 0; i < max; i++ {
-        key := make([]byte, 13)
+        key := make([]byte, 16)
         random.Read(key)
-        value := make([]byte, 12)
+        value := make([]byte, 8)
         random.Read(value)
 
         cipher1, err := NewCipher(key)
@@ -26,14 +26,14 @@ func Test_Enigma(t *testing.T) {
             t.Fatal(err.Error())
         }
 
-        cipher1.XORKeyStream(encrypted[:], value)
+        cipher1.Encrypt(encrypted[:], value)
 
         cipher2, err := NewCipher(key)
         if err != nil {
             t.Fatal(err.Error())
         }
 
-        cipher2.XORKeyStream(decrypted[:], encrypted[:])
+        cipher2.Decrypt(decrypted[:], encrypted[:])
 
         if !bytes.Equal(decrypted[:], value[:]) {
             t.Errorf("encryption/decryption failed: % 02x != % 02x\n", decrypted, value)
@@ -42,36 +42,36 @@ func Test_Enigma(t *testing.T) {
 }
 
 func Test_Check(t *testing.T) {
-    var key [13]byte
+    key := "00000000000000000000000000000000"
 
-    key2 := []byte("enadyotr")
-    copy(key[:8], key2)
+    ciphertext := "6e950f179e145921"
+    plaintext := "842dc7a5b57b7af3"
 
-    ciphertext := "f3edda7da20f8975884600f014d32c7a08e59d7b"
-    plaintext := "000102030405060708090a0b0c0d0e0f10111213"
-
+    keyBytes, _ := hex.DecodeString(key)
     cipherBytes, _ := hex.DecodeString(ciphertext)
     plainBytes, _ := hex.DecodeString(plaintext)
 
-    cipher, err := NewCipher(key[:])
+    cipher, err := NewCipher(keyBytes)
     if err != nil {
         t.Fatal(err.Error())
     }
 
-    encrypted := make([]byte, len(plainBytes))
-    cipher.XORKeyStream(encrypted, plainBytes)
+    var encrypted []byte = make([]byte, len(plainBytes))
+    cipher.Encrypt(encrypted, plainBytes)
 
     if ciphertext != fmt.Sprintf("%x", encrypted) {
         t.Errorf("Encrypt error: act=%x, old=%s\n", encrypted, ciphertext)
     }
 
-    cipher2, err := NewCipher(key[:])
+    // ==========
+
+    cipher2, err := NewCipher(keyBytes)
     if err != nil {
         t.Fatal(err.Error())
     }
 
-    decrypted := make([]byte, len(cipherBytes))
-    cipher2.XORKeyStream(decrypted, cipherBytes)
+    var decrypted []byte = make([]byte, len(cipherBytes))
+    cipher2.Decrypt(decrypted, cipherBytes)
 
     if plaintext != fmt.Sprintf("%x", decrypted) {
         t.Errorf("Decrypt error: act=%x, old=%s\n", decrypted, plaintext)

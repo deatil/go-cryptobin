@@ -1,12 +1,19 @@
 package cast256
 
 import (
-    "unsafe"
     "strconv"
     "crypto/cipher"
+
+    "github.com/deatil/go-cryptobin/tool/alias"
 )
 
 const BlockSize = 16
+
+type KeySizeError int
+
+func (k KeySizeError) Error() string {
+    return "cryptobin/cast256: invalid key size " + strconv.Itoa(int(k))
+}
 
 type cast256Cipher struct {
     l_key [96]uint32
@@ -42,15 +49,15 @@ func (this *cast256Cipher) BlockSize() int {
 
 func (this *cast256Cipher) Encrypt(dst, src []byte) {
     if len(src) < BlockSize {
-        panic("crypto/cast256: input not full block")
+        panic("cryptobin/cast256: input not full block")
     }
 
     if len(dst) < BlockSize {
-        panic("crypto/cast256: output not full block")
+        panic("cryptobin/cast256: output not full block")
     }
 
-    if inexactOverlap(dst[:BlockSize], src[:BlockSize]) {
-        panic("crypto/cast256: invalid buffer overlap")
+    if alias.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
+        panic("cryptobin/cast256: invalid buffer overlap")
     }
 
     blk := bytesToUint32s(src)
@@ -76,15 +83,15 @@ func (this *cast256Cipher) Encrypt(dst, src []byte) {
 
 func (this *cast256Cipher) Decrypt(dst, src []byte) {
     if len(src) < BlockSize {
-        panic("crypto/cast256: input not full block")
+        panic("cryptobin/cast256: input not full block")
     }
 
     if len(dst) < BlockSize {
-        panic("crypto/cast256: output not full block")
+        panic("cryptobin/cast256: output not full block")
     }
 
-    if inexactOverlap(dst[:BlockSize], src[:BlockSize]) {
-        panic("crypto/cast256: invalid buffer overlap")
+    if alias.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
+        panic("cryptobin/cast256: invalid buffer overlap")
     }
 
     blk := bytesToUint32s(src)
@@ -147,32 +154,4 @@ func (this *cast256Cipher) setKey(key []uint32) {
         this.l_key[i + 6] = lk[3]
         this.l_key[i + 7] = lk[1]
     }
-}
-
-// anyOverlap reports whether x and y share memory at any (not necessarily
-// corresponding) index. The memory beyond the slice length is ignored.
-func anyOverlap(x, y []byte) bool {
-    return len(x) > 0 && len(y) > 0 &&
-        uintptr(unsafe.Pointer(&x[0])) <= uintptr(unsafe.Pointer(&y[len(y)-1])) &&
-        uintptr(unsafe.Pointer(&y[0])) <= uintptr(unsafe.Pointer(&x[len(x)-1]))
-}
-
-// inexactOverlap reports whether x and y share memory at any non-corresponding
-// index. The memory beyond the slice length is ignored. Note that x and y can
-// have different lengths and still not have any inexact overlap.
-//
-// inexactOverlap can be used to implement the requirements of the crypto/cipher
-// AEAD, Block, BlockMode and Stream interfaces.
-func inexactOverlap(x, y []byte) bool {
-    if len(x) == 0 || len(y) == 0 || &x[0] == &y[0] {
-        return false
-    }
-
-    return anyOverlap(x, y)
-}
-
-type KeySizeError int
-
-func (k KeySizeError) Error() string {
-    return "crypto/cast256: invalid key size " + strconv.Itoa(int(k))
 }

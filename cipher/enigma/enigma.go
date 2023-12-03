@@ -5,16 +5,16 @@ import (
     "crypto/cipher"
 )
 
-type KeySizeError int
-
-func (k KeySizeError) Error() string {
-    return "crypto/enigma: invalid key size " + strconv.Itoa(int(k))
-}
-
 const ROTORSZ int32 = 256
 const MASK uint32 = 0377
 
 const DefaultSeed int32 = 123
+
+type KeySizeError int
+
+func (k KeySizeError) Error() string {
+    return "cryptobin/enigma: invalid key size " + strconv.Itoa(int(k))
+}
 
 type enigmaCipher struct {
     seed int32
@@ -51,7 +51,7 @@ func NewCipherWithSeed(key []byte, seed int32) (cipher.Stream, error) {
 
 func (this *enigmaCipher) XORKeyStream(dst, src []byte) {
     if len(dst) < len(src) {
-        panic("crypto/enigma: output not full block")
+        panic("cryptobin/enigma: output not full block")
     }
 
     var i int32

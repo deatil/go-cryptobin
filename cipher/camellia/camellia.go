@@ -36,6 +36,12 @@ func initAll() {
     }
 }
 
+type KeySizeError int
+
+func (k KeySizeError) Error() string {
+    return "cryptobin/camellia: invalid key size " + strconv.Itoa(int(k))
+}
+
 type camelliaCipher struct {
     kw   [5]uint64
     k    [25]uint64
@@ -267,10 +273,4 @@ func (c *camelliaCipher) Decrypt(dst, src []byte) {
 
     binary.BigEndian.PutUint64(dst[0:], d1)
     binary.BigEndian.PutUint64(dst[8:], d2)
-}
-
-type KeySizeError int
-
-func (k KeySizeError) Error() string {
-    return "camellia: invalid key size " + strconv.Itoa(int(k))
 }

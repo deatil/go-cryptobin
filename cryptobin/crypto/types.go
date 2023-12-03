@@ -127,6 +127,8 @@ func (this Multiple) String() string {
             return "Hight"
         case Lea:
             return "Lea"
+        case Panama:
+            return "Panama"
         default:
             if TypeMultiple.Names().Has(this) {
                 return (TypeMultiple.Names().Get(this))()
@@ -173,6 +175,7 @@ const (
     Enigma
     Hight
     Lea
+    Panama
     maxMultiple
 )
 

@@ -7,12 +7,11 @@ import (
     "math/rand"
     "encoding/hex"
 
-    "github.com/deatil/go-cryptobin/tool"
 )
 
 func Test_Panama(t *testing.T) {
     random := rand.New(rand.NewSource(99))
-    max := 2
+    max := 5000
 
     var encrypted [16]byte
     var decrypted [16]byte
@@ -43,7 +42,7 @@ func Test_Panama(t *testing.T) {
     }
 }
 
-func test_Check(t *testing.T) {
+func Test_Check(t *testing.T) {
     var key [32]byte
     for i := 0; i < 32; i++ {
         key[i] = byte((i * 2 + 10) % 256)
@@ -58,17 +57,6 @@ func test_Check(t *testing.T) {
 
     cipherBytes, _ := hex.DecodeString(ciphertext)
 
-    // 小端转大端
-    for i := 0; i < len(key); i += 4 {
-        k2 := tool.LE2BE_32(key[i:i+4])
-        copy(key[i:i+4], k2[:])
-    }
-
-    for i := 0; i < len(cipherBytes); i += 4 {
-        c2 := tool.LE2BE_32(cipherBytes[i:i+4])
-        copy(cipherBytes[i:i+4], c2[:])
-    }
-
     cipher, err := NewCipher(key[:])
     if err != nil {
         t.Fatal(err.Error())
@@ -76,12 +64,6 @@ func test_Check(t *testing.T) {
 
     var encrypted []byte = make([]byte, len(plaintext))
     cipher.XORKeyStream(encrypted, plaintext[:])
-
-    // 大端转小端
-    for i := 0; i < len(encrypted); i += 4 {
-        e2 := tool.BE2LE_32(encrypted[i:i+4])
-        copy(encrypted[i:i+4], e2[:])
-    }
 
     if ciphertext != fmt.Sprintf("%x", encrypted) {
         t.Errorf("Encrypt error: act=%x, old=%s\n", encrypted, ciphertext)
@@ -96,12 +78,6 @@ func test_Check(t *testing.T) {
 
     var decrypted []byte = make([]byte, len(cipherBytes))
     cipher2.XORKeyStream(decrypted, cipherBytes)
-
-    // 大端转小端
-    for i := 0; i < len(decrypted); i += 4 {
-        e2 := tool.BE2LE_32(decrypted[i:i+4])
-        copy(decrypted[i:i+4], e2[:])
-    }
 
     if fmt.Sprintf("%x", plaintext) != fmt.Sprintf("%x", decrypted) {
         t.Errorf("Decrypt error: act=%x, old=%x\n", decrypted, plaintext)

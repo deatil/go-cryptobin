@@ -13,7 +13,7 @@ const (
 type KeySizeError int
 
 func (k KeySizeError) Error() string {
-    return fmt.Sprintf("crypto/hight: invalid key size %d", int(k))
+    return fmt.Sprintf("cryptobin/hight: invalid key size %d", int(k))
 }
 
 type hightCipher struct {
@@ -59,13 +59,13 @@ func (s *hightCipher) encryptStep(XX []byte, k, i0, i1, i2, i3, i4, i5, i6, i7 i
 
 func (s *hightCipher) Encrypt(dst, src []byte) {
     if len(src) < BlockSize {
-        panic(fmt.Sprintf("crypto/hight: invalid block size %d (src)", len(src)))
+        panic("cryptobin/hight: input not full block")
     }
 
     if len(dst) < BlockSize {
-        panic(fmt.Sprintf("crypto/hight: invalid block size %d (dst)", len(dst)))
+        panic("cryptobin/hight: output not full block")
     }
-
+    
     XX := []byte{
         src[0] + s.roundKey[0],
         src[1],
@@ -129,13 +129,13 @@ func (s *hightCipher) decryptStep(XX []byte, k, i0, i1, i2, i3, i4, i5, i6, i7 i
 
 func (s *hightCipher) Decrypt(dst, src []byte) {
     if len(src) < BlockSize {
-        panic(fmt.Sprintf("crypto/hight: invalid block size %d (src)", len(src)))
+        panic("cryptobin/hight: input not full block")
     }
 
     if len(dst) < BlockSize {
-        panic(fmt.Sprintf("crypto/hight: invalid block size %d (dst)", len(dst)))
+        panic("cryptobin/hight: output not full block")
     }
-
+    
     XX := []byte{
         src[7],
         src[0] - s.roundKey[4],

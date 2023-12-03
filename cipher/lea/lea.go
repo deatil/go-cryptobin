@@ -10,7 +10,7 @@ const BlockSize = 16
 type KeySizeError int
 
 func (k KeySizeError) Error() string {
-    return fmt.Sprintf("crypto/lea: invalid key size %d", int(k))
+    return fmt.Sprintf("cryptobin/lea: invalid key size %d", int(k))
 }
 
 type leaCipher struct {
@@ -27,6 +27,7 @@ func NewCipher(key []byte) (cipher.Block, error) {
     k := len(key)
     switch k {
         case 16, 24, 32:
+            break
         default:
             return nil, KeySizeError(k)
     }
@@ -43,11 +44,11 @@ func (this *leaCipher) BlockSize() int {
 
 func (this *leaCipher) Encrypt(dst, src []byte) {
     if len(src) < BlockSize {
-        panic(fmt.Sprintf("crypto/lea: invalid block size %d (src)", len(src)))
+        panic(fmt.Sprintf("cryptobin/lea: invalid block size %d (src)", len(src)))
     }
 
     if len(dst) < BlockSize {
-        panic(fmt.Sprintf("crypto/lea: invalid block size %d (dst)", len(dst)))
+        panic(fmt.Sprintf("cryptobin/lea: invalid block size %d (dst)", len(dst)))
     }
 
     this.encrypt(dst, src)
@@ -55,11 +56,11 @@ func (this *leaCipher) Encrypt(dst, src []byte) {
 
 func (this *leaCipher) Decrypt(dst, src []byte) {
     if len(src) < BlockSize {
-        panic(fmt.Sprintf("crypto/lea: invalid block size %d (src)", len(src)))
+        panic(fmt.Sprintf("cryptobin/lea: invalid block size %d (src)", len(src)))
     }
 
     if len(dst) < BlockSize {
-        panic(fmt.Sprintf("crypto/lea: invalid block size %d (dst)", len(dst)))
+        panic(fmt.Sprintf("cryptobin/lea: invalid block size %d (dst)", len(dst)))
     }
 
     this.decrypt(dst, src)

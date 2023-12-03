@@ -19,7 +19,7 @@ const BlockSize = 8
 type KeySizeError int
 
 func (k KeySizeError) Error() string {
-    return "cipher/idea: invalid key size " + strconv.Itoa(int(k))
+    return "cryptobin/idea: invalid key size " + strconv.Itoa(int(k))
 }
 
 type ideaCipher struct {

@@ -72,8 +72,9 @@ func NewEAXWithNonceAndTagSize(
 
 func (e *eax) Seal(dst, nonce, plaintext, adata []byte) []byte {
     if len(nonce) > e.nonceSize {
-        panic("crypto/eax: Nonce too long for this instance")
+        panic("cryptobin/eax: Nonce too long for this instance")
     }
+    
     ret, out := byteutil.SliceForAppend(dst, len(plaintext)+e.tagSize)
     omacNonce := e.omacT(0, nonce)
     omacAdata := e.omacT(1, adata)
@@ -94,7 +95,7 @@ func (e *eax) Seal(dst, nonce, plaintext, adata []byte) []byte {
 
 func (e *eax) Open(dst, nonce, ciphertext, adata []byte) ([]byte, error) {
     if len(nonce) > e.nonceSize {
-        panic("crypto/eax: Nonce too long for this instance")
+        panic("cryptobin/eax: Nonce too long for this instance")
     }
 
     if len(ciphertext) < e.tagSize {

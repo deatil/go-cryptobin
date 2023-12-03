@@ -10,7 +10,7 @@ import (
 
 func Test_Saferplus(t *testing.T) {
     random := rand.New(rand.NewSource(99))
-    max := 500
+    max := 5000
 
     var encrypted [8]byte
     var decrypted [8]byte

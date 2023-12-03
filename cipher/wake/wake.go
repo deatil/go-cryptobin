@@ -1,12 +1,19 @@
 package wake
 
 import (
-    "unsafe"
     "strconv"
     "crypto/cipher"
+
+    "github.com/deatil/go-cryptobin/tool/alias"
 )
 
 const BlockSize = 1
+
+type KeySizeError int
+
+func (k KeySizeError) Error() string {
+    return "cryptobin/wake: invalid key size " + strconv.Itoa(int(k))
+}
 
 type wakeCipher struct {
     t [257]uint32
@@ -40,13 +47,13 @@ func (this *wakeCipher) BlockSize() int {
 
 func (this *wakeCipher) Encrypt(dst, src []byte) {
     if len(dst) < len(src) {
-        panic("crypto/wake: output not full block")
+        panic("cryptobin/wake: output not full block")
     }
 
     bs := len(src)
 
-    if inexactOverlap(dst[:bs], src[:bs]) {
-        panic("crypto/wake: invalid buffer overlap")
+    if alias.InexactOverlap(dst[:bs], src[:bs]) {
+        panic("cryptobin/wake: invalid buffer overlap")
     }
 
     this.encrypt(dst, src)
@@ -54,13 +61,13 @@ func (this *wakeCipher) Encrypt(dst, src []byte) {
 
 func (this *wakeCipher) Decrypt(dst, src []byte) {
     if len(dst) < len(src) {
-        panic("crypto/wake: output not full block")
+        panic("cryptobin/wake: output not full block")
     }
 
     bs := len(src)
 
-    if inexactOverlap(dst[:bs], src[:bs]) {
-        panic("crypto/wake: invalid buffer overlap")
+    if alias.InexactOverlap(dst[:bs], src[:bs]) {
+        panic("cryptobin/wake: invalid buffer overlap")
     }
 
     this.decrypt(dst, src)
@@ -231,32 +238,4 @@ func (this *wakeCipher) M(X uint32, Y uint32) uint32 {
     TMP = X + Y;
 
     return (((TMP >> 8) & 0x00ffffff) ^ this.t[TMP & 0xff])
-}
-
-// anyOverlap reports whether x and y share memory at any (not necessarily
-// corresponding) index. The memory beyond the slice length is ignored.
-func anyOverlap(x, y []byte) bool {
-    return len(x) > 0 && len(y) > 0 &&
-        uintptr(unsafe.Pointer(&x[0])) <= uintptr(unsafe.Pointer(&y[len(y)-1])) &&
-        uintptr(unsafe.Pointer(&y[0])) <= uintptr(unsafe.Pointer(&x[len(x)-1]))
-}
-
-// inexactOverlap reports whether x and y share memory at any non-corresponding
-// index. The memory beyond the slice length is ignored. Note that x and y can
-// have different lengths and still not have any inexact overlap.
-//
-// inexactOverlap can be used to implement the requirements of the crypto/cipher
-// AEAD, Block, BlockMode and Stream interfaces.
-func inexactOverlap(x, y []byte) bool {
-    if len(x) == 0 || len(y) == 0 || &x[0] == &y[0] {
-        return false
-    }
-
-    return anyOverlap(x, y)
-}
-
-type KeySizeError int
-
-func (k KeySizeError) Error() string {
-    return "crypto/wake: invalid key size " + strconv.Itoa(int(k))
 }

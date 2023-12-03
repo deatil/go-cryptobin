@@ -46,10 +46,10 @@ func (s *seed128Cipher) BlockSize() int {
 
 func (s *seed128Cipher) Encrypt(dst, src []byte) {
     if len(src) < BlockSize {
-        panic(fmt.Sprintf("crypto/seed: invalid block size %d (src)", len(src)))
+        panic(fmt.Sprintf("cryptobin/seed: invalid block size %d (src)", len(src)))
     }
     if len(dst) < BlockSize {
-        panic(fmt.Sprintf("crypto/seed: invalid block size %d (dst)", len(dst)))
+        panic(fmt.Sprintf("cryptobin/seed: invalid block size %d (dst)", len(dst)))
     }
 
     data := [...]uint32{
@@ -88,10 +88,10 @@ func (s *seed128Cipher) Encrypt(dst, src []byte) {
 
 func (s *seed128Cipher) Decrypt(dst, src []byte) {
     if len(src) < BlockSize {
-        panic(fmt.Sprintf("crypto/seed: invalid block size %d (src)", len(src)))
+        panic(fmt.Sprintf("cryptobin/seed: invalid block size %d (src)", len(src)))
     }
     if len(dst) < BlockSize {
-        panic(fmt.Sprintf("crypto/seed: invalid block size %d (dst)", len(dst)))
+        panic(fmt.Sprintf("cryptobin/seed: invalid block size %d (dst)", len(dst)))
     }
 
     data := [...]uint32{

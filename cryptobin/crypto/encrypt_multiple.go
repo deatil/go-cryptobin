@@ -42,6 +42,7 @@ import (
     cryptobin_cast256 "github.com/deatil/go-cryptobin/cipher/cast256"
     cryptobin_hight "github.com/deatil/go-cryptobin/cipher/hight"
     cryptobin_lea "github.com/deatil/go-cryptobin/cipher/lea"
+    cryptobin_panama "github.com/deatil/go-cryptobin/cipher/panama"
 )
 
 // 获取模式方式
@@ -1498,5 +1499,46 @@ func (this EncryptLea) Decrypt(data []byte, opt IOption) ([]byte, error) {
 func init() {
     UseEncrypt.Add(Lea, func() IEncrypt {
         return EncryptLea{}
+    })
+}
+
+// ===================
+
+// The key argument should be 32 bytes.
+type EncryptPanama struct {}
+
+// 加密
+func (this EncryptPanama) Encrypt(data []byte, opt IOption) ([]byte, error) {
+    c, err := cryptobin_panama.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: %w", err)
+        return nil, err
+    }
+
+    dst := make([]byte, len(data))
+
+    c.XORKeyStream(dst, data)
+
+    return dst, nil
+}
+
+// 解密
+func (this EncryptPanama) Decrypt(data []byte, opt IOption) ([]byte, error) {
+    c, err := cryptobin_panama.NewCipher(opt.Key())
+    if err != nil {
+        err := fmt.Errorf("Cryptobin: %w", err)
+        return nil, err
+    }
+
+    dst := make([]byte, len(data))
+
+    c.XORKeyStream(dst, data)
+
+    return dst, nil
+}
+
+func init() {
+    UseEncrypt.Add(Panama, func() IEncrypt {
+        return EncryptPanama{}
     })
 }

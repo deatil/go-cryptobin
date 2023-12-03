@@ -110,7 +110,7 @@ func (o *ocb) Seal(dst, nonce, plaintext, adata []byte) []byte {
 
 func (o *ocb) Open(dst, nonce, ciphertext, adata []byte) ([]byte, error) {
     if len(nonce) > o.nonceSize {
-        panic("Nonce too long for this instance")
+        panic("crypto/ocb: Nonce too long for this instance")
     }
     if len(ciphertext) < o.tagSize {
         return nil, ocbError("Ciphertext shorter than tag length")

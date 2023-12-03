@@ -1,9 +1,10 @@
 package saferplus
 
 import (
-    "unsafe"
     "strconv"
     "crypto/cipher"
+
+    "github.com/deatil/go-cryptobin/tool/alias"
 )
 
 const BlockSize = 8
@@ -13,6 +14,12 @@ const (
     SAFER_BLOCK_LEN = 8;
     SAFER_MAX_NOF_ROUNDS = 13;
 )
+
+type KeySizeError int
+
+func (k KeySizeError) Error() string {
+    return "cryptobin/saferplus: invalid key size " + strconv.Itoa(int(k))
+}
 
 type saferplusCipher struct {
     exp_tab [256]uint8
@@ -44,15 +51,15 @@ func (this *saferplusCipher) BlockSize() int {
 
 func (this *saferplusCipher) Encrypt(dst, src []byte) {
     if len(src) < BlockSize {
-        panic("crypto/saferplus: input not full block")
+        panic("cryptobin/saferplus: input not full block")
     }
 
     if len(dst) < BlockSize {
-        panic("crypto/saferplus: output not full block")
+        panic("cryptobin/saferplus: output not full block")
     }
 
-    if inexactOverlap(dst[:BlockSize], src[:BlockSize]) {
-        panic("crypto/saferplus: invalid buffer overlap")
+    if alias.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
+        panic("cryptobin/saferplus: invalid buffer overlap")
     }
 
     this.encrypt(dst, src)
@@ -60,15 +67,15 @@ func (this *saferplusCipher) Encrypt(dst, src []byte) {
 
 func (this *saferplusCipher) Decrypt(dst, src []byte) {
     if len(src) < BlockSize {
-        panic("crypto/saferplus: input not full block")
+        panic("cryptobin/saferplus: input not full block")
     }
 
     if len(dst) < BlockSize {
-        panic("crypto/saferplus: output not full block")
+        panic("cryptobin/saferplus: output not full block")
     }
 
-    if inexactOverlap(dst[:BlockSize], src[:BlockSize]) {
-        panic("crypto/saferplus: invalid buffer overlap")
+    if alias.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
+        panic("cryptobin/saferplus: invalid buffer overlap")
     }
 
     this.decrypt(dst, src)
@@ -380,32 +387,4 @@ func (this *saferplusCipher) setKey(keyData []uint8) {
     }
 
     this.local_key = key
-}
-
-// anyOverlap reports whether x and y share memory at any (not necessarily
-// corresponding) index. The memory beyond the slice length is ignored.
-func anyOverlap(x, y []byte) bool {
-    return len(x) > 0 && len(y) > 0 &&
-        uintptr(unsafe.Pointer(&x[0])) <= uintptr(unsafe.Pointer(&y[len(y)-1])) &&
-        uintptr(unsafe.Pointer(&y[0])) <= uintptr(unsafe.Pointer(&x[len(x)-1]))
-}
-
-// inexactOverlap reports whether x and y share memory at any non-corresponding
-// index. The memory beyond the slice length is ignored. Note that x and y can
-// have different lengths and still not have any inexact overlap.
-//
-// inexactOverlap can be used to implement the requirements of the crypto/cipher
-// AEAD, Block, BlockMode and Stream interfaces.
-func inexactOverlap(x, y []byte) bool {
-    if len(x) == 0 || len(y) == 0 || &x[0] == &y[0] {
-        return false
-    }
-
-    return anyOverlap(x, y)
-}
-
-type KeySizeError int
-
-func (k KeySizeError) Error() string {
-    return "crypto/saferplus: invalid key size " + strconv.Itoa(int(k))
 }

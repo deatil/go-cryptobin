@@ -303,6 +303,14 @@ func (this Cryptobin) Lea() Cryptobin {
     return this
 }
 
+// Panama
+// The key argument should be 32 bytes.
+func (this Cryptobin) Panama() Cryptobin {
+    this.multiple = Panama
+
+    return this
+}
+
 // 使用类型
 func (this Cryptobin) MultipleBy(multiple Multiple, cfg ...map[string]any) Cryptobin {
     this.multiple = multiple

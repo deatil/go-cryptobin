@@ -1245,7 +1245,7 @@ func Test_WakeNoPadding(t *testing.T) {
     assert(data, cyptdeStr, "WakeNoPadding-res")
 }
 
-func Test_EnigmaNoPadding(t *testing.T) {
+func Test_Enigma(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
     assertError := cryptobin_test.AssertErrorT(t)
 
@@ -1253,8 +1253,6 @@ func Test_EnigmaNoPadding(t *testing.T) {
     cypt := FromString(data).
         SetKey("dfertf12dfert").
         Enigma().
-        ECB().
-        NoPadding().
         Encrypt()
     cyptStr := cypt.ToBase64String()
 
@@ -1263,8 +1261,6 @@ func Test_EnigmaNoPadding(t *testing.T) {
     cyptde := FromBase64String(cyptStr).
         SetKey("dfertf12dfert").
         Enigma().
-        ECB().
-        NoPadding().
         Decrypt()
     cyptdeStr := cyptde.ToString()
 
@@ -1361,4 +1357,28 @@ func Test_LeaPKCS7Padding(t *testing.T) {
     assertError(cyptde.Error(), "LeaPKCS7Padding-Decode")
 
     assert(data, cyptdeStr, "LeaPKCS7Padding-res")
+}
+
+func Test_Panama(t *testing.T) {
+    assert := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
+    cypt := FromString(data).
+        SetKey("dfertf12dfertf12dfertf12dfertf12").
+        Panama().
+        Encrypt()
+    cyptStr := cypt.ToBase64String()
+
+    assertError(cypt.Error(), "Panama-Encode")
+
+    cyptde := FromBase64String(cyptStr).
+        SetKey("dfertf12dfertf12dfertf12dfertf12").
+        Panama().
+        Decrypt()
+    cyptdeStr := cyptde.ToString()
+
+    assertError(cyptde.Error(), "Panama-Decode")
+
+    assert(data, cyptdeStr, "Panama-res")
 }

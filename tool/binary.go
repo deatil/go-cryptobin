@@ -57,3 +57,101 @@ func BE2LE_64(inp []byte) []byte {
 
     return sav[:]
 }
+
+// =============
+
+func LE2BE_16_Bytes(in []byte) []byte {
+    if len(in) % 2 != 0 {
+        panic("in data error")
+    }
+
+    out := make([]byte, len(in))
+
+    // 小端转大端
+    for i := 0; i < len(in); i += 2 {
+        tmp := LE2BE_16(in[i:])
+        copy(out[i:], tmp[:])
+    }
+
+    return out
+}
+
+func BE2LE_16_Bytes(in []byte) []byte {
+    if len(in) % 2 != 0 {
+        panic("in data error")
+    }
+
+    out := make([]byte, len(in))
+
+    // 大端转小端
+    for i := 0; i < len(in); i += 2 {
+        tmp := BE2LE_16(in[i:])
+        copy(out[i:], tmp[:])
+    }
+
+    return out
+}
+
+func LE2BE_32_Bytes(in []byte) []byte {
+    if len(in) % 4 != 0 {
+        panic("in data error")
+    }
+
+    out := make([]byte, len(in))
+
+    // 小端转大端
+    for i := 0; i < len(in); i += 4 {
+        tmp := LE2BE_32(in[i:])
+        copy(out[i:], tmp[:])
+    }
+
+    return out
+}
+
+func BE2LE_32_Bytes(in []byte) []byte {
+    if len(in) % 4 != 0 {
+        panic("in data error")
+    }
+
+    out := make([]byte, len(in))
+
+    // 大端转小端
+    for i := 0; i < len(in); i += 4 {
+        tmp := BE2LE_32(in[i:])
+        copy(out[i:], tmp[:])
+    }
+
+    return out
+}
+
+func LE2BE_64_Bytes(in []byte) []byte {
+    if len(in) % 8 != 0 {
+        panic("in data error")
+    }
+
+    out := make([]byte, len(in))
+
+    // 小端转大端
+    for i := 0; i < len(in); i += 8 {
+        tmp := LE2BE_64(in[i:])
+        copy(out[i:], tmp[:])
+    }
+
+    return out
+}
+
+func BE2LE_64_Bytes(in []byte) []byte {
+    if len(in) % 8 != 0 {
+        panic("in data error")
+    }
+
+    out := make([]byte, len(in))
+
+    // 大端转小端
+    for i := 0; i < len(in); i += 8 {
+        tmp := BE2LE_64(in[i:])
+        copy(out[i:], tmp[:])
+    }
+
+    return out
+}

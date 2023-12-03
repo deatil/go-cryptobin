@@ -104,3 +104,42 @@ func Test_BE2LE_64(t *testing.T) {
 
     assertEqual(enInt, oldInt, "BE2LE_64")
 }
+
+func Test_16_Bytes(t *testing.T) {
+    assertNotEmpty := test.AssertNotEmptyT(t)
+
+    data := make([]byte, 32)
+    io.ReadFull(rand.Reader, data)
+
+    enData := LE2BE_16_Bytes(data)
+    assertNotEmpty(enData, "LE2BE_16_Bytes")
+
+    deData := BE2LE_16_Bytes(data)
+    assertNotEmpty(deData, "BE2LE_16_Bytes")
+}
+
+func Test_32_Bytes(t *testing.T) {
+    assertNotEmpty := test.AssertNotEmptyT(t)
+
+    data := make([]byte, 128)
+    io.ReadFull(rand.Reader, data)
+
+    enData := LE2BE_32_Bytes(data)
+    assertNotEmpty(enData, "LE2BE_32_Bytes")
+
+    deData := BE2LE_32_Bytes(data)
+    assertNotEmpty(deData, "LE2BE_32_Bytes")
+}
+
+func Test_64_Bytes(t *testing.T) {
+    assertNotEmpty := test.AssertNotEmptyT(t)
+
+    data := make([]byte, 128)
+    io.ReadFull(rand.Reader, data)
+
+    enData := LE2BE_64_Bytes(data)
+    assertNotEmpty(enData, "LE2BE_64_Bytes")
+
+    deData := BE2LE_64_Bytes(data)
+    assertNotEmpty(deData, "BE2LE_64_Bytes")
+}

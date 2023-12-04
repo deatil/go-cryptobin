@@ -68,8 +68,10 @@ func (g *gostCipher) Decrypt(dst, src []byte) {
 
 // GOST block cipher round function
 func (g *gostCipher) f(x uint32) uint32 {
-    x = uint32(g.k[0][(x>>24)&255])<<24 | uint32(g.k[1][(x>>16)&255])<<16 |
-        uint32(g.k[2][(x>>8)&255])<<8 | uint32(g.k[3][x&255])
+    x = uint32(g.k[0][(x >> 24)&255])<<24 |
+        uint32(g.k[1][(x >> 16)&255])<<16 |
+        uint32(g.k[2][(x >>  8)&255])<< 8 |
+        uint32(g.k[3][x&255])
 
     // rotate result left by 11 bits
     return (x << 11) | (x >> (32 - 11))

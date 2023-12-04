@@ -154,6 +154,7 @@ func (this *wakeCipher) decrypt(dst, src []byte) {
 
             r1 = byteswap32(r1)
             r6 = byteswap32(r6)
+
             r3 = this.M(r3, r1)
             r4 = this.M(r4, r3)
             r5 = this.M(r5, r4)

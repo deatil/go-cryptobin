@@ -81,6 +81,13 @@ func (this *panamaCipher) set_key(
 
     this.keymat_pointer = 0
 
+    if littleEndian {
+        var i int32
+        for i = 0; i < 8; i++ {
+            this.wkeymat[i] = byteswap32(this.wkeymat[i])
+        }
+    }
+
     this.keymat = keymatToBytes(this.wkeymat)
 }
 
@@ -94,6 +101,13 @@ func (this *panamaCipher) XORKeyStream(dst, src []byte) {
             copy(this.wkeymat[0:], wkeymat)
 
             this.keymat_pointer = 0
+
+            if littleEndian {
+                var j int32
+                for j = 0; j < 8; j++ {
+                    this.wkeymat[j] = byteswap32(this.wkeymat[j])
+                }
+            }
 
             this.keymat = keymatToBytes(this.wkeymat)
         }
@@ -239,6 +253,12 @@ func (this *panamaCipher) pan_push(
     data.READ_STATE(state)
 
     /* we assume pointer to input buffer is compatible with pointer to PAN_STAGE */
+    if littleEndian {
+        for i, in := range In {
+            In[i] = byteswap32(in)
+        }
+    }
+
     var pan_states [8]uint32
 
     for i = 0; i < uint32(len(In)); i += PAN_STAGE_SIZE {

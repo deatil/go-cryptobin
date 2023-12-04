@@ -3,11 +3,7 @@ package panama
 import (
     "math/bits"
     "encoding/binary"
-
-    "github.com/deatil/go-cryptobin/tool"
 )
-
-var byteswap32 = tool.Byteswap32
 
 func ROTL32(x, n uint32) uint32 {
     return bits.RotateLeft32(x, int(n))

@@ -8,13 +8,13 @@ import (
     "github.com/deatil/go-cryptobin/tool/alias"
 )
 
+const BlockSize = 8
+
 type KeySizeError int
 
 func (k KeySizeError) Error() string {
     return "cryptobin/safer: invalid key size " + strconv.Itoa(int(k))
 }
-
-const BlockSize = 8
 
 type saferCipher struct {
     key []uint8

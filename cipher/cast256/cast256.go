@@ -29,13 +29,7 @@ func NewCipher(key []byte) (cipher.Block, error) {
             return nil, KeySizeError(len(key))
     }
 
-    var in_key []uint32
-
-    keyints := bytesToUint32s(key[:16])
-    in_key = append(in_key, keyints[:]...)
-
-    keyints = bytesToUint32s(key[16:])
-    in_key = append(in_key, keyints[:]...)
+    in_key := keyToUint32s(key)
 
     c := new(cast256Cipher)
     c.setKey(in_key)

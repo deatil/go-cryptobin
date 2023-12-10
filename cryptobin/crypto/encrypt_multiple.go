@@ -1564,32 +1564,24 @@ type EncryptSquare struct {}
 
 // 加密
 func (this EncryptSquare) Encrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_square.NewCipher(opt.Key())
+    block, err := cryptobin_square.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.XORKeyStream(dst, data)
-
-    return dst, nil
+    return BlockEncrypt(block, data, opt)
 }
 
 // 解密
 func (this EncryptSquare) Decrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_square.NewCipher(opt.Key())
+    block, err := cryptobin_square.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.XORKeyStream(dst, data)
-
-    return dst, nil
+    return BlockDecrypt(block, data, opt)
 }
 
 func init() {
@@ -1605,32 +1597,24 @@ type EncryptMagenta struct {}
 
 // 加密
 func (this EncryptMagenta) Encrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_magenta.NewCipher(opt.Key())
+    block, err := cryptobin_magenta.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Encrypt(dst, data)
-
-    return dst, nil
+    return BlockEncrypt(block, data, opt)
 }
 
 // 解密
 func (this EncryptMagenta) Decrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_magenta.NewCipher(opt.Key())
+    block, err := cryptobin_magenta.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Decrypt(dst, data)
-
-    return dst, nil
+    return BlockDecrypt(block, data, opt)
 }
 
 func init() {
@@ -1646,32 +1630,24 @@ type EncryptKasumi struct {}
 
 // 加密
 func (this EncryptKasumi) Encrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_kasumi.NewCipher(opt.Key())
+    block, err := cryptobin_kasumi.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Encrypt(dst, data)
-
-    return dst, nil
+    return BlockEncrypt(block, data, opt)
 }
 
 // 解密
 func (this EncryptKasumi) Decrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_kasumi.NewCipher(opt.Key())
+    block, err := cryptobin_kasumi.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Decrypt(dst, data)
-
-    return dst, nil
+    return BlockDecrypt(block, data, opt)
 }
 
 func init() {
@@ -1687,32 +1663,24 @@ type EncryptE2 struct {}
 
 // 加密
 func (this EncryptE2) Encrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_e2.NewCipher(opt.Key())
+    block, err := cryptobin_e2.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Encrypt(dst, data)
-
-    return dst, nil
+    return BlockEncrypt(block, data, opt)
 }
 
 // 解密
 func (this EncryptE2) Decrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_e2.NewCipher(opt.Key())
+    block, err := cryptobin_e2.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Decrypt(dst, data)
-
-    return dst, nil
+    return BlockDecrypt(block, data, opt)
 }
 
 func init() {
@@ -1728,32 +1696,24 @@ type EncryptCrypton1 struct {}
 
 // 加密
 func (this EncryptCrypton1) Encrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_crypton1.NewCipher(opt.Key())
+    block, err := cryptobin_crypton1.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Encrypt(dst, data)
-
-    return dst, nil
+    return BlockEncrypt(block, data, opt)
 }
 
 // 解密
 func (this EncryptCrypton1) Decrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_crypton1.NewCipher(opt.Key())
+    block, err := cryptobin_crypton1.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Decrypt(dst, data)
-
-    return dst, nil
+    return BlockDecrypt(block, data, opt)
 }
 
 func init() {
@@ -1769,32 +1729,24 @@ type EncryptClefia struct {}
 
 // 加密
 func (this EncryptClefia) Encrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_clefia.NewCipher(opt.Key())
+    block, err := cryptobin_clefia.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Encrypt(dst, data)
-
-    return dst, nil
+    return BlockEncrypt(block, data, opt)
 }
 
 // 解密
 func (this EncryptClefia) Decrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_clefia.NewCipher(opt.Key())
+    block, err := cryptobin_clefia.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Decrypt(dst, data)
-
-    return dst, nil
+    return BlockDecrypt(block, data, opt)
 }
 
 func init() {
@@ -1822,32 +1774,24 @@ func (this EncryptSafer) getBlock(opt IOption) (cipher.Block, error) {
 
 // 加密
 func (this EncryptSafer) Encrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := this.getBlock(opt)
+    block, err := this.getBlock(opt)
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Encrypt(dst, data)
-
-    return dst, nil
+    return BlockEncrypt(block, data, opt)
 }
 
 // 解密
 func (this EncryptSafer) Decrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := this.getBlock(opt)
+    block, err := this.getBlock(opt)
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Decrypt(dst, data)
-
-    return dst, nil
+    return BlockDecrypt(block, data, opt)
 }
 
 func init() {
@@ -1863,32 +1807,24 @@ type EncryptNoekeon struct {}
 
 // 加密
 func (this EncryptNoekeon) Encrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_noekeon.NewCipher(opt.Key())
+    block, err := cryptobin_noekeon.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Encrypt(dst, data)
-
-    return dst, nil
+    return BlockEncrypt(block, data, opt)
 }
 
 // 解密
 func (this EncryptNoekeon) Decrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_noekeon.NewCipher(opt.Key())
+    block, err := cryptobin_noekeon.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Decrypt(dst, data)
-
-    return dst, nil
+    return BlockDecrypt(block, data, opt)
 }
 
 func init() {
@@ -1906,34 +1842,26 @@ type EncryptMulti2 struct {}
 func (this EncryptMulti2) Encrypt(data []byte, opt IOption) ([]byte, error) {
     rounds := opt.Config().GetInt32("rounds")
 
-    c, err := cryptobin_multi2.NewCipher(opt.Key(), rounds)
+    block, err := cryptobin_multi2.NewCipher(opt.Key(), rounds)
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Encrypt(dst, data)
-
-    return dst, nil
+    return BlockEncrypt(block, data, opt)
 }
 
 // 解密
 func (this EncryptMulti2) Decrypt(data []byte, opt IOption) ([]byte, error) {
     rounds := opt.Config().GetInt32("rounds")
 
-    c, err := cryptobin_multi2.NewCipher(opt.Key(), rounds)
+    block, err := cryptobin_multi2.NewCipher(opt.Key(), rounds)
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Decrypt(dst, data)
-
-    return dst, nil
+    return BlockDecrypt(block, data, opt)
 }
 
 func init() {
@@ -1949,32 +1877,24 @@ type EncryptKseed struct {}
 
 // 加密
 func (this EncryptKseed) Encrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_kseed.NewCipher(opt.Key())
+    block, err := cryptobin_kseed.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Encrypt(dst, data)
-
-    return dst, nil
+    return BlockEncrypt(block, data, opt)
 }
 
 // 解密
 func (this EncryptKseed) Decrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_kseed.NewCipher(opt.Key())
+    block, err := cryptobin_kseed.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Decrypt(dst, data)
-
-    return dst, nil
+    return BlockDecrypt(block, data, opt)
 }
 
 func init() {
@@ -1990,32 +1910,24 @@ type EncryptKhazad struct {}
 
 // 加密
 func (this EncryptKhazad) Encrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_khazad.NewCipher(opt.Key())
+    block, err := cryptobin_khazad.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Encrypt(dst, data)
-
-    return dst, nil
+    return BlockEncrypt(block, data, opt)
 }
 
 // 解密
 func (this EncryptKhazad) Decrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_khazad.NewCipher(opt.Key())
+    block, err := cryptobin_khazad.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Decrypt(dst, data)
-
-    return dst, nil
+    return BlockDecrypt(block, data, opt)
 }
 
 func init() {
@@ -2031,32 +1943,24 @@ type EncryptAnubis struct {}
 
 // 加密
 func (this EncryptAnubis) Encrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_anubis.NewCipher(opt.Key())
+    block, err := cryptobin_anubis.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Encrypt(dst, data)
-
-    return dst, nil
+    return BlockEncrypt(block, data, opt)
 }
 
 // 解密
 func (this EncryptAnubis) Decrypt(data []byte, opt IOption) ([]byte, error) {
-    c, err := cryptobin_anubis.NewCipher(opt.Key())
+    block, err := cryptobin_anubis.NewCipher(opt.Key())
     if err != nil {
         err := fmt.Errorf("Cryptobin: %w", err)
         return nil, err
     }
 
-    dst := make([]byte, len(data))
-
-    c.Decrypt(dst, data)
-
-    return dst, nil
+    return BlockDecrypt(block, data, opt)
 }
 
 func init() {

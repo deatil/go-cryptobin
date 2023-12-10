@@ -8,12 +8,6 @@ import (
     "github.com/deatil/go-cryptobin/tool/alias"
 )
 
-var once sync.Once
-
-func initAll() {
-    init_tab()
-}
-
 const BlockSize = 8
 
 const (
@@ -21,6 +15,12 @@ const (
     SAFER_BLOCK_LEN = 8;
     SAFER_MAX_NOF_ROUNDS = 13;
 )
+
+var once sync.Once
+
+func initAll() {
+    init_tab()
+}
 
 type KeySizeError int
 

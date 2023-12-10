@@ -1383,3 +1383,33 @@ func Test_Panama(t *testing.T) {
 
     assert(data, cyptdeStr, "Panama-res")
 }
+
+func Test_SquareNoPadding(t *testing.T) {
+    assert := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    data := "dfertf12dfertf12teertf12dfertf12"
+    cypt := FromString(data).
+        SetKey("dfertf12dfertf12dfertf12dfertf12").
+        SetIv("dfertf1d2fgtyf12dfertf12dfertf12").
+        Square().
+        ECB().
+        NoPadding().
+        Encrypt()
+    cyptStr := cypt.ToBase64String()
+
+    assertError(cypt.Error(), "SquareNoPadding-Encode")
+
+    cyptde := FromBase64String(cyptStr).
+        SetKey("dfertf12dfertf12dfertf12dfertf12").
+        SetIv("dfertf1d2fgtyf12dfertf12dfertf12").
+        Square().
+        ECB().
+        NoPadding().
+        Decrypt()
+    cyptdeStr := cyptde.ToString()
+
+    assertError(cyptde.Error(), "SquareNoPadding-Decode")
+
+    assert(cyptdeStr, data, "SquareNoPadding-res")
+}

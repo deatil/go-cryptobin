@@ -76,7 +76,7 @@ func (this *cast256Cipher) Encrypt(dst, src []byte) {
     blk = i_rnd(blk, 80, this.l_key)
     blk = i_rnd(blk, 88, this.l_key)
 
-    dstBytes := Uint32sToBytes(blk)
+    dstBytes := uint32sToBytes(blk)
 
     copy(dst, dstBytes[:])
 }
@@ -110,7 +110,7 @@ func (this *cast256Cipher) Decrypt(dst, src []byte) {
     blk = i_rnd(blk,  8, this.l_key)
     blk = i_rnd(blk,  0, this.l_key)
 
-    dstBytes := Uint32sToBytes(blk)
+    dstBytes := uint32sToBytes(blk)
 
     copy(dst, dstBytes[:])
 }

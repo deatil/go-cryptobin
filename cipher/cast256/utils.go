@@ -26,7 +26,7 @@ func bytesToUint32s(inp []byte) [4]uint32 {
     return blk
 }
 
-func Uint32sToBytes(blk [4]uint32) [16]byte {
+func uint32sToBytes(blk [4]uint32) [16]byte {
     var sav [16]byte
 
     if littleEndian {

@@ -3,7 +3,6 @@ package mars
 import (
     "strconv"
     "crypto/cipher"
-    "encoding/binary"
 
     "github.com/deatil/go-cryptobin/tool/alias"
 )
@@ -30,30 +29,10 @@ func NewCipher(key []byte) (cipher.Block, error) {
             return nil, KeySizeError(len(key))
     }
 
-    var in_key []uint32
-    var one uint32
-
-    keyints := bytesToUint32s(key[:16])
-    in_key = append(in_key, keyints[:]...)
-
-    if k > 16 {
-        one = binary.BigEndian.Uint32(key[16:])
-        in_key = append(in_key, one)
-
-        one = binary.BigEndian.Uint32(key[20:])
-        in_key = append(in_key, one)
-    }
-
-    if k > 24 {
-        one = binary.BigEndian.Uint32(key[24:])
-        in_key = append(in_key, one)
-
-        one = binary.BigEndian.Uint32(key[28:])
-        in_key = append(in_key, one)
-    }
+    inKey := keyToUint32s(key)
 
     c := new(marsCipher)
-    c.key = setKey(in_key, uint32(k*8))
+    c.key = setKey(inKey, uint32(k) * 8)
 
     return c, nil
 }
@@ -79,7 +58,7 @@ func (this *marsCipher) Encrypt(dst, src []byte) {
 
     encBlock := encrypt(in_blk, this.key)
 
-    encBytes := Uint32sToBytes(encBlock)
+    encBytes := uint32sToBytes(encBlock)
 
     copy(dst, encBytes[:])
 }
@@ -101,7 +80,7 @@ func (this *marsCipher) Decrypt(dst, src []byte) {
 
     decBlock := decrypt(in_blk, this.key);
 
-    decBytes := Uint32sToBytes(decBlock)
+    decBytes := uint32sToBytes(decBlock)
 
     copy(dst, decBytes[:])
 }

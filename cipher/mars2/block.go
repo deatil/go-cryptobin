@@ -1,4 +1,4 @@
-package mars
+package mars2
 
 var s_box = []uint32{
     0x09d0c479, 0x28c8ffe0, 0x84aa6c39, 0x9dad7287, /* 0x000    */

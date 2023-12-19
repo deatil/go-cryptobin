@@ -1,10 +1,8 @@
-package key
+package sm2
 
 import (
     "testing"
     "crypto/rand"
-
-    "github.com/tjfoc/gmsm/sm2"
 
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
@@ -12,12 +10,12 @@ import (
 func Test_PKCS8(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
 
-    priv1, err := sm2.GenerateKey(rand.Reader)
+    priv1, err := GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
     }
 
-    pem1, err := MarshalPKCS8PrivateKey(priv1)
+    pem1, err := MarshalPrivateKey(priv1)
     if err != nil {
         t.Fatal(err)
     }
@@ -26,7 +24,7 @@ func Test_PKCS8(t *testing.T) {
         t.Error("priv pem make error")
     }
 
-    priv2, err := ParsePKCS8PrivateKey(pem1)
+    priv2, err := ParsePrivateKey(pem1)
     if err != nil {
         t.Fatal(err)
     }
@@ -37,7 +35,7 @@ func Test_PKCS8(t *testing.T) {
 func Test_PublicKey(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
 
-    priv1, err := sm2.GenerateKey(rand.Reader)
+    priv1, err := GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
     }

@@ -1,16 +1,21 @@
-package sm2
+package sm2_test
 
 import (
     "fmt"
     "bytes"
+    "reflect"
     "testing"
     "math/big"
     "io/ioutil"
     "crypto/rand"
+    "encoding/pem"
+
+    "github.com/deatil/go-cryptobin/gm/sm2"
+    sm2_key "github.com/deatil/go-cryptobin/gm/sm2/key"
 )
 
 func TestSm2(t *testing.T) {
-    priv, err := GenerateKey(rand.Reader) // 生成密钥对
+    priv, err := sm2.GenerateKey(rand.Reader) // 生成密钥对
     fmt.Println(priv)
     if err != nil {
         t.Fatal(err)
@@ -34,14 +39,14 @@ func TestSm2(t *testing.T) {
     }
 
     fmt.Printf("clear text = %s\n", d1)
-    d2, err := Encrypt(rand.Reader, pub,msg, C1C2C3)
+    d2, err := sm2.Encrypt(rand.Reader, pub,msg, sm2.C1C2C3)
     if err != nil {
         fmt.Printf("Error: failed to encrypt %s: %v\n", msg, err)
         return
     }
 
     // fmt.Printf("Cipher text = %v\n", d0)
-    d3, err := Decrypt(priv, d2, C1C2C3)
+    d3, err := sm2.Decrypt(priv, d2, sm2.C1C2C3)
     if err != nil {
         fmt.Printf("Error: failed to decrypt: %v\n", err)
     }
@@ -65,7 +70,7 @@ func TestSm2(t *testing.T) {
 func BenchmarkSM2(t *testing.B) {
     t.ReportAllocs()
     msg := []byte("test")
-    priv, err := GenerateKey(nil) // 生成密钥对
+    priv, err := sm2.GenerateKey(nil) // 生成密钥对
     if err != nil {
         t.Fatal(err)
     }
@@ -106,33 +111,33 @@ func TestKEB2(t *testing.T) {
     expk := []byte{0x6C, 0x89, 0x34, 0x73, 0x54, 0xDE, 0x24, 0x84,
         0xC6, 0x0B, 0x4A, 0xB1, 0xFD, 0xE4, 0xC6, 0xE5}
 
-    curve := P256Sm2()
+    curve := sm2.P256Sm2()
     curve.ScalarBaseMult(daBuf)
-    da := new(PrivateKey)
+    da := new(sm2.PrivateKey)
     da.PublicKey.Curve = curve
     da.D = new(big.Int).SetBytes(daBuf)
     da.PublicKey.X, da.PublicKey.Y = curve.ScalarBaseMult(daBuf)
 
-    db := new(PrivateKey)
+    db := new(sm2.PrivateKey)
     db.PublicKey.Curve = curve
     db.D = new(big.Int).SetBytes(dbBuf)
     db.PublicKey.X, db.PublicKey.Y = curve.ScalarBaseMult(dbBuf)
 
-    ra := new(PrivateKey)
+    ra := new(sm2.PrivateKey)
     ra.PublicKey.Curve = curve
     ra.D = new(big.Int).SetBytes(raBuf)
     ra.PublicKey.X, ra.PublicKey.Y = curve.ScalarBaseMult(raBuf)
 
-    rb := new(PrivateKey)
+    rb := new(sm2.PrivateKey)
     rb.PublicKey.Curve = curve
     rb.D = new(big.Int).SetBytes(rbBuf)
     rb.PublicKey.X, rb.PublicKey.Y = curve.ScalarBaseMult(rbBuf)
 
-    k1, Sb, S2, err := KeyExchangeB(16, ida, idb, db, &da.PublicKey, rb, &ra.PublicKey)
+    k1, Sb, S2, err := sm2.KeyExchangeB(16, ida, idb, db, &da.PublicKey, rb, &ra.PublicKey)
     if err != nil {
         t.Error(err)
     }
-    k2, S1, Sa, err := KeyExchangeA(16, ida, idb, da, &db.PublicKey, ra, &rb.PublicKey)
+    k2, S1, Sa, err := sm2.KeyExchangeA(16, ida, idb, da, &db.PublicKey, ra, &rb.PublicKey)
     if err != nil {
         t.Error(err)
     }
@@ -151,23 +156,23 @@ func TestKEB2(t *testing.T) {
 }
 
 func Test_Compress(t *testing.T) {
-    priv, err := GenerateKey(rand.Reader)
+    priv, err := sm2.GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
     }
 
     pub := &priv.PublicKey
 
-    p := Compress(pub)
+    p := sm2.Compress(pub)
 
-    newpub := Decompress(p)
+    newpub := sm2.Decompress(p)
     if !newpub.Equal(pub) {
         t.Errorf("Compress got %x", p)
     }
 }
 
 func Test_SignHex(t *testing.T) {
-    priv, err := GenerateKey(rand.Reader)
+    priv, err := sm2.GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
     }
@@ -188,7 +193,7 @@ func Test_SignHex(t *testing.T) {
 }
 
 func Test_Sign(t *testing.T) {
-    priv, err := GenerateKey(rand.Reader)
+    priv, err := sm2.GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
     }
@@ -205,5 +210,58 @@ func Test_Sign(t *testing.T) {
     veri := pub.Verify(msg, signed, nil)
     if !veri {
         t.Error("veri error")
+    }
+}
+
+func decodePEM(pubPEM string) *pem.Block {
+    block, _ := pem.Decode([]byte(pubPEM))
+    if block == nil {
+        panic("failed to parse PEM block containing the key")
+    }
+
+    return block
+}
+
+var testPrikey = `
+-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqBHM9VAYItBG0wawIBAQQgBh/5ZbHdkwXhwteN
+OYecASnP778U0BLZ4suYZf5XvIOhRANCAASQ2AGZRgNjUwkiujPI24Abec5HM1MK
+ghJ+FA8z/WrZyNjgBKEV1Fm7SiVfoIuaKIGHPFm1vbkKNCqpPijXWPcM
+-----END PRIVATE KEY-----
+`
+var testPubkey = `
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAEkNgBmUYDY1MJIrozyNuAG3nORzNT
+CoISfhQPM/1q2cjY4AShFdRZu0olX6CLmiiBhzxZtb25CjQqqT4o11j3DA==
+-----END PUBLIC KEY-----
+`
+
+func Test_Encrypt(t *testing.T) {
+    blockPri := decodePEM(testPrikey)
+    pri, err := sm2_key.ParsePrivateKey(blockPri.Bytes)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    blockPub := decodePEM(testPubkey)
+    pub, err := sm2_key.ParsePublicKey(blockPub.Bytes)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    plainText := "sm2-data"
+
+    ciphertext, err := sm2.Encrypt(rand.Reader, pub, []byte(plainText), sm2.C1C3C2)
+    if err != nil {
+        t.Fatalf("encrypt failed %v", err)
+    }
+
+    plaintext, err := pri.Decrypt(rand.Reader, ciphertext, sm2.EncrypterOpts{sm2.C1C3C2})
+    if err != nil {
+        t.Fatalf("decrypt failed %v", err)
+    }
+
+    if !reflect.DeepEqual(string(plaintext), plainText) {
+        t.Errorf("Decrypt() = %v, want %v", string(plaintext), plainText)
     }
 }

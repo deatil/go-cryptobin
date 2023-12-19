@@ -10,7 +10,7 @@ import (
     "github.com/pkg/errors"
 
     "github.com/deatil/go-cryptobin/hash/sm3"
-    "github.com/deatil/go-cryptobin/elliptic/sm9curve"
+    "github.com/deatil/go-cryptobin/gm/sm9/sm9curve"
 )
 
 type hashMode int

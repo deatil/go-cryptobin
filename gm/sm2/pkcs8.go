@@ -1,4 +1,4 @@
-package key
+package sm2
 
 import (
     "errors"
@@ -6,8 +6,6 @@ import (
     "encoding/asn1"
     "crypto/elliptic"
     "crypto/x509/pkix"
-
-    "github.com/tjfoc/gmsm/sm2"
 )
 
 var (
@@ -29,21 +27,30 @@ type pkixPublicKey struct {
     BitString asn1.BitString
 }
 
-func ParsePKCS8PrivateKey(der []byte) (*sm2.PrivateKey, error) {
+func ParsePrivateKey(der []byte) (*PrivateKey, error) {
     var privKey pkcs8
 
     if _, err := asn1.Unmarshal(der, &privKey); err != nil {
         return nil, err
     }
 
-    if !reflect.DeepEqual(privKey.Algo.Algorithm, oidSM2) {
-        return nil, errors.New("x509: not sm2 elliptic curve")
+    algoEq := privKey.Algo.Algorithm.Equal(oidSM2)
+    if !algoEq {
+        err := errors.New("ecdsa: unknown private key algorithm")
+        return nil, err
     }
 
-    return parseSM2PrivateKey(nil, privKey.PrivateKey)
+    bytes := privKey.Algo.Parameters.FullBytes
+
+    namedCurveOID := new(asn1.ObjectIdentifier)
+    if _, err := asn1.Unmarshal(bytes, namedCurveOID); err != nil {
+        namedCurveOID = nil
+    }
+
+    return parseSM2PrivateKey(namedCurveOID, privKey.PrivateKey)
 }
 
-func MarshalPKCS8PrivateKey(key *sm2.PrivateKey) ([]byte, error) {
+func MarshalPrivateKey(key *PrivateKey) ([]byte, error) {
     var r pkcs8
     var algo pkix.AlgorithmIdentifier
 
@@ -73,7 +80,7 @@ func MarshalPKCS8PrivateKey(key *sm2.PrivateKey) ([]byte, error) {
     return asn1.Marshal(r)
 }
 
-func ParsePublicKey(der []byte) (*sm2.PublicKey, error) {
+func ParsePublicKey(der []byte) (*PublicKey, error) {
     var pubkey pkixPublicKey
 
     if _, err := asn1.Unmarshal(der, &pubkey); err != nil {
@@ -84,11 +91,11 @@ func ParsePublicKey(der []byte) (*sm2.PublicKey, error) {
         return nil, errors.New("x509: not sm2 elliptic curve")
     }
 
-    curve := sm2.P256Sm2()
+    curve := P256Sm2()
 
     x, y := elliptic.Unmarshal(curve, pubkey.BitString.Bytes)
 
-    pub := sm2.PublicKey{
+    pub := PublicKey{
         Curve: curve,
         X:     x,
         Y:     y,
@@ -97,11 +104,11 @@ func ParsePublicKey(der []byte) (*sm2.PublicKey, error) {
     return &pub, nil
 }
 
-func MarshalPublicKey(key *sm2.PublicKey) ([]byte, error) {
+func MarshalPublicKey(key *PublicKey) ([]byte, error) {
     var r pkixPublicKey
     var algo pkix.AlgorithmIdentifier
 
-    if key.Curve.Params() != sm2.P256Sm2().Params() {
+    if key.Curve.Params() != P256Sm2().Params() {
         return nil, errors.New("x509: unsupported elliptic curve")
     }
 

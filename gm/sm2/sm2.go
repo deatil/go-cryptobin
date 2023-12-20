@@ -4,7 +4,6 @@ import (
     "io"
     "bytes"
     "errors"
-    "strings"
     "math/big"
     "crypto"
     "crypto/rand"
@@ -23,16 +22,13 @@ var defaultUid = []byte{
 
 var errZeroParam = errors.New("zero parameter")
 
-// 加密模式
+// 模式
 type Mode uint
 
 const (
     C1C3C2 Mode = 0 + iota
-    C1C2C3 = 1
+    C1C2C3
 )
-
-var one = new(big.Int).SetInt64(1)
-var two = new(big.Int).SetInt64(2)
 
 type sm2Signature struct {
     R, S *big.Int
@@ -87,10 +83,8 @@ func (pub *PublicKey) VerifyHex(msg []byte, sign []byte, opts crypto.SignerOpts)
         uid = opt.Uid
     }
 
-    signData := hex.EncodeToString(sign)
-
-    r, _ := new(big.Int).SetString(signData[:64], 16)
-    s, _ := new(big.Int).SetString(signData[64:], 16)
+    r := new(big.Int).SetBytes(sign[:32])
+    s := new(big.Int).SetBytes(sign[32:])
 
     return Sm2Verify(pub, msg, uid, r, s)
 }
@@ -160,12 +154,11 @@ func (priv *PrivateKey) SignHex(random io.Reader, msg []byte, opts crypto.Signer
         return nil, err
     }
 
-    rHex := hex.EncodeToString(r.Bytes())
-    sHex := hex.EncodeToString(s.Bytes())
+    sign := []byte{}
+    sign = append(sign, zeroPadding(r.Bytes(), 32)...)
+    sign = append(sign, zeroPadding(s.Bytes(), 32)...)
 
-    sign := hexPadding(rHex, 64) + hexPadding(sHex, 64)
-
-    return hex.DecodeString(sign)
+    return sign, nil
 }
 
 // crypto.Decrypter
@@ -186,6 +179,9 @@ func (priv *PrivateKey) DecryptAsn1(data []byte, opts crypto.DecrypterOpts) ([]b
 
     return DecryptAsn1(priv, data, mode)
 }
+
+var one = new(big.Int).SetInt64(1)
+var two = new(big.Int).SetInt64(2)
 
 func GenerateKey(random io.Reader) (*PrivateKey, error) {
     c := P256Sm2()
@@ -222,7 +218,7 @@ func NewPrivateKey(Dhex string) (*PrivateKey, error) {
     c := P256Sm2()
 
     d, err := hex.DecodeString(Dhex)
-    if err != nil{
+    if err != nil {
         return nil, err
     }
 
@@ -230,10 +226,9 @@ func NewPrivateKey(Dhex string) (*PrivateKey, error) {
 
     params := c.Params()
 
-    one := new(big.Int).SetInt64(1)
     n := new(big.Int).Sub(params.N, one)
-    if k.Cmp(n) >= 0{
-      return nil, errors.New("privateKey's D is overflow.")
+    if k.Cmp(n) >= 0 {
+        return nil, errors.New("privateKey's D is overflow.")
     }
 
     priv := new(PrivateKey)
@@ -252,7 +247,7 @@ func ToPrivateKey(key *PrivateKey) string {
 // 根据公钥16进制明文初始化公钥
 func NewPublicKey(Qhex string) (*PublicKey, error) {
     q, err := hex.DecodeString(Qhex)
-    if err!=nil{
+    if err != nil {
         return nil, err
     }
 
@@ -276,13 +271,9 @@ func NewPublicKey(Qhex string) (*PublicKey, error) {
 func ToPublicKey(key *PublicKey) string {
     x := key.X.Bytes()
     y := key.Y.Bytes()
-    if n := len(x); n < 32 {
-        x = append(zeroByteSlice()[:32-n], x...)
-    }
 
-    if n := len(y); n < 32 {
-        y = append(zeroByteSlice()[:32-n], y...)
-    }
+    x = zeroPadding(x, 32)
+    y = zeroPadding(y, 32)
 
     c := []byte{}
     c = append(c, x...)
@@ -295,6 +286,7 @@ func ToPublicKey(key *PublicKey) string {
 // sm2 密文结构: x + y + hash + CipherText
 func Encrypt(random io.Reader, pub *PublicKey, data []byte, mode Mode) ([]byte, error) {
     length := len(data)
+
     for {
         c := []byte{}
 
@@ -313,21 +305,10 @@ func Encrypt(random io.Reader, pub *PublicKey, data []byte, mode Mode) ([]byte, 
         x2Buf := x2.Bytes()
         y2Buf := y2.Bytes()
 
-        if n := len(x1Buf); n < 32 {
-            x1Buf = append(zeroByteSlice()[:32-n], x1Buf...)
-        }
-
-        if n := len(y1Buf); n < 32 {
-            y1Buf = append(zeroByteSlice()[:32-n], y1Buf...)
-        }
-
-        if n := len(x2Buf); n < 32 {
-            x2Buf = append(zeroByteSlice()[:32-n], x2Buf...)
-        }
-
-        if n := len(y2Buf); n < 32 {
-            y2Buf = append(zeroByteSlice()[:32-n], y2Buf...)
-        }
+        x1Buf = zeroPadding(x1Buf, 32)
+        y1Buf = zeroPadding(y1Buf, 32)
+        x2Buf = zeroPadding(x2Buf, 32)
+        y2Buf = zeroPadding(y2Buf, 32)
 
         c = append(c, x1Buf...) // x分量
         c = append(c, y1Buf...) // y分量
@@ -411,13 +392,8 @@ func Decrypt(priv *PrivateKey, data []byte, mode Mode) ([]byte, error) {
     x2Buf := x2.Bytes()
     y2Buf := y2.Bytes()
 
-    if n := len(x2Buf); n < 32 {
-        x2Buf = append(zeroByteSlice()[:32-n], x2Buf...)
-    }
-
-    if n := len(y2Buf); n < 32 {
-        y2Buf = append(zeroByteSlice()[:32-n], y2Buf...)
-    }
+    x2Buf = zeroPadding(x2Buf, 32)
+    y2Buf = zeroPadding(y2Buf, 32)
 
     c, ok := kdf(length, x2Buf, y2Buf)
     if !ok {
@@ -624,134 +600,14 @@ func ZA(pub *PublicKey, uid []byte) ([]byte, error) {
 
     xBuf := pub.X.Bytes()
     yBuf := pub.Y.Bytes()
-    if n := len(xBuf); n < 32 {
-        xBuf = append(zeroByteSlice()[:32-n], xBuf...)
-    }
 
-    if n := len(yBuf); n < 32 {
-        yBuf = append(zeroByteSlice()[:32-n], yBuf...)
-    }
+    xBuf = zeroPadding(xBuf, 32)
+    yBuf = zeroPadding(yBuf, 32)
 
     za.Write(xBuf)
     za.Write(yBuf)
 
     return za.Sum(nil)[:32], nil
-}
-
-type sm2ASN1 struct {
-    XCoordinate *big.Int
-    YCoordinate *big.Int
-    HASH        []byte
-    CipherText  []byte
-}
-
-// sm2 密文转 asn.1 编码格式
-// sm2 密文结构: x + y + hash + CipherText
-func ASN1Marshal(data []byte) ([]byte, error) {
-    data = data[1:]
-
-    x := new(big.Int).SetBytes(data[:32])
-    y := new(big.Int).SetBytes(data[32:64])
-
-    hash := data[64:96]
-    cipherText := data[96:]
-
-    return asn1.Marshal(sm2ASN1{x, y, hash, cipherText})
-}
-
-// sm2 密文 asn.1 编码格式转 C1|C3|C2 拼接格式
-func ASN1Unmarshal(b []byte) ([]byte, error) {
-    var data sm2ASN1
-    _, err := asn1.Unmarshal(b, &data)
-    if err != nil {
-        return nil, err
-    }
-
-    x := data.XCoordinate.Bytes()
-    y := data.YCoordinate.Bytes()
-    hash := data.HASH
-    if err != nil {
-        return nil, err
-    }
-
-    cipherText := data.CipherText
-    if err != nil {
-        return nil, err
-    }
-
-    if n := len(x); n < 32 {
-        x = append(zeroByteSlice()[:32-n], x...)
-    }
-
-    if n := len(y); n < 32 {
-        y = append(zeroByteSlice()[:32-n], y...)
-    }
-
-    c := []byte{}
-    c = append(c, x...)          // x分量
-    c = append(c, y...)          // y分
-    c = append(c, hash...)       // hash
-    c = append(c, cipherText...) // cipherText
-
-    return append([]byte{0x04}, c...), nil
-}
-
-type sm2C1C2C3ASN1 struct {
-    XCoordinate *big.Int
-    YCoordinate *big.Int
-    CipherText  []byte
-    HASH        []byte
-}
-
-// sm2 密文转 asn.1 编码格式
-// sm2 密文结构: x + y + hash + CipherText
-func ASN1MarshalC1C2C3(data []byte) ([]byte, error) {
-    data = data[1:]
-
-    x := new(big.Int).SetBytes(data[:32])
-    y := new(big.Int).SetBytes(data[32:64])
-
-    hash := data[64:96]
-    cipherText := data[96:]
-
-    return asn1.Marshal(sm2C1C2C3ASN1{x, y, cipherText, hash})
-}
-
-// sm2 密文 asn.1 编码格式转 C1|C2|C3 拼接格式
-func ASN1UnmarshalC1C2C3(b []byte) ([]byte, error) {
-    var data sm2C1C2C3ASN1
-    _, err := asn1.Unmarshal(b, &data)
-    if err != nil {
-        return nil, err
-    }
-
-    x := data.XCoordinate.Bytes()
-    y := data.YCoordinate.Bytes()
-    hash := data.HASH
-    if err != nil {
-        return nil, err
-    }
-
-    cipherText := data.CipherText
-    if err != nil {
-        return nil, err
-    }
-
-    if n := len(x); n < 32 {
-        x = append(zeroByteSlice()[:32-n], x...)
-    }
-
-    if n := len(y); n < 32 {
-        y = append(zeroByteSlice()[:32-n], y...)
-    }
-
-    c := []byte{}
-    c = append(c, x...)          // x分量
-    c = append(c, y...)          // y分
-    c = append(c, hash...)       // hash
-    c = append(c, cipherText...) // cipherText
-
-    return append([]byte{0x04}, c...), nil
 }
 
 func randFieldElement(c elliptic.Curve, random io.Reader) (k *big.Int, err error) {
@@ -781,23 +637,4 @@ func randFieldElement(c elliptic.Curve, random io.Reader) (k *big.Int, err error
 // through timing side-channels.
 func bigIntEqual(a, b *big.Int) bool {
     return subtle.ConstantTimeCompare(a.Bytes(), b.Bytes()) == 1
-}
-
-// hex padding
-func hexPadding(text string, size int) string {
-    if size < 1 {
-        return text
-    }
-
-    n := len(text)
-
-    if n == size {
-        return text
-    }
-
-    if n < size {
-        return strings.Repeat("0", size-n) + text
-    }
-
-    return text[n-size:]
 }

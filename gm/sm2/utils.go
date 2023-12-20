@@ -2,6 +2,7 @@ package sm2
 
 import (
     "io"
+    "bytes"
     "math/big"
     "encoding/asn1"
     "encoding/binary"
@@ -27,6 +28,7 @@ func Decompress(a []byte) *PublicKey {
 
     y2 := sm2P256ToBig(&xx3)
     y := new(big.Int).ModSqrt(y2, sm2P256.P)
+
     if getLastBit(y)!= uint(a[0]) {
         y.Sub(sm2P256.P, y)
     }
@@ -44,10 +46,8 @@ func Compress(a *PublicKey) []byte {
     yp := getLastBit(a.Y)
 
     buf = append(buf, a.X.Bytes()...)
-    if n := len(a.X.Bytes()); n < 32 {
-        buf = append(zeroByteSlice()[:(32-n)], buf...)
-    }
 
+    buf = zeroPadding(buf, 32)
     buf = append([]byte{byte(yp)}, buf...)
 
     return buf
@@ -70,6 +70,20 @@ func SignDataToSignDigit(sign []byte) (*big.Int, *big.Int, error) {
     }
     return sm2Sign.R, sm2Sign.S, nil
 }
+
+type zr struct {
+    io.Reader
+}
+
+func (z *zr) Read(dst []byte) (n int, err error) {
+    for i := range dst {
+        dst[i] = 0
+    }
+
+    return len(dst), nil
+}
+
+var zeroReader = &zr{}
 
 func kdf(length int, x ...[]byte) ([]byte, bool) {
     var c []byte
@@ -111,30 +125,117 @@ func intToBytes(x int) []byte {
     return buf
 }
 
-// 32byte
-func zeroByteSlice() []byte {
-    return []byte{
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0,
+// zero padding
+func zeroPadding(text []byte, size int) []byte {
+    if size < 1 {
+        return text
     }
-}
 
-type zr struct {
-    io.Reader
-}
+    n := len(text)
 
-func (z *zr) Read(dst []byte) (n int, err error) {
-    for i := range dst {
-        dst[i] = 0
+    if n == size {
+        return text
     }
-    return len(dst), nil
+
+    if n < size {
+        r := bytes.Repeat([]byte("0"), size - n)
+        return append(r, text...)
+    }
+
+    return text[n-size:]
 }
 
-var zeroReader = &zr{}
+type sm2ASN1 struct {
+    XCoordinate *big.Int
+    YCoordinate *big.Int
+    HASH        []byte
+    CipherText  []byte
+}
+
+// sm2 密文转 asn.1 编码格式
+// sm2 密文结构: x + y + hash + CipherText
+func ASN1Marshal(data []byte) ([]byte, error) {
+    data = data[1:]
+
+    x := new(big.Int).SetBytes(data[:32])
+    y := new(big.Int).SetBytes(data[32:64])
+
+    hash       := data[64:96]
+    cipherText := data[96:]
+
+    return asn1.Marshal(sm2ASN1{x, y, hash, cipherText})
+}
+
+// sm2 密文 asn.1 编码格式转 C1|C3|C2 拼接格式
+func ASN1Unmarshal(b []byte) ([]byte, error) {
+    var data sm2ASN1
+    _, err := asn1.Unmarshal(b, &data)
+    if err != nil {
+        return nil, err
+    }
+
+    x := data.XCoordinate.Bytes()
+    y := data.YCoordinate.Bytes()
+
+    hash       := data.HASH
+    cipherText := data.CipherText
+
+    x = zeroPadding(x, 32)
+    y = zeroPadding(y, 32)
+
+    c := []byte{}
+    c = append(c, x...)          // x分量
+    c = append(c, y...)          // y分
+    c = append(c, hash...)       // hash
+    c = append(c, cipherText...) // cipherText
+
+    return append([]byte{0x04}, c...), nil
+}
+
+type sm2C1C2C3ASN1 struct {
+    XCoordinate *big.Int
+    YCoordinate *big.Int
+    CipherText  []byte
+    HASH        []byte
+}
+
+// sm2 密文转 asn.1 编码格式
+// sm2 密文结构: x + y + hash + CipherText
+func ASN1MarshalC1C2C3(data []byte) ([]byte, error) {
+    data = data[1:]
+
+    x := new(big.Int).SetBytes(data[:32])
+    y := new(big.Int).SetBytes(data[32:64])
+
+    hash       := data[64:96]
+    cipherText := data[96:]
+
+    return asn1.Marshal(sm2C1C2C3ASN1{x, y, cipherText, hash})
+}
+
+// sm2 密文 asn.1 编码格式转 C1|C2|C3 拼接格式
+func ASN1UnmarshalC1C2C3(b []byte) ([]byte, error) {
+    var data sm2C1C2C3ASN1
+    _, err := asn1.Unmarshal(b, &data)
+    if err != nil {
+        return nil, err
+    }
+
+    x := data.XCoordinate.Bytes()
+    y := data.YCoordinate.Bytes()
+
+    hash       := data.HASH
+    cipherText := data.CipherText
+
+    x = zeroPadding(x, 32)
+    y = zeroPadding(y, 32)
+
+    c := []byte{}
+    c = append(c, x...)          // x分量
+    c = append(c, y...)          // y分
+    c = append(c, hash...)       // hash
+    c = append(c, cipherText...) // cipherText
+
+    return append([]byte{0x04}, c...), nil
+}
 

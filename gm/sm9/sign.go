@@ -169,29 +169,31 @@ func NewSignPrivateKey(bytes []byte) (uke *SignPrivateKey, err error) {
         return nil, err
     }
 
+    if len(pub) == 0 {
+        return nil, errors.New("key need publickey bytes")
+    }
+
     uke = new(SignPrivateKey)
     uke.Sk = g1
 
-    if len(pub) > 0 {
-        g2 := new(sm9curve.G2)
-        _, err = g2.Unmarshal(pub)
-        if err != nil {
-            return nil, err
-        }
-
-        uke.Mpk = g2
+    g2 := new(sm9curve.G2)
+    _, err = g2.Unmarshal(pub)
+    if err != nil {
+        return nil, err
     }
+
+    uke.Mpk = g2
 
     return
 }
 
 // 输出明文
 func ToSignPrivateKey(pri *SignPrivateKey) []byte {
-    var pub []byte
-
-    if pri.Mpk != nil {
-        pub = pri.Mpk.Marshal()
+    if pri.Mpk == nil {
+        return nil
     }
+
+    pub := pri.Mpk.Marshal()
 
     return append(pri.Sk.Marshal(), pub...)
 }

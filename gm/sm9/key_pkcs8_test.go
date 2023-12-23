@@ -415,6 +415,34 @@ func Test_SignKey_Check(t *testing.T) {
     assertNotEmpty(mpubkey, "testSignPub")
 }
 
+func Test_KeySign11(t *testing.T) {
+    var hid byte = 1
+    var uid = []byte("Alice")
+
+    msg := []byte("message")
+
+    prikeyDer := decodePEM(testSignPriv)
+    prikey, _ := ParsePrivateKey(prikeyDer.Bytes)
+
+    uk := prikey.(*SignPrivateKey)
+
+    pubkeyDer := decodePEM(testSignPub)
+    pubkey, _ := ParsePublicKey(pubkeyDer.Bytes)
+
+    mpk := pubkey.(*SignMasterPublicKey)
+
+    h, s, err := Sign(rand.Reader, uk, msg)
+    if err != nil {
+        t.Errorf("sm9 sign failed:%s", err)
+        return
+    }
+
+    if !Verify(mpk, uid, hid, msg, h, s) {
+        t.Error("sm9 sig failed")
+        return
+    }
+}
+
 // =======
 
 var testEncryptMPriv = `
@@ -463,28 +491,28 @@ func Test_EncryptKey_Check(t *testing.T) {
 // =======
 
 var testSignMPriv2 = `
------BEGIN PRIVATE KEY-----
-MIHHAgEAMBUGCCqBHM9VAYIuBgkqgRzPVQGCLgEEgaowgacCIE+dSqQnFF1yDfPf
-tJZaq/cAtssUxVDYwrgniI4k0/TiA4GCAASABzLrvxJ/yemVyF6nwvBTOVmHI8xb
-oPz1fv1BA2CwGIGF+x73EvSFpZfSUIqcv5ydlhiYgVlLjiO7M9azMAj1ElXRZaRp
-Q/SbEk+ccW0nvxvdtviZTQ+FbGPx2GLKWORXlzoqynyrPXNcwDXk9UEaoGfd+47t
-mmwaXLVrNUZO8Q==
------END PRIVATE KEY-----
+-----BEGIN masterKey PRIVATE KEY-----
+MIHHAgEAMBUGCCqBHM9VAYIuBgkqgRzPVQGCLgEEgaowgacCIBi/WYY3tscBJIAl
+YocZGHNC3fnI2yLT/1zTF239Jkk+A4GCAARM5tyRCoC+sTyctT7bmBu1xECKVifx
+vvx3yDiK5jp23lenV1iMCEIg9PDxmdoN7kHD0j9c2n4zSLx8hAbI4y6uGwOJ+Ylr
+M/zFtPyx18IWwCNptlxK9RI5NcA5RGmda6JJNtviTaGeylKWSVp71kzLV9DCbhGN
+1h05Em19ScVWnw==
+-----END masterKey PRIVATE KEY-----
 `
 var testSignPriv2 = `
------BEGIN PRIVATE KEY-----
-MIHhAgEAMA0GCSqBHM9VAYIuAQUABIHMMIHJA0IABI2cq7ovUOczf6DHunE8wYkR
-rZTGsKnUCFtNRWwKsXluPg+5tmrTe5HMT1hxXSS5/O16AsYypyyhu4PX6DnOaJID
-gYIABIAHMuu/En/J6ZXIXqfC8FM5WYcjzFug/PV+/UEDYLAYgYX7HvcS9IWll9JQ
-ipy/nJ2WGJiBWUuOI7sz1rMwCPUSVdFlpGlD9JsST5xxbSe/G922+JlND4VsY/HY
-YspY5FeXOirKfKs9c1zANeT1QRqgZ937ju2abBpctWs1Rk7x
------END PRIVATE KEY-----
+-----BEGIN userKey PRIVATE KEY-----
+MIHhAgEAMA0GCSqBHM9VAYIuAQUABIHMMIHJA0IABAB2IU1ldD2E1lbElxFGsgcO
+rPLg/nKjwy9byLSqO4m2ogzt4mvmrkrI+Rd2tVm/bgecB7s3PXk6LJLFZpY2uUkD
+gYIABEzm3JEKgL6xPJy1PtuYG7XEQIpWJ/G+/HfIOIrmOnbeV6dXWIwIQiD08PGZ
+2g3uQcPSP1zafjNIvHyEBsjjLq4bA4n5iWsz/MW0/LHXwhbAI2m2XEr1Ejk1wDlE
+aZ1rokk22+JNoZ7KUpZJWnvWTMtX0MJuEY3WHTkSbX1JxVaf
+-----END userKey PRIVATE KEY-----
 `
 var testSignPub2 = `
 -----BEGIN SM9 SIGN MASTER PUBLIC KEY-----
-MIGFA4GCAASABzLrvxJ/yemVyF6nwvBTOVmHI8xboPz1fv1BA2CwGIGF+x73EvSF
-pZfSUIqcv5ydlhiYgVlLjiO7M9azMAj1ElXRZaRpQ/SbEk+ccW0nvxvdtviZTQ+F
-bGPx2GLKWORXlzoqynyrPXNcwDXk9UEaoGfd+47tmmwaXLVrNUZO8Q==
+MIGFA4GCAARM5tyRCoC+sTyctT7bmBu1xECKVifxvvx3yDiK5jp23lenV1iMCEIg
+9PDxmdoN7kHD0j9c2n4zSLx8hAbI4y6uGwOJ+YlrM/zFtPyx18IWwCNptlxK9RI5
+NcA5RGmda6JJNtviTaGeylKWSVp71kzLV9DCbhGN1h05Em19ScVWnw==
 -----END SM9 SIGN MASTER PUBLIC KEY-----
 `
 
@@ -528,7 +556,7 @@ func Test_SignKey_Check2(t *testing.T) {
 
 func test_KeySign2(t *testing.T) {
     var hid byte = 1
-    var uid = []byte("Alice")
+    var uid = []byte("testu")
 
     msg := []byte("message")
 

@@ -379,6 +379,7 @@ func (e *G2) Unmarshal(m []byte) ([]byte, error) {
     e.p.x.y.Unmarshal(m[1+numBytes:])
     e.p.y.x.Unmarshal(m[1+2*numBytes:])
     e.p.y.y.Unmarshal(m[1+3*numBytes:])
+
     montEncode(&e.p.x.x, &e.p.x.x)
     montEncode(&e.p.x.y, &e.p.x.y)
     montEncode(&e.p.y.x, &e.p.y.x)

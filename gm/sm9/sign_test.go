@@ -135,7 +135,7 @@ func Test_HashH1(t *testing.T) {
     n := sm9curve.Order
 
     expected := "2acc468c3926b0bdb2767e99ff26e084de9ced8dbc7d5fbf418027b667862fab"
-    h := uhash([]byte{0x41, 0x6c, 0x69, 0x63, 0x65, 0x01}, n, H1)
+    h := hash([]byte{0x41, 0x6c, 0x69, 0x63, 0x65, 0x01}, n, H1)
 
     res := h.Bytes()
 
@@ -155,7 +155,7 @@ func Test_HashH2(t *testing.T) {
         t.Fatal(err)
     }
 
-    h := uhash(z, n, H2)
+    h := hash(z, n, H2)
 
     res := h.Bytes()
 

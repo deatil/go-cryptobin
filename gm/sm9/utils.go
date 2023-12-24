@@ -47,6 +47,40 @@ func hash(z []byte, n *big.Int, h hashMode) *big.Int {
     return bn
 }
 
+// hash implements H1(Z,n) or H2(Z,n) in sm9 algorithm.
+func uhash(z []byte, n *big.Int, h hashMode) *big.Int {
+    var ha [64]byte
+    var countBytes [4]byte
+    var ct uint32 = 1
+
+    md := sm3.New()
+
+    binary.BigEndian.PutUint32(countBytes[:], ct)
+    md.Write([]byte{byte(h)})
+    md.Write(z)
+    md.Write(countBytes[:])
+    copy(ha[:], md.Sum(nil))
+
+    md.Reset()
+    ct++
+
+    binary.BigEndian.PutUint32(countBytes[:], ct)
+    md.Write([]byte{byte(h)})
+    md.Write(z)
+    md.Write(countBytes[:])
+    copy(ha[sm3.Size:], md.Sum(nil))
+
+    bn := new(big.Int).SetBytes(ha[:40])
+    one := big.NewInt(1)
+
+    nMinus1 := new(big.Int).Sub(n, one)
+
+    bn.Mod(bn, nMinus1)
+    bn.Add(bn, one)
+
+    return bn
+}
+
 // generate rand numbers in [1,n-1].
 func randFieldElement(rand io.Reader, n *big.Int) (k *big.Int, err error) {
     one := big.NewInt(1)

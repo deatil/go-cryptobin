@@ -48,6 +48,12 @@ func Test_SignPrivateKey(t *testing.T) {
         t.Fatal(err)
     }
 
+    /*
+    if !mprikey2.(*SignMasterPrivateKey).Equal(mprikey) {
+        t.Error("m prikey make error")
+    }
+    */
+
     assertEqual(mprikey2.(*SignMasterPrivateKey).D, mprikey.D, "mprikey")
     // assertEqual(mprikey2.(*SignMasterPrivateKey).SignMasterPublicKey, mprikey.SignMasterPublicKey, "mprikey")
 
@@ -418,7 +424,7 @@ func Test_SignKey_Check(t *testing.T) {
     assertNotEmpty(mpubkey, "testSignPub")
 }
 
-func Test_KeySign11(t *testing.T) {
+func test_KeySign11(t *testing.T) {
     var hid byte = 1
     var uid = []byte("Alice")
 
@@ -450,24 +456,24 @@ func Test_KeySign11(t *testing.T) {
 
 var testEncryptMPriv = `
 -----BEGIN SM9 ENC MASTER PRIVATE KEY-----
-MIGFAgEAMBUGCCqBHM9VAYIuBgkqgRzPVQGCLgMEaTBnAiEAoWPTk9AwPEYbWvjs
-k+ivG7nzJte256RJioDznqYyJZMDQgAERN3hxGNZNV2DtxJI6mY7s58FZejZZbgV
-b4tCFRaLb5tCnXbWmjS3kxHrZiFAAJLlKD5DLUPdCfe8AjKj18iVDg==
+MIGEAgEAMBUGCCqBHM9VAYIuBgkqgRzPVQGCLgMEaDBmAiBtTWzPz7ihVUzZQmZR
+vopFejo9z97dP0Ekemaj0Go/nwNCAASwuGdlWcAXSiSCUAWGorrfg3c2uOkAJBT7
+usXXIKsTU2Exj+iq8P2vvZD4ZvRs4VugzIITJ35MuVkj4D+r8lj4
 -----END SM9 ENC MASTER PRIVATE KEY-----
 `
 var testEncryptPriv = `
 -----BEGIN SM9 ENC PRIVATE KEY-----
-MIHhAgEAMA0GCSqBHM9VAYIuAwUABIHMMIHJA4GCAAQccF3iDRg2oHMVOyd3Z4Z5
-HYL6RZ1dDq9aJYkPcmb4cAYMcDxFGSJlRo8AjPwKlnqSmnVj3UK1OXrhLRSuMT2h
-VK8gODBfeIvMg7V9KaocSiY5b4rhA6tYUOat7Ec8LTZ9QvNqqYczcb+3B61ZW5yP
-5+U2AtKpV1fSg3rFvbOUwgNCAARE3eHEY1k1XYO3EkjqZjuznwVl6NlluBVvi0IV
-Fotvm0KddtaaNLeTEetmIUAAkuUoPkMtQ90J97wCMqPXyJUO
+MIHhAgEAMA0GCSqBHM9VAYIuAwUABIHMMIHJA4GCAASafuG584pfKE0K5sDXx52q
+X0oZpzoMBxclSlE5lUy4V49tbssjYQ4rkdzIJWkkEeDWG52lpk8etLPRR5UUDhQB
+U2pj2tfLnK5yqGKjJnkz6obwXDD+/PQZiyE2TM+NwFBFgQRKKG5adOsegWBmsd0x
+MGuL6mSwILdI2P+6RSBWqANCAASwuGdlWcAXSiSCUAWGorrfg3c2uOkAJBT7usXX
+IKsTU2Exj+iq8P2vvZD4ZvRs4VugzIITJ35MuVkj4D+r8lj4
 -----END SM9 ENC PRIVATE KEY-----
 `
 var testEncryptPub = `
 -----BEGIN SM9 ENC MASTER PUBLIC KEY-----
-MF4wFQYIKoEcz1UBgi4GCSqBHM9VAYIuAwNFAANCAARE3eHEY1k1XYO3EkjqZjuz
-nwVl6NlluBVvi0IVFotvm0KddtaaNLeTEetmIUAAkuUoPkMtQ90J97wCMqPXyJUO
+MF4wFQYIKoEcz1UBgi4GCSqBHM9VAYIuAwNFAANCAASwuGdlWcAXSiSCUAWGorrf
+g3c2uOkAJBT7usXXIKsTU2Exj+iq8P2vvZD4ZvRs4VugzIITJ35MuVkj4D+r8lj4
 -----END SM9 ENC MASTER PUBLIC KEY-----
 `
 
@@ -489,6 +495,40 @@ func Test_EncryptKey_Check(t *testing.T) {
     mpubkey, err := ParsePublicKey(pubDer.Bytes)
     assertError(err, "testEncryptPub")
     assertNotEmpty(mpubkey, "testEncryptPub")
+}
+
+func Test_PemKeyEncrypt(t *testing.T) {
+    var hid byte = 1
+    var uid = []byte("Alice")
+
+    msg := []byte("message")
+
+    prikeyDer := decodePEM(testEncryptPriv)
+    prikey, _ := ParsePrivateKey(prikeyDer.Bytes)
+
+    uk := prikey.(*EncryptPrivateKey)
+
+    pubkeyDer := decodePEM(testEncryptPub)
+    pubkey, _ := ParsePublicKey(pubkeyDer.Bytes)
+
+    mpk := pubkey.(*EncryptMasterPublicKey)
+
+    en, err := Encrypt(rand.Reader, mpk, uid, hid, msg, nil)
+    if err != nil {
+        t.Errorf("sm9 Encrypt failed:%s", err)
+        return
+    }
+
+    de, err := Decrypt(uk, uid, en, nil)
+    if err != nil {
+        t.Error("sm9 Decrypt failed")
+        return
+    }
+
+    if string(msg) != string(de) {
+        t.Error("sm9 Decrypt Check failed")
+        return
+    }
 }
 
 // =======
@@ -613,7 +653,7 @@ func Test_KeySign22(t *testing.T) {
     }
 }
 
-func test_SignKey_Check3(t *testing.T) {
+func Test_SignKey_Check3(t *testing.T) {
     uid := []byte("testu")
     hid := byte(0x01)
 
@@ -635,3 +675,230 @@ func test_SignKey_Check3(t *testing.T) {
         t.Error("check fail")
     }
 }
+
+func Test_PemKeySignWithKey(t *testing.T) {
+    var hid byte = 1
+    var uid = []byte("testu")
+
+    msg := []byte("message")
+
+    prikeyDer := decodePEM(testSignPriv2)
+    prikey, _ := ParsePrivateKey(prikeyDer.Bytes)
+
+    uk := prikey.(*SignPrivateKey)
+
+    pubkeyDer := decodePEM(testSignPub2)
+    pubkeyBytes := testParsePub(pubkeyDer.Bytes)
+    mpk, _ := NewSignMasterPublicKey(pubkeyBytes)
+
+    sig, err := uk.Sign(rand.Reader, msg)
+    if err != nil {
+        t.Errorf("sm9 sign failed:%s", err)
+        return
+    }
+
+    if !mpk.Verify(uid, hid, msg, sig) {
+        t.Error("sm9 sig failed")
+        return
+    }
+}
+
+// =======
+
+var testEncryptMPriv2 = `
+-----BEGIN SM9 ENC MASTER PRIVATE KEY-----
+MIGFAgEAMBUGCCqBHM9VAYIuBgkqgRzPVQGCLgMEaTBnAiEAir3bj9m5Nj8bLlNh
+ag1CvlZz/W8mIh7Xx0DBEBSdZiADQgAEBKYwj40Eb6ig0GmLLCM0mOkTm+JvWp4E
+eQIjwxMO2BFnAGHTY4qDKmZM/VAqRR5o6vVtXlZ3sKe7WU5rw4IcRA==
+-----END SM9 ENC MASTER PRIVATE KEY-----
+`
+var testEncryptPriv2 = `
+-----BEGIN SM9 ENC PRIVATE KEY-----
+MIHhAgEAMA0GCSqBHM9VAYIuAwUABIHMMIHJA4GCAASbw8MdJY3bmIaNwtzZ52GA
+H/op1Y9pfIYxb2mJLLvBd6zpRkN0NtrO3QQ+piiD4zEHOB7ovqtaZ6BZ9GDQdLay
+TtW3uF0vfzTE/0YOLsTkUJGYvAYUC8UgC7oEdnn5tVYzG80KU5ReWed3LxUJewe9
+3hDoNImjex1nRtaHHCfBJQNCAAQEpjCPjQRvqKDQaYssIzSY6ROb4m9angR5AiPD
+Ew7YEWcAYdNjioMqZkz9UCpFHmjq9W1eVnewp7tZTmvDghxE
+-----END SM9 ENC PRIVATE KEY-----
+`
+var testEncryptPub2 = `
+-----BEGIN SM9 ENC MASTER PUBLIC KEY-----
+MEQDQgAEBKYwj40Eb6ig0GmLLCM0mOkTm+JvWp4EeQIjwxMO2BFnAGHTY4qDKmZM
+/VAqRR5o6vVtXlZ3sKe7WU5rw4IcRA==
+-----END SM9 ENC MASTER PUBLIC KEY-----
+`
+
+func Test_EncryptKey_Check2(t *testing.T) {
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    mprikeyDer := decodePEM(testEncryptMPriv2)
+    mprikey, err := ParsePrivateKey(mprikeyDer.Bytes)
+    assertError(err, "testEncryptMPriv2")
+    assertNotEmpty(mprikey, "testEncryptMPriv2")
+
+    prikeyDer := decodePEM(testEncryptPriv2)
+    prikey, err := ParsePrivateKey(prikeyDer.Bytes)
+    assertError(err, "testEncryptPriv2")
+    assertNotEmpty(prikey, "testEncryptPriv2")
+
+    pubkeyDer := decodePEM(testEncryptPub2)
+    pubkeyBytes := testParsePub(pubkeyDer.Bytes)
+
+    pubkey, err := NewEncryptMasterPublicKey(pubkeyBytes)
+    assertNotEmpty(pubkey, "testEncryptPub2")
+}
+
+func Test_PemKeyEncrypt2(t *testing.T) {
+    uid := []byte("testu")
+    hid := byte(0x01)
+
+    msg := []byte("message")
+
+    prikeyDer := decodePEM(testEncryptPriv2)
+    prikey, _ := ParsePrivateKey(prikeyDer.Bytes)
+
+    uk := prikey.(*EncryptPrivateKey)
+
+    pubkeyDer := decodePEM(testEncryptPub2)
+    pubkeyBytes := testParsePub(pubkeyDer.Bytes)
+
+    mpk, err := NewEncryptMasterPublicKey(pubkeyBytes)
+    if err != nil {
+        t.Errorf("sm9 NewEncryptMasterPublicKey failed:%s", err)
+        return
+    }
+
+    en, err := Encrypt(rand.Reader, mpk, uid, hid, msg, nil)
+    if err != nil {
+        t.Errorf("sm9 Encrypt failed:%s", err)
+        return
+    }
+
+    de, err := Decrypt(uk, uid, en, nil)
+    if err != nil {
+        t.Error("sm9 Decrypt failed")
+        return
+    }
+
+    if string(msg) != string(de) {
+        t.Error("sm9 Decrypt Check failed")
+        return
+    }
+}
+
+func Test_PemKeyEncrypt_ASN12(t *testing.T) {
+    uid := []byte("testu")
+    hid := byte(0x01)
+
+    msg := []byte("message")
+
+    prikeyDer := decodePEM(testEncryptPriv2)
+    prikey, _ := ParsePrivateKey(prikeyDer.Bytes)
+
+    uk := prikey.(*EncryptPrivateKey)
+
+    pubkeyDer := decodePEM(testEncryptPub2)
+    pubkeyBytes := testParsePub(pubkeyDer.Bytes)
+
+    mpk, err := NewEncryptMasterPublicKey(pubkeyBytes)
+    if err != nil {
+        t.Errorf("sm9 NewEncryptMasterPublicKey failed:%s", err)
+        return
+    }
+
+    en, err := EncryptASN1(rand.Reader, mpk, uid, hid, msg, nil)
+    if err != nil {
+        t.Errorf("sm9 EncryptASN1 failed:%s", err)
+        return
+    }
+
+    // t.Errorf("%x", en)
+
+    de, err := DecryptASN1(uk, uid, en, nil)
+    if err != nil {
+        t.Error("sm9 DecryptASN1 failed")
+        return
+    }
+
+    if string(msg) != string(de) {
+        t.Error("sm9 DecryptASN1 Check failed")
+        return
+    }
+}
+
+func Test_EncryptKey_Check3(t *testing.T) {
+    uid := []byte("testu")
+
+    msg := []byte("message")
+
+    en := "30818b020102034200047fd55a36613bf4acd2144a33ff169f923fb1b258efe53a3466d73ce93d0b65d0a7f416ac7b5ac1ea4b1e288f1abcc0ced6fb08c5e27641cf6e9b3d3012c5c60f042044245fdf01c40a4dee956af78a813428dcfc22b762558905e3c03d3f052d4e1a042021347c448d38ef20bbda3e1ba3d781b1cef92930a07d1b3a939a761c36244aef"
+
+    enBytes, err := hex.DecodeString(en)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    prikeyDer := decodePEM(testEncryptPriv2)
+    prikey, _ := ParsePrivateKey(prikeyDer.Bytes)
+
+    uk := prikey.(*EncryptPrivateKey)
+
+    de, err := DecryptASN1(uk, uid, enBytes, nil)
+    if err != nil {
+        t.Error("sm9 DecryptASN1 2 failed。" + err.Error())
+        return
+    }
+
+    if string(msg) != string(de) {
+        t.Error("sm9 DecryptASN1 2 Check failed")
+        return
+    }
+}
+
+func Test_PemKeyEncrypt_List(t *testing.T) {
+    test_PemKeyEncrypt_List(t, SM4ECBEncrypt)
+    test_PemKeyEncrypt_List(t, SM4CBCEncrypt)
+    test_PemKeyEncrypt_List(t, SM4CFBEncrypt)
+    test_PemKeyEncrypt_List(t, SM4OFBEncrypt)
+    test_PemKeyEncrypt_List(t, XorEncrypt)
+}
+
+func test_PemKeyEncrypt_List(t *testing.T, enc IEncrypt) {
+    uid := []byte("testu")
+    hid := byte(0x01)
+
+    msg := []byte("message")
+
+    prikeyDer := decodePEM(testEncryptPriv2)
+    prikey, _ := ParsePrivateKey(prikeyDer.Bytes)
+
+    uk := prikey.(*EncryptPrivateKey)
+
+    pubkeyDer := decodePEM(testEncryptPub2)
+    pubkeyBytes := testParsePub(pubkeyDer.Bytes)
+
+    mpk, err := NewEncryptMasterPublicKey(pubkeyBytes)
+    if err != nil {
+        t.Errorf("sm9 NewEncryptMasterPublicKey failed:%s", err)
+        return
+    }
+
+    en, err := mpk.Encrypt(rand.Reader, uid, hid, msg, enc)
+    if err != nil {
+        t.Errorf("sm9 Encrypt failed:%s", err)
+        return
+    }
+
+    de, err := uk.Decrypt(uid, en)
+    if err != nil {
+        t.Error("sm9 Decrypt failed")
+        return
+    }
+
+    if string(msg) != string(de) {
+        t.Error("sm9 Decrypt Check failed")
+        return
+    }
+}
+

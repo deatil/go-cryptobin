@@ -4,6 +4,7 @@ import (
     "io"
     "fmt"
     "testing"
+    "crypto/hmac"
 )
 
 func Test_Hash(t *testing.T) {
@@ -90,5 +91,20 @@ func Test_MarshalBinary(t *testing.T) {
 
     if string(newdst) != string(dst) {
         t.Error("Hash MarshalBinary error")
+    }
+}
+
+func Test_HmacSM3(t *testing.T) {
+    key := []byte("1234567812345678")
+    msg := []byte("abc")
+
+    check := "0a69401a75c5d471f5166465eec89e6a65198ae885c1fdc061556254d91c1080"
+
+    hash := hmac.New(New, key)
+    hash.Write(msg)
+
+    s := fmt.Sprintf("%x", hash.Sum(nil))
+    if s != check {
+        t.Errorf("error, got %s want %s", s, check)
     }
 }

@@ -147,8 +147,31 @@ func (priv *EncryptMasterPrivateKey) Public() crypto.PublicKey {
     return priv.PublicKey()
 }
 
-func (priv *EncryptMasterPrivateKey) GenerateUserKey(uid []byte, hid byte) (*EncryptPrivateKey, error) {
-    return GenerateEncryptPrivateKey(priv, uid, hid)
+// generate user's secret key.
+func (priv *EncryptMasterPrivateKey) GenerateUserKey(id []byte, hid byte) (uk *EncryptPrivateKey, err error) {
+    id = append(id, hid)
+
+    n := sm9curve.Order
+
+    t1 := hash(id, n, H1)
+    t1.Add(t1, priv.D)
+
+    // if t1 = 0, we need to regenerate the master key.
+    if t1.BitLen() == 0 || t1.Cmp(n) == 0 {
+        return nil, errors.New("need to regen MasterPrivateKey!")
+    }
+
+    t1.ModInverse(t1, n)
+
+    // t2 = s*t1^-1
+    t2 := new(big.Int).Mul(priv.D, t1)
+
+    uk = new(EncryptPrivateKey)
+
+    uk.Sk, err = new(sm9curve.G2).ScalarBaseMult(sm9curve.NormalizeScalar(t2.Bytes()))
+    uk.Mpk = priv.Mpk
+
+    return uk, nil
 }
 
 func (priv *EncryptMasterPrivateKey) Marshal() []byte {
@@ -227,7 +250,7 @@ func (priv *EncryptPrivateKey) Unmarshal(bytes []byte) (err error) {
 }
 
 // generate matser's secret encrypt key.
-func GenerateEncryptMasterPrivateKey(rand io.Reader) (mk *EncryptMasterPrivateKey, err error) {
+func GenerateEncryptMasterKey(rand io.Reader) (mk *EncryptMasterPrivateKey, err error) {
     k, err := randFieldElement(rand, sm9curve.Order)
     if err != nil {
         return nil, errors.New("gen rand num err:" + err.Error())
@@ -244,30 +267,8 @@ func GenerateEncryptMasterPrivateKey(rand io.Reader) (mk *EncryptMasterPrivateKe
 }
 
 // generate user's secret encrypt key.
-func GenerateEncryptPrivateKey(mk *EncryptMasterPrivateKey, id []byte, hid byte) (uk *EncryptPrivateKey, err error) {
-    id = append(id, hid)
-
-    n := sm9curve.Order
-
-    t1 := hash(id, n, H1)
-    t1.Add(t1, mk.D)
-
-    // if t1 = 0, we need to regenerate the master key.
-    if t1.BitLen() == 0 || t1.Cmp(n) == 0 {
-        return nil, errors.New("need to regen mk!")
-    }
-
-    t1.ModInverse(t1, n)
-
-    // t2 = s*t1^-1
-    t2 := new(big.Int).Mul(mk.D, t1)
-
-    uk = new(EncryptPrivateKey)
-
-    uk.Sk, err = new(sm9curve.G2).ScalarBaseMult(sm9curve.NormalizeScalar(t2.Bytes()))
-    uk.Mpk = mk.Mpk
-
-    return
+func GenerateEncryptUserKey(priv *EncryptMasterPrivateKey, id []byte, hid byte) (*EncryptPrivateKey, error) {
+    return priv.GenerateUserKey(id, hid)
 }
 
 // 解析加密主公钥明文

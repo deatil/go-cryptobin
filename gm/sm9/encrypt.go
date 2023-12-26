@@ -43,8 +43,8 @@ type IHash interface {
     // Size
     Size() int
 
-    // Hash
-    Hash(c, k []byte) []byte
+    // Mac
+    Mac(k, c []byte) []byte
 }
 
 type EncryptMasterPublicKey struct {
@@ -430,7 +430,7 @@ func encrypt(rand io.Reader, pub *EncryptMasterPublicKey, uid []byte, hid byte, 
         return nil, nil, nil, err
     }
 
-    c3 = hash.Hash(c2, key[key1Len:])
+    c3 = hash.Mac(key[key1Len:], c2)
 
     return
 }
@@ -468,7 +468,7 @@ func Decrypt(priv *EncryptPrivateKey, uid, ciphertext []byte, opts *Opts) ([]byt
     key1 := key[:key1Len]
     key2 := key[key1Len:]
 
-    mac := hash.Hash(c2, key2)
+    mac := hash.Mac(key2, c2)
 
     if subtle.ConstantTimeCompare(c3, mac) != 1 {
         return nil, ErrDecryption

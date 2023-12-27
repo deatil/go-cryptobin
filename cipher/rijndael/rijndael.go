@@ -138,7 +138,7 @@ func (this *rijndaelCipher) Decrypt(dst, src []byte) {
 func (this *rijndaelCipher) encrypt(dst, src []byte) {
     var i, j, k, m int32
     var a, b [8]uint32
-    var x, y, t []uint32
+    var x, y []uint32
 
     for i, j = 0, 0; i < this.Nb; i, j = i+1, j+4 {
         a[i] = pack(src[j:])
@@ -159,9 +159,7 @@ func (this *rijndaelCipher) encrypt(dst, src []byte) {
             k++
         }
 
-        t = x
-        x = y
-        y = t
+        x, y = y, x
     }
 
     for m, j = 0, 0; j < this.Nb; j, m = j+1, m+3 {
@@ -180,7 +178,7 @@ func (this *rijndaelCipher) encrypt(dst, src []byte) {
 func (this *rijndaelCipher) decrypt(dst, src []byte) {
     var i, j, k, m int32
     var a, b [8]uint32
-    var x, y, t []uint32
+    var x, y []uint32
 
     for i, j = 0, 0; i < this.Nb; i, j = i+1, j+4 {
         a[i] = pack(src[j:])
@@ -200,9 +198,7 @@ func (this *rijndaelCipher) decrypt(dst, src []byte) {
             k++
         }
 
-        t = x
-        x = y
-        y = t
+        x, y = y, x
     }
 
     for m, j = 0, 0; j < this.Nb; j, m = j+1, m+3 {

@@ -23,6 +23,13 @@ func New(hash func() hash.Hash) *Prng {
     }
 }
 
+func NewWithSeed(hash func() hash.Hash, seed []byte) *Prng {
+    return &Prng{
+        hash: hash,
+        seed: seed,
+    }
+}
+
 func (this *Prng) SetSeed(seed []byte) *Prng {
     this.seed = seed
 

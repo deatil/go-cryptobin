@@ -5,6 +5,24 @@ import (
     "errors"
 )
 
+const (
+    /* seedlen for hash_drgb, table 2 of nist sp 800-90a rev.1 */
+    DIGEST_MAX_SIZE = 64
+
+    HASH_DRBG_SEED_SIZE	           = 55
+    HASH_DRBG_MAX_SEED_SIZE        = 111
+
+    HASH_DRBG_RESEED_INTERVAL      = (uint64(1) << 48)
+)
+
+func NewNIST(digest hash.Hash, entropy []byte, nonce []byte, personalstr []byte) *Drbg {
+    return New(digest, entropy, nonce, personalstr, false)
+}
+
+func NewGM(digest hash.Hash, entropy []byte, nonce []byte, personalstr []byte) *Drbg {
+    return New(digest, entropy, nonce, personalstr, true)
+}
+
 type Drbg struct {
     digest hash.Hash
     v [HASH_DRBG_MAX_SEED_SIZE]byte
@@ -14,7 +32,7 @@ type Drbg struct {
     isGm bool
 }
 
-func New(digest hash.Hash, isGm bool, entropy []byte, nonce []byte, personalstr []byte) *Drbg {
+func New(digest hash.Hash, entropy []byte, nonce []byte, personalstr []byte, isGm bool) *Drbg {
     drbg := new(Drbg)
     drbg.init(digest, entropy, nonce, personalstr)
 
@@ -38,9 +56,9 @@ func (this *Drbg) init(digest hash.Hash, entropy []byte, nonce []byte, personals
 
     /* set seedlen */
     if digest.Size() <= 32 {
-        this.seedlen = HASH_DRBG_SM3_SEED_SIZE
+        this.seedlen = HASH_DRBG_SEED_SIZE
     } else {
-        this.seedlen = HASH_DRBG_SHA512_SEED_SIZE
+        this.seedlen = HASH_DRBG_MAX_SEED_SIZE
     }
 
     /* seedMaterial = entropy_input || nonce || personalization_string */
@@ -52,12 +70,12 @@ func (this *Drbg) init(digest hash.Hash, entropy []byte, nonce []byte, personals
     copy(seedMaterial[entropyLen+nonceLen:], personalstr)
 
     /* V = Hash_df (seedMaterial, seedlen) */
-    HashDF(this.digest, seedMaterial, this.v[:this.seedlen])
+    hashDF(this.digest, seedMaterial, this.v[:this.seedlen])
 
     /* C = Hash_df ((0x00 || V), seedlen) */
     buf[0] = 0x00
     copy(buf[1:], this.v[:this.seedlen])
-    HashDF(this.digest, buf[:1 + this.seedlen], this.c[:this.seedlen])
+    hashDF(this.digest, buf[:1 + this.seedlen], this.c[:this.seedlen])
 
     /* reseedCounter = 1 */
     this.reseedCounter = 1
@@ -87,12 +105,12 @@ func (this *Drbg) Reseed(entropy []byte, additional []byte) {
     copy(seedMaterial[1+this.seedlen+entropyLen:], additional)
 
     /* V = Hash_df(seedMaterial, seedlen) */
-    HashDF(this.digest, seedMaterial, this.v[:this.seedlen])
+    hashDF(this.digest, seedMaterial, this.v[:this.seedlen])
 
     /* C = Hash_df((0x00 || V), seedlen) */
     buf[0] = 0x00
     copy(buf[1:], this.v[:this.seedlen])
-    HashDF(this.digest, buf[:1 + this.seedlen], this.c[:this.seedlen])
+    hashDF(this.digest, buf[:1 + this.seedlen], this.c[:this.seedlen])
 
     /* reseedCounter = 1 */
     this.reseedCounter = 1
@@ -187,7 +205,7 @@ func (this *Drbg) Generate(out []byte, additional []byte) error {
     drbg_add(this.v[:], this.c[:], this.seedlen)
 
     T = [HASH_DRBG_MAX_SEED_SIZE]byte{}
-    PUTU64(T[this.seedlen - 8:], this.reseedCounter)
+    putu64(T[this.seedlen - 8:], this.reseedCounter)
     drbg_add(this.v[:], T[:], this.seedlen)
 
     /* reseedCounter = reseedCounter + 1 */

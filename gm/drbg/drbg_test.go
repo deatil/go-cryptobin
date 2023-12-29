@@ -183,7 +183,7 @@ func Test_DRBG(t *testing.T) {
         personalizationString, _ := hex.DecodeString(test.personalizationString)
         v0, _ := hex.DecodeString(test.v0)
         c0, _ := hex.DecodeString(test.c0)
-        hd := New(test.newHash(), test.gm, entropyInput, nonce, personalizationString)
+        hd := New(test.newHash(), entropyInput, nonce, personalizationString, test.gm)
 
         if !bytes.Equal(hd.v[:len(v0)], v0) {
             t.Errorf("not same v0 %x, want %x", hd.v[:len(v0)], v0)

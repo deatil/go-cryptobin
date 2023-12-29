@@ -10,20 +10,20 @@ var ftable [256]uint32
 var rtable [256]uint32
 var rco [30]uint32
 
-func ROTL(x byte) byte {
+func rotl(x byte) byte {
     return (x >> 7) | (x << 1)
 }
 
-func ROTL8(x uint32) uint32 {
+func rotl8(x uint32) uint32 {
     return (x << 8) | (x >> 24)
 }
 
-func ROTL16(x uint32) uint32 {
-    return (x << 16)|(x >> 16)
+func rotl16(x uint32) uint32 {
+    return (x << 16) | (x >> 16)
 }
 
-func ROTL24(x uint32) uint32 {
-    return (x << 24)|(x >> 8)
+func rotl24(x uint32) uint32 {
+    return (x << 24) | (x >> 8)
 }
 
 func pack(b []byte) uint32 {
@@ -65,7 +65,7 @@ func bmul(x byte, y byte) byte {
     return 0
 }
 
-func SubByte(a uint32) uint32 {
+func subByte(a uint32) uint32 {
     var b [4]byte
     unpack(a, b[:])
 
@@ -90,7 +90,7 @@ func product(x uint32, y uint32) byte {
            bmul(xb[3], yb[3])
 }
 
-func InvMixCol(x uint32) uint32 {
+func invMixCol(x uint32) uint32 {
     /* matrix Multiplication */
     var y, m uint32
     var b [4]byte
@@ -98,13 +98,13 @@ func InvMixCol(x uint32) uint32 {
     m = pack(inCo[:])
     b[3] = product(m, x)
 
-    m = ROTL24(m);
+    m = rotl24(m);
     b[2] = product(m, x)
 
-    m = ROTL24(m);
+    m = rotl24(m);
     b[1] = product(m, x)
 
-    m = ROTL24(m);
+    m = rotl24(m);
     b[0] = product(m, x)
 
     y = pack(b[:])
@@ -112,22 +112,22 @@ func InvMixCol(x uint32) uint32 {
     return y
 }
 
-func ByteSub(x byte) byte {
+func byteSub(x byte) byte {
     /* multiplicative inverse */
     var y byte = ptab[255 - ltab[x]]
 
     x = y
 
-    x = ROTL(x)
+    x = rotl(x)
     y ^= x
 
-    x = ROTL(x)
+    x = rotl(x)
     y ^= x
 
-    x = ROTL(x)
+    x = rotl(x)
     y ^= x
 
-    x = ROTL(x)
+    x = rotl(x)
     y ^= x
 
     y ^= 0x63
@@ -159,7 +159,7 @@ func genTables() {
     fbsub[0] = 0x63
     rbsub[0x63] = 0
     for i = 1; i < 256; i++ {
-        y = ByteSub(byte(i))
+        y = byteSub(byte(i))
         fbsub[i] = y
         rbsub[y] = byte(i)
     }

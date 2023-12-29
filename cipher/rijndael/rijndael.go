@@ -153,9 +153,9 @@ func (this *rijndaelCipher) encrypt(dst, src []byte) {
 
         for m, j = 0, 0; j < this.Nb; j, m = j+1, m+3 {
             y[j] = this.fkey[k] ^ ftable[byte(x[j])] ^
-                ROTL8(ftable[byte(x[this.fi[m]] >> 8)]) ^
-                ROTL16(ftable[byte(x[this.fi[m + 1]] >> 16)]) ^
-                ROTL24(ftable[byte(x[this.fi[m + 2]] >> 24)])
+                rotl8(ftable[byte(x[this.fi[m]] >> 8)]) ^
+                rotl16(ftable[byte(x[this.fi[m + 1]] >> 16)]) ^
+                rotl24(ftable[byte(x[this.fi[m + 2]] >> 24)])
             k++
         }
 
@@ -164,9 +164,9 @@ func (this *rijndaelCipher) encrypt(dst, src []byte) {
 
     for m, j = 0, 0; j < this.Nb; j, m = j+1, m+3 {
         y[j] = this.fkey[k] ^ uint32(fbsub[byte(x[j])]) ^
-            ROTL8(uint32(fbsub[byte(x[this.fi[m]] >> 8)])) ^
-            ROTL16(uint32(fbsub[byte(x[this.fi[m + 1]] >> 16)])) ^
-            ROTL24(uint32(fbsub[byte(x[this.fi[m + 2]] >> 24)]))
+            rotl8(uint32(fbsub[byte(x[this.fi[m]] >> 8)])) ^
+            rotl16(uint32(fbsub[byte(x[this.fi[m + 1]] >> 16)])) ^
+            rotl24(uint32(fbsub[byte(x[this.fi[m + 2]] >> 24)]))
         k++
     }
 
@@ -192,9 +192,9 @@ func (this *rijndaelCipher) decrypt(dst, src []byte) {
     for i = 1; i < this.Nr; i++ {
         for m, j = 0, 0; j < this.Nb; j, m = j+1, m+3 {
             y[j] = this.rkey[k] ^ rtable[byte(x[j])] ^
-                ROTL8(rtable[byte(x[this.ri[m]] >> 8)]) ^
-                ROTL16(rtable[byte(x[this.ri[m + 1]] >> 16)]) ^
-                ROTL24(rtable[byte(x[this.ri[m + 2]] >> 24)])
+                rotl8(rtable[byte(x[this.ri[m]] >> 8)]) ^
+                rotl16(rtable[byte(x[this.ri[m + 1]] >> 16)]) ^
+                rotl24(rtable[byte(x[this.ri[m + 2]] >> 24)])
             k++
         }
 
@@ -203,9 +203,9 @@ func (this *rijndaelCipher) decrypt(dst, src []byte) {
 
     for m, j = 0, 0; j < this.Nb; j, m = j+1, m+3 {
         y[j] = this.rkey[k] ^ uint32(rbsub[byte(x[j])]) ^
-            ROTL8(uint32(rbsub[byte(x[this.ri[m]] >> 8)])) ^
-            ROTL16(uint32(rbsub[byte(x[this.ri[m + 1]] >> 16)])) ^
-            ROTL24(uint32(rbsub[byte(x[this.ri[m + 2]] >> 24)]))
+            rotl8(uint32(rbsub[byte(x[this.ri[m]] >> 8)])) ^
+            rotl16(uint32(rbsub[byte(x[this.ri[m + 1]] >> 16)])) ^
+            rotl24(uint32(rbsub[byte(x[this.ri[m + 2]] >> 24)]))
         k++
     }
 
@@ -307,7 +307,7 @@ func (this *rijndaelCipher) expandKey(key []byte, nb int32, nk int32) {
     }
 
     for j, k = this.Nk, 0; j < N; j, k = j + this.Nk, k + 1 {
-        this.fkey[j] = this.fkey[j - this.Nk] ^ SubByte(ROTL24(this.fkey[j - 1])) ^ rco[k]
+        this.fkey[j] = this.fkey[j - this.Nk] ^ subByte(rotl24(this.fkey[j - 1])) ^ rco[k]
         if this.Nk <= 6 {
             for i = 1; i < this.Nk && (i + j) < N; i++ {
                 this.fkey[i + j] = this.fkey[i + j - this.Nk] ^ this.fkey[i + j - 1]
@@ -318,7 +318,7 @@ func (this *rijndaelCipher) expandKey(key []byte, nb int32, nk int32) {
             }
 
             if (j + 4) < N {
-                this.fkey[j + 4] = this.fkey[j + 4 - this.Nk] ^ SubByte(this.fkey[j + 3])
+                this.fkey[j + 4] = this.fkey[j + 4 - this.Nk] ^ subByte(this.fkey[j + 3])
             }
 
             for i = 5; i < this.Nk && (i + j) < N; i++ {
@@ -336,7 +336,7 @@ func (this *rijndaelCipher) expandKey(key []byte, nb int32, nk int32) {
     for i = this.Nb; i < N - this.Nb; i += this.Nb {
         k = N - this.Nb - i
         for j = 0; j < this.Nb; j++ {
-            this.rkey[k + j] = InvMixCol(this.fkey[i + j])
+            this.rkey[k + j] = invMixCol(this.fkey[i + j])
         }
     }
 

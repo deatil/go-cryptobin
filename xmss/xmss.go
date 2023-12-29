@@ -2,6 +2,7 @@ package xmss
 
 import (
     "bytes"
+    "errors"
     "crypto"
     "crypto/rand"
     "crypto/subtle"
@@ -175,7 +176,8 @@ func treehash(params *Params, root, authPath, prvSeed, pubSeed []byte, leafIdx u
 
 // PublicKey key
 type PublicKey struct {
-    Curve *Curve
+    Params *Params
+    Oid uint32
     X []byte
 }
 
@@ -186,8 +188,19 @@ func (pub *PublicKey) Equal(x crypto.PublicKey) bool {
         return false
     }
 
-    return pub.Curve == xx.Curve &&
+    return pub.Oid == xx.Oid &&
         bytes.Equal(pub.X, xx.X)
+}
+
+func (pub *PublicKey) Precompute() error {
+    params, err := NewParamsWithOid(pub.Oid)
+    if err != nil {
+        return errors.New("publicKey precompute error")
+    }
+
+    pub.Params = params
+
+    return nil
 }
 
 // PrivateKey key
@@ -215,9 +228,10 @@ func (priv *PrivateKey) Public() crypto.PublicKey {
 // Sign Section 4.1.9. Algorithm 12: XMSS_sign - Generate an XMSS signature and update the XMSS private key
 // Signs a message. Returns an array containing the signature followed by the
 // message and an updated secret key.
-func (priv *PrivateKey) Sign(m []byte) []byte {
+func (priv *PrivateKey) Sign(m []byte) ([]byte, error) {
     prv := priv.D
-    params := priv.Curve.Params()
+
+    params := priv.Params
 
     var signature []byte
     signature = make([]byte, int(params.signBytes)+len(m))
@@ -273,18 +287,21 @@ func (priv *PrivateKey) Sign(m []byte) []byte {
         treehash(params, root, signature[params.indexBytes+n+params.wotsSignLen:params.indexBytes+n+params.wotsSignLen+params.treeHeight*n], prvSeed, pubSeed, idxLeaf, otsA)
     }
 
-    return signature
+    return signature, nil
 }
 
 // GenerateKey Section 4.1.7. Algorithm 10: XMSS_keyGen - Generate an XMSS key pair
 // Generates a XMSS key pair for a given parameter set.
 // Format private: [(32bit) index || prvSeed || seed || pubSeed || root]
 // Format public: [root || pubSeed]
-func GenerateKey(curve *Curve) (*PrivateKey, error) {
+func GenerateKey(oid uint32) (*PrivateKey, error) {
     var prv PrivateKey
     var pub PublicKey
 
-    params := curve.Params()
+    params, err := NewParamsWithOid(oid)
+    if err != nil {
+        return nil, err
+    }
 
     prv.D = make([]byte, params.prvBytes)
     pub.X = make([]byte, params.pubBytes)
@@ -306,7 +323,8 @@ func GenerateKey(curve *Curve) (*PrivateKey, error) {
     treehash(params, pub.X, authPath, prv.D[params.indexBytes:params.indexBytes+n], pub.X[n:2*n], 0, topTreeA)
     copy(prv.D[params.indexBytes+3*n:], pub.X[:n])
 
-    pub.Curve = curve
+    pub.Oid = oid
+    pub.Params = params
     prv.PublicKey = pub
 
     return &prv, nil
@@ -317,7 +335,7 @@ func GenerateKey(curve *Curve) (*PrivateKey, error) {
 // Note that this assumes a pk without an OID, i.e. [root || pubSeed]
 func Verify(publicKey *PublicKey, m, signature []byte) (match bool) {
     pub := publicKey.X
-    params := publicKey.Curve.Params()
+    params := publicKey.Params
 
     n := uint32(params.n)
 

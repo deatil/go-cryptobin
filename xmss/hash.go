@@ -1,11 +1,19 @@
 package xmss
 
-import "crypto/sha256"
+import (
+    "hash"
+)
+
+func coreHash(params *Params) hash.Hash {
+    h := params.Hash()
+
+    return h
+}
 
 // PRF: SHA2-256(toBytes(3, 32) || KEY || M)
 // Message must be exactly 32 bytes
 func hashPRF(params *Params, out, key, m []byte) {
-    h := sha256.New()
+    h := coreHash(params)
     h.Write(toBytes(3, params.n))
     h.Write(key)
     h.Write(m)
@@ -16,7 +24,7 @@ func hashPRF(params *Params, out, key, m []byte) {
 // Computes the message hash using R, the public root, the index of the leaf
 // node, and the message.
 func hashMsg(params *Params, out, R, root, mPlus []byte, idx uint64) {
-    h := sha256.New()
+    h := coreHash(params)
     copy(mPlus[:params.n], toBytes(2, params.n))
     copy(mPlus[params.n:2*params.n], R)
     copy(mPlus[2*params.n:3*params.n], root)
@@ -30,7 +38,7 @@ func hashMsg(params *Params, out, R, root, mPlus []byte, idx uint64) {
 // strings of length 2n and returns an n-byte string.
 // Includes: Algorithm 7: RAND_HASH
 func hashH(params *Params, out, seed, m []byte, a *address) {
-    h := sha256.New()
+    h := coreHash(params)
     h.Write(toBytes(1, params.n))
 
     // Generate the n-byte key
@@ -42,6 +50,7 @@ func hashH(params *Params, out, seed, m []byte, a *address) {
     a.setKeyAndMask(1)
     bitmask := make([]byte, 2*params.n)
     hashPRF(params, bitmask[:params.n], seed, a.toBytes())
+
     a.setKeyAndMask(2)
     hashPRF(params, bitmask[params.n:], seed, a.toBytes())
 
@@ -53,7 +62,7 @@ func hashH(params *Params, out, seed, m []byte, a *address) {
 
 // F: SHA2-256(toBytes(0, 32) || KEY || M)
 func hashF(params *Params, out, seed, m []byte, a *address) {
-    h := sha256.New()
+    h := coreHash(params)
     h.Write(make([]byte, params.n))
 
     // Generate the n-byte key

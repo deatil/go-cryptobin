@@ -7,6 +7,12 @@ import (
     "encoding/hex"
 )
 
+var (
+    SHA2_10_256 uint32 = 0x00000001
+    SHA2_16_256 uint32 = 0x00000002
+    SHA2_20_256 uint32 = 0x00000003
+)
+
 func decodeHex(s string) []byte {
     r, _ := hex.DecodeString(s)
     return r
@@ -14,11 +20,11 @@ func decodeHex(s string) []byte {
 
 func Test_XMSS(t *testing.T) {
     t.Parallel()
-    curve := SHA2_10_256
-    prv, _ := GenerateKey(curve)
+    oid := SHA2_10_256
+    prv, _ := GenerateKey(oid)
     pub := &prv.PublicKey
 
-    params := curve.Params()
+    params, _ := NewParamsWithOid(oid)
 
     var sig []byte
     msg := make([]byte, 32)
@@ -29,7 +35,7 @@ func Test_XMSS(t *testing.T) {
         initIndex := make([]byte, params.indexBytes)
         copy(initIndex, prv.D[:params.indexBytes])
 
-        sig = prv.Sign(msg)
+        sig, _ = prv.Sign(msg)
 
         afterIndex := prv.D[:params.indexBytes]
         if bytes.Equal(initIndex, afterIndex) {
@@ -77,7 +83,7 @@ var testDatas = map[string]testData{
 
 func TestVerify(t *testing.T) {
     t.Parallel()
-    testParams := map[string]*Curve{
+    testParams := map[string]uint32{
         "SHA2_10_256": SHA2_10_256,
         "SHA2_16_256": SHA2_16_256,
         "SHA2_20_256": SHA2_20_256,
@@ -86,7 +92,7 @@ func TestVerify(t *testing.T) {
     message := "2095eaf8702244a20121c7df900b2e86ec2fe212bcda91576b0154460d38a4f8"
     msg := decodeHex(message)
 
-    for name, curve := range testParams {
+    for name, oid := range testParams {
         t.Run(name, func(t *testing.T) {
             t.Parallel()
             var pub *PublicKey = &PublicKey{}
@@ -94,12 +100,13 @@ func TestVerify(t *testing.T) {
 
             data := testDatas[name]
 
-            params := curve.Params()
-
             pub.X = decodeHex(data.pub)
-            pub.Curve = curve
+            pub.Oid = oid
+            pub.Precompute()
 
             sig = decodeHex(data.sig)
+
+            params, _ := NewParamsWithOid(oid)
 
             m := make([]byte, params.SignBytes()+len(msg))
             if !Verify(pub, m, sig) {

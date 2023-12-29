@@ -9,10 +9,10 @@ const (
     /* seedlen for hash_drgb, table 2 of nist sp 800-90a rev.1 */
     DIGEST_MAX_SIZE = 64
 
-    HASH_DRBG_SEED_SIZE	           = 55
-    HASH_DRBG_MAX_SEED_SIZE        = 111
+    HASH_DRBG_SEED_SIZE	      = 55
+    HASH_DRBG_MAX_SEED_SIZE   = 111
 
-    HASH_DRBG_RESEED_INTERVAL      = (uint64(1) << 48)
+    HASH_DRBG_RESEED_INTERVAL = (uint64(1) << 48)
 )
 
 func NewNIST(digest hash.Hash, entropy []byte, nonce []byte, personalstr []byte) *Drbg {

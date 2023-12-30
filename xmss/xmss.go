@@ -265,7 +265,7 @@ func (priv *PrivateKey) Sign(m []byte) ([]byte, error) {
     hashPRF(params, signature[params.indexBytes:params.indexBytes+n], prfSeed, idxBytes)
 
     // Compute the message hash
-    hashMsg(params, msgHash, signature[params.indexBytes:params.indexBytes+n], pubRoot, signature[params.signBytes-4*n:], idx)
+    hashMsg(params, msgHash, signature[params.indexBytes:params.indexBytes+n], pubRoot, signature[params.signBytes-uint32(params.paddingLen)-3*n:], idx)
     copy(root, msgHash)
 
     for i := uint32(0); i < uint32(params.d); i++ {
@@ -358,7 +358,7 @@ func Verify(publicKey *PublicKey, m, signature []byte) (match bool) {
     idx := fromBytes(signature[:params.indexBytes], int(params.indexBytes))
 
     copy(m[params.signBytes:], signature[params.signBytes:])
-    hashMsg(params, msgHash, signature[params.indexBytes:params.indexBytes+n], pubRoot, m[params.signBytes-4*n:], idx)
+    hashMsg(params, msgHash, signature[params.indexBytes:params.indexBytes+n], pubRoot, m[params.signBytes-uint32(params.paddingLen)-3*n:], idx)
     copy(root, msgHash)
 
     signature = signature[params.indexBytes+n:]

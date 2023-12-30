@@ -27,7 +27,7 @@ type Params struct {
     signBytes   uint32
 }
 
-func NewParams(hashFunc func() hash.Hash, n, w, h, d int) *Params {
+func NewParams(hashFunc func() hash.Hash, n, w, h, d, paddingLen int) *Params {
     log2w := uint(math.Log2(float64(w)))
     len1 := uint32(math.Ceil(float64(8 * n / int(log2w))))
     len2 := uint32(math.Floor(math.Log2(float64(len1*uint32(w-1)))/math.Log2(float64(w)))) + 1 // len2 = 3
@@ -59,6 +59,7 @@ func NewParams(hashFunc func() hash.Hash, n, w, h, d int) *Params {
         wotsSignLen: wotsSignLen,
         fullHeight:  h,
         d:           d,
+        paddingLen:  paddingLen,
         treeHeight:  treeHeight,
         indexBytes:  indexBytes,
         prvBytes:    prvBytes,
@@ -80,6 +81,9 @@ var oids = map[uint32]string{
     0x00000001: "XMSS-SHA2_10_256",
     0x00000002: "XMSS-SHA2_16_256",
     0x00000003: "XMSS-SHA2_20_256",
+    0x00000004: "XMSS-SHA2_10_512",
+    0x00000005: "XMSS-SHA2_16_512",
+    0x00000006: "XMSS-SHA2_20_512",
 }
 
 func GetOidByName(name string) (uint32, error) {
@@ -106,13 +110,19 @@ func NewParamsWithOid(oid uint32) (*Params, error) {
     switch (oid) {
         case 0x00000001:
             // SHA2_10_256 is parameter set using SHA-256 with n = 32, w = 16 and a Merkle Tree of height 10
-            return NewParams(sha256.New, 32, 16, 10, 1), nil
+            return NewParams(sha256.New, 32, 16, 10, 1, 32), nil
         case 0x00000002:
             // SHA2_16_256 is parameter set using SHA-256 with n = 32, w = 16 and a Merkle Tree of height 16
-            return NewParams(sha256.New, 32, 16, 16, 1), nil
+            return NewParams(sha256.New, 32, 16, 16, 1, 32), nil
         case 0x00000003:
             // SHA2_20_256 is parameter set using SHA-256 with n = 32, w = 16 and a Merkle Tree of height 20
-            return NewParams(sha256.New, 32, 16, 20, 1), nil
+            return NewParams(sha256.New, 32, 16, 20, 1, 32), nil
+        case 0x00000004:
+            return NewParams(sha256.New, 64, 16, 10, 1, 64), nil
+        case 0x00000005:
+            return NewParams(sha256.New, 64, 16, 16, 1, 64), nil
+        case 0x00000006:
+            return NewParams(sha256.New, 64, 16, 20, 1, 64), nil
     }
 
     return nil, errors.New("no support oid")

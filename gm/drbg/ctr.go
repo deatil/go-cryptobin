@@ -110,13 +110,12 @@ func (this *ctrDRBG) Generate(out, additional []byte) error {
 
     var temp bytes.Buffer
 
-    block := this.newBlockCipher(this.key)
-    blockSize := block.BlockSize()
+    blockSize := len(this.v)
     for temp.Len() < len(out) {
         drbg_add1(this.v, blockSize)
 
         outputBlock := make([]byte, blockSize)
-        block.Encrypt(outputBlock, this.v)
+        this.newBlockCipher(this.key).Encrypt(outputBlock, this.v)
 
         temp.Write(outputBlock)
     }
@@ -132,9 +131,8 @@ func (this *ctrDRBG) Generate(out, additional []byte) error {
 
 func (this *ctrDRBG) update(seedMaterial []byte) {
     temp := make([]byte, this.seedLength)
-    block := this.newBlockCipher(this.key)
 
-    outlen := block.BlockSize()
+    outlen := len(this.v)
     v := make([]byte, outlen)
 
     copy(v, this.v)
@@ -143,7 +141,7 @@ func (this *ctrDRBG) update(seedMaterial []byte) {
     for i := 0; i < (this.seedLength+outlen-1)/outlen; i++ {
         drbg_add1(v, outlen)
 
-        block.Encrypt(output, v)
+        this.newBlockCipher(this.key).Encrypt(output, v)
 
         copy(temp[i*outlen:], output)
     }
@@ -220,9 +218,8 @@ func (this *ctrDRBG) blockCipherDF(input []byte, requestedBytes int) []byte {
 
     temp.Reset()
 
-    block := this.newBlockCipher(k)
     for temp.Len() < requestedBytes {
-        block.Encrypt(x, x)
+        this.newBlockCipher(k).Encrypt(x, x)
 
         temp.Write(x)
     }

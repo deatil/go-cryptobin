@@ -9,7 +9,7 @@ func expandSeed(params *Params, inseed []byte) (expanded []byte) {
     for i := 0; i < int(params.wlen); i++ {
         ctr = toBytes(i, 32)
         idx = i * params.n
-        hashPRF(params, expanded[idx:idx+params.n], inseed, ctr)
+        hashKeygen(params, expanded[idx:idx+params.n], inseed, ctr)
     }
 
     return

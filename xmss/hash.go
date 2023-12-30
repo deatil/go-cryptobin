@@ -4,6 +4,15 @@ import (
     "hash"
 )
 
+const (
+    XMSS_HASH_PADDING_F = 0
+    XMSS_HASH_PADDING_H = 1
+    XMSS_HASH_PADDING_HASH = 2
+    XMSS_HASH_PADDING_PRF = 3
+    XMSS_HASH_PADDING_PRF_KEYGEN = 4
+)
+
+// coreHash
 func coreHash(params *Params) hash.Hash {
     h := params.Hash()
 
@@ -14,8 +23,17 @@ func coreHash(params *Params) hash.Hash {
 // Message must be exactly 32 bytes
 func hashPRF(params *Params, out, key, m []byte) {
     h := coreHash(params)
-    h.Write(toBytes(3, params.n))
-    h.Write(key)
+    h.Write(toBytes(XMSS_HASH_PADDING_PRF, params.paddingLen))
+    h.Write(key[:params.n])
+    h.Write(m)
+    copy(out, h.Sum(nil))
+}
+
+// hashKeygen
+func hashKeygen(params *Params, out, key, m []byte) {
+    h := coreHash(params)
+    h.Write(toBytes(XMSS_HASH_PADDING_PRF_KEYGEN, params.paddingLen))
+    h.Write(key[:params.n])
     h.Write(m)
     copy(out, h.Sum(nil))
 }
@@ -25,9 +43,9 @@ func hashPRF(params *Params, out, key, m []byte) {
 // node, and the message.
 func hashMsg(params *Params, out, R, root, mPlus []byte, idx uint64) {
     h := coreHash(params)
-    copy(mPlus[:params.n], toBytes(2, params.n))
-    copy(mPlus[params.n:2*params.n], R)
-    copy(mPlus[2*params.n:3*params.n], root)
+    copy(mPlus[:params.n], toBytes(XMSS_HASH_PADDING_HASH, params.paddingLen))
+    copy(mPlus[params.n:2*params.n], R[:params.n])
+    copy(mPlus[2*params.n:3*params.n], root[:params.n])
     copy(mPlus[3*params.n:4*params.n], toBytes(int(idx), params.n))
     h.Write(mPlus)
     copy(out, h.Sum(nil))
@@ -39,7 +57,7 @@ func hashMsg(params *Params, out, R, root, mPlus []byte, idx uint64) {
 // Includes: Algorithm 7: RAND_HASH
 func hashH(params *Params, out, seed, m []byte, a *address) {
     h := coreHash(params)
-    h.Write(toBytes(1, params.n))
+    h.Write(toBytes(XMSS_HASH_PADDING_H, params.paddingLen))
 
     // Generate the n-byte key
     a.setKeyAndMask(0)
@@ -63,7 +81,7 @@ func hashH(params *Params, out, seed, m []byte, a *address) {
 // F: SHA2-256(toBytes(0, 32) || KEY || M)
 func hashF(params *Params, out, seed, m []byte, a *address) {
     h := coreHash(params)
-    h.Write(make([]byte, params.n))
+    h.Write(toBytes(XMSS_HASH_PADDING_F, params.paddingLen))
 
     // Generate the n-byte key
     a.setKeyAndMask(0)

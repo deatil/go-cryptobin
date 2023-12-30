@@ -2,12 +2,6 @@ package xmss
 
 import "encoding/binary"
 
-func xor(out, a, b []byte) {
-    for i := 0; i < len(a); i++ {
-        out[i] = a[i] ^ b[i]
-    }
-}
-
 // If x and y are non-negative integers, we define Z = toBytes(x, y) to
 // be the y-byte string containing the binary representation of x in
 // big-endian byte order.

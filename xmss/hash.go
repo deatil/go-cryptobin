@@ -2,13 +2,14 @@ package xmss
 
 import (
     "hash"
+    "crypto/subtle"
 )
 
 const (
     XMSS_HASH_PADDING_F = 0
     XMSS_HASH_PADDING_H = 1
     XMSS_HASH_PADDING_HASH = 2
-    XMSS_HASH_PADDING_PRF = 3
+    XMSS_HASH_PADDING_PRF  = 3
     XMSS_HASH_PADDING_PRF_KEYGEN = 4
 )
 
@@ -72,7 +73,7 @@ func hashH(params *Params, out, seed, m []byte, a *address) {
     a.setKeyAndMask(2)
     hashPRF(params, bitmask[params.n:], seed, a.toBytes())
 
-    xor(buf[params.n:], m, bitmask)
+    subtle.XORBytes(buf[params.n:], m, bitmask)
     h.Write(buf)
 
     copy(out, h.Sum(nil))
@@ -92,7 +93,7 @@ func hashF(params *Params, out, seed, m []byte, a *address) {
     a.setKeyAndMask(1)
     bitmask := make([]byte, params.n)
     hashPRF(params, bitmask, seed, a.toBytes())
-    xor(buf[params.n:], m, bitmask)
+    subtle.XORBytes(buf[params.n:], m, bitmask)
     h.Write(buf)
 
     copy(out, h.Sum(nil))

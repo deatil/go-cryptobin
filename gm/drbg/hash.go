@@ -15,15 +15,15 @@ const (
     HASH_DRBG_RESEED_INTERVAL = (uint64(1) << 48)
 )
 
-func NewNIST(digest hash.Hash, entropy []byte, nonce []byte, personalstr []byte) *Drbg {
-    return New(digest, entropy, nonce, personalstr, false)
+func NewNISTHash(digest hash.Hash, entropy []byte, nonce []byte, personalstr []byte) (*hashDRBG, error) {
+    return NewHash(digest, entropy, nonce, personalstr, false)
 }
 
-func NewGM(digest hash.Hash, entropy []byte, nonce []byte, personalstr []byte) *Drbg {
-    return New(digest, entropy, nonce, personalstr, true)
+func NewGMHash(digest hash.Hash, entropy []byte, nonce []byte, personalstr []byte) (*hashDRBG, error) {
+    return NewHash(digest, entropy, nonce, personalstr, true)
 }
 
-type Drbg struct {
+type hashDRBG struct {
     digest hash.Hash
     v [HASH_DRBG_MAX_SEED_SIZE]byte
     c [HASH_DRBG_MAX_SEED_SIZE]byte
@@ -32,17 +32,29 @@ type Drbg struct {
     isGm bool
 }
 
-func New(digest hash.Hash, entropy []byte, nonce []byte, personalstr []byte, isGm bool) *Drbg {
-    drbg := new(Drbg)
+func NewHash(digest hash.Hash, entropy []byte, nonce []byte, personalstr []byte, isGm bool) (*hashDRBG, error) {
+    if len(entropy) <= 0 ||  len(entropy) >= MAX_BYTES {
+        return nil, errors.New("invalid entropy length")
+    }
+
+    if len(nonce) == 0 || len(nonce) >= MAX_BYTES>>1 {
+        return nil, errors.New("invalid nonce length")
+    }
+
+    if len(personalstr) >= MAX_BYTES {
+        return nil, errors.New("personalization is too long")
+    }
+
+    drbg := new(hashDRBG)
     drbg.init(digest, entropy, nonce, personalstr)
 
     /* set isGm */
     drbg.isGm = isGm
 
-    return drbg
+    return drbg, nil
 }
 
-func (this *Drbg) init(digest hash.Hash, entropy []byte, nonce []byte, personalstr []byte) {
+func (this *hashDRBG) init(digest hash.Hash, entropy []byte, nonce []byte, personalstr []byte) {
     var seedMaterial []byte
     var seedMaterialLen int
     var buf [1 + HASH_DRBG_MAX_SEED_SIZE]byte
@@ -81,7 +93,15 @@ func (this *Drbg) init(digest hash.Hash, entropy []byte, nonce []byte, personals
     this.reseedCounter = 1
 }
 
-func (this *Drbg) Reseed(entropy []byte, additional []byte) {
+func (this *hashDRBG) Reseed(entropy []byte, additional []byte) error {
+    if len(entropy) <= 0 ||  len(entropy) >= MAX_BYTES {
+        return errors.New("invalid entropy length")
+    }
+
+    if len(additional) >= MAX_BYTES {
+        return errors.New("additional input too long")
+    }
+
     var seedMaterial []byte
     var seedMaterialLen int
     var buf [1 + HASH_DRBG_MAX_SEED_SIZE]byte
@@ -114,9 +134,11 @@ func (this *Drbg) Reseed(entropy []byte, additional []byte) {
 
     /* reseedCounter = 1 */
     this.reseedCounter = 1
+
+    return nil
 }
 
-func (this *Drbg) hashgen(out []byte) {
+func (this *hashDRBG) hashgen(out []byte) {
     var h hash.Hash
     var data [HASH_DRBG_MAX_SEED_SIZE]byte
     var dgst []byte = make([]byte, DIGEST_MAX_SIZE)
@@ -159,7 +181,7 @@ func (this *Drbg) hashgen(out []byte) {
     }
 }
 
-func (this *Drbg) Generate(out []byte, additional []byte) error {
+func (this *hashDRBG) Generate(out []byte, additional []byte) error {
     var ctx hash.Hash
     var prefix byte
     var T [HASH_DRBG_MAX_SEED_SIZE]byte

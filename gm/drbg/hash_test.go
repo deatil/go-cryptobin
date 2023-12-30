@@ -176,14 +176,17 @@ var tests = []struct {
     },
 }
 
-func Test_DRBG(t *testing.T) {
+func Test_Hash(t *testing.T) {
     for _, test := range tests {
         entropyInput, _ := hex.DecodeString(test.entropyInput)
         nonce, _ := hex.DecodeString(test.nonce)
         personalizationString, _ := hex.DecodeString(test.personalizationString)
         v0, _ := hex.DecodeString(test.v0)
         c0, _ := hex.DecodeString(test.c0)
-        hd := New(test.newHash(), entropyInput, nonce, personalizationString, test.gm)
+        hd, err := NewHash(test.newHash(), entropyInput, nonce, personalizationString, test.gm)
+        if err != nil {
+            t.Fatal(err)
+        }
 
         if !bytes.Equal(hd.v[:len(v0)], v0) {
             t.Errorf("not same v0 %x, want %x", hd.v[:len(v0)], v0)
@@ -200,10 +203,10 @@ func Test_DRBG(t *testing.T) {
         hd.Reseed(entropyInputReseed, additionalInputReseed)
 
         if !bytes.Equal(hd.v[:len(v0)], v1) {
-            t.Errorf("not same v1 %x", hd.v[:len(v0)])
+            t.Errorf("not same v1 %x, want %x", hd.v[:len(v0)], v1)
         }
         if !bytes.Equal(hd.c[:len(c0)], c1) {
-            t.Errorf("not same c1 %x", hd.c[:len(c0)])
+            t.Errorf("not same c1 %x, want %x", hd.c[:len(c0)], c1)
         }
 
         // Generate 1
@@ -221,11 +224,11 @@ func Test_DRBG(t *testing.T) {
         additionalInput2, _ := hex.DecodeString(test.additionalInput2)
         hd.Generate(output, additionalInput2)
         if !bytes.Equal(hd.v[:len(v0)], v3) {
-            t.Errorf("not same v3 %x", hd.v[:len(v0)])
+            t.Errorf("not same v3 %x, want %x", hd.v[:len(v0)], v3)
         }
 
         if !bytes.Equal(returnbits1, output) {
-            t.Errorf("not expected return bits %x", output)
+            t.Errorf("not expected return bits %x, want %x", output, returnbits1)
         }
     }
 }

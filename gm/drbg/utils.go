@@ -2,8 +2,14 @@ package drbg
 
 import (
     "hash"
+    "errors"
     "encoding/binary"
 )
+
+const MAX_BYTES = 1 << 27
+const MAX_BYTES_PER_GENERATE = 1 << 11
+
+var ErrReseedRequired = errors.New("the DRGB must be reseeded")
 
 // Endianness option
 const littleEndian bool = false

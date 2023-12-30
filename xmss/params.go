@@ -107,25 +107,39 @@ func GetNameByOid(oid uint32) (string, error) {
 }
 
 func NewParamsWithOid(oid uint32) (*Params, error) {
+    var hasher func() hash.Hash
+    var n, w, h, d, paddingLen int
+
+    w = 16
+    d = 1
+
     switch (oid) {
         case 0x00000001:
             // SHA2_10_256 is parameter set using SHA-256 with n = 32, w = 16 and a Merkle Tree of height 10
-            return NewParams(sha256.New, 32, 16, 10, 1, 32), nil
+            hasher = sha256.New
+            n, h, paddingLen = 32, 10, 32
         case 0x00000002:
             // SHA2_16_256 is parameter set using SHA-256 with n = 32, w = 16 and a Merkle Tree of height 16
-            return NewParams(sha256.New, 32, 16, 16, 1, 32), nil
+            hasher = sha256.New
+            n, h, paddingLen = 32, 16, 32
         case 0x00000003:
             // SHA2_20_256 is parameter set using SHA-256 with n = 32, w = 16 and a Merkle Tree of height 20
-            return NewParams(sha256.New, 32, 16, 20, 1, 32), nil
+            hasher = sha256.New
+            n, h, paddingLen = 32, 20, 32
         case 0x00000004:
-            return NewParams(sha256.New, 64, 16, 10, 1, 64), nil
+            hasher = sha256.New
+            n, h, paddingLen = 64, 10, 64
         case 0x00000005:
-            return NewParams(sha256.New, 64, 16, 16, 1, 64), nil
+            hasher = sha256.New
+            n, h, paddingLen = 64, 16, 64
         case 0x00000006:
-            return NewParams(sha256.New, 64, 16, 20, 1, 64), nil
+            hasher = sha256.New
+            n, h, paddingLen = 64, 20, 64
+        default:
+            return nil, errors.New("no support oid")
     }
 
-    return nil, errors.New("no support oid")
+    return NewParams(hasher, n, w, h, d, paddingLen), nil
 }
 
 func NewParamsWithName(name string) (*Params, error) {

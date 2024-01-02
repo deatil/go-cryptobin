@@ -77,10 +77,8 @@ func (a *address) setTreeIndex(idx uint32) {
 func (a *address) toBytes() (out []byte) {
     out = make([]byte, len(a)*4)
 
-    j := 0
-    for i := 0; i < len(out); i += 4 {
-        copy(out[i:], uint32ToBytes(a[j]))
-        j++
+    for i := 0; i < 8; i++ {
+        copy(out[i*4:], uint32ToBytes(a[i]))
     }
 
     return

@@ -14,6 +14,8 @@ import (
     "crypto/sha256"
     "crypto/sha512"
     "crypto/subtle"
+
+    "github.com/deatil/go-cryptobin/elliptic/secp256k1"
 )
 
 var (
@@ -49,14 +51,14 @@ var (
         Hash:      sha256.New,
         Cipher:    aes.NewCipher,
         BlockSize: aes.BlockSize,
-        KeyLen:    32,
+        KeyLen:    16,
     }
 
     ECIES_AES256_SHA384 = &ECIESParams{
         Hash:      sha512.New384,
         Cipher:    aes.NewCipher,
         BlockSize: aes.BlockSize,
-        KeyLen:    32,
+        KeyLen:    24,
     }
 
     ECIES_AES256_SHA512 = &ECIESParams{
@@ -68,7 +70,7 @@ var (
 )
 
 var paramsFromCurve = map[elliptic.Curve]*ECIESParams{
-    // elliptic.S256(): ECIES_AES128_SHA256,
+    secp256k1.S256(): ECIES_AES128_SHA256,
     elliptic.P256(): ECIES_AES128_SHA256,
     elliptic.P384(): ECIES_AES256_SHA384,
     elliptic.P521(): ECIES_AES256_SHA512,
@@ -177,7 +179,7 @@ func (priv *PrivateKey) GenerateShared(pub *PublicKey, skLen, macLen int) (sk []
         return nil, ErrInvalidCurve
     }
 
-    if skLen+macLen > MaxSharedKeyLength(pub) {
+    if skLen + macLen > MaxSharedKeyLength(pub) {
         return nil, ErrSharedKeyTooBig
     }
 
@@ -186,9 +188,14 @@ func (priv *PrivateKey) GenerateShared(pub *PublicKey, skLen, macLen int) (sk []
         return nil, ErrSharedKeyIsPointAtInfinity
     }
 
-    sk = make([]byte, skLen+macLen)
+    sk = make([]byte, skLen + macLen)
     skBytes := x.Bytes()
-    copy(sk[len(sk)-len(skBytes):], skBytes)
+
+    if len(skBytes) > len(sk) {
+        copy(sk[:], skBytes)
+    } else {
+        copy(sk[len(sk)-len(skBytes):], skBytes)
+    }
 
     return sk, nil
 }
@@ -223,7 +230,9 @@ func (priv *PrivateKey) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
     // 算出公钥数据长度
     switch c[0] {
         case 2, 3, 4:
-            rLen = (priv.PublicKey.Curve.Params().BitSize + 7) / 4
+            byteLen := (priv.PublicKey.Curve.Params().BitSize + 7) / 8
+
+            rLen = 1 + 2*byteLen
             if len(c) < (rLen + hLen + 1) {
                 err = ErrInvalidMessage
                 return

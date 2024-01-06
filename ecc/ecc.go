@@ -46,21 +46,12 @@ var (
         BlockSize: aes.BlockSize,
         KeyLen:    16,
     }
-
-    ECIES_AES256_SHA256 = &ECIESParams{
-        Hash:      sha256.New,
-        Cipher:    aes.NewCipher,
-        BlockSize: aes.BlockSize,
-        KeyLen:    16,
-    }
-
-    ECIES_AES256_SHA384 = &ECIESParams{
+    ECIES_AES192_SHA384 = &ECIESParams{
         Hash:      sha512.New384,
         Cipher:    aes.NewCipher,
         BlockSize: aes.BlockSize,
         KeyLen:    24,
     }
-
     ECIES_AES256_SHA512 = &ECIESParams{
         Hash:      sha512.New,
         Cipher:    aes.NewCipher,
@@ -72,7 +63,7 @@ var (
 var paramsFromCurve = map[elliptic.Curve]*ECIESParams{
     secp256k1.S256(): ECIES_AES128_SHA256,
     elliptic.P256(): ECIES_AES128_SHA256,
-    elliptic.P384(): ECIES_AES256_SHA384,
+    elliptic.P384(): ECIES_AES192_SHA384,
     elliptic.P521(): ECIES_AES256_SHA512,
 }
 
@@ -144,7 +135,6 @@ func ImportECDSAPrivateKey(priv *ecdsa.PrivateKey) *PrivateKey {
     }
 }
 
-// 生成公钥
 // Generate an elliptic curve public / private keypair. If params is nil,
 // the recommended default parameters for the key will be chosen.
 func GenerateKey(rand io.Reader, curve elliptic.Curve, params *ECIESParams) (priv *PrivateKey, err error) {
@@ -207,7 +197,7 @@ func (priv *PrivateKey) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
         return
     }
 
-    // 算出 params 数据
+    // params
     params := priv.PublicKey.Params
     if params == nil {
         params = ParamsFromCurve(priv.PublicKey.Curve)
@@ -227,7 +217,7 @@ func (priv *PrivateKey) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
         mEnd   int
     )
 
-    // 算出公钥数据长度
+    // 算出公钥数据长度 / get rLen
     switch c[0] {
         case 2, 3, 4:
             byteLen := (priv.PublicKey.Curve.Params().BitSize + 7) / 8
@@ -245,7 +235,7 @@ func (priv *PrivateKey) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
     mStart = rLen
     mEnd = len(c) - hLen
 
-    // 算出公钥
+    // 算出公钥 / make publickey
     R := new(PublicKey)
     R.Curve = priv.PublicKey.Curve
     R.X, R.Y = elliptic.Unmarshal(R.Curve, c[:rLen])
@@ -259,35 +249,35 @@ func (priv *PrivateKey) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
         return
     }
 
-    // 根据私钥和公钥算出密钥
+    // 根据私钥和公钥算出密钥 / make sym key
     z, err := priv.GenerateShared(R, params.KeyLen, params.KeyLen)
     if err != nil {
         return
     }
 
-    // kdf 方式算出密钥
+    // kdf 方式算出密钥 / get K
     K, err := concatKDF(hash, z, s1, params.KeyLen+params.KeyLen)
     if err != nil {
         return
     }
 
-    // 对称加密密钥
+    // 对称加密密钥 / get Ke
     Ke := K[:params.KeyLen]
 
-    // 签名密钥
+    // 签名密钥 / mac key
     Km := K[params.KeyLen:]
     hash.Write(Km)
     Km = hash.Sum(nil)
     hash.Reset()
 
-    // hmac 签名数据验证
+    // hmac 签名数据验证 / mac
     d := messageTag(params.Hash, Km, c[mStart:mEnd], s2)
     if subtle.ConstantTimeCompare(c[mEnd:], d) != 1 {
         err = ErrInvalidMessage
         return
     }
 
-    // 对称加密解出数据
+    // 对称加密解出数据 / decrypt data
     m, err = cipherDecrypt(params, Ke, c[mStart:mEnd])
 
     return
@@ -301,7 +291,6 @@ func (priv *PrivateKey) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
 // ciphertext. s1 is fed into key derivation, s2 is fed into the MAC. If the
 // shared information parameters aren't being used, they should be nil.
 func Encrypt(rand io.Reader, pub *PublicKey, m, s1, s2 []byte) (ct []byte, err error) {
-    // 算出 params 数据
     params := pub.Params
     if params == nil {
         params = ParamsFromCurve(pub.Curve)
@@ -312,13 +301,13 @@ func Encrypt(rand io.Reader, pub *PublicKey, m, s1, s2 []byte) (ct []byte, err e
         return
     }
 
-    // 生成私钥
+    // 生成私钥 / get R
     R, err := GenerateKey(rand, pub.Curve, params)
     if err != nil {
         return
     }
 
-    // 根据私钥和公钥生成密钥
+    // 根据私钥和公钥生成密钥 / make sym key
     z, err := R.GenerateShared(pub, params.KeyLen, params.KeyLen)
     if err != nil {
         return
@@ -326,43 +315,44 @@ func Encrypt(rand io.Reader, pub *PublicKey, m, s1, s2 []byte) (ct []byte, err e
 
     hash := params.Hash()
 
-    // kdf 方式算出密钥
+    // kdf 方式算出密钥 / get K
     K, err := concatKDF(hash, z, s1, params.KeyLen+params.KeyLen)
     if err != nil {
         return
     }
 
-    // 对称加密密钥
+    // 对称加密密钥 / get Ke
     Ke := K[:params.KeyLen]
 
-    // 签名密钥
+    // 签名密钥 / get Km
     Km := K[params.KeyLen:]
     hash.Write(Km)
     Km = hash.Sum(nil)
     hash.Reset()
 
-    // 对称加密数据
+    // 对称加密数据 / Encrypt data
     em, err := cipherEncrypt(rand, params, Ke, m)
     if err != nil || len(em) <= params.BlockSize {
         return
     }
 
-    // hmac 签名数据
+    // hmac 签名数据 / get hmac data
     d := messageTag(params.Hash, Km, em, s2)
 
-    // 生成公钥数据
+    // 生成公钥数据 / get publickey
     Rb := elliptic.Marshal(pub.Curve, R.PublicKey.X, R.PublicKey.Y)
 
     // 最终数据包括 [公钥数据 + 对称加密后的数据 + hmac签名数据]
+    // make ct
     ct = make([]byte, len(Rb)+len(em)+len(d))
 
-    // 添加公钥数据
+    // 添加公钥数据 / put Rb
     copy(ct, Rb)
 
-    // 添加对称加密后的数据
+    // 添加对称加密后的数据 / put em
     copy(ct[len(Rb):], em)
 
-    // 添加 hmac 签名数据
+    // 添加 hmac 签名数据 / put hmac data
     copy(ct[len(Rb)+len(em):], d)
 
     return

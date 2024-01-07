@@ -6,6 +6,7 @@ import (
     "encoding/hex"
 
     "github.com/deatil/go-cryptobin/xmss"
+    cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
 func Test_XMSSMT(t *testing.T) {
@@ -32,6 +33,8 @@ func Test_XMSSMT(t *testing.T) {
 }
 
 func Test_XMSSMTWithName(t *testing.T) {
+    assert := cryptobin_test.AssertEqualT(t)
+
     name := "XMSSMT-SHA2_40/4_192"
 
     prv, pub, err := GenerateKeyWithName(rand.Reader, name)
@@ -52,6 +55,31 @@ func Test_XMSSMTWithName(t *testing.T) {
     if !Verify(pub, m, sig) {
         t.Error("XMSSMT test failed. Verification does not match")
     }
+
+    prvName, err := GetPrivateKeyTypeName(prv)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    if prvName != name {
+        t.Error("XMSSMT test failed. GetPrivateKeyTypeName error")
+    }
+
+    pubName, err := GetPublicKeyTypeName(pub)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    if pubName != name {
+        t.Error("XMSSMT test failed. GetPublicKeyTypeName error")
+    }
+
+    pub2, err := ExportPublicKey(prv)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    assert(pub2, pub, "XMSSMT test failed. ExportPublicKey error")
 }
 
 func Test_XMSSMT_Check(t *testing.T) {

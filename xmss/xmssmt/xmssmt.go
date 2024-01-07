@@ -38,6 +38,15 @@ func GenerateKey(rand io.Reader, oid uint32) (*xmss.PrivateKey, *xmss.PublicKey,
     return pri, pub2, nil
 }
 
+func GenerateKeyWithName(rand io.Reader, name string) (*xmss.PrivateKey, *xmss.PublicKey, error) {
+    oid, err := GetOidByName(name)
+    if err != nil {
+        return nil, nil, err
+    }
+
+    return GenerateKey(rand, oid)
+}
+
 func Sign(priv *xmss.PrivateKey, msg []byte) ([]byte, error) {
     var oid uint32 = 0
     var i uint32

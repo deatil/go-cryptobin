@@ -31,6 +31,29 @@ func Test_XMSSMT(t *testing.T) {
     }
 }
 
+func Test_XMSSMTWithName(t *testing.T) {
+    name := "XMSSMT-SHA2_40/4_192"
+
+    prv, pub, err := GenerateKeyWithName(rand.Reader, name)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    msg := make([]byte, 32)
+    rand.Read(msg)
+
+    sig, err := Sign(prv, msg)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    m := make([]byte, len(sig))
+
+    if !Verify(pub, m, sig) {
+        t.Error("XMSSMT test failed. Verification does not match")
+    }
+}
+
 func Test_XMSSMT_Check(t *testing.T) {
     prv := "00000002000000be9b3820ffc50b10c91ebe5a2f294ce90d83ba749e8c7f1be0130c60d4bcdf79e0c3c526d88df2d27bb00c706072a1402654312c5b0224e04d7744a8aa1f50222dec0eab8dc64d1ee93d1fa7d5ef486c21e1582887ac2b85653c4a0743b9273697e9d9fa6f4926e3e1ecae02044e70bb855c86820bc8d62cf2d8fa997aa69e0e"
     pub := "0000000297e9d9fa6f4926e3e1ecae02044e70bb855c86820bc8d62cf2d8fa997aa69e0e2dec0eab8dc64d1ee93d1fa7d5ef486c21e1582887ac2b85653c4a0743b92736"

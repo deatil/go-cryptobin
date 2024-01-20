@@ -190,7 +190,7 @@ func main() {
     var priKeyPem string = "..."
     var pubKeyPem string = "..."
 
-    var res bool = cryptobin_sm2.New().
+    var res bool = sm2.New().
         FromPrivateKey([]byte(priKeyPem)).
         // FromPrivateKeyWithPassword([]byte(priKeyPem), psssword).
         // FromPKCS1PrivateKey([]byte(priKeyPem)).
@@ -210,7 +210,7 @@ import (
     "fmt"
     "encoding/base64"
 
-    cryptobin_sm2 "github.com/deatil/go-cryptobin/cryptobin/sm2"
+    "github.com/deatil/go-cryptobin/cryptobin/sm2"
 )
 
 func main() {
@@ -221,7 +221,7 @@ func main() {
     sm2data := `{"request":{"body":{"TEST":"中文","TEST2":"!@#$%^&*()","TEST3":12345,"TEST4":[{"arrItem1":"qaz","arrItem2":123,"arrItem3":true,"arrItem4":"中文"}],"buscod":"N02030"},"head":{"funcode":"DCLISMOD","userid":"N003261207"}},"signature":{"sigdat":"__signature_sigdat__"}}`
     sm2userid := "N0032612070000000000000000"
     sm2userid = sm2userid[0:16]
-    sm2Sign := cryptobin_sm2.NewSM2().
+    sm2Sign := sm2.New().
         FromString(sm2data).
         FromPrivateKeyBytes(sm2keyBytes).
         SignBytes([]byte(sm2userid)).
@@ -230,7 +230,7 @@ func main() {
 
     // sm2 验证【招商银行】
     sm2signdata := "CDAYcxm3jM+65XKtFNii0tKrTmEbfNdR/Q/BtuQFzm5+luEf2nAhkjYTS2ygPjodpuAkarsNqjIhCZ6+xD4WKA=="
-    sm2Verify := cryptobin_sm2.NewSM2().
+    sm2Verify := sm2.New().
         FromBase64String(sm2signdata).
         FromPrivateKeyBytes(sm2keyBytes).
         MakePublicKey().

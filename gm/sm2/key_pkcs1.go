@@ -6,6 +6,8 @@ import (
     "math/big"
     "encoding/asn1"
     "crypto/elliptic"
+
+    "github.com/deatil/go-cryptobin/gm/sm2/p256"
 )
 
 const sm2PrivKeyVersion = 1
@@ -127,7 +129,7 @@ var (
 func namedCurveFromOID(oid asn1.ObjectIdentifier) elliptic.Curve {
     switch {
         case oid.Equal(oidNamedCurveP256SM2):
-            return P256Sm2()
+            return p256.P256()
     }
 
     return nil
@@ -135,7 +137,7 @@ func namedCurveFromOID(oid asn1.ObjectIdentifier) elliptic.Curve {
 
 func oidFromNamedCurve(curve elliptic.Curve) (asn1.ObjectIdentifier, bool) {
     switch curve {
-        case P256Sm2():
+        case p256.P256():
             return oidNamedCurveP256SM2, true
     }
 

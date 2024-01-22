@@ -299,24 +299,24 @@ func (this *PointJacobian) Add(a, b *PointJacobian) *PointJacobian {
     h.Sub(&u2, &u1) // h = u2 - u1
     r.Sub(&s2, &s1) // r = s2 - s1
 
-    r2.Square(&r) // r2 = r ^ 2
-    h2.Square(&h) // h2 = h ^ 2
+    r2.Square(&r)   // r2 = r ^ 2
+    h2.Square(&h)   // h2 = h ^ 2
 
     tm.Mul(&h2, &h) // tm = h ^ 3
     this.x.Sub(&r2, &tm)
     tm.Mul(&u1, &h2)
-    tm.Scalar(2)   // tm = 2 * (u1 * h ^ 2)
+    tm.Scalar(2)             // tm = 2 * (u1 * h ^ 2)
     this.x.Sub(&this.x, &tm) // x3 = r ^ 2 - h ^ 3 - 2 * u1 * h ^ 2
 
-    tm.Mul(&u1, &h2) // tm = u1 * h ^ 2
-    tm.Sub(&tm, &this.x)  // tm = u1 * h ^ 2 - x3
+    tm.Mul(&u1, &h2)         // tm = u1 * h ^ 2
+    tm.Sub(&tm, &this.x)     // tm = u1 * h ^ 2 - x3
     this.y.Mul(&r, &tm)
-    tm.Mul(&h2, &h)  // tm = h ^ 3
-    tm.Mul(&tm, &s1) // tm = s1 * h ^ 3
-    this.y.Sub(&this.y, &tm)   // y3 = r * (u1 * h ^ 2 - x3) - s1 * h ^ 3
+    tm.Mul(&h2, &h)          // tm = h ^ 3
+    tm.Mul(&tm, &s1)         // tm = s1 * h ^ 3
+    this.y.Sub(&this.y, &tm) // y3 = r * (u1 * h ^ 2 - x3) - s1 * h ^ 3
 
     this.z.Mul(&a.z, &b.z)
-    this.z.Mul(&this.z, &h) // z3 = z1 * z3 * h
+    this.z.Mul(&this.z, &h)  // z3 = z1 * z3 * h
 
     return this
 }
@@ -367,21 +367,21 @@ func (this *PointJacobian) Sub(a, b *PointJacobian) *PointJacobian {
     h.Sub(&u2, &u1) // h = u2 - u1
     r.Sub(&s2, &s1) // r = s2 - s1
 
-    r2.Square(&r) // r2 = r ^ 2
-    h2.Square(&h) // h2 = h ^ 2
+    r2.Square(&r)   // r2 = r ^ 2
+    h2.Square(&h)   // h2 = h ^ 2
 
     tm.Mul(&h2, &h) // tm = h ^ 3
     this.x.Sub(&r2, &tm)
     tm.Mul(&u1, &h2)
-    tm.Scalar(2)   // tm = 2 * (u1 * h ^ 2)
+    tm.Scalar(2)    // tm = 2 * (u1 * h ^ 2)
     this.x.Sub(&this.x, &tm) // x3 = r ^ 2 - h ^ 3 - 2 * u1 * h ^ 2
 
-    tm.Mul(&u1, &h2) // tm = u1 * h ^ 2
-    tm.Sub(&tm, &this.x)  // tm = u1 * h ^ 2 - x3
+    tm.Mul(&u1, &h2)         // tm = u1 * h ^ 2
+    tm.Sub(&tm, &this.x)     // tm = u1 * h ^ 2 - x3
     this.y.Mul(&r, &tm)
     tm.Mul(&h2, &h)  // tm = h ^ 3
     tm.Mul(&tm, &s1) // tm = s1 * h ^ 3
-    this.y.Sub(&this.y, &tm)   // y3 = r * (u1 * h ^ 2 - x3) - s1 * h ^ 3
+    this.y.Sub(&this.y, &tm) // y3 = r * (u1 * h ^ 2 - x3) - s1 * h ^ 3
 
     this.z.Mul(&a.z, &b.z)
     this.z.Mul(&this.z, &h) // z3 = z1 * z3 * h
@@ -403,7 +403,7 @@ func (this *PointJacobian) Double(v *PointJacobian) *PointJacobian {
     y4.Square(&v.y)   // y4 = y ^ 2
     y4.Mul(&y4, &v.y) // y4 = y ^ 3
     y4.Mul(&y4, &v.y) // y4 = y ^ 4
-    y4.Scalar(8)   // y4 = 8 * y ^ 4
+    y4.Scalar(8)      // y4 = 8 * y ^ 4
 
     s.Mul(&v.x, &y2)
     s.Scalar(4) // s = 4 * x * y ^ 2
@@ -416,7 +416,7 @@ func (this *PointJacobian) Double(v *PointJacobian) *PointJacobian {
     az4.Mul(&a, &z4)
     m.Add(&m, &az4) // m = 3 * x ^ 2 + a * z ^ 4
 
-    m2.Square(&m) // m2 = m ^ 2
+    m2.Square(&m)   // m2 = m ^ 2
 
     this.z.Add(&v.y, &v.z)
     this.z.Square(&this.z)
@@ -424,7 +424,7 @@ func (this *PointJacobian) Double(v *PointJacobian) *PointJacobian {
     this.z.Sub(&this.z, &y2) // z' = (y + z) ^2 - z ^ 2 - y ^ 2
 
     this.x.Sub(&m2, &s)
-    this.x.Sub(&this.x, &s) // x' = m2 - 2 * s
+    this.x.Sub(&this.x, &s)  // x' = m2 - 2 * s
 
     this.y.Sub(&s, &this.x)
     this.y.Mul(&this.y, &m)

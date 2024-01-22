@@ -24,6 +24,7 @@ func (this *Point) NewPoint(x, y *big.Int) (*Point, error) {
     if x.Sign() < 0 || y.Sign() < 0 {
         return nil, errors.New("negative coordinate")
     }
+
     if x.BitLen() > 256 || y.BitLen() > 256 {
         return nil, errors.New("overflowing coordinate")
     }
@@ -71,8 +72,7 @@ func (this *Point) Set(q *Point) *Point {
 // Select sets {out_x,out_y} to the index'th entry of table.
 // On entry: index < 16, table[0] must be zero.
 func (this *Point) Select(table []uint32, index uint32) *Point {
-    this.x.Zero()
-    this.y.Zero()
+    this.Zero()
 
     for i := uint32(1); i < 16; i++ {
         mask := i ^ index
@@ -94,8 +94,7 @@ func (this *Point) Select(table []uint32, index uint32) *Point {
 // FromJacobian reverses the Jacobian transform. If the point is ∞ it returns 0, 0.
 func (this *Point) FromJacobian(v *PointJacobian) *Point {
     if v.z.Equal(&feZero) == 1 {
-        this.x.Zero()
-        this.y.Zero()
+        this.Zero()
         return this
     }
 

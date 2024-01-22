@@ -167,9 +167,9 @@ func (this *PointJacobian) ScalarBaseMult(scalar []byte) *PointJacobian {
             // The result of pointAddMixed is incorrect if {xOut,yOut,zOut} is zero
             // (a.k.a.  the point at infinity). We handle that situation by
             // copying the point from the table.
-            this.x.CopyConditional(&p.x, nIsInfinityMask)
-            this.y.CopyConditional(&p.y, nIsInfinityMask)
-            this.z.CopyConditional(&field.Factor[1], nIsInfinityMask)
+            this.x.Select(&p.x, nIsInfinityMask)
+            this.y.Select(&p.y, nIsInfinityMask)
+            this.z.Select(&field.Factor[1], nIsInfinityMask)
 
             // Equally, the result is also wrong if the point from the table is
             // zero, which happens when the index is zero. We handle that by
@@ -177,9 +177,9 @@ func (this *PointJacobian) ScalarBaseMult(scalar []byte) *PointJacobian {
             pIsNoninfiniteMask = nonZeroToAllOnes(index)
 
             mask = pIsNoninfiniteMask & ^nIsInfinityMask
-            this.x.CopyConditional(&t.x, mask)
-            this.y.CopyConditional(&t.y, mask)
-            this.z.CopyConditional(&t.z, mask)
+            this.x.Select(&t.x, mask)
+            this.y.Select(&t.y, mask)
+            this.z.Select(&t.z, mask)
 
             // If p was not zero, then n is now non-zero.
             nIsInfinityMask &^= pIsNoninfiniteMask
@@ -236,17 +236,17 @@ func (this *PointJacobian) ScalarMult(q *PointJacobian, scalar []int8) *PointJac
             t.Sub(this, &p)
         }
 
-        this.x.CopyConditional(&p.x, nIsInfinityMask)
-        this.y.CopyConditional(&p.y, nIsInfinityMask)
-        this.z.CopyConditional(&p.z, nIsInfinityMask)
+        this.x.Select(&p.x, nIsInfinityMask)
+        this.y.Select(&p.y, nIsInfinityMask)
+        this.z.Select(&p.z, nIsInfinityMask)
 
         pIsNoninfiniteMask = nonZeroToAllOnes(index)
 
         mask = pIsNoninfiniteMask & ^nIsInfinityMask
 
-        this.x.CopyConditional(&t.x, mask)
-        this.y.CopyConditional(&t.y, mask)
-        this.z.CopyConditional(&t.z, mask)
+        this.x.Select(&t.x, mask)
+        this.y.Select(&t.y, mask)
+        this.z.Select(&t.z, mask)
 
         nIsInfinityMask &^= pIsNoninfiniteMask
     }

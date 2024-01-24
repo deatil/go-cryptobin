@@ -259,15 +259,15 @@ func ToPrivateKey(key *PrivateKey) []byte {
 
 // 根据公钥明文初始化公钥
 func NewPublicKey(data []byte) (*PublicKey, error) {
-    curve := P256()
+    c := P256()
 
-    x, y := elliptic.Unmarshal(curve, data)
+    x, y := curve.Unmarshal(c, data)
     if x == nil || y == nil {
         return nil, errors.New("sm2: publicKey is incorrect.")
     }
 
     pub := &PublicKey{
-        Curve: curve,
+        Curve: c,
         X: x,
         Y: y,
     }
@@ -277,7 +277,7 @@ func NewPublicKey(data []byte) (*PublicKey, error) {
 
 // 输出公钥明文
 func ToPublicKey(key *PublicKey) []byte {
-    return elliptic.Marshal(key.Curve, key.X, key.Y)
+    return curve.Marshal(key.Curve, key.X, key.Y)
 }
 
 // sm2 密文结构: x + y + hash + CipherText

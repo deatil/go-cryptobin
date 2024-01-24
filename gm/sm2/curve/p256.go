@@ -40,29 +40,41 @@ func (curve *sm2Curve) Params() *elliptic.CurveParams {
     return curve.params
 }
 
-// y^2 = x^3 + ax + b
-func (curve *sm2Curve) IsOnCurve(x, y *big.Int) bool {
-    var a, b, x1, y1, y2, x3 field.Element
-
-    x1.FromBig(x)
-    y1.FromBig(y)
-
-    x3.Square(&x1)   // x3 = x ^ 2
-    x3.Mul(&x3, &x1) // x3 = x ^ 2 * x
+// polynomial returns x³ + a*x + b.
+func (curve *sm2Curve) polynomial(x *big.Int) *big.Int {
+    var a, b, aa, xx, xx3 field.Element
 
     a1 := new(big.Int).Sub(curve.params.P, big.NewInt(3))
 
     a.FromBig(a1)
     b.FromBig(curve.params.B)
 
-    a.Mul(&a, &x1)   // a = a * x
+    xx.FromBig(x)
+    xx3.Square(&xx)    // x3 = x ^ 2
+    xx3.Mul(&xx3, &xx) // x3 = x ^ 2 * x
 
-    x3.Add(&x3, &a)
-    x3.Add(&x3, &b)
+    aa.Mul(&a, &xx)    // a = a * x
 
-    y2.Square(&y1) // y2 = y ^ 2
+    xx3.Add(&xx3, &aa)
+    xx3.Add(&xx3, &b)
 
-    return x3.ToBig().Cmp(y2.ToBig()) == 0
+    y := xx3.ToBig()
+
+    return y
+}
+
+// y^2 = x^3 + ax + b
+func (curve *sm2Curve) IsOnCurve(x, y *big.Int) bool {
+    if x.Sign() < 0 || x.Cmp(curve.params.P) >= 0 ||
+        y.Sign() < 0 || y.Cmp(curve.params.P) >= 0 {
+        return false
+    }
+
+    var y2 field.Element
+    y2.FromBig(y)
+    y2.Square(&y2) // y2 = y ^ 2
+
+    return curve.polynomial(x).Cmp(y2.ToBig()) == 0
 }
 
 func (curve *sm2Curve) Add(x1, y1, x2, y2 *big.Int) (xx, yy *big.Int) {
@@ -252,4 +264,13 @@ func boolToUint(b bool) uint {
     }
 
     return 0
+}
+
+func bigFromHex(s string) *big.Int {
+    b, ok := new(big.Int).SetString(s, 16)
+    if !ok {
+        panic("cryptobin/sm2: internal error: invalid encoding")
+    }
+
+    return b
 }

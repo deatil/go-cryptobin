@@ -393,7 +393,7 @@ func decrypt(priv *PrivateKey, data []byte) ([]byte, error) {
 
     c, ok := kdf(length, x2Buf, y2Buf)
     if !ok {
-        return nil, errors.New("Decrypt: failed to decrypt")
+        return nil, errors.New("sm2: failed to decrypt")
     }
 
     for i := 0; i < length; i++ {
@@ -408,7 +408,7 @@ func decrypt(priv *PrivateKey, data []byte) ([]byte, error) {
     h := sm3.Sum(tm)
 
     if bytes.Compare(h[:], data[64:96]) != 0 {
-        return c, errors.New("Decrypt: failed to decrypt")
+        return c, errors.New("sm2: failed to decrypt")
     }
 
     return c, nil
@@ -547,7 +547,7 @@ func ZA(pub *PublicKey, uid []byte) ([]byte, error) {
     uidLen := len(uid)
 
     if uidLen >= 8192 {
-        return []byte{}, errors.New("SM2: uid too large")
+        return []byte{}, errors.New("sm2: uid too large")
     }
 
     Entla := uint16(8 * uidLen)
@@ -581,7 +581,9 @@ func ZA(pub *PublicKey, uid []byte) ([]byte, error) {
 
 func randFieldElement(c elliptic.Curve, random io.Reader) (k *big.Int, err error) {
     if random == nil {
-        random = rand.Reader //If there is no external trusted random source,please use rand.Reader to instead of it.
+        // If there is no external trusted random source,
+        // please use rand.Reader to instead of it.
+        random = rand.Reader
     }
 
     params := c.Params()

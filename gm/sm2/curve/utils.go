@@ -30,6 +30,7 @@ func MarshalCompressed(curve elliptic.Curve, x, y *big.Int) []byte {
 
     compressed := make([]byte, 1+byteLen)
     compressed[0] = byte(y.Bit(0)) | 2
+
     x.FillBytes(compressed[1:])
 
     return compressed

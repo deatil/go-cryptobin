@@ -6,8 +6,7 @@ import (
     "math/big"
     "crypto/elliptic"
 
-    "github.com/deatil/go-cryptobin/gm/sm2/field"
-    "github.com/deatil/go-cryptobin/gm/sm2/point"
+    "github.com/deatil/go-cryptobin/gm/sm2/curve/field"
 )
 
 var (
@@ -88,7 +87,7 @@ func (curve *sm2Curve) Add(x1, y1, x2, y2 *big.Int) (xx, yy *big.Int) {
         panic("cryptobin/sm2Curve: Add was called on an invalid point")
     }
 
-    var c point.PointJacobian
+    var c PointJacobian
     c.Add(&a, &b)
 
     return curve.pointToAffine(c)
@@ -114,7 +113,7 @@ func (curve *sm2Curve) ScalarMult(x, y *big.Int, k []byte) (xx, yy *big.Int) {
     scalar := curve.genrateWNaf(k)
     scalar = curve.wnafReversed(scalar)
 
-    var b point.PointJacobian
+    var b PointJacobian
     b.ScalarMult(&a, scalar)
 
     return curve.pointToAffine(b)
@@ -123,15 +122,15 @@ func (curve *sm2Curve) ScalarMult(x, y *big.Int, k []byte) (xx, yy *big.Int) {
 func (curve *sm2Curve) ScalarBaseMult(k []byte) (xx, yy *big.Int) {
     scalarReversed := curve.normalizeScalar(k)
 
-    var a point.PointJacobian
+    var a PointJacobian
     a.ScalarBaseMult(scalarReversed)
 
     return curve.pointToAffine(a)
 }
 
-func (curve *sm2Curve) pointFromAffine(x, y *big.Int) (p point.PointJacobian, err error) {
+func (curve *sm2Curve) pointFromAffine(x, y *big.Int) (p PointJacobian, err error) {
     if x.Sign() == 0 && y.Sign() == 0 {
-        return point.PointJacobian{}, nil
+        return PointJacobian{}, nil
     }
 
     if x.Sign() < 0 || y.Sign() < 0 {
@@ -147,8 +146,8 @@ func (curve *sm2Curve) pointFromAffine(x, y *big.Int) (p point.PointJacobian, er
         return p, errors.New("cryptobin/sm2Curve: overflowing coordinate")
     }
 
-    var a point.Point
-    var b point.PointJacobian
+    var a Point
+    var b PointJacobian
 
     _, err = a.NewPoint(x, y)
     if err != nil {
@@ -160,8 +159,8 @@ func (curve *sm2Curve) pointFromAffine(x, y *big.Int) (p point.PointJacobian, er
     return b, nil
 }
 
-func (curve *sm2Curve) pointToAffine(p point.PointJacobian) (x, y *big.Int) {
-    var a point.Point
+func (curve *sm2Curve) pointToAffine(p PointJacobian) (x, y *big.Int) {
+    var a Point
 
     x, y = new(big.Int), new(big.Int)
     return a.FromJacobian(&p).ToBig(x, y)

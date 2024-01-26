@@ -32,10 +32,10 @@ func (this *PointJacobian) Set(v *PointJacobian) *PointJacobian {
     return this
 }
 
-func (this *PointJacobian) Select(a *PointJacobian, cond uint32) *PointJacobian {
-    this.x.Select(&a.x, cond)
-    this.y.Select(&a.y, cond)
-    this.z.Select(&a.z, cond)
+func (this *PointJacobian) Select(a, b *PointJacobian, cond int) *PointJacobian {
+    this.x.Select(&a.x, &b.x, cond)
+    this.y.Select(&a.y, &b.y, cond)
+    this.z.Select(&a.z, &b.z, cond)
 
     return this
 }
@@ -46,7 +46,7 @@ func (this *PointJacobian) FromAffine(v *Point) *PointJacobian {
 
     x := new(big.Int).SetBytes(v.x.Bytes())
     y := new(big.Int).SetBytes(v.y.Bytes())
-    
+
     z := zForAffine(x, y)
     this.z.SetBytes(z.Bytes())
 
@@ -115,12 +115,13 @@ func (this *PointJacobian) AddMixed(a *PointJacobian, b *Point) *PointJacobian {
 // little-endian number. Note that the value of scalar must be less than the
 // order of the group.
 func (this *PointJacobian) ScalarBaseMult(scalar []byte) *PointJacobian {
-    var nIsInfinityMask, pIsNoninfiniteMask, mask, tableOffset uint32
-    var p Point
-    var t PointJacobian
+    var nIsInfinityMask, pIsNoninfiniteMask, mask uint32
+    var tableOffset int
+    var p, p1 Point
+    var t, t1 PointJacobian
+    var one field.Element
 
     nIsInfinityMask = ^uint32(0)
-    one := new(field.Element).One()
 
     this.Zero()
 
@@ -140,9 +141,9 @@ func (this *PointJacobian) ScalarBaseMult(scalar []byte) *PointJacobian {
 
             index := bit0 | (bit1 << 1) | (bit2 << 2) | (bit3 << 3)
 
-            pointSelectInto(precomputed[tableOffset:], &p, index)
+            pointPrecomp(tableOffset).SelectInto(&p, index)
 
-            tableOffset += 30 * 9
+            tableOffset += 1
 
             // Since scalar is less than the order of the group, we know that
             // {xOut,yOut,zOut} != {px,py,1}, unless both are zero, which we handle
@@ -152,9 +153,10 @@ func (this *PointJacobian) ScalarBaseMult(scalar []byte) *PointJacobian {
             // The result of pointAddMixed is incorrect if {xOut,yOut,zOut} is zero
             // (a.k.a.  the point at infinity). We handle that situation by
             // copying the point from the table.
-            this.x.Swap(&p.x, nIsInfinityMask)
-            this.y.Swap(&p.y, nIsInfinityMask)
-            this.z.Swap(one, nIsInfinityMask)
+            p1.Set(&p)
+            this.x.Swap(&p1.x, nIsInfinityMask)
+            this.y.Swap(&p1.y, nIsInfinityMask)
+            this.z.Swap(one.One(), nIsInfinityMask)
 
             // Equally, the result is also wrong if the point from the table is
             // zero, which happens when the index is zero. We handle that by
@@ -162,9 +164,11 @@ func (this *PointJacobian) ScalarBaseMult(scalar []byte) *PointJacobian {
             pIsNoninfiniteMask = nonZeroToAllOnes(index)
 
             mask = pIsNoninfiniteMask & ^nIsInfinityMask
-            this.x.Swap(&t.x, mask)
-            this.y.Swap(&t.y, mask)
-            this.z.Swap(&t.z, mask)
+
+            t1.Set(&t)
+            this.x.Swap(&t1.x, mask)
+            this.y.Swap(&t1.y, mask)
+            this.z.Swap(&t1.z, mask)
 
             // If p was not zero, then n is now non-zero.
             nIsInfinityMask &^= pIsNoninfiniteMask
@@ -175,7 +179,7 @@ func (this *PointJacobian) ScalarBaseMult(scalar []byte) *PointJacobian {
 }
 
 func (this *PointJacobian) ScalarMult(q *PointJacobian, scalar []int8) *PointJacobian {
-    var p, t PointJacobian
+    var p, t, p1, t1 PointJacobian
     var nIsInfinityMask, index, pIsNoninfiniteMask, mask uint32
 
     var precomp lookupTable
@@ -209,17 +213,19 @@ func (this *PointJacobian) ScalarMult(q *PointJacobian, scalar []int8) *PointJac
             t.Sub(this, &p)
         }
 
-        this.x.Swap(&p.x, nIsInfinityMask)
-        this.y.Swap(&p.y, nIsInfinityMask)
-        this.z.Swap(&p.z, nIsInfinityMask)
+        p1.Set(&p)
+        this.x.Swap(&p1.x, nIsInfinityMask)
+        this.y.Swap(&p1.y, nIsInfinityMask)
+        this.z.Swap(&p1.z, nIsInfinityMask)
 
         pIsNoninfiniteMask = nonZeroToAllOnes(index)
 
         mask = pIsNoninfiniteMask & ^nIsInfinityMask
 
-        this.x.Swap(&t.x, mask)
-        this.y.Swap(&t.y, mask)
-        this.z.Swap(&t.z, mask)
+        t1.Set(&t)
+        this.x.Swap(&t1.x, mask)
+        this.y.Swap(&t1.y, mask)
+        this.z.Swap(&t1.z, mask)
 
         nIsInfinityMask &^= pIsNoninfiniteMask
     }
@@ -278,7 +284,7 @@ func (this *PointJacobian) Add(a, b *PointJacobian) *PointJacobian {
     tm.Mul(&h2, &h) // tm = h ^ 3
     this.x.Sub(&r2, &tm)
     tm.Mul(&u1, &h2)
-    tm.Scalar(2)             // tm = 2 * (u1 * h ^ 2)
+    tm.Mul(&tm, &scalars[2]) // tm = 2 * (u1 * h ^ 2)
     this.x.Sub(&this.x, &tm) // x3 = r ^ 2 - h ^ 3 - 2 * u1 * h ^ 2
 
     tm.Mul(&u1, &h2)         // tm = u1 * h ^ 2
@@ -342,7 +348,7 @@ func (this *PointJacobian) Sub(a, b *PointJacobian) *PointJacobian {
     tm.Mul(&h2, &h) // tm = h ^ 3
     this.x.Sub(&r2, &tm)
     tm.Mul(&u1, &h2)
-    tm.Scalar(2)    // tm = 2 * (u1 * h ^ 2)
+    tm.Mul(&tm, &scalars[2]) // tm = 2 * (u1 * h ^ 2)
     this.x.Sub(&this.x, &tm) // x3 = r ^ 2 - h ^ 3 - 2 * u1 * h ^ 2
 
     tm.Mul(&u1, &h2)         // tm = u1 * h ^ 2
@@ -369,18 +375,18 @@ func (this *PointJacobian) Double(v *PointJacobian) *PointJacobian {
     z4.Mul(&z4, &v.z) // z4 = z ^ 3
     z4.Mul(&z4, &v.z) // z4 = z ^ 4
 
-    y4.Square(&v.y)   // y4 = y ^ 2
-    y4.Mul(&y4, &v.y) // y4 = y ^ 3
-    y4.Mul(&y4, &v.y) // y4 = y ^ 4
-    y4.Scalar(8)      // y4 = 8 * y ^ 4
+    y4.Square(&v.y)         // y4 = y ^ 2
+    y4.Mul(&y4, &v.y)       // y4 = y ^ 3
+    y4.Mul(&y4, &v.y)       // y4 = y ^ 4
+    y4.Mul(&y4, &scalars[8]) // y4 = 8 * y ^ 4
 
     s.Mul(&v.x, &y2)
-    s.Scalar(4) // s = 4 * x * y ^ 2
+    s.Mul(&s, &scalars[4]) // s = 4 * x * y ^ 2
 
     a.SetBytes(A.Bytes())
 
     m.Set(&x2)
-    m.Scalar(3)
+    m.Mul(&m, &scalars[3])
     az4.Mul(&a, &z4)
     m.Add(&m, &az4) // m = 3 * x ^ 2 + a * z ^ 4
 

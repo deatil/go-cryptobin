@@ -63,9 +63,9 @@ func (this *Point) Set(q *Point) *Point {
 
 // Select sets {out_x,out_y} to the cond'th entry of table.
 // On entry: cond < 16, table[0] must be zero.
-func (this *Point) Select(a *Point, cond uint32) *Point {
-    this.x.Select(&a.x, cond)
-    this.y.Select(&a.y, cond)
+func (this *Point) Select(a, b *Point, cond int) *Point {
+    this.x.Select(&a.x, &b.x, cond)
+    this.y.Select(&a.y, &b.y, cond)
 
     return this
 }

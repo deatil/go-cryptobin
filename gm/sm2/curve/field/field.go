@@ -30,7 +30,9 @@ type Element struct {
 }
 
 func (this *Element) One() *Element {
-    one := factor[1]
+    var one Element
+    one.l = [9]uint32{0x2, 0x0, 0x1FFFFF00, 0x7FF, 0x0, 0x0, 0x0, 0x2000000, 0x0}
+
     return this.Set(&one)
 }
 
@@ -51,17 +53,6 @@ func (this *Element) SetBytes(x []byte) error {
 
 func (this *Element) Bytes() []byte {
     return this.toBig().Bytes()
-}
-
-// Set field data
-func (this *Element) SetUint32(a [9]uint32) *Element {
-    copy(this.l[:], a[:])
-    return this
-}
-
-// Get field data
-func (this *Element) GetUint32() [9]uint32 {
-    return this.l
 }
 
 // Equal returns 1 if v and u are equal, and 0 otherwise.
@@ -88,9 +79,11 @@ func (this *Element) Set(a *Element) *Element {
     return this
 }
 
-func (this *Element) Select(in *Element, mask uint32) *Element {
+func (this *Element) Select(a, b *Element, cond int) *Element {
+    m := uint32(cond)
+
     for i := 0; i < 9; i++ {
-        this.l[i] |= in.l[i] & mask
+        this.l[i] = (m & a.l[i]) | (^m & b.l[i])
     }
 
     return this
@@ -104,6 +97,7 @@ func (this *Element) Swap(in *Element, mask uint32) *Element {
         tmp := mask & (in.l[i] ^ this.l[i])
 
         this.l[i] ^= tmp
+        in.l[i] ^= tmp
     }
 
     return this
@@ -313,23 +307,6 @@ func (this *Element) Square(a *Element) *Element {
     tmp[16] = uint64(a.l[8]) * uint64(a.l[8])
 
     return this.reduceDegree(tmp)
-}
-
-// big.int 0..8 data
-var factor = []Element{
-    Element{l: [9]uint32{0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0}},
-    Element{l: [9]uint32{0x2, 0x0, 0x1FFFFF00, 0x7FF, 0x0, 0x0, 0x0, 0x2000000, 0x0}},
-    Element{l: [9]uint32{0x4, 0x0, 0x1FFFFE00, 0xFFF, 0x0, 0x0, 0x0, 0x4000000, 0x0}},
-    Element{l: [9]uint32{0x6, 0x0, 0x1FFFFD00, 0x17FF, 0x0, 0x0, 0x0, 0x6000000, 0x0}},
-    Element{l: [9]uint32{0x8, 0x0, 0x1FFFFC00, 0x1FFF, 0x0, 0x0, 0x0, 0x8000000, 0x0}},
-    Element{l: [9]uint32{0xA, 0x0, 0x1FFFFB00, 0x27FF, 0x0, 0x0, 0x0, 0xA000000, 0x0}},
-    Element{l: [9]uint32{0xC, 0x0, 0x1FFFFA00, 0x2FFF, 0x0, 0x0, 0x0, 0xC000000, 0x0}},
-    Element{l: [9]uint32{0xE, 0x0, 0x1FFFF900, 0x37FF, 0x0, 0x0, 0x0, 0xE000000, 0x0}},
-    Element{l: [9]uint32{0x10, 0x0, 0x1FFFF800, 0x3FFF, 0x0, 0x0, 0x0, 0x0, 0x01}},
-}
-
-func (this *Element) Scalar(a int) *Element {
-    return this.Mul(this, &factor[a])
 }
 
 // nonZeroToAllOnes returns:

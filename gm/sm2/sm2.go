@@ -104,8 +104,8 @@ func (pub *PublicKey) VerifyBytes(msg []byte, sign []byte, opts crypto.SignerOpt
         uid = opt.Uid
     }
 
-    r := new(big.Int).SetBytes(sign[:32])
-    s := new(big.Int).SetBytes(sign[32:])
+    r := new(big.Int).SetBytes(sign[ 0:32])
+    s := new(big.Int).SetBytes(sign[32:64])
 
     return VerifyWithSM2(pub, msg, uid, r, s)
 }

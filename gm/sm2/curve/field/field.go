@@ -29,14 +29,14 @@ type Element struct {
     l [9]uint32
 }
 
-func (this *Element) Zero() *Element {
-    this.l = [9]uint32{}
-    return this
-}
-
 func (this *Element) One() *Element {
     one := factor[1]
     return this.Set(&one)
+}
+
+func (this *Element) Zero() *Element {
+    this.l = [9]uint32{}
+    return this
 }
 
 func (this *Element) SetBytes(x []byte) error {
@@ -44,18 +44,29 @@ func (this *Element) SetBytes(x []byte) error {
         return errors.New("too long bytes: " + strconv.Itoa(len(x)))
     }
 
-    this.FromBig(new(big.Int).SetBytes(x))
+    this.fromBig(new(big.Int).SetBytes(x))
 
     return nil
 }
 
 func (this *Element) Bytes() []byte {
-    return this.ToBig().Bytes()
+    return this.toBig().Bytes()
+}
+
+// Set field data
+func (this *Element) SetUint32(a [9]uint32) *Element {
+    copy(this.l[:], a[:])
+    return this
+}
+
+// Get field data
+func (this *Element) GetUint32() [9]uint32 {
+    return this.l
 }
 
 // Equal returns 1 if v and u are equal, and 0 otherwise.
 func (this *Element) Equal(x *Element) int {
-    if this.ToBig().Cmp(x.ToBig()) == 0 {
+    if this.toBig().Cmp(x.toBig()) == 0 {
         return 1
     }
 
@@ -64,7 +75,7 @@ func (this *Element) Equal(x *Element) int {
 
 // IsZero returns 1 if v equals zero, and 0 otherwise.
 func (this *Element) IsZero() int {
-    if this.ToBig().Sign() == 0 {
+    if this.toBig().Sign() == 0 {
         return 1
     }
 
@@ -77,15 +88,25 @@ func (this *Element) Set(a *Element) *Element {
     return this
 }
 
-// Set field data
-func (this *Element) SetUint32(a [9]uint32) *Element {
-    copy(this.l[:], a[:])
+func (this *Element) Select(in *Element, mask uint32) *Element {
+    for i := 0; i < 9; i++ {
+        this.l[i] |= in.l[i] & mask
+    }
+
     return this
 }
 
-// Get field data
-func (this *Element) GetUint32() [9]uint32 {
-    return this.l
+// Swap sets out=in if mask = 0xffffffff in constant time.
+//
+// On entry: mask is either 0 or 0xffffffff.
+func (this *Element) Swap(in *Element, mask uint32) *Element {
+    for i := 0; i < 9; i++ {
+        tmp := mask & (in.l[i] ^ this.l[i])
+
+        this.l[i] ^= tmp
+    }
+
+    return this
 }
 
 // c = a + b
@@ -545,29 +566,17 @@ func (this *Element) reduceDegree(b [17]uint64) *Element {
     return this.reduce(carry)
 }
 
-func (this *Element) Select(in *Element, mask uint32) *Element {
-    for i := 0; i < 9; i++ {
-        this.l[i] |= in.l[i] & mask
-    }
+func (this *Element) Inv(in *Element) *Element {
+    z := in.toBig()
+    z.ModInverse(z, P)
 
-    return this
-}
-
-// Swap sets out=in if mask = 0xffffffff in constant time.
-//
-// On entry: mask is either 0 or 0xffffffff.
-func (this *Element) Swap(in *Element, mask uint32) *Element {
-    for i := 0; i < 9; i++ {
-        tmp := mask & (in.l[i] ^ this.l[i])
-
-        this.l[i] ^= tmp
-    }
+    this.fromBig(z)
 
     return this
 }
 
 // X = a * R mod P
-func (this *Element) FromBig(a *big.Int) *Element {
+func (this *Element) fromBig(a *big.Int) *Element {
     x := new(big.Int).Lsh(a, 257)
     x.Mod(x, P)
 
@@ -600,7 +609,7 @@ func (this *Element) FromBig(a *big.Int) *Element {
 // X = this.l
 // X = r * R mod P
 // r = X * R' mod P
-func (this *Element) ToBig() *big.Int {
+func (this *Element) toBig() *big.Int {
     r, tm := new(big.Int), new(big.Int)
 
     r.SetInt64(int64(this.l[8]))

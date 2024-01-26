@@ -45,10 +45,10 @@ func (curve *sm2Curve) polynomial(x *big.Int) *big.Int {
 
     a1 := new(big.Int).Sub(curve.params.P, big.NewInt(3))
 
-    a.FromBig(a1)
-    b.FromBig(curve.params.B)
+    a.SetBytes(a1.Bytes())
+    b.SetBytes(curve.params.B.Bytes())
 
-    xx.FromBig(x)
+    xx.SetBytes(x.Bytes())
     xx3.Square(&xx)    // x3 = x ^ 2
     xx3.Mul(&xx3, &xx) // x3 = x ^ 2 * x
 
@@ -57,7 +57,7 @@ func (curve *sm2Curve) polynomial(x *big.Int) *big.Int {
     xx3.Add(&xx3, &aa)
     xx3.Add(&xx3, &b)
 
-    y := xx3.ToBig()
+    y := new(big.Int).SetBytes(xx3.Bytes())
 
     return y
 }
@@ -70,10 +70,12 @@ func (curve *sm2Curve) IsOnCurve(x, y *big.Int) bool {
     }
 
     var y2 field.Element
-    y2.FromBig(y)
+    y2.SetBytes(y.Bytes())
     y2.Square(&y2) // y2 = y ^ 2
+    
+    yy := new(big.Int).SetBytes(y2.Bytes())
 
-    return curve.polynomial(x).Cmp(y2.ToBig()) == 0
+    return curve.polynomial(x).Cmp(yy) == 0
 }
 
 func (curve *sm2Curve) Add(x1, y1, x2, y2 *big.Int) (xx, yy *big.Int) {

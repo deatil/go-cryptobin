@@ -43,7 +43,7 @@ func Test_ToBig(t *testing.T) {
 
     d.SetUint32([9]uint32{0x10, 0x0, 0x1FFFF800, 0x3FFF, 0x0, 0x0, 0x0, 0x0, 0x01})
 
-    big := d.ToBig()
+    big := d.toBig()
 
     check := "08"
     got := fmt.Sprintf("%x", big.Bytes())
@@ -59,7 +59,7 @@ func Test_FromBig(t *testing.T) {
 
     d, _ = new(big.Int).SetString("08", 16)
 
-    el.FromBig(d)
+    el.fromBig(d)
 
     check2 := [9]uint32{0x10, 0x0, 0x1FFFF800, 0x3FFF, 0x0, 0x0, 0x0, 0x0, 0x01}
     check := fmt.Sprintf("%x", check2)

@@ -1,6 +1,8 @@
 package curve
 
 import (
+    "math/big"
+
     "github.com/deatil/go-cryptobin/gm/sm2/curve/field"
 )
 
@@ -42,8 +44,11 @@ func (this *PointJacobian) FromAffine(v *Point) *PointJacobian {
     this.x.Set(&v.x)
     this.y.Set(&v.y)
 
-    z := zForAffine(v.x.ToBig(), v.y.ToBig())
-    this.z.FromBig(z)
+    x := new(big.Int).SetBytes(v.x.Bytes())
+    y := new(big.Int).SetBytes(v.y.Bytes())
+    
+    z := zForAffine(x, y)
+    this.z.SetBytes(z.Bytes())
 
     return this
 }
@@ -372,7 +377,7 @@ func (this *PointJacobian) Double(v *PointJacobian) *PointJacobian {
     s.Mul(&v.x, &y2)
     s.Scalar(4) // s = 4 * x * y ^ 2
 
-    a.FromBig(A)
+    a.SetBytes(A.Bytes())
 
     m.Set(&x2)
     m.Scalar(3)

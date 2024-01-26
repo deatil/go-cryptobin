@@ -7,11 +7,10 @@ import (
     "github.com/deatil/go-cryptobin/gm/sm2/curve/field"
 )
 
-var A, P *big.Int
+var A *big.Int
 
 func init() {
     A, _ = new(big.Int).SetString("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC", 16)
-    P, _ = new(big.Int).SetString("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF", 16)
 }
 
 type Point struct {
@@ -27,8 +26,8 @@ func (this *Point) NewPoint(x, y *big.Int) (*Point, error) {
         return nil, errors.New("overflowing coordinate")
     }
 
-    this.x.FromBig(x)
-    this.y.FromBig(y)
+    this.x.SetBytes(x.Bytes())
+    this.y.SetBytes(y.Bytes())
 
     return this, nil
 }
@@ -39,8 +38,8 @@ func init() {
     x, _ := new(big.Int).SetString("32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7", 16)
     y, _ := new(big.Int).SetString("BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0", 16)
 
-    generator.x.FromBig(x)
-    generator.y.FromBig(y)
+    generator.x.SetBytes(x.Bytes())
+    generator.y.SetBytes(y.Bytes())
 }
 
 func (this *Point) NewGenerator() *Point {
@@ -80,10 +79,7 @@ func (this *Point) FromJacobian(v *PointJacobian) *Point {
 
     var zInv, zInvSq field.Element
 
-    zz := v.z.ToBig()
-    zz.ModInverse(zz, P)
-
-    zInv.FromBig(zz)
+    zInv.Inv(&v.z)
 
     zInvSq.Square(&zInv)
     this.x.Mul(&v.x, &zInvSq)
@@ -95,8 +91,8 @@ func (this *Point) FromJacobian(v *PointJacobian) *Point {
 }
 
 func (this *Point) ToBig(x, y *big.Int) (xx, yy *big.Int) {
-    x.Set(this.x.ToBig())
-    y.Set(this.y.ToBig())
+    x.SetBytes(this.x.Bytes())
+    y.SetBytes(this.y.Bytes())
 
     return x, y
 }

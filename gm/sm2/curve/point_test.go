@@ -176,7 +176,10 @@ func Test_Point_ScalarMult(t *testing.T) {
     x1.SetUint32([9]uint32{0x11, 0x0, 0x1FFFF800, 0x3FFF, 0x0, 0x0, 0x0, 0x12, 0x01})
     y1.SetUint32([9]uint32{0x10, 0x0, 0x1FFFF801, 0x3FFF, 0x0, 0x25, 0x0, 0x0, 0x01})
 
-    a.NewPoint(x1.ToBig(), y1.ToBig())
+    x := new(big.Int).SetBytes(x1.Bytes())
+    y := new(big.Int).SetBytes(y1.Bytes())
+
+    a.NewPoint(x, y)
 
     scalar = []int8{
         1, 2, 3, 4, 5, 6, 7, 8,

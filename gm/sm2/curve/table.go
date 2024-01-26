@@ -8,7 +8,7 @@ import (
     "github.com/deatil/go-cryptobin/gm/sm2/curve/field"
 )
 
-var precomputed = [2 * 15 * 2]string{
+var precomputed = [2 * 30]string{
     "32c4ae2c1f1981195f9904466a39c9948fe30bbff2660be1715a4589334c74c7", "bc3736a2f4f6779c59bdcee36b692153d0a9877cc62a474002df32e52139f0a0",
     "95afbd1155c1da54ba220b99df9f9a14673891d791caa486e18bd546b5824517", "e8a6d82c517388c22eee750f4053017cc3c7d1898a53f20d8e4450eb334acdcb",
     "82a0f5407d123db6cb129aa494da9ad4137f6c6149feef6ef81c8da9b99fba55", "f12fa4696a22ca3fecacab94e973f9c3a961b58f0cf58373fdeca00772c4dbc9",

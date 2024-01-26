@@ -72,7 +72,7 @@ func (curve *sm2Curve) IsOnCurve(x, y *big.Int) bool {
     var y2 field.Element
     y2.SetBytes(y.Bytes())
     y2.Square(&y2) // y2 = y ^ 2
-    
+
     yy := new(big.Int).SetBytes(y2.Bytes())
 
     return curve.polynomial(x).Cmp(yy) == 0
@@ -113,7 +113,6 @@ func (curve *sm2Curve) ScalarMult(x, y *big.Int, k []byte) (xx, yy *big.Int) {
     }
 
     scalar := curve.genrateWNaf(k)
-    scalar = curve.wnafReversed(scalar)
 
     var b PointJacobian
     b.ScalarMult(&a, scalar)
@@ -168,41 +167,19 @@ func (curve *sm2Curve) pointToAffine(p PointJacobian) (x, y *big.Int) {
     return a.FromJacobian(&p).ToBig(x, y)
 }
 
-func (curve *sm2Curve) normalizeScalar(scalar []byte) []byte {
-    var b [32]byte
-    var scalarBytes []byte
-
-    params := curve.Params()
-
-    n := new(big.Int).SetBytes(scalar)
-    if n.Cmp(params.N) >= 0 {
-        n.Mod(n, params.N)
-        scalarBytes = n.Bytes()
-    } else {
-        scalarBytes = scalar
-    }
-
-    for i, v := range scalarBytes {
-        b[len(scalarBytes) - (1+i)] = v
-    }
-
-    return b[:]
-}
-
 func (curve *sm2Curve) genrateWNaf(b []byte) []int8 {
-    n:= new(big.Int).SetBytes(b)
+    n := new(big.Int).SetBytes(b)
 
     params := curve.Params()
 
     var k *big.Int
     if n.Cmp(params.N) >= 0 {
         n.Mod(n, params.N)
-        k = n
-    } else {
-        k = n
     }
 
-    wnaf := make([]int8, k.BitLen()+1, k.BitLen()+1)
+    k = n
+
+    wnaf := make([]int8, k.BitLen()+1)
     if k.Sign() == 0 {
         return wnaf
     }
@@ -240,16 +217,12 @@ func (curve *sm2Curve) genrateWNaf(b []byte) []int8 {
     }
 
     if len(wnaf) > length + 1 {
-        t := make([]int8, length+1, length+1)
+        t := make([]int8, length+1)
         copy(t, wnaf[0:length+1])
 
         wnaf = t
     }
 
-    return wnaf
-}
-
-func (curve *sm2Curve) wnafReversed(wnaf []int8) []int8 {
     wnafRev := make([]int8, len(wnaf))
 
     for i, v := range wnaf {
@@ -257,6 +230,27 @@ func (curve *sm2Curve) wnafReversed(wnaf []int8) []int8 {
     }
 
     return wnafRev
+}
+
+func (curve *sm2Curve) normalizeScalar(scalar []byte) []byte {
+    var b [32]byte
+    var scalarBytes []byte
+
+    params := curve.Params()
+
+    n := new(big.Int).SetBytes(scalar)
+    if n.Cmp(params.N) >= 0 {
+        n.Mod(n, params.N)
+        scalarBytes = n.Bytes()
+    } else {
+        scalarBytes = scalar
+    }
+
+    for i, v := range scalarBytes {
+        b[len(scalarBytes) - (1+i)] = v
+    }
+
+    return b[:]
 }
 
 func boolToUint(b bool) uint {

@@ -159,7 +159,7 @@ func Test_Point_ScalarBaseMult(t *testing.T) {
 
     d.ScalarBaseMult(scalar[:])
 
-    check := "972a4a10cedad0c4cd4f32662ca8b029cbd97cd5a07198945ea6dc185a589eba-f10b6fe97d204fc99a5a216b5a9cf2f686dfe91a08a99b210bced948fa011e7f-03dc175476b54617de4bded48ce1f8984b8790ed98ea8f3df12e82b8af2c29d2"
+    check := "25bc8c3ff69ab40b0858fb149598a9b9285aeab91f5ba8d9fb748188f8396cd0-a08b1711e4fcdc4a4a4dde6ac211ab9e543751a78d453c66ff06a363bef971cb-3b97792c735eb1cfe8a59d4f6dc189cfafb2cc261fb039478e37ac1f67607e6d"
     got := fmt.Sprintf("%x-%x-%x", d.x.Bytes(), d.y.Bytes(), d.z.Bytes())
 
     if got != check {
@@ -171,7 +171,7 @@ func Test_Point_ScalarMult(t *testing.T) {
     var x1, y1 field.Element
     var d, ad PointJacobian
     var a Point
-    var scalar []int8
+    var scalar []byte
 
     x1.SetBytes([]byte{0x11, 0x0, 0x80, 0x31, 0x0, 0x0, 0x0, 0x12, 0x01})
     y1.SetBytes([]byte{0x10, 0x0, 0x81, 0x31, 0x0, 0x25, 0x0, 0x0, 0x01})
@@ -181,7 +181,7 @@ func Test_Point_ScalarMult(t *testing.T) {
 
     a.NewPoint(x, y)
 
-    scalar = []int8{
+    scalar = []byte{
         1, 2, 3, 4, 5, 6, 7, 8,
         3, 4, 5, 6, 11, 12, 13, 14,
         1, 2, 3, 4, 5, 6, 7, 8,
@@ -192,7 +192,7 @@ func Test_Point_ScalarMult(t *testing.T) {
 
     d.ScalarMult(&ad, scalar)
 
-    check := "52a4bba72edfafbb2e418510b586730bf0cdf52cbdf93112f5e7345a08a6ceb9-a1d2957f78112e65970ffff5cbb0c0200bc407b568a38f564c63e185e7d9789e-b27d6cd021bb7fd08b3198932959ee8d5316e1c7f59baf2ab643a6f062b5ccfd"
+    check := "5d5db11b93118d0afa08a9ea64a89c53805cafa6af1b48894f02bd3bd8b3b03a-b092d0a6cd7655a9497840759e65268949631bfbaae9b8db09fe0b838036f74e-f11c14c6fc6c5c0aa838d7b26384e0d0e071b08e9fa4ce3d6c3fbab8fd25d8ec"
     got := fmt.Sprintf("%x-%x-%x", d.x.Bytes(), d.y.Bytes(), d.z.Bytes())
 
     if got != check {

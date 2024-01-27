@@ -49,6 +49,7 @@ func (curve *sm2Curve) polynomial(x *big.Int) *big.Int {
     b.SetBytes(curve.params.B.Bytes())
 
     xx.SetBytes(x.Bytes())
+
     xx3.Square(&xx)    // x3 = x ^ 2
     xx3.Mul(&xx3, &xx) // x3 = x ^ 2 * x
 
@@ -106,27 +107,57 @@ func (curve *sm2Curve) Double(x, y *big.Int) (xx, yy *big.Int) {
     return curve.pointToAffine(a)
 }
 
-func (curve *sm2Curve) ScalarMult(x, y *big.Int, k []byte) (xx, yy *big.Int) {
+func (curve *sm2Curve) ScalarMult(x, y *big.Int, scalar []byte) (xx, yy *big.Int) {
     a, err := curve.pointFromAffine(x, y)
     if err != nil {
         panic("cryptobin/sm2Curve: ScalarMult was called on an invalid point")
     }
 
-    scalar := curve.genrateWNaf(k)
+    scalar = curve.normalizeScalar(scalar)
 
     var b PointJacobian
-    b.ScalarMult(&a, scalar)
+    _, err = b.ScalarMult(&a, scalar)
+    if err != nil {
+        panic("cryptobin/sm2Curve: sm2 rejected normalized scalar")
+    }
 
     return curve.pointToAffine(b)
 }
 
-func (curve *sm2Curve) ScalarBaseMult(k []byte) (xx, yy *big.Int) {
-    scalarReversed := curve.normalizeScalar(k)
+func (curve *sm2Curve) ScalarBaseMult(scalar []byte) (xx, yy *big.Int) {
+    scalar = curve.normalizeScalar(scalar)
 
     var a PointJacobian
-    a.ScalarBaseMult(scalarReversed)
+    _, err := a.ScalarBaseMult(scalar)
+    if err != nil {
+        panic("cryptobin/sm2Curve: sm2 rejected normalized scalar")
+    }
 
     return curve.pointToAffine(a)
+}
+
+// CombinedMult returns [s1]G + [s2]P where G is the generator.
+func (curve *sm2Curve) CombinedMult(Px, Py *big.Int, s1, s2 []byte) (x, y *big.Int) {
+    s1 = curve.normalizeScalar(s1)
+    q, err := new(PointJacobian).ScalarBaseMult(s1)
+    if err != nil {
+        panic("cryptobin/sm2Curve: sm2 rejected normalized scalar")
+    }
+
+    p, err := curve.pointFromAffine(Px, Py)
+    if err != nil {
+        panic("cryptobin/sm2Curve: CombinedMult was called on an invalid point")
+    }
+
+    s2 = curve.normalizeScalar(s2)
+    _, err = p.ScalarMult(&p, s2)
+    if err != nil {
+        panic("cryptobin/sm2Curve: sm2 rejected normalized scalar")
+    }
+
+    p.Add(&p, q)
+
+    return curve.pointToAffine(p)
 }
 
 func (curve *sm2Curve) pointFromAffine(x, y *big.Int) (p PointJacobian, err error) {
@@ -167,89 +198,21 @@ func (curve *sm2Curve) pointToAffine(p PointJacobian) (x, y *big.Int) {
     return a.FromJacobian(&p).ToBig(x, y)
 }
 
-func (curve *sm2Curve) genrateWNaf(b []byte) []int8 {
-    k := new(big.Int).SetBytes(b)
-
-    params := curve.Params()
-
-    if k.Cmp(params.N) >= 0 {
-        k.Mod(k, params.N)
-    }
-
-    wnaf := make([]int8, k.BitLen()+1)
-    if k.Sign() == 0 {
-        return wnaf
-    }
-
-    var width, pow2, sign int = 4, 16, 8
-    var mask int64 = 15
-    var carry bool
-    var length, pos int
-
-    for pos <= k.BitLen() {
-        if k.Bit(pos) == boolToUint(carry) {
-            pos++
-            continue
-        }
-
-        k.Rsh(k, uint(pos))
-
-        digit := int(k.Int64() & mask)
-        if carry {
-            digit++
-        }
-
-        carry = (digit & sign) != 0
-        if carry {
-            digit -= pow2
-        }
-
-        length += pos
-        wnaf[length] = int8(digit)
-
-        pos = int(width)
-    }
-
-    if len(wnaf) > length + 1 {
-        wnaf = wnaf[0:length+1]
-    }
-
-    wnafRev := make([]int8, len(wnaf))
-
-    for i, v := range wnaf {
-        wnafRev[len(wnaf)-(1+i)] = v
-    }
-
-    return wnafRev
-}
-
+// normalizeScalar brings the scalar within the byte size of the order of the
+// curve, as expected by the nistec scalar multiplication functions.
 func (curve *sm2Curve) normalizeScalar(scalar []byte) []byte {
-    var b [32]byte
-    var scalarBytes []byte
-
-    params := curve.Params()
-
-    n := new(big.Int).SetBytes(scalar)
-    if n.Cmp(params.N) >= 0 {
-        n.Mod(n, params.N)
-        scalarBytes = n.Bytes()
-    } else {
-        scalarBytes = scalar
+    byteSize := (curve.params.N.BitLen() + 7) / 8
+    if len(scalar) == byteSize {
+        return scalar
     }
 
-    for i, v := range scalarBytes {
-        b[len(scalarBytes) - (1+i)] = v
+    s := new(big.Int).SetBytes(scalar)
+    if len(scalar) > byteSize {
+        s.Mod(s, curve.params.N)
     }
 
-    return b[:]
-}
-
-func boolToUint(b bool) uint {
-    if b {
-        return 1
-    }
-
-    return 0
+    out := make([]byte, byteSize)
+    return s.FillBytes(out)
 }
 
 func bigFromHex(s string) *big.Int {

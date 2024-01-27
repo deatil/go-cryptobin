@@ -1,6 +1,7 @@
 package curve
 
 import (
+    "errors"
     "math/big"
 
     "github.com/deatil/go-cryptobin/gm/sm2/curve/field"
@@ -85,7 +86,7 @@ func (this *PointJacobian) Equal(v *PointJacobian) int {
 // ScalarBaseMult sets {xOut,yOut,zOut} = scalar*G where scalar is a
 // little-endian number. Note that the value of scalar must be less than the
 // order of the group.
-func (this *PointJacobian) ScalarBaseMult(scalar []byte) *PointJacobian {
+func (this *PointJacobian) ScalarBaseMult(scalars []byte) (*PointJacobian, error) {
     var nIsInfinityMask, pIsNoninfiniteMask, mask uint32
     var tableOffset int
     var p, p1 Point
@@ -95,6 +96,15 @@ func (this *PointJacobian) ScalarBaseMult(scalar []byte) *PointJacobian {
     nIsInfinityMask = ^uint32(0)
 
     this.Zero()
+
+    if len(scalars) != 32 {
+        return nil, errors.New("invalid scalar length")
+    }
+
+    var scalar = make([]byte, 32)
+    for i, v := range scalars {
+        scalar[len(scalars) - (1+i)] = v
+    }
 
     // The loop adds bits at positions 0, 64, 128 and 192, followed by
     // positions 32,96,160 and 224 and does this 32 times.
@@ -146,10 +156,10 @@ func (this *PointJacobian) ScalarBaseMult(scalar []byte) *PointJacobian {
         }
     }
 
-    return this
+    return this, nil
 }
 
-func (this *PointJacobian) ScalarMult(q *PointJacobian, scalar []int8) *PointJacobian {
+func (this *PointJacobian) ScalarMult(q *PointJacobian, scalars []byte) (*PointJacobian, error) {
     var p, t, p1, t1 PointJacobian
     var nIsInfinityMask, index, pIsNoninfiniteMask, mask uint32
 
@@ -159,6 +169,8 @@ func (this *PointJacobian) ScalarMult(q *PointJacobian, scalar []int8) *PointJac
     this.Zero()
 
     nIsInfinityMask = ^uint32(0)
+
+    scalar := genrateWNaf(scalars)
 
     var zeroes int16
     for i := 0; i < len(scalar); i++ {
@@ -207,7 +219,7 @@ func (this *PointJacobian) ScalarMult(q *PointJacobian, scalar []int8) *PointJac
         }
     }
 
-    return this
+    return this, nil
 }
 
 // this = a + b
@@ -411,4 +423,62 @@ func (this *PointJacobian) Double(v *PointJacobian) *PointJacobian {
     this.y.Sub(&this.y, &y4) // y' = m * (s - x') - 8 * y ^ 4
 
     return this
+}
+
+func genrateWNaf(b []byte) []int8 {
+    k := new(big.Int).SetBytes(b)
+
+    wnaf := make([]int8, k.BitLen()+1)
+    if k.Sign() == 0 {
+        return wnaf
+    }
+
+    var width, pow2, sign int = 4, 16, 8
+    var mask int64 = 15
+    var carry bool
+    var length, pos int
+
+    for pos <= k.BitLen() {
+        if k.Bit(pos) == boolToUint(carry) {
+            pos++
+            continue
+        }
+
+        k.Rsh(k, uint(pos))
+
+        digit := int(k.Int64() & mask)
+        if carry {
+            digit++
+        }
+
+        carry = (digit & sign) != 0
+        if carry {
+            digit -= pow2
+        }
+
+        length += pos
+        wnaf[length] = int8(digit)
+
+        pos = int(width)
+    }
+
+    if len(wnaf) > length + 1 {
+        wnaf = wnaf[0:length+1]
+    }
+
+    wnafRev := make([]int8, len(wnaf))
+
+    for i, v := range wnaf {
+        wnafRev[len(wnaf)-(1+i)] = v
+    }
+
+    return wnafRev
+}
+
+func boolToUint(b bool) uint {
+    if b {
+        return 1
+    }
+
+    return 0
 }

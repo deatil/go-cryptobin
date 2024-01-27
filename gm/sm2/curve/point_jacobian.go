@@ -6,6 +6,12 @@ import (
     "github.com/deatil/go-cryptobin/gm/sm2/curve/field"
 )
 
+var A *big.Int
+
+func init() {
+    A, _ = new(big.Int).SetString("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC", 16)
+}
+
 type incomparable [0]func()
 
 type PointJacobian struct {
@@ -76,41 +82,6 @@ func (this *PointJacobian) Equal(v *PointJacobian) int {
     return (x1.Equal(&x2) & y1.Equal(&y2) & ^zero1 & ^zero2) | (zero1 & zero2)
 }
 
-// z1 = a, z2 = b
-func (this *PointJacobian) AddMixed(a *PointJacobian, b *Point) *PointJacobian {
-    var z1z1, z1z1z1, s2, u2 field.Element
-    var h, i, j, r, rr, v, tmp field.Element
-
-    z1z1.Square(&a.z)
-    tmp.Add(&a.z, &a.z)
-
-    u2.Mul(&b.x, &z1z1)
-    z1z1z1.Mul(&a.z, &z1z1)
-
-    s2.Mul(&b.y, &z1z1z1)
-    h.Sub(&u2, &a.x)
-    i.Add(&h, &h)
-    i.Square(&i)
-    j.Mul(&h, &i)
-    r.Sub(&s2, &a.y)
-    r.Add(&r, &r)
-    v.Mul(&a.x, &i)
-
-    this.z.Mul(&tmp, &h)
-    rr.Square(&r)
-    this.x.Sub(&rr, &j)
-    this.x.Sub(&this.x, &v)
-    this.x.Sub(&this.x, &v)
-
-    tmp.Sub(&v, &this.x)
-    this.y.Mul(&tmp, &r)
-    tmp.Mul(&a.y, &j)
-    this.y.Sub(&this.y, &tmp)
-    this.y.Sub(&this.y, &tmp)
-
-    return this
-}
-
 // ScalarBaseMult sets {xOut,yOut,zOut} = scalar*G where scalar is a
 // little-endian number. Note that the value of scalar must be less than the
 // order of the group.
@@ -154,9 +125,9 @@ func (this *PointJacobian) ScalarBaseMult(scalar []byte) *PointJacobian {
             // (a.k.a.  the point at infinity). We handle that situation by
             // copying the point from the table.
             p1.Set(&p)
-            this.x.Swap(&p1.x, nIsInfinityMask)
-            this.y.Swap(&p1.y, nIsInfinityMask)
-            this.z.Swap(one.One(), nIsInfinityMask)
+            this.x.Swap(&p1.x, int(nIsInfinityMask))
+            this.y.Swap(&p1.y, int(nIsInfinityMask))
+            this.z.Swap(one.One(), int(nIsInfinityMask))
 
             // Equally, the result is also wrong if the point from the table is
             // zero, which happens when the index is zero. We handle that by
@@ -166,9 +137,9 @@ func (this *PointJacobian) ScalarBaseMult(scalar []byte) *PointJacobian {
             mask = pIsNoninfiniteMask & ^nIsInfinityMask
 
             t1.Set(&t)
-            this.x.Swap(&t1.x, mask)
-            this.y.Swap(&t1.y, mask)
-            this.z.Swap(&t1.z, mask)
+            this.x.Swap(&t1.x, int(mask))
+            this.y.Swap(&t1.y, int(mask))
+            this.z.Swap(&t1.z, int(mask))
 
             // If p was not zero, then n is now non-zero.
             nIsInfinityMask &^= pIsNoninfiniteMask
@@ -214,18 +185,18 @@ func (this *PointJacobian) ScalarMult(q *PointJacobian, scalar []int8) *PointJac
         }
 
         p1.Set(&p)
-        this.x.Swap(&p1.x, nIsInfinityMask)
-        this.y.Swap(&p1.y, nIsInfinityMask)
-        this.z.Swap(&p1.z, nIsInfinityMask)
+        this.x.Swap(&p1.x, int(nIsInfinityMask))
+        this.y.Swap(&p1.y, int(nIsInfinityMask))
+        this.z.Swap(&p1.z, int(nIsInfinityMask))
 
         pIsNoninfiniteMask = nonZeroToAllOnes(index)
 
         mask = pIsNoninfiniteMask & ^nIsInfinityMask
 
         t1.Set(&t)
-        this.x.Swap(&t1.x, mask)
-        this.y.Swap(&t1.y, mask)
-        this.z.Swap(&t1.z, mask)
+        this.x.Swap(&t1.x, int(mask))
+        this.y.Swap(&t1.y, int(mask))
+        this.z.Swap(&t1.z, int(mask))
 
         nIsInfinityMask &^= pIsNoninfiniteMask
     }
@@ -235,6 +206,41 @@ func (this *PointJacobian) ScalarMult(q *PointJacobian, scalar []int8) *PointJac
             this.Double(this)
         }
     }
+
+    return this
+}
+
+// this = a + b
+func (this *PointJacobian) AddMixed(a *PointJacobian, b *Point) *PointJacobian {
+    var z1z1, z1z1z1, s2, u2 field.Element
+    var h, i, j, r, rr, v, tmp field.Element
+
+    z1z1.Square(&a.z)
+    tmp.Add(&a.z, &a.z)
+
+    u2.Mul(&b.x, &z1z1)
+    z1z1z1.Mul(&a.z, &z1z1)
+
+    s2.Mul(&b.y, &z1z1z1)
+    h.Sub(&u2, &a.x)
+    i.Add(&h, &h)
+    i.Square(&i)
+    j.Mul(&h, &i)
+    r.Sub(&s2, &a.y)
+    r.Add(&r, &r)
+    v.Mul(&a.x, &i)
+
+    this.z.Mul(&tmp, &h)
+    rr.Square(&r)
+    this.x.Sub(&rr, &j)
+    this.x.Sub(&this.x, &v)
+    this.x.Sub(&this.x, &v)
+
+    tmp.Sub(&v, &this.x)
+    this.y.Mul(&tmp, &r)
+    tmp.Mul(&a.y, &j)
+    this.y.Sub(&this.y, &tmp)
+    this.y.Sub(&this.y, &tmp)
 
     return this
 }

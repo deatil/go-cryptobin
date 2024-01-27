@@ -168,25 +168,20 @@ func (curve *sm2Curve) pointToAffine(p PointJacobian) (x, y *big.Int) {
 }
 
 func (curve *sm2Curve) genrateWNaf(b []byte) []int8 {
-    n := new(big.Int).SetBytes(b)
+    k := new(big.Int).SetBytes(b)
 
     params := curve.Params()
 
-    var k *big.Int
-    if n.Cmp(params.N) >= 0 {
-        n.Mod(n, params.N)
+    if k.Cmp(params.N) >= 0 {
+        k.Mod(k, params.N)
     }
-
-    k = n
 
     wnaf := make([]int8, k.BitLen()+1)
     if k.Sign() == 0 {
         return wnaf
     }
 
-    var width, pow2, sign int
-    width, pow2, sign = 4, 16, 8
-
+    var width, pow2, sign int = 4, 16, 8
     var mask int64 = 15
     var carry bool
     var length, pos int
@@ -199,8 +194,7 @@ func (curve *sm2Curve) genrateWNaf(b []byte) []int8 {
 
         k.Rsh(k, uint(pos))
 
-        var digit int
-        digit = int(k.Int64() & mask)
+        digit := int(k.Int64() & mask)
         if carry {
             digit++
         }
@@ -217,10 +211,7 @@ func (curve *sm2Curve) genrateWNaf(b []byte) []int8 {
     }
 
     if len(wnaf) > length + 1 {
-        t := make([]int8, length+1)
-        copy(t, wnaf[0:length+1])
-
-        wnaf = t
+        wnaf = wnaf[0:length+1]
     }
 
     wnafRev := make([]int8, len(wnaf))

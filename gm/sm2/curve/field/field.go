@@ -92,9 +92,9 @@ func (this *Element) Select(a, b *Element, cond int) *Element {
 // Swap sets out=in if mask = 0xffffffff in constant time.
 //
 // On entry: mask is either 0 or 0xffffffff.
-func (this *Element) Swap(in *Element, mask uint32) *Element {
+func (this *Element) Swap(in *Element, mask int) *Element {
     for i := 0; i < 9; i++ {
-        tmp := mask & (in.l[i] ^ this.l[i])
+        tmp := uint32(mask) & (in.l[i] ^ this.l[i])
 
         this.l[i] ^= tmp
         in.l[i] ^= tmp
@@ -307,6 +307,15 @@ func (this *Element) Square(a *Element) *Element {
     tmp[16] = uint64(a.l[8]) * uint64(a.l[8])
 
     return this.reduceDegree(tmp)
+}
+
+func (this *Element) Inv(in *Element) *Element {
+    z := in.toBig()
+    z.ModInverse(z, P)
+
+    this.fromBig(z)
+
+    return this
 }
 
 // nonZeroToAllOnes returns:
@@ -541,15 +550,6 @@ func (this *Element) reduceDegree(b [17]uint64) *Element {
     this.l[8] &= bottom29Bits
 
     return this.reduce(carry)
-}
-
-func (this *Element) Inv(in *Element) *Element {
-    z := in.toBig()
-    z.ModInverse(z, P)
-
-    this.fromBig(z)
-
-    return this
 }
 
 // X = a * R mod P

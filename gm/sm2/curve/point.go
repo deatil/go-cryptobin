@@ -7,12 +7,6 @@ import (
     "github.com/deatil/go-cryptobin/gm/sm2/curve/field"
 )
 
-var A *big.Int
-
-func init() {
-    A, _ = new(big.Int).SetString("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC", 16)
-}
-
 type Point struct {
     x, y field.Element
 }

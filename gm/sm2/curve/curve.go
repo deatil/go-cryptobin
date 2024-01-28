@@ -57,11 +57,11 @@ func (curve *sm2Curve) pointFromAffine(x, y *big.Int) (p *Point, err error) {
 
     // Reject values that would not get correctly encoded.
     if x.Sign() < 0 || y.Sign() < 0 {
-        return p, errors.New("negative coordinate")
+        return p, errors.New("cryptobin/sm2: negative coordinate")
     }
 
     if x.BitLen() > curve.params.BitSize || y.BitLen() > curve.params.BitSize {
-        return p, errors.New("overflowing coordinate")
+        return p, errors.New("cryptobin/sm2: overflowing coordinate")
     }
 
     // Encode the coordinates and let SetBytes reject invalid points.
@@ -92,12 +92,12 @@ func (curve *sm2Curve) pointToAffine(p *Point) (x, y *big.Int) {
 func (curve *sm2Curve) Add(x1, y1, x2, y2 *big.Int) (*big.Int, *big.Int) {
     p1, err := curve.pointFromAffine(x1, y1)
     if err != nil {
-        panic("sm2/elliptic: Add was called on an invalid point")
+        panic("cryptobin/sm2: Add was called on an invalid point")
     }
 
     p2, err := curve.pointFromAffine(x2, y2)
     if err != nil {
-        panic("sm2/elliptic: Add was called on an invalid point")
+        panic("cryptobin/sm2: Add was called on an invalid point")
     }
 
     return curve.pointToAffine(p1.Add(p1, p2))
@@ -106,7 +106,7 @@ func (curve *sm2Curve) Add(x1, y1, x2, y2 *big.Int) (*big.Int, *big.Int) {
 func (curve *sm2Curve) Double(x1, y1 *big.Int) (*big.Int, *big.Int) {
     p, err := curve.pointFromAffine(x1, y1)
     if err != nil {
-        panic("sm2/elliptic: Double was called on an invalid point")
+        panic("cryptobin/sm2: Double was called on an invalid point")
     }
 
     return curve.pointToAffine(p.Double(p))
@@ -132,13 +132,13 @@ func (curve *sm2Curve) normalizeScalar(scalar []byte) []byte {
 func (curve *sm2Curve) ScalarMult(Bx, By *big.Int, scalar []byte) (*big.Int, *big.Int) {
     p, err := curve.pointFromAffine(Bx, By)
     if err != nil {
-        panic("sm2/elliptic: ScalarMult was called on an invalid point")
+        panic("cryptobin/sm2: ScalarMult was called on an invalid point")
     }
 
     scalar = curve.normalizeScalar(scalar)
     p, err = p.ScalarMult(p, scalar)
     if err != nil {
-        panic("sm2/elliptic: sm2 rejected normalized scalar")
+        panic("cryptobin/sm2: sm2 rejected normalized scalar")
     }
 
     return curve.pointToAffine(p)
@@ -149,7 +149,7 @@ func (curve *sm2Curve) ScalarBaseMult(scalar []byte) (*big.Int, *big.Int) {
 
     p, err := curve.newPoint().ScalarBaseMult(scalar)
     if err != nil {
-        panic("sm2/elliptic: sm2 rejected normalized scalar")
+        panic("cryptobin/sm2: sm2 rejected normalized scalar")
     }
 
     return curve.pointToAffine(p)
@@ -161,18 +161,18 @@ func (curve *sm2Curve) CombinedMult(Px, Py *big.Int, s1, s2 []byte) (x, y *big.I
     s1 = curve.normalizeScalar(s1)
     q, err := curve.newPoint().ScalarBaseMult(s1)
     if err != nil {
-        panic("sm2/elliptic: sm2 rejected normalized scalar")
+        panic("cryptobin/sm2: sm2 rejected normalized scalar")
     }
 
     p, err := curve.pointFromAffine(Px, Py)
     if err != nil {
-        panic("sm2/elliptic: CombinedMult was called on an invalid point")
+        panic("cryptobin/sm2: CombinedMult was called on an invalid point")
     }
 
     s2 = curve.normalizeScalar(s2)
     p, err = p.ScalarMult(p, s2)
     if err != nil {
-        panic("sm2/elliptic: sm2 rejected normalized scalar")
+        panic("cryptobin/sm2: sm2 rejected normalized scalar")
     }
 
     return curve.pointToAffine(p.Add(p, q))
@@ -227,7 +227,7 @@ func (curve *sm2Curve) Inverse(k *big.Int) *big.Int {
     scalar := k.FillBytes(make([]byte, 32))
     inverse, err := P256OrdInverse(scalar)
     if err != nil {
-        panic("sm2/elliptic: sm2 rejected normalized scalar")
+        panic("cryptobin/sm2: sm2 rejected normalized scalar")
     }
 
     return new(big.Int).SetBytes(inverse)
@@ -236,7 +236,7 @@ func (curve *sm2Curve) Inverse(k *big.Int) *big.Int {
 func bigFromHex(s string) *big.Int {
     b, ok := new(big.Int).SetString(s, 16)
     if !ok {
-        panic("sm2/elliptic: internal error: invalid encoding")
+        panic("cryptobin/sm2: internal error: invalid encoding")
     }
 
     return b

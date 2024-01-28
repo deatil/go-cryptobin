@@ -81,7 +81,7 @@ func (p *Point) SetBytes(b []byte) (*Point, error) {
             // y² = x³ - 3x + b
             y := p256Polynomial(new(field.Element), x)
             if !p256Sqrt(y, y) {
-                return nil, errors.New("invalid SM2P256 compressed point encoding")
+                return nil, errors.New("cryptobin/sm2: invalid compressed point encoding")
             }
             // Select the positive or negative root, as indicated by the least
             // significant bit, based on the encoding type byte.
@@ -94,7 +94,7 @@ func (p *Point) SetBytes(b []byte) (*Point, error) {
             p.z.One()
             return p, nil
         default:
-            return nil, errors.New("invalid SM2P256 point encoding")
+            return nil, errors.New("cryptobin/sm2: invalid point encoding")
     }
 }
 
@@ -126,7 +126,7 @@ func p256CheckOnCurve(x, y *field.Element) error {
     rhs := p256Polynomial(new(field.Element), x)
     lhs := new(field.Element).Square(y)
     if rhs.Equal(lhs) != 1 {
-        return errors.New("SM2P256 point not on curve")
+        return errors.New("cryptobin/sm2: point not on curve")
     }
     return nil
 }
@@ -165,7 +165,7 @@ func (p *Point) BytesX() ([]byte, error) {
 
 func (p *Point) bytesX(out *[p256ElementLength]byte) ([]byte, error) {
     if p.z.IsZero() == 1 {
-        return nil, errors.New("SM2P256 point is the point at infinity")
+        return nil, errors.New("cryptobin/sm2: point is the point at infinity")
     }
     zinv := new(field.Element).Invert(p.z)
     x := new(field.Element).Mul(p.x, zinv)
@@ -304,16 +304,16 @@ func (q *Point) Select(p1, p2 *Point, cond int) *Point {
     return q
 }
 
-// A p256Table holds the first 15 multiples of a point at offset -1, so [1]P
+// A lookupTable holds the first 15 multiples of a point at offset -1, so [1]P
 // is at table[0], [15]P is at table[14], and [0]P is implicitly the identity
 // point.
-type p256Table [15]*Point
+type lookupTable [15]*Point
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
-func (table *p256Table) Select(p *Point, n uint8) {
+func (table *lookupTable) Select(p *Point, n uint8) {
     if n >= 16 {
-        panic("sm2ec: internal error: p256Table called with out-of-bounds value")
+        panic("cryptobin/sm2: lookupTable called with out-of-bounds value")
     }
     p.Set(NewPoint())
     for i, f := range table {
@@ -324,9 +324,9 @@ func (table *p256Table) Select(p *Point, n uint8) {
 
 // ScalarMult sets p = scalar * q, and returns p.
 func (p *Point) ScalarMult(q *Point, scalar []byte) (*Point, error) {
-    // Compute a p256Table for the base point q. The explicit NewPoint
+    // Compute a lookupTable for the base point q. The explicit NewPoint
     // calls get inlined, letting the allocations live on the stack.
-    var table = p256Table{
+    var table = lookupTable{
         NewPoint(), NewPoint(), NewPoint(),
         NewPoint(), NewPoint(), NewPoint(), NewPoint(),
         NewPoint(), NewPoint(), NewPoint(), NewPoint(),
@@ -369,15 +369,15 @@ func (p *Point) ScalarMult(q *Point, scalar []byte) (*Point, error) {
     return p, nil
 }
 
-var p256GeneratorTable *[p256ElementLength * 2]p256Table
+var p256GeneratorTable *[p256ElementLength * 2]lookupTable
 var p256GeneratorTableOnce sync.Once
 
-// generatorTable returns a sequence of p256Tables. The first table contains
+// generatorTable returns a sequence of lookupTables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
 // times.
-func (p *Point) generatorTable() *[p256ElementLength * 2]p256Table {
+func (p *Point) generatorTable() *[p256ElementLength * 2]lookupTable {
     p256GeneratorTableOnce.Do(func() {
-        p256GeneratorTable = new([p256ElementLength * 2]p256Table)
+        p256GeneratorTable = new([p256ElementLength * 2]lookupTable)
         base := NewPoint().SetGenerator()
         for i := 0; i < p256ElementLength*2; i++ {
             p256GeneratorTable[i][0] = NewPoint().Set(base)
@@ -397,7 +397,7 @@ func (p *Point) generatorTable() *[p256ElementLength * 2]p256Table {
 // returns p.
 func (p *Point) ScalarBaseMult(scalar []byte) (*Point, error) {
     if len(scalar) != p256ElementLength {
-        return nil, errors.New("invalid scalar length")
+        return nil, errors.New("cryptobin/sm2: invalid scalar length")
     }
     tables := p.generatorTable()
 

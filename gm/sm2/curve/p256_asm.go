@@ -38,16 +38,22 @@ type Point struct {
 // NewPoint returns a new Point representing the point at infinity.
 func NewPoint() *Point {
     return &Point{
-        x: p256One, y: p256One, z: p256Zero,
+        x: p256One,
+        y: p256One,
+        z: p256Zero,
     }
 }
 
 // SetGenerator sets p to the canonical generator and returns p.
 func (p *Point) SetGenerator() *Point {
-    p.x = p256Element{0x61328990f418029e, 0x3e7981eddca6c050,
-        0xd6a1ed99ac24c3c3, 0x91167a5ee1c13b05}
-    p.y = p256Element{0xc1354e593c2d0ddd, 0xc1f5e5788d3295fa,
-        0x8d4cfb066e2a48f8, 0x63cd65d481d735bd}
+    p.x = p256Element{
+        0x61328990f418029e, 0x3e7981eddca6c050,
+        0xd6a1ed99ac24c3c3, 0x91167a5ee1c13b05,
+    }
+    p.y = p256Element{
+        0xc1354e593c2d0ddd, 0xc1f5e5788d3295fa,
+        0x8d4cfb066e2a48f8, 0x63cd65d481d735bd,
+    }
     p.z = p256One
     return p
 }
@@ -143,8 +149,10 @@ func p256Polynomial(y2, x *p256Element) *p256Element {
     p256Add(threeX, threeX, x)
     p256NegCond(threeX, 1)
 
-    p256B := &p256Element{0x90d230632bc0dd42, 0x71cf379ae9b537ab,
-        0x527981505ea51c3c, 0x240fe188ba20e2c8}
+    p256B := &p256Element{
+        0x90d230632bc0dd42, 0x71cf379ae9b537ab,
+        0x527981505ea51c3c, 0x240fe188ba20e2c8,
+    }
 
     p256Add(x3, x3, threeX)
     p256Add(x3, x3, p256B)
@@ -239,60 +247,28 @@ func p256Sqrt(e, x *p256Element) (isSquare bool) {
     p256Sqr(t2, z, 1)  // t2.Square(z)
     p256Sqr(t3, t2, 1) // t3.Square(t2)
     p256Sqr(t1, t3, 1) // t1.Square(t3)
-    // t4.Square(t1)
-    //for s := 1; s < 3; s++ {
-    //	t4.Square(t4)
-    //}
+
     p256Sqr(t4, t1, 3)
     p256Mul(t3, t3, t4) // t3.Mul(t3, t4)
-    //for s := 0; s < 5; s++ {
-    //	t3.Square(t3)
-    //}
     p256Sqr(t3, t3, 5)
     p256Mul(t1, t1, t3) // t1.Mul(t1, t3)
-    //t3.Square(t1)
-    //for s := 1; s < 2; s++ {
-    //	t3.Square(t3)
-    //}
     p256Sqr(t3, t1, 2)
     p256Mul(t2, t2, t3) // t2.Mul(t2, t3)
-    //for s := 0; s < 14; s++ {
-    //	t2.Square(t2)
-    //}
     p256Sqr(t2, t2, 14)
     p256Mul(t1, t1, t2) // t1.Mul(t1, t2)
 
     p256Mul(t0, t0, t1) // t0.Mul(t0, t1)
-    //for s := 0; s < 4; s++ {
-    //	t0.Square(t0)
-    //}
     p256Sqr(t0, t0, 4)
-    //t1.Square(t0)
-    //for s := 1; s < 31; s++ {
-    //	t1.Square(t1)
-    //}
     p256Sqr(t1, t0, 31)
     p256Mul(t0, t0, t1) //t0.Mul(t0, t1)
-    //for s := 0; s < 32; s++ {
-    //	t1.Square(t1)
-    //}
     p256Sqr(t1, t1, 32)
 
     p256Mul(t1, t0, t1) //t1.Mul(t0, t1)
-    //for s := 0; s < 62; s++ {
-    //	t1.Square(t1)
-    //}
     p256Sqr(t1, t1, 62)
     p256Mul(t0, t0, t1) //t0.Mul(t0, t1)
     p256Mul(z, z, t0)   //z.Mul(z, t0)
-    //for s := 0; s < 32; s++ {
-    //	e.Square(e)
-    //}
     p256Sqr(z, z, 32)
     p256Mul(z, z, x) // z.Mul(x, z)
-    //for s := 0; s < 62; s++ {
-    //	z.Square(z)
-    //}
     p256Sqr(z, z, 62)
 
     p256Sqr(t1, z, 1)
@@ -351,16 +327,16 @@ func p256OrdLittleToBig(res *[32]byte, in *p256OrdElement)
 //go:noescape
 func p256OrdReduce(s *p256OrdElement)
 
-// p256Table is a table of the first 16 multiples of a point. Points are stored
+// lookupTable is a table of the first 16 multiples of a point. Points are stored
 // at an index offset of -1 so [8]P is at index 7, P is at 0, and [16]P is at 15.
 // [0]P is the point at infinity and it's not stored.
-type p256Table [32]Point
+type lookupTable [32]Point
 
 // p256Select sets res to the point at index idx in the table.
 // idx must be in [0, limit-1]. It executes in constant time.
 //
 //go:noescape
-func p256Select(res *Point, table *p256Table, idx, limit int)
+func p256Select(res *Point, table *lookupTable, idx, limit int)
 
 // p256AffinePoint is a point in affine coordinates (x, y). x and y are still
 // Montgomery domain elements. The point can't be the point at infinity.
@@ -369,7 +345,7 @@ type p256AffinePoint struct {
 }
 
 // p256AffineTable is a table of the first 32 multiples of a point. Points are
-// stored at an index offset of -1 like in p256Table, and [0]P is not stored.
+// stored at an index offset of -1 like in lookupTable, and [0]P is not stored.
 type p256AffineTable [32]p256AffinePoint
 
 // p256Precomputed is a series of precomputed multiples of G, the canonical
@@ -825,7 +801,7 @@ func (p *Point) p256BaseMult(scalar *p256OrdElement) {
 func (p *Point) p256ScalarMult(scalar *p256OrdElement) {
     // precomp is a table of precomputed points that stores powers of p
     // from p^1 to p^32.
-    var precomp p256Table
+    var precomp lookupTable
     var t0, t1 Point
 
     // Prepare the table

@@ -291,7 +291,7 @@ TEXT ·p256FromMont(SB),NOSPLIT,$0
 
     RET
 /* ---------------------------------------*/
-// func p256Select(res *Point, table *p256Table, idx, limit int)
+// func p256Select(res *Point, table *lookupTable, idx, limit int)
 TEXT ·p256Select(SB),NOSPLIT,$0
     MOVD	limit+24(FP), a_ptr
     MOVD	idx+16(FP), const0

@@ -38,9 +38,9 @@ func marshalCipherBytes(curve elliptic.Curve, c []byte, mode Mode) []byte {
             c2 := make([]byte, len(c) - 2*byteLen - 32)
             c3 := make([]byte, 32)
 
-            copy(c1, c[:2*byteLen])             // x1, y1
-            copy(c3, c[2*byteLen:2*byteLen+32]) // hash
-            copy(c2, c[2*byteLen+32:])          // 密文
+            copy(c1, c[0:])    // x1, y1
+            copy(c3, c[2*byteLen:])    // hash
+            copy(c2, c[2*byteLen+32:]) // 密文
 
             ct := make([]byte, 0)
             ct = append(ct, c1...)
@@ -74,9 +74,9 @@ func unmarshalCipherBytes(curve elliptic.Curve, data []byte, mode Mode) ([]byte,
             c2 := make([]byte, len(data) - 2*byteLen - 32)
             c3 := make([]byte, 32)
 
-            copy(c1, data[:2*byteLen])               // x1, y1
-            copy(c2, data[2*byteLen:len(data) - 32]) // 密文
-            copy(c3, data[len(data) - 32:])          // hash
+            copy(c1, data[0:])      // x1, y1
+            copy(c2, data[2*byteLen:])      // 密文
+            copy(c3, data[len(data) - 32:]) // hash
 
             c := make([]byte, 0)
             c = append(c, c1...)

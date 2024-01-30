@@ -140,12 +140,8 @@ func unmarshalCipherASN1New(curve elliptic.Curve, b []byte) ([]byte, error) {
         return nil, err
     }
 
-    byteLen := (curve.Params().BitSize + 7) / 8
-
-    xBuf := make([]byte, byteLen)
-    data.XCoordinate.FillBytes(xBuf)
-    yBuf := make([]byte, byteLen)
-    data.YCoordinate.FillBytes(yBuf)
+    xBuf := bigIntToBytes(curve, data.XCoordinate)
+    yBuf := bigIntToBytes(curve, data.YCoordinate)
 
     c := []byte{}
     c = append(c, xBuf...)            // x分量
@@ -186,12 +182,8 @@ func unmarshalCipherASN1Old(curve elliptic.Curve, b []byte) ([]byte, error) {
         return nil, err
     }
 
-    byteLen := (curve.Params().BitSize + 7) / 8
-
-    xBuf := make([]byte, byteLen)
-    data.XCoordinate.FillBytes(xBuf)
-    yBuf := make([]byte, byteLen)
-    data.YCoordinate.FillBytes(yBuf)
+    xBuf := bigIntToBytes(curve, data.XCoordinate)
+    yBuf := bigIntToBytes(curve, data.YCoordinate)
 
     c := []byte{}
     c = append(c, xBuf...)            // x分量

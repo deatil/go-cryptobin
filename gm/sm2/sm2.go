@@ -28,7 +28,8 @@ var two = new(big.Int).SetInt64(2)
 
 var errZeroParam = errors.New("zero parameter")
 
-// 加密数据模式 / Encrypt data mode
+// 加密后数据编码模式
+// Encrypted data encoding mode
 type Mode uint
 
 const (
@@ -80,6 +81,8 @@ func (pub *PublicKey) Verify(msg []byte, sign []byte, opts crypto.SignerOpts) bo
     return VerifyWithSM2(pub, msg, uid, r, s)
 }
 
+// 验证 asn.1 编码的数据 ans1(r, s)
+// Verify Bytes marshal data
 func (pub *PublicKey) VerifyBytes(msg []byte, sign []byte, opts crypto.SignerOpts) bool {
     uid := defaultUid
     if opt, ok := opts.(SignerOpts); ok {
@@ -152,6 +155,8 @@ func (priv *PrivateKey) Sign(random io.Reader, msg []byte, opts crypto.SignerOpt
     return MarshalSignatureASN1(r, s)
 }
 
+// 签名返回 Bytes 编码数据
+// sign data and return Bytes marshal data
 func (priv *PrivateKey) SignBytes(random io.Reader, msg []byte, opts crypto.SignerOpts) ([]byte, error) {
     uid := defaultUid
     if opt, ok := opts.(SignerOpts); ok {
@@ -230,9 +235,8 @@ func NewPrivateKey(d []byte) (*PrivateKey, error) {
     k := new(big.Int).SetBytes(d)
 
     c := P256()
-    params := c.Params()
 
-    n := new(big.Int).Sub(params.N, one)
+    n := new(big.Int).Sub(c.Params().N, one)
     if k.Cmp(n) >= 0 {
         return nil, errors.New("cryptobin/sm2: privateKey's D is overflow.")
     }
@@ -325,7 +329,6 @@ func DecryptASN1(priv *PrivateKey, data []byte, mode Mode) ([]byte, error) {
 }
 
 func encrypt(random io.Reader, pub *PublicKey, data []byte) ([]byte, error) {
-    byteLen := (pub.Curve.Params().BitSize + 7) / 8
     length := len(data)
 
     for {
@@ -341,16 +344,13 @@ func encrypt(random io.Reader, pub *PublicKey, data []byte) ([]byte, error) {
         x1, y1 := curve.ScalarBaseMult(k.Bytes())
         x2, y2 := curve.ScalarMult(pub.X, pub.Y, k.Bytes())
 
-        newPubBuf := make([]byte, 2*byteLen)
-        x1.FillBytes(newPubBuf[:byteLen]) // x分量
-        y1.FillBytes(newPubBuf[byteLen:]) // y分量
+        x1Buf := bigIntToBytes(pub.Curve, x1)
+        y1Buf := bigIntToBytes(pub.Curve, y1)
+        x2Buf := bigIntToBytes(pub.Curve, x2)
+        y2Buf := bigIntToBytes(pub.Curve, y2)
 
-        x2Buf := make([]byte, byteLen)
-        x2.FillBytes(x2Buf)
-        y2Buf := make([]byte, byteLen)
-        y2.FillBytes(y2Buf)
-
-        c = append(c, newPubBuf...)
+        c = append(c, x1Buf...) // x分量
+        c = append(c, y1Buf...) // y分量
 
         tm := []byte{}
         tm = append(tm, x2Buf...)
@@ -361,11 +361,12 @@ func encrypt(random io.Reader, pub *PublicKey, data []byte) ([]byte, error) {
         c = append(c, h[:]...)
 
         // 生成密钥 / make key
-        ct, ok := kdf(length, x2Buf, y2Buf) // 密文
+        ct, ok := kdf(length, x2Buf, y2Buf)
         if !ok {
             continue
         }
 
+        // 生成密文 / make encrypt data
         subtle.XORBytes(ct, ct, data)
 
         c = append(c, ct...)
@@ -386,10 +387,8 @@ func decrypt(priv *PrivateKey, data []byte) ([]byte, error) {
 
     x2, y2 := curve.ScalarMult(x, y, priv.D.Bytes())
 
-    x2Buf := make([]byte, byteLen)
-    x2.FillBytes(x2Buf)
-    y2Buf := make([]byte, byteLen)
-    y2.FillBytes(y2Buf)
+    x2Buf := bigIntToBytes(curve, x2)
+    y2Buf := bigIntToBytes(curve, y2)
 
     hash := data[:32]
     data = data[32:]
@@ -402,6 +401,7 @@ func decrypt(priv *PrivateKey, data []byte) ([]byte, error) {
         return nil, errors.New("cryptobin/sm2: failed to decrypt")
     }
 
+    // 解密密文 / decrypt data
     subtle.XORBytes(c, c, data)
 
     tm := []byte{}
@@ -437,7 +437,7 @@ func Sign(random io.Reader, priv *PrivateKey, hash []byte) (r, s *big.Int, err e
                 return
             }
 
-            r, _ = priv.Curve.ScalarBaseMult(k.Bytes())
+            r, _ = c.ScalarBaseMult(k.Bytes())
             r.Add(r, e)
             r.Mod(r, N)
 

@@ -7,7 +7,7 @@ import (
     "crypto/rand"
     "crypto/ecdsa"
 
-    cryptobin_tool "github.com/deatil/go-cryptobin/tool"
+    "github.com/deatil/go-cryptobin/tool"
 )
 
 // 私钥签名
@@ -153,7 +153,7 @@ func (this Ecdsa) SignBytes() Ecdsa {
         return this.AppendError(err)
     }
 
-    encoding := cryptobin_tool.NewEncoding()
+    encoding := tool.NewEncoding()
 
     rHex := encoding.HexEncode(r.Bytes())
     sHex := encoding.HexEncode(s.Bytes())
@@ -175,7 +175,7 @@ func (this Ecdsa) VerifyBytes(data []byte) Ecdsa {
         return this.AppendError(err)
     }
 
-    signData := cryptobin_tool.NewEncoding().HexEncode(this.data)
+    signData := tool.NewEncoding().HexEncode(this.data)
 
     r, _ := new(big.Int).SetString(signData[:64], 16)
     s, _ := new(big.Int).SetString(signData[64:], 16)

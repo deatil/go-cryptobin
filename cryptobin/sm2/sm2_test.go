@@ -2,13 +2,13 @@ package sm2
 
 import (
     "testing"
+    "crypto/md5"
     "crypto/rand"
     "encoding/base64"
 
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
-// signedData = S4vhrJoHXn98ByNw73CSOCqguYeuc4LrhsIHqkv/xA8Waw7YOLsfQzOKzxAjF0vyPKKSEQpq4zEgj9Mb/VL1pQ==
 func Test_SM2_SignBytes(t *testing.T) {
     assertError := cryptobin_test.AssertErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
@@ -486,4 +486,179 @@ func Test_ZhaoshangBank_Verify2(t *testing.T) {
         ToVerify()
 
     assertBool(sm2Verify, "ZhaoshangBank_Verify")
+}
+
+func Test_PKCS1SignWithHash(t *testing.T) {
+    test_PKCS1SignWithHash(t, "MD2")
+    test_PKCS1SignWithHash(t, "MD4")
+    test_PKCS1SignWithHash(t, "MD5")
+    test_PKCS1SignWithHash(t, "SHA1")
+    test_PKCS1SignWithHash(t, "SHA224")
+    test_PKCS1SignWithHash(t, "SHA256")
+    test_PKCS1SignWithHash(t, "SHA384")
+    test_PKCS1SignWithHash(t, "SHA512")
+    test_PKCS1SignWithHash(t, "RIPEMD160")
+    test_PKCS1SignWithHash(t, "SHA3_224")
+    test_PKCS1SignWithHash(t, "SHA3_256")
+    test_PKCS1SignWithHash(t, "SHA3_384")
+    test_PKCS1SignWithHash(t, "SHA3_512")
+    test_PKCS1SignWithHash(t, "SHA512_224")
+    test_PKCS1SignWithHash(t, "SHA512_256")
+    test_PKCS1SignWithHash(t, "BLAKE2s_256")
+    test_PKCS1SignWithHash(t, "BLAKE2b_256")
+    test_PKCS1SignWithHash(t, "BLAKE2b_384")
+    test_PKCS1SignWithHash(t, "BLAKE2b_512")
+    test_PKCS1SignWithHash(t, "SM3")
+}
+
+func test_PKCS1SignWithHash(t *testing.T, hash string) {
+    assertBool := cryptobin_test.AssertBoolT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
+
+    t.Run("PKCS1SignWithHash " + hash, func(t *testing.T) {
+        // 签名
+        objSign := New().
+            FromString(data).
+            FromPKCS1PrivateKey([]byte(prikeyPKCS1)).
+            SetSignHash(hash).
+            Sign()
+        signed := objSign.ToBase64String()
+
+        assertError(objSign.Error(), "PKCS1SignWithHash-Sign")
+        assertNotEmpty(signed, "PKCS1SignWithHash-Sign")
+
+        // 验证
+        objVerify := New().
+            FromBase64String(signed).
+            FromPublicKey([]byte(pubkeyPKCS1)).
+            SetSignHash(hash).
+            Verify([]byte(data))
+
+        assertError(objVerify.Error(), "PKCS1SignWithHash-Verify")
+        assertBool(objVerify.ToVerify(), "PKCS1SignWithHash-Verify")
+    })
+}
+
+func Test_PKCS1SignWithHashFunc(t *testing.T) {
+    assertBool := cryptobin_test.AssertBoolT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    data := "test-pass"
+
+    // 签名
+    objSign := New().
+        FromString(data).
+        FromPKCS1PrivateKey([]byte(prikeyPKCS1)).
+        WithSignHash(md5.New).
+        Sign()
+    signed := objSign.ToBase64String()
+
+    assertError(objSign.Error(), "PKCS1SignWithHashFunc-Sign")
+    assertNotEmpty(signed, "PKCS1SignWithHashFunc-Sign")
+
+    // 验证
+    objVerify := New().
+        FromBase64String(signed).
+        FromPublicKey([]byte(pubkeyPKCS1)).
+        WithSignHash(md5.New).
+        Verify([]byte(data))
+
+    assertError(objVerify.Error(), "PKCS1SignWithHashFunc-Verify")
+    assertBool(objVerify.ToVerify(), "PKCS1SignWithHashFunc-Verify")
+}
+
+func Test_PKCS1SignASN1WithHashFunc(t *testing.T) {
+    assertBool := cryptobin_test.AssertBoolT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    data := "test-pass"
+    uid := []byte("N003261207000000")
+
+    // 签名
+    objSign := New().
+        FromString(data).
+        FromPKCS1PrivateKey([]byte(prikeyPKCS1)).
+        WithSignHash(md5.New).
+        SignASN1(uid)
+    signed := objSign.ToBase64String()
+
+    assertError(objSign.Error(), "PKCS1SignWithHashFunc-Sign")
+    assertNotEmpty(signed, "PKCS1SignWithHashFunc-Sign")
+
+    // 验证
+    objVerify := New().
+        FromBase64String(signed).
+        FromPublicKey([]byte(pubkeyPKCS1)).
+        WithSignHash(md5.New).
+        VerifyASN1([]byte(data), uid)
+
+    assertError(objVerify.Error(), "PKCS1SignWithHashFunc-Verify")
+    assertBool(objVerify.ToVerify(), "PKCS1SignWithHashFunc-Verify")
+}
+
+func Test_PKCS1SignBytesWithHashFunc(t *testing.T) {
+    assertBool := cryptobin_test.AssertBoolT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    data := "test-pass"
+    uid := []byte("N003261207000000")
+
+    // 签名
+    objSign := New().
+        FromString(data).
+        FromPKCS1PrivateKey([]byte(prikeyPKCS1)).
+        WithSignHash(md5.New).
+        SignBytes(uid)
+    signed := objSign.ToBase64String()
+
+    assertError(objSign.Error(), "PKCS1SignWithHashFunc-Sign")
+    assertNotEmpty(signed, "PKCS1SignWithHashFunc-Sign")
+
+    // 验证
+    objVerify := New().
+        FromBase64String(signed).
+        FromPublicKey([]byte(pubkeyPKCS1)).
+        WithSignHash(md5.New).
+        VerifyBytes([]byte(data), uid)
+
+    assertError(objVerify.Error(), "PKCS1SignWithHashFunc-Verify")
+    assertBool(objVerify.ToVerify(), "PKCS1SignWithHashFunc-Verify")
+}
+
+func Test_PKCS1SignBytesWithHashFunc_Fail(t *testing.T) {
+    assertNotBool := cryptobin_test.AssertNotBoolT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    data := "test-pass"
+    uid := []byte("N003261207000000")
+
+    // 签名
+    objSign := New().
+        FromString(data).
+        FromPKCS1PrivateKey([]byte(prikeyPKCS1)).
+        WithSignHash(md5.New).
+        SignBytes(uid)
+    signed := objSign.ToBase64String()
+
+    assertError(objSign.Error(), "PKCS1SignWithHashFunc_Fail-Sign")
+    assertNotEmpty(signed, "PKCS1SignWithHashFunc_Fail-Sign")
+
+    sm2signdata := "123Ycxm312365XKtFNii0tKrTmEbfNdR/Q/BtuQFzm5+luEf2nAhkjYTS2ygPjodpuAkarsNqjIhCZ6+xD4WKA=="
+
+    // 验证
+    objVerify := New().
+        FromBase64String(sm2signdata).
+        FromPublicKey([]byte(pubkeyPKCS1)).
+        WithSignHash(md5.New).
+        VerifyBytes([]byte(data), uid)
+
+    assertError(objVerify.Error(), "PKCS1SignWithHashFunc_Fail-Verify")
+    assertNotBool(objVerify.ToVerify(), "PKCS1SignWithHashFunc_Fail-Verify")
 }

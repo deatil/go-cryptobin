@@ -373,3 +373,117 @@ func test_CreatePKCS1PrivateKeyWithPassword(t *testing.T, cipher string) {
         assertEqual(newPrikey, prikey, "Test_CreatePKCS1PrivateKeyWithPassword")
     })
 }
+
+// 招商银行签名会因为业务不同用的签名方法也会不同，签名方法默认有 SignBytes 和 SignASN1 两种，可根据招商银行给的 demo 选择对应的方法使用
+func Test_ZhaoshangBank_Check(t *testing.T) {
+    assertBool := cryptobin_test.AssertBoolT(t)
+
+    // sm2 签名【招商银行】，
+    sm2key := "NBtl7WnuUtA2v5FaebEkU0/Jj1IodLGT6lQqwkzmd2E="
+    sm2keyBytes, _ := base64.StdEncoding.DecodeString(sm2key)
+    sm2data := `{"request":{"body":{"TEST":"中文","TEST2":"!@#$%^&*()","TEST3":12345,"TEST4":[{"arrItem1":"qaz","arrItem2":123,"arrItem3":true,"arrItem4":"中文"}],"buscod":"N02030"},"head":{"funcode":"DCLISMOD","userid":"N003261207"}},"signature":{"sigdat":"__signature_sigdat__"}}`
+    sm2userid := "N0032612070000000000000000"
+    sm2userid = sm2userid[0:16]
+    sm2Sign := New().
+        FromString(sm2data).
+        FromPrivateKeyBytes(sm2keyBytes).
+        SignBytes([]byte(sm2userid)).
+        // SignASN1([]byte(sm2userid)).
+        ToBase64String()
+
+    // sm2 验证【招商银行】
+    sm2Verify := New().
+        FromBase64String(sm2Sign).
+        FromPrivateKeyBytes(sm2keyBytes).
+        MakePublicKey().
+        VerifyBytes([]byte(sm2data), []byte(sm2userid)).
+        // VerifyASN1([]byte(sm2data), []byte(sm2userid)).
+        ToVerify()
+
+    assertBool(sm2Verify, "ZhaoshangBank_Check")
+}
+
+func Test_ZhaoshangBank_Sign(t *testing.T) {
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    // 私钥明文
+    sm2prikey := "NBtl7WnuUtA2v5FaebEkU0/Jj1IodLGT6lQqwkzmd2E="
+    sm2prikeyBytes, _ := base64.StdEncoding.DecodeString(sm2prikey)
+    sm2data := `{"request":{"body":{"TEST":"中文","TEST2":"!@#$%^&*()","TEST3":12345,"TEST4":[{"arrItem1":"qaz","arrItem2":123,"arrItem3":true,"arrItem4":"中文"}],"buscod":"N02030"},"head":{"funcode":"DCLISMOD","userid":"N003261207"}},"signature":{"sigdat":"__signature_sigdat__"}}`
+    sm2userid := "N0032612070000000000000000"
+    sm2userid = sm2userid[0:16]
+
+    // sm2 签名【招商银行】，
+    sm2Sign := New().
+        FromString(sm2data).
+        FromPrivateKeyBytes(sm2prikeyBytes).
+        SignBytes([]byte(sm2userid)).
+        // SignASN1([]byte(sm2userid)).
+        ToBase64String()
+
+    assertNotEmpty(sm2Sign, "ZhaoshangBank_Sign")
+}
+
+func Test_ZhaoshangBank_Sign2(t *testing.T) {
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    // 私钥明文,16进制
+    sm2prikey := "341b65ed69ee52d036bf915a79b124534fc98f522874b193ea542ac24ce67761"
+    sm2data := `{"request":{"body":{"TEST":"中文","TEST2":"!@#$%^&*()","TEST3":12345,"TEST4":[{"arrItem1":"qaz","arrItem2":123,"arrItem3":true,"arrItem4":"中文"}],"buscod":"N02030"},"head":{"funcode":"DCLISMOD","userid":"N003261207"}},"signature":{"sigdat":"__signature_sigdat__"}}`
+    sm2userid := "N0032612070000000000000000"
+    sm2userid = sm2userid[0:16]
+
+    // sm2 签名【招商银行】，
+    sm2Sign := New().
+        FromString(sm2data).
+        FromPrivateKeyString(sm2prikey).
+        SignBytes([]byte(sm2userid)).
+        // SignASN1([]byte(sm2userid)).
+        ToBase64String()
+
+    assertNotEmpty(sm2Sign, "ZhaoshangBank_Sign")
+}
+
+func Test_ZhaoshangBank_Verify(t *testing.T) {
+    assertBool := cryptobin_test.AssertBoolT(t)
+
+    // 未压缩公钥明文,16进制
+    sm2pubkey := "046374f8947b208b3f28a2dfaec78510f858bc1bad37f038b95903975c9636beb859653fb145727d02d65cd68f202abc2ff93eecea477b1dc81f4f650621b89e9d"
+    sm2data := `{"request":{"body":{"TEST":"中文","TEST2":"!@#$%^&*()","TEST3":12345,"TEST4":[{"arrItem1":"qaz","arrItem2":123,"arrItem3":true,"arrItem4":"中文"}],"buscod":"N02030"},"head":{"funcode":"DCLISMOD","userid":"N003261207"}},"signature":{"sigdat":"__signature_sigdat__"}}`
+    sm2userid := "N0032612070000000000000000"
+    sm2userid = sm2userid[0:16]
+
+    sm2signdata := "CDAYcxm3jM+65XKtFNii0tKrTmEbfNdR/Q/BtuQFzm5+luEf2nAhkjYTS2ygPjodpuAkarsNqjIhCZ6+xD4WKA=="
+
+    // sm2 验证【招商银行】
+    sm2Verify := New().
+        FromBase64String(sm2signdata).
+        FromPublicKeyUncompressString(sm2pubkey).
+        VerifyBytes([]byte(sm2data), []byte(sm2userid)).
+        // VerifyASN1([]byte(sm2data), []byte(sm2userid)).
+        ToVerify()
+
+    assertBool(sm2Verify, "ZhaoshangBank_Verify")
+}
+
+func Test_ZhaoshangBank_Verify2(t *testing.T) {
+    assertBool := cryptobin_test.AssertBoolT(t)
+
+    // 压缩公钥明文,16进制
+    sm2pubkey := "036374f8947b208b3f28a2dfaec78510f858bc1bad37f038b95903975c9636beb8"
+    sm2data := `{"request":{"body":{"TEST":"中文","TEST2":"!@#$%^&*()","TEST3":12345,"TEST4":[{"arrItem1":"qaz","arrItem2":123,"arrItem3":true,"arrItem4":"中文"}],"buscod":"N02030"},"head":{"funcode":"DCLISMOD","userid":"N003261207"}},"signature":{"sigdat":"__signature_sigdat__"}}`
+    sm2userid := "N0032612070000000000000000"
+    sm2userid = sm2userid[0:16]
+
+    sm2signdata := "37fe1dd7697634612b8ec58e59c757b180c7a1262812766e84674e28f601f58a3748ec1bfe23702693d1ec160b116d66ffbddeb6529872fb2c311fd2e0ab5335"
+
+    // sm2 验证【招商银行】
+    sm2Verify := New().
+        FromHexString(sm2signdata).
+        FromPublicKeyCompressString(sm2pubkey).
+        VerifyBytes([]byte(sm2data), []byte(sm2userid)).
+        // VerifyASN1([]byte(sm2data), []byte(sm2userid)).
+        ToVerify()
+
+    assertBool(sm2Verify, "ZhaoshangBank_Verify")
+}

@@ -357,7 +357,7 @@ type p256AffineTable [32]p256AffinePoint
 // MUST NOT be modified, as it aliases into p256PrecomputedEmbed below.
 var p256Precomputed *[43]p256AffineTable
 
-//go:embed p256_asm_table.bin
+//go:embed sm2ec_asm_table.bin
 var p256PrecomputedEmbed string
 
 func init() {

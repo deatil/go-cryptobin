@@ -29,7 +29,7 @@ jobs:
         run: go mod tidy
 
       - name: Unit tests
-        run: cd ./cryptobin && go test -short -covermode=atomic -coverprofile=cover.out ./...
+        run: go test -short -covermode=atomic -coverprofile=cover.out ./...
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3

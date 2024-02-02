@@ -279,7 +279,7 @@ func p256Sqrt(e, x *p256Element) (isSquare bool) {
     return true
 }
 
-// The following assembly functions are implemented in p256_asm_*.s
+// The following assembly functions are implemented in sm2ec_asm_*.s
 var supportBMI2 = cpu.X86.HasBMI2
 
 var supportAVX2 = cpu.X86.HasAVX2

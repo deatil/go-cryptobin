@@ -42,3 +42,6 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           files: cover.out
+
+      - name: Test Generic
+        run: go test -short -tags=purego -covermode=atomic ./...

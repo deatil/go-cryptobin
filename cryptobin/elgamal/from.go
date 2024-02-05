@@ -8,24 +8,6 @@ import (
     cryptobin_elgamal "github.com/deatil/go-cryptobin/elgamal"
 )
 
-// 生成密钥
-func (this EIGamal) GenerateKey(bitsize, probability int) EIGamal {
-    priv, err := cryptobin_elgamal.GenerateKey(rand.Reader, bitsize, probability)
-    if err != nil {
-        return this.AppendError(err)
-    }
-
-    this.privateKey = priv
-    this.publicKey = &priv.PublicKey
-
-    return this
-}
-
-// 生成密钥
-func GenerateKey(bitsize, probability int) EIGamal {
-    return defaultEIGamal.GenerateKey(bitsize, probability)
-}
-
 // 使用数据生成密钥对
 func (this EIGamal) GenerateKeyWithSeed(reader io.Reader, bitsize, probability int) EIGamal {
     priv, err := cryptobin_elgamal.GenerateKey(reader, bitsize, probability)
@@ -42,6 +24,16 @@ func (this EIGamal) GenerateKeyWithSeed(reader io.Reader, bitsize, probability i
 // 使用数据生成密钥对
 func GenerateKeyWithSeed(reader io.Reader, bitsize, probability int) EIGamal {
     return defaultEIGamal.GenerateKeyWithSeed(reader, bitsize, probability)
+}
+
+// 生成密钥
+func (this EIGamal) GenerateKey(bitsize, probability int) EIGamal {
+    return this.GenerateKeyWithSeed(rand.Reader, bitsize, probability)
+}
+
+// 生成密钥
+func GenerateKey(bitsize, probability int) EIGamal {
+    return defaultEIGamal.GenerateKey(bitsize, probability)
 }
 
 // ==========

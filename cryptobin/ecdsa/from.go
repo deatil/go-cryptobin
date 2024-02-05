@@ -12,27 +12,6 @@ import (
 )
 
 // 生成密钥
-func (this ECDSA) GenerateKey() ECDSA {
-    privateKey, err := ecdsa.GenerateKey(this.curve, rand.Reader)
-    if err != nil {
-        return this.AppendError(err)
-    }
-
-    this.privateKey = privateKey
-
-    // 生成公钥
-    this.publicKey = &privateKey.PublicKey
-
-    return this
-}
-
-// 生成密钥
-// 可选 [P521 | P384 | P256 | P224]
-func GenerateKey(curve string) ECDSA {
-    return defaultECDSA.SetCurve(curve).GenerateKey()
-}
-
-// 生成密钥
 func (this ECDSA) GenerateKeyWithSeed(reader io.Reader) ECDSA {
     privateKey, err := ecdsa.GenerateKey(this.curve, reader)
     if err != nil {
@@ -51,6 +30,17 @@ func (this ECDSA) GenerateKeyWithSeed(reader io.Reader) ECDSA {
 // 可选 [P521 | P384 | P256 | P224]
 func GenerateKeyWithSeed(reader io.Reader, curve string) ECDSA {
     return defaultECDSA.SetCurve(curve).GenerateKeyWithSeed(reader)
+}
+
+// 生成密钥
+func (this ECDSA) GenerateKey() ECDSA {
+    return this.GenerateKeyWithSeed(rand.Reader)
+}
+
+// 生成密钥
+// 可选 [P521 | P384 | P256 | P224]
+func GenerateKey(curve string) ECDSA {
+    return defaultECDSA.SetCurve(curve).GenerateKey()
 }
 
 // ==========

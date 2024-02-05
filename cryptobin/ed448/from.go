@@ -9,24 +9,6 @@ import (
 )
 
 // 生成密钥
-func (this ED448) GenerateKey() ED448 {
-    publicKey, privateKey, err := ed448.GenerateKey(rand.Reader)
-    if err != nil {
-        return this.AppendError(err)
-    }
-
-    this.publicKey  = publicKey
-    this.privateKey = privateKey
-
-    return this
-}
-
-// 生成密钥
-func GenerateKey() ED448 {
-    return defaultED448.GenerateKey()
-}
-
-// 生成密钥
 func (this ED448) GenerateKeyWithSeed(reader io.Reader) ED448 {
     publicKey, privateKey, err := ed448.GenerateKey(reader)
     if err != nil {
@@ -42,6 +24,16 @@ func (this ED448) GenerateKeyWithSeed(reader io.Reader) ED448 {
 // 生成密钥
 func GenerateKeyWithSeed(reader io.Reader) ED448 {
     return defaultED448.GenerateKeyWithSeed(reader)
+}
+
+// 生成密钥
+func (this ED448) GenerateKey() ED448 {
+    return this.GenerateKeyWithSeed(rand.Reader)
+}
+
+// 生成密钥
+func GenerateKey() ED448 {
+    return defaultED448.GenerateKey()
 }
 
 // ==========

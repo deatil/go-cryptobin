@@ -9,22 +9,6 @@ import (
 )
 
 // 生成密钥
-func (this ECDH) GenerateKey() ECDH {
-    privateKey, publicKey, err := ecdh.GenerateKey(this.curve, rand.Reader)
-
-    this.privateKey = privateKey
-    this.publicKey  = publicKey
-
-    return this.AppendError(err)
-}
-
-// 生成密钥
-// 可用参数 [P521 | P384 | P256 | P224]
-func GenerateKey(curve string) ECDH {
-    return defaultECDH.SetCurve(curve).GenerateKey()
-}
-
-// 生成密钥
 func (this ECDH) GenerateKeyWithSeed(reader io.Reader) ECDH {
     privateKey, publicKey, err := ecdh.GenerateKey(this.curve, reader)
 
@@ -38,6 +22,17 @@ func (this ECDH) GenerateKeyWithSeed(reader io.Reader) ECDH {
 // 可用参数 [P521 | P384 | P256 | P224]
 func GenerateKeyWithSeed(reader io.Reader, curve string) ECDH {
     return defaultECDH.SetCurve(curve).GenerateKeyWithSeed(reader)
+}
+
+// 生成密钥
+func (this ECDH) GenerateKey() ECDH {
+    return this.GenerateKeyWithSeed(rand.Reader)
+}
+
+// 生成密钥
+// 可用参数 [P521 | P384 | P256 | P224]
+func GenerateKey(curve string) ECDH {
+    return defaultECDH.SetCurve(curve).GenerateKey()
 }
 
 // ==========

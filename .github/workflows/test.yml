@@ -36,12 +36,12 @@ jobs:
       - name: Unit tests
         run: go test -short -covermode=atomic -coverprofile=cover.out ./...
 
+      - name: Test Generic
+        run: go test -short -tags=purego -covermode=atomic ./...
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           files: cover.out
-
-      - name: Test Generic
-        run: go test -short -tags=purego -covermode=atomic ./...

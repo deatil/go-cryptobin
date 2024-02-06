@@ -19,9 +19,7 @@ func (this ECDSA) GenerateKeyWithSeed(reader io.Reader) ECDSA {
     }
 
     this.privateKey = privateKey
-
-    // 生成公钥
-    this.publicKey = &privateKey.PublicKey
+    this.publicKey  = &privateKey.PublicKey
 
     return this
 }

@@ -15,8 +15,8 @@ func (this EdDSA) GenerateKeyWithSeed(reader io.Reader) EdDSA {
         return this.AppendError(err)
     }
 
-    this.publicKey  = publicKey
     this.privateKey = privateKey
+    this.publicKey  = publicKey
 
     return this
 }

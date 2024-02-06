@@ -4,19 +4,19 @@ import (
     "io"
     "crypto/rand"
 
-    cryptobin_tool "github.com/deatil/go-cryptobin/tool"
-    cryptobin_elgamal "github.com/deatil/go-cryptobin/elgamal"
+    "github.com/deatil/go-cryptobin/tool"
+    "github.com/deatil/go-cryptobin/elgamal"
 )
 
 // 使用数据生成密钥对
 func (this EIGamal) GenerateKeyWithSeed(reader io.Reader, bitsize, probability int) EIGamal {
-    priv, err := cryptobin_elgamal.GenerateKey(reader, bitsize, probability)
+    privateKey, err := elgamal.GenerateKey(reader, bitsize, probability)
     if err != nil {
         return this.AppendError(err)
     }
 
-    this.privateKey = priv
-    this.publicKey = &priv.PublicKey
+    this.privateKey = privateKey
+    this.publicKey  = &privateKey.PublicKey
 
     return this
 }
@@ -220,7 +220,7 @@ func FromPKCS8PublicKey(key []byte) EIGamal {
 
 // Pkcs1 DER 私钥
 func (this EIGamal) FromPKCS1PrivateKeyDer(der []byte) EIGamal {
-    key := cryptobin_tool.EncodeDerToPem(der, "EIGamal PRIVATE KEY")
+    key := tool.EncodeDerToPem(der, "EIGamal PRIVATE KEY")
 
     parsedKey, err := this.ParsePKCS1PrivateKeyFromPEM(key)
     if err != nil {
@@ -234,7 +234,7 @@ func (this EIGamal) FromPKCS1PrivateKeyDer(der []byte) EIGamal {
 
 // PKCS1 DER 公钥
 func (this EIGamal) FromPKCS1PublicKeyDer(der []byte) EIGamal {
-    key := cryptobin_tool.EncodeDerToPem(der, "EIGamal PUBLIC KEY")
+    key := tool.EncodeDerToPem(der, "EIGamal PUBLIC KEY")
 
     parsedKey, err := this.ParsePKCS1PublicKeyFromPEM(key)
     if err != nil {
@@ -250,7 +250,7 @@ func (this EIGamal) FromPKCS1PublicKeyDer(der []byte) EIGamal {
 
 // Pkcs8 DER 私钥
 func (this EIGamal) FromPKCS8PrivateKeyDer(der []byte) EIGamal {
-    key := cryptobin_tool.EncodeDerToPem(der, "PRIVATE KEY")
+    key := tool.EncodeDerToPem(der, "PRIVATE KEY")
 
     parsedKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
     if err != nil {
@@ -264,7 +264,7 @@ func (this EIGamal) FromPKCS8PrivateKeyDer(der []byte) EIGamal {
 
 // PKCS8 DER 公钥
 func (this EIGamal) FromPKCS8PublicKeyDer(der []byte) EIGamal {
-    key := cryptobin_tool.EncodeDerToPem(der, "PUBLIC KEY")
+    key := tool.EncodeDerToPem(der, "PUBLIC KEY")
 
     parsedKey, err := this.ParsePKCS8PublicKeyFromPEM(key)
     if err != nil {
@@ -340,7 +340,7 @@ func FromString(data string) EIGamal {
 
 // Base64
 func (this EIGamal) FromBase64String(data string) EIGamal {
-    newData, err := cryptobin_tool.NewEncoding().Base64Decode(data)
+    newData, err := tool.NewEncoding().Base64Decode(data)
 
     this.data = newData
 
@@ -354,7 +354,7 @@ func FromBase64String(data string) EIGamal {
 
 // Hex
 func (this EIGamal) FromHexString(data string) EIGamal {
-    newData, err := cryptobin_tool.NewEncoding().HexDecode(data)
+    newData, err := tool.NewEncoding().HexDecode(data)
 
     this.data = newData
 

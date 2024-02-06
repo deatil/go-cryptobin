@@ -21,7 +21,7 @@ func (this RSA) GenerateKeyWithSeed(reader io.Reader, bits int) RSA {
     this.privateKey = privateKey
 
     // 生成公钥
-    this.publicKey = &this.privateKey.PublicKey
+    this.publicKey = &privateKey.PublicKey
 
     return this
 }
@@ -40,9 +40,7 @@ func (this RSA) GenerateMultiPrimeKeyWithSeed(reader io.Reader, nprimes int, bit
     }
 
     this.privateKey = privateKey
-
-    // 生成公钥
-    this.publicKey = &this.privateKey.PublicKey
+    this.publicKey  = &privateKey.PublicKey
 
     return this
 }

@@ -19,9 +19,7 @@ func (this SM2) GenerateKeyWithSeed(reader io.Reader) SM2 {
     }
 
     this.privateKey = privateKey
-
-    // 生成公钥
-    this.publicKey = &this.privateKey.PublicKey
+    this.publicKey  = &privateKey.PublicKey
 
     return this
 }

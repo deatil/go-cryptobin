@@ -9,6 +9,36 @@ import (
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
+func Test_SignBytesWithHashFunc(t *testing.T) {
+    assertBool := cryptobin_test.AssertBoolT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    data := "test-pass"
+    uid := []byte("N003261207000000")
+
+    gen := GenerateKey()
+
+    // 签名
+    objSign := gen.
+        FromString(data).
+        WithSignHash(md5.New).
+        SignBytes(uid)
+    signed := objSign.ToBase64String()
+
+    assertError(objSign.Error(), "SignBytesWithHashFunc-Sign")
+    assertNotEmpty(signed, "SignBytesWithHashFunc-Sign")
+
+    // 验证
+    objVerify := gen.
+        FromBase64String(signed).
+        WithSignHash(md5.New).
+        VerifyBytes([]byte(data), uid)
+
+    assertError(objVerify.Error(), "SignBytesWithHashFunc-Verify")
+    assertBool(objVerify.ToVerify(), "SignBytesWithHashFunc-Verify")
+}
+
 func Test_SM2_SignBytes(t *testing.T) {
     assertError := cryptobin_test.AssertErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)

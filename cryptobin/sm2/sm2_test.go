@@ -4,6 +4,7 @@ import (
     "testing"
     "crypto/md5"
     "crypto/rand"
+    "encoding/hex"
     "encoding/base64"
 
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
@@ -691,4 +692,32 @@ func Test_PKCS1SignBytesWithHashFunc_Fail(t *testing.T) {
 
     assertError(objVerify.Error(), "PKCS1SignWithHashFunc_Fail-Verify")
     assertNotBool(objVerify.ToVerify(), "PKCS1SignWithHashFunc_Fail-Verify")
+}
+
+// 测试 bc-java 库加密的数据解密
+func Test_DecryptWithBCJavaEndata(t *testing.T) {
+    assertEqual := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    // 明文： AH04DAEB01 对应16进制字串 41483034444145423031
+    check := "AH04DAEB01"
+
+    enData := "BB1925F51B39F7CB725783D4C5F62513F4763D60D4764D4B553C477491811009D221C1EBD33FF3FBA71CC082C350609C054D37E1CF6DC480B8FEF0970AE6D91C622A5759E15ABB3F663D4775B6A6B8E439368FC6D787B47C199A2F0A779F4FC4AFAB37B72790701DB561"
+    prikey := "448152D77F06A39368BE3228C1CE8B6623B934359AB77D733768515259A80BD6"
+
+    enDataBytes, _ := hex.DecodeString(enData)
+    enDataBytes = append([]byte{byte(4)}, enDataBytes...)
+
+    de := New().
+        FromBytes(enDataBytes).
+        FromPrivateKeyString(prikey).
+        SetMode("C1C2C3").
+        Decrypt()
+    deData := de.ToString()
+
+    assertError(de.Error(), "DecryptWithBCJavaEndata-Decrypt")
+    assertNotEmpty(deData, "DecryptWithBCJavaEndata-Decrypt")
+
+    assertEqual(deData, check, "DecryptWithBCJavaEndata-Dedata")
 }

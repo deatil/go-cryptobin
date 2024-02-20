@@ -8,13 +8,25 @@ import (
 ~~~
 
 * 数据输入方式 / input funcs
-`FromBytes(data []byte)`, `FromString(data string)`, `FromBase64String(data string)`, `FromHexString(data string)`
+~~~go
+FromBytes(data []byte)
+FromString(data string)
+FromBase64String(data string)
+FromHexString(data string)
+~~~
 
 * 数据输出方式 / output funcs
-`ToBytes()`, `ToString()`, `ToBase64String()`, `ToHexString()`,
+~~~go
+ToBytes()
+ToString()
+ToBase64String()
+ToHexString()
+~~~
 
 * 获取 error / get error
-`Error()`
+~~~go
+Error()
+~~~
 
 * 生成证书 / make keys
 ~~~go

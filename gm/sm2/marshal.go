@@ -30,15 +30,15 @@ func UnmarshalSignatureASN1(sign []byte) (*big.Int, *big.Int, error) {
 func marshalCipherBytes(curve elliptic.Curve, c []byte, mode Mode) []byte {
     byteLen := (curve.Params().BitSize + 7) / 8
 
-    // C1C3C2 密文结构: 0x04 + x + y + hash + CipherText
-    // C1C2C3 密文结构: 0x04 + x + y + CipherText + hash
+    // C1C3C2 密文结构: x + y + hash + CipherText
+    // C1C2C3 密文结构: x + y + CipherText + hash
     switch mode {
         case C1C2C3:
             c1 := make([]byte, 2*byteLen)
             c2 := make([]byte, len(c) - 2*byteLen - 32)
             c3 := make([]byte, 32)
 
-            copy(c1, c[0:])    // x1, y1
+            copy(c1, c[0:])            // x1, y1
             copy(c3, c[2*byteLen:])    // hash
             copy(c2, c[2*byteLen+32:]) // 密文
 
@@ -74,7 +74,7 @@ func unmarshalCipherBytes(curve elliptic.Curve, data []byte, mode Mode) ([]byte,
             c2 := make([]byte, len(data) - 2*byteLen - 32)
             c3 := make([]byte, 32)
 
-            copy(c1, data[0:])      // x1, y1
+            copy(c1, data[0:])              // x1, y1
             copy(c2, data[2*byteLen:])      // 密文
             copy(c3, data[len(data) - 32:]) // hash
 

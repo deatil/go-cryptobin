@@ -81,8 +81,8 @@ func main() {
     // privatekey password
     var psssword string = ""
 
-	// ctx 数据
-	var ctx string = ""
+    // ctx 数据
+    var ctx string = ""
 
     obj := eddsa.New()
 

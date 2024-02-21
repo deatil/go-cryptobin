@@ -86,8 +86,8 @@ func main() {
     // privatekey password
     var psssword string = ""
 
-	// 设置 UID 值
-	var uid []byte = []byte("")
+    // 设置 UID 值
+    var uid []byte = []byte("")
 
     obj := sm2.New()
 
@@ -102,7 +102,7 @@ func main() {
         // FromPKCS1PrivateKeyWithPassword([]byte(priKeyPem), psssword).
         // FromPKCS8PrivateKey([]byte(priKeyPem)).
         // FromPKCS8PrivateKeyWithPassword([]byte(priKeyPem), psssword).
-		// WithUID(uid).
+        // WithUID(uid).
         Sign().
         // SignASN1().
         // SignBytes().
@@ -114,7 +114,7 @@ func main() {
     var res bool = obj.
         FromBase64String(sigBase64String).
         FromPublicKey([]byte(pubKeyPem)).
-		// WithUID(uid).
+        // WithUID(uid).
         Verify([]byte(data)).
         // VerifyASN1([]byte(data)).
         // VerifyBytes([]byte(data)).
@@ -245,7 +245,7 @@ func main() {
     sm2Sign := sm2.New().
         FromString(sm2data).
         FromPrivateKeyBytes(sm2keyBytes).
-		WithUID([]byte(sm2userid)).
+        WithUID([]byte(sm2userid)).
         SignBytes().
         // SignASN1().
         ToBase64String()
@@ -256,7 +256,7 @@ func main() {
         FromBase64String(sm2signdata).
         FromPrivateKeyBytes(sm2keyBytes).
         MakePublicKey().
-		WithUID([]byte(sm2userid)).
+        WithUID([]byte(sm2userid)).
         VerifyBytes([]byte(sm2data)).
         // VerifyASN1([]byte(sm2data)).
         ToVerify()

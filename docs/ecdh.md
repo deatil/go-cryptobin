@@ -33,8 +33,8 @@ Error()
 func main() {
     // 可用参数 [P521 | P384 | P256 | X25519]
     obj := ecdh.New().
-		SetCurve("P256").
-		GenerateKey()
+        SetCurve("P256").
+        GenerateKey()
 
     // 私钥密码
     // privatekey password

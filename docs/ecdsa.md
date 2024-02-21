@@ -60,10 +60,10 @@ func main() {
 
 签名验证支持以下方式
 ~~~
-符号分割:
-Sign(separator ...string) / Verify(data []byte, separator ...string)
+默认方法:
+Sign() / Verify(data []byte)
 
-ASN1编码:
+ASN1编码，为默认方法别名:
 SignASN1() / VerifyASN1(data []byte)
 
 字节拼接:

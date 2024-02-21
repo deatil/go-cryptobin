@@ -2,6 +2,7 @@ package rsa
 
 import (
     "errors"
+    "crypto"
     "crypto/rsa"
     "crypto/rand"
 )
@@ -13,13 +14,12 @@ func (this RSA) Sign() RSA {
         return this.AppendError(err)
     }
 
-    h := this.signHash.New()
-    h.Write(this.data)
-    hashed := h.Sum(nil)
+    hashed, err := this.dataHash(this.data)
+    if err != nil {
+        return this.AppendError(err)
+    }
 
-    parsedData, err := rsa.SignPKCS1v15(rand.Reader, this.privateKey, this.signHash, hashed)
-
-    this.parsedData = parsedData
+    this.parsedData, err = rsa.SignPKCS1v15(rand.Reader, this.privateKey, this.signHash, hashed)
 
     return this.AppendError(err)
 }
@@ -32,11 +32,12 @@ func (this RSA) Verify(data []byte) RSA {
         return this.AppendError(err)
     }
 
-    h := this.signHash.New()
-    h.Write(data)
-    hashed := h.Sum(nil)
+    hashed, err := this.dataHash(data)
+    if err != nil {
+        return this.AppendError(err)
+    }
 
-    err := rsa.VerifyPKCS1v15(this.publicKey, this.signHash, hashed, this.data)
+    err = rsa.VerifyPKCS1v15(this.publicKey, this.signHash, hashed, this.data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -44,4 +45,16 @@ func (this RSA) Verify(data []byte) RSA {
     this.verify = true
 
     return this
+}
+
+// 签名后数据
+func (this RSA) dataHash(data []byte) ([]byte, error) {
+    if this.signHash == crypto.Hash(0) {
+        return nil, errors.New("crypto.Hash not set.")
+    }
+
+    h := this.signHash.New()
+    h.Write(data)
+
+    return h.Sum(nil), nil
 }

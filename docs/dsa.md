@@ -97,6 +97,8 @@ func main() {
         // FromXMLPrivateKey([]byte(priKeyXML)).
         SetSignHash("SHA256").
         Sign().
+        // SignASN1().
+        // SignBytes().
         ToBase64String()
 
     // 公钥验证
@@ -110,6 +112,8 @@ func main() {
         // FromXMLPublicKey([]byte(pubKeyXML)).
         SetSignHash("SHA256").
         Verify([]byte(data)).
+        // VerifyASN1([]byte(data)).
+        // VerifyBytes([]byte(data)).
         ToVerify()
 }
 ~~~

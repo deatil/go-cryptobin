@@ -72,17 +72,15 @@ func (this DSA) Verify(data []byte, separator ...string) DSA {
         return this.AppendError(err)
     }
 
-    rStr := split[0]
-    sStr := split[1]
     rr := new(big.Int)
     ss := new(big.Int)
 
-    err = rr.UnmarshalText([]byte(rStr))
+    err = rr.UnmarshalText([]byte(split[0]))
     if err != nil {
         return this.AppendError(err)
     }
 
-    err = ss.UnmarshalText([]byte(sStr))
+    err = ss.UnmarshalText([]byte(split[1]))
     if err != nil {
         return this.AppendError(err)
     }
@@ -94,7 +92,7 @@ func (this DSA) Verify(data []byte, separator ...string) DSA {
 
 // ===============
 
-type DSASignature struct {
+type dsaSignature struct {
     R, S *big.Int
 }
 
@@ -115,9 +113,7 @@ func (this DSA) SignASN1() DSA {
         return this.AppendError(err)
     }
 
-    parsedData, err := asn1.Marshal(DSASignature{r, s})
-
-    this.parsedData = parsedData
+    this.parsedData, err = asn1.Marshal(dsaSignature{r, s})
 
     return this.AppendError(err)
 }
@@ -130,7 +126,7 @@ func (this DSA) VerifyASN1(data []byte) DSA {
         return this.AppendError(err)
     }
 
-    var dsaSign DSASignature
+    var dsaSign dsaSignature
     _, err := asn1.Unmarshal(this.data, &dsaSign)
     if err != nil {
         return this.AppendError(err)
@@ -141,10 +137,7 @@ func (this DSA) VerifyASN1(data []byte) DSA {
         return this.AppendError(err)
     }
 
-    r := dsaSign.R
-    s := dsaSign.S
-
-    this.verify = dsa.Verify(this.publicKey, hashed, r, s)
+    this.verify = dsa.Verify(this.publicKey, hashed, dsaSign.R, dsaSign.S)
 
     return this
 }
@@ -153,7 +146,7 @@ func (this DSA) VerifyASN1(data []byte) DSA {
 
 const (
     // 字节大小
-    dsaSubgroupBytes = 32
+    dsaByteLen = 32
 )
 
 // 私钥签名
@@ -173,18 +166,17 @@ func (this DSA) SignBytes() DSA {
         return this.AppendError(err)
     }
 
-    rBytes := r.Bytes()
-    sBytes := s.Bytes()
-    if len(rBytes) > dsaSubgroupBytes || len(sBytes) > dsaSubgroupBytes {
+    if r.BitLen() > (dsaByteLen * 8) || s.BitLen() > (dsaByteLen * 8) {
         err := errors.New("dsa: DSA signature too large.")
         return this.AppendError(err)
     }
 
-    out := make([]byte, 2*dsaSubgroupBytes)
-    copy(out[dsaSubgroupBytes-len(rBytes):], rBytes)
-    copy(out[len(out)-len(sBytes):], sBytes)
+    buf := make([]byte, 2*dsaByteLen)
 
-    this.parsedData = out
+    r.FillBytes(buf[         0:  dsaByteLen])
+    s.FillBytes(buf[dsaByteLen:2*dsaByteLen])
+
+    this.parsedData = buf
 
     return this
 }
@@ -200,13 +192,13 @@ func (this DSA) VerifyBytes(data []byte) DSA {
     // 签名结果数据
     sig := this.data
 
-    if len(sig) != 2*dsaSubgroupBytes {
+    if len(sig) != 2*dsaByteLen {
         err := errors.New("dsa: sig data error.")
         return this.AppendError(err)
     }
 
-    r := new(big.Int).SetBytes(sig[:dsaSubgroupBytes])
-    s := new(big.Int).SetBytes(sig[dsaSubgroupBytes:])
+    r := new(big.Int).SetBytes(sig[:dsaByteLen])
+    s := new(big.Int).SetBytes(sig[dsaByteLen:])
 
     hashed, err := this.dataHash(this.signHash, data)
     if err != nil {

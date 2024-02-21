@@ -14,7 +14,7 @@ func (this EIGamal) Sign() EIGamal {
         return this.AppendError(err)
     }
 
-    hashed, err := this.DataHash(this.signHash, this.data)
+    hashed, err := this.dataHash(this.signHash, this.data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -37,7 +37,7 @@ func (this EIGamal) Verify(data []byte) EIGamal {
         return this.AppendError(err)
     }
 
-    hashed, err := this.DataHash(this.signHash, data)
+    hashed, err := this.dataHash(this.signHash, data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -51,7 +51,7 @@ func (this EIGamal) Verify(data []byte) EIGamal {
 }
 
 // 签名后数据
-func (this EIGamal) DataHash(fn HashFunc, data []byte) ([]byte, error) {
+func (this EIGamal) dataHash(fn HashFunc, data []byte) ([]byte, error) {
     h := fn()
     h.Write(data)
 

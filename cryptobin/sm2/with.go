@@ -73,6 +73,20 @@ func (this SM2) SetSignHash(data string) SM2 {
     return this
 }
 
+// 设置 uid
+func (this SM2) WithUID(data []byte) SM2 {
+    this.uid = data
+
+    return this
+}
+
+// 设置 uid
+func (this SM2) SetUID(data string) SM2 {
+    this.uid = []byte(data)
+
+    return this
+}
+
 // 设置 verify
 func (this SM2) WithVerify(data bool) SM2 {
     this.verify = data

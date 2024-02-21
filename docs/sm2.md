@@ -86,6 +86,9 @@ func main() {
     // privatekey password
     var psssword string = ""
 
+	// 设置 UID 值
+	var uid []byte = []byte("")
+
     obj := sm2.New()
 
     // 私钥签名
@@ -99,7 +102,10 @@ func main() {
         // FromPKCS1PrivateKeyWithPassword([]byte(priKeyPem), psssword).
         // FromPKCS8PrivateKey([]byte(priKeyPem)).
         // FromPKCS8PrivateKeyWithPassword([]byte(priKeyPem), psssword).
+		// WithUID(uid).
         Sign().
+        // SignASN1().
+        // SignBytes().
         ToBase64String()
 
     // 公钥验证
@@ -108,7 +114,10 @@ func main() {
     var res bool = obj.
         FromBase64String(sigBase64String).
         FromPublicKey([]byte(pubKeyPem)).
+		// WithUID(uid).
         Verify([]byte(data)).
+        // VerifyASN1([]byte(data)).
+        // VerifyBytes([]byte(data)).
         ToVerify()
 }
 ~~~
@@ -236,8 +245,9 @@ func main() {
     sm2Sign := sm2.New().
         FromString(sm2data).
         FromPrivateKeyBytes(sm2keyBytes).
-        SignBytes([]byte(sm2userid)).
-        // SignASN1([]byte(sm2userid)).
+		WithUID([]byte(sm2userid)).
+        SignBytes().
+        // SignASN1().
         ToBase64String()
 
     // sm2 验证【招商银行】
@@ -246,8 +256,9 @@ func main() {
         FromBase64String(sm2signdata).
         FromPrivateKeyBytes(sm2keyBytes).
         MakePublicKey().
-        VerifyBytes([]byte(sm2data), []byte(sm2userid)).
-        // VerifyASN1([]byte(sm2data), []byte(sm2userid)).
+		WithUID([]byte(sm2userid)).
+        VerifyBytes([]byte(sm2data)).
+        // VerifyASN1([]byte(sm2data)).
         ToVerify()
 
     fmt.Println("签名结果：", sm2Sign)

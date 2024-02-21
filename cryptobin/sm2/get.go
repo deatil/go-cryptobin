@@ -102,6 +102,11 @@ func (this SM2) GetParedData() []byte {
     return this.parsedData
 }
 
+// 获取 uid
+func (this SM2) GetUID() []byte {
+    return this.uid
+}
+
 // 获取验证后情况
 func (this SM2) GetVerify() bool {
     return this.verify

@@ -1,13 +1,13 @@
 ### ECDH 使用文档
 
-* 包引入 / import pkg
+#### 包引入 / import pkg
 ~~~go
 import (
     "github.com/deatil/go-cryptobin/cryptobin/ecdh"
 )
 ~~~
 
-* 数据输入方式 / input funcs
+#### 数据输入方式 / input funcs
 ~~~go
 FromBytes(data []byte)
 FromString(data string)
@@ -15,7 +15,7 @@ FromBase64String(data string)
 FromHexString(data string)
 ~~~
 
-* 数据输出方式 / output funcs
+#### 数据输出方式 / output funcs
 ~~~go
 ToBytes()
 ToString()
@@ -23,12 +23,12 @@ ToBase64String()
 ToHexString()
 ~~~
 
-* 获取 error / get error
+#### 获取 error / get error
 ~~~go
 Error()
 ~~~
 
-* 生成证书 / make keys
+#### 生成证书 / make keys
 ~~~go
 func main() {
     // 可用参数 [P521 | P384 | P256 | X25519]
@@ -69,7 +69,7 @@ func main() {
 }
 ~~~
 
-* 生成对称加密密钥
+#### 生成对称加密密钥
 ~~~go
 func main() {
     var prikeyPem1 string = "..."

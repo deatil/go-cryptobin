@@ -1,13 +1,13 @@
 ### SM2 使用说明
 
-* 包引入 / import pkg
+#### 包引入 / import pkg
 ~~~go
 import (
     "github.com/deatil/go-cryptobin/cryptobin/sm2"
 )
 ~~~
 
-* 数据输入方式 / input funcs
+#### 数据输入方式 / input funcs
 ~~~go
 FromBytes(data []byte)
 FromString(data string)
@@ -15,7 +15,7 @@ FromBase64String(data string)
 FromHexString(data string)
 ~~~
 
-* 数据输出方式 / output funcs
+#### 数据输出方式 / output funcs
 ~~~go
 ToBytes()
 ToString()
@@ -23,12 +23,12 @@ ToBase64String()
 ToHexString()
 ~~~
 
-* 获取 error / get error
+#### 获取 error / get error
 ~~~go
 Error()
 ~~~
 
-* 生成证书 / make keys
+#### 生成证书 / make keys
 ~~~go
 func main() {
     obj := sm2.New().GenerateKey()
@@ -71,7 +71,7 @@ func main() {
 }
 ~~~
 
-* 签名验证 / sign data
+#### 签名验证 / sign data
 ~~~go
 func main() {
     // 待签名数据
@@ -122,7 +122,7 @@ func main() {
 }
 ~~~
 
-* 加密解密 - 公钥加密/私钥解密 / Encrypt with public key
+#### 加密解密 - 公钥加密/私钥解密 / Encrypt with public key
 ~~~go
 func main() {
     obj := sm2.New()
@@ -164,7 +164,7 @@ func main() {
 }
 ~~~
 
-* SM2 获取 x,y,d 16进制 / get x,y,d data
+#### SM2 获取 x,y,d 16进制数据 / get x,y,d data
 ~~~go
 func main() {
     obj := sm2.New()
@@ -186,7 +186,7 @@ func main() {
 }
 ~~~
 
-* SM2 用 x, y 生成公钥，用 d 生成私钥 / use x,y to make public key and use d to make private key
+#### SM2 用 x, y 生成公钥，用 d 生成私钥 / use x,y to make public key and use d to make private key
 ~~~go
 func main() {
     sm2PublicKeyX  := "a4b75c4c8c44d11687bdd93c0883e630c895234beb685910efbe27009ad911fa"
@@ -205,7 +205,7 @@ func main() {
 }
 ~~~
 
-* 检测私钥公钥是否匹配 / Check KeyPair
+#### 检测私钥公钥是否匹配 / Check KeyPair
 ~~~go
 func main() {
     var priKeyPem string = "..."
@@ -223,7 +223,7 @@ func main() {
 }
 ~~~
 
-* 【招商银行】支付签名验证 / zhaoshang bank check
+#### 【招商银行】支付签名验证 / zhaoshang bank check
 ~~~go
 package main
 

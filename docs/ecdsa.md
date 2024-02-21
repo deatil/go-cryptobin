@@ -1,13 +1,13 @@
 ### EcDsa 使用说明
 
-* 包引入
+#### 包引入
 ~~~go
 import (
     "github.com/deatil/go-cryptobin/cryptobin/ecdsa"
 )
 ~~~
 
-* 数据输入方式 / input funcs
+#### 数据输入方式 / input funcs
 ~~~go
 FromBytes(data []byte)
 FromString(data string)
@@ -15,7 +15,7 @@ FromBase64String(data string)
 FromHexString(data string)
 ~~~
 
-* 数据输出方式 / output funcs
+#### 数据输出方式 / output funcs
 ~~~go
 ToBytes()
 ToString()
@@ -23,12 +23,12 @@ ToBase64String()
 ToHexString()
 ~~~
 
-* 获取 error / get error
+#### 获取 error / get error
 ~~~go
 Error()
 ~~~
 
-* 生成证书
+#### 生成证书
 ~~~go
 func main() {
     // 私钥密码
@@ -56,7 +56,7 @@ func main() {
 }
 ~~~
 
-* 签名验证
+#### 签名验证
 
 签名验证支持以下方式
 ~~~
@@ -101,7 +101,7 @@ func main() {
 }
 ~~~
 
-* 加密解密
+#### 加密解密
 
 ECDSA 加密使用自身的 ECDH 生成的密钥，使用 AES 对称加密解密数据
 
@@ -141,7 +141,7 @@ Vu0zCh5hkl/0r9vPzPeqGpHJv3eJw/zF+gZWxn2LvLcKkQTcGutSwVdVRQ==
 }
 ~~~
 
-* 检测私钥公钥是否匹配
+#### 检测私钥公钥是否匹配
 ~~~go
 func main() {
     // 私钥密码

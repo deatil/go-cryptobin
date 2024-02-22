@@ -10,7 +10,7 @@ import (
 // 私钥签名
 func (this RSA) Sign() RSA {
     if this.privateKey == nil {
-        err := errors.New("rsa: privateKey error.")
+        err := errors.New("privateKey error.")
         return this.AppendError(err)
     }
 
@@ -28,7 +28,7 @@ func (this RSA) Sign() RSA {
 // 使用原始数据[data]对比签名后数据
 func (this RSA) Verify(data []byte) RSA {
     if this.publicKey == nil {
-        err := errors.New("rsa: publicKey error.")
+        err := errors.New("publicKey error.")
         return this.AppendError(err)
     }
 

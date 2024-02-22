@@ -12,7 +12,7 @@ import (
 // 私钥签名
 func (this DSA) Sign(separator ...string) DSA {
     if this.privateKey == nil {
-        err := errors.New("dsa: privateKey error.")
+        err := errors.New("privateKey error.")
         return this.AppendError(err)
     }
 
@@ -52,7 +52,7 @@ func (this DSA) Sign(separator ...string) DSA {
 // 使用原始数据[data]对比签名后数据
 func (this DSA) Verify(data []byte, separator ...string) DSA {
     if this.publicKey == nil {
-        err := errors.New("dsa: publicKey error.")
+        err := errors.New("publicKey error.")
         return this.AppendError(err)
     }
 
@@ -68,7 +68,7 @@ func (this DSA) Verify(data []byte, separator ...string) DSA {
 
     split := strings.Split(string(this.data), sep)
     if len(split) != 2 {
-        err := errors.New("dsa: sign data is error.")
+        err := errors.New("sign data is error.")
         return this.AppendError(err)
     }
 
@@ -99,7 +99,7 @@ type dsaSignature struct {
 // 私钥签名
 func (this DSA) SignASN1() DSA {
     if this.privateKey == nil {
-        err := errors.New("dsa: privateKey error.")
+        err := errors.New("privateKey error.")
         return this.AppendError(err)
     }
 
@@ -122,7 +122,7 @@ func (this DSA) SignASN1() DSA {
 // 使用原始数据[data]对比签名后数据
 func (this DSA) VerifyASN1(data []byte) DSA {
     if this.publicKey == nil {
-        err := errors.New("dsa: publicKey error.")
+        err := errors.New("publicKey error.")
         return this.AppendError(err)
     }
 
@@ -152,7 +152,7 @@ const (
 // 私钥签名
 func (this DSA) SignBytes() DSA {
     if this.privateKey == nil {
-        err := errors.New("dsa: privateKey error.")
+        err := errors.New("privateKey error.")
         return this.AppendError(err)
     }
 
@@ -167,7 +167,7 @@ func (this DSA) SignBytes() DSA {
     }
 
     if r.BitLen() > (dsaByteLen * 8) || s.BitLen() > (dsaByteLen * 8) {
-        err := errors.New("dsa: DSA signature too large.")
+        err := errors.New("DSA signature too large.")
         return this.AppendError(err)
     }
 
@@ -185,7 +185,7 @@ func (this DSA) SignBytes() DSA {
 // 使用原始数据[data]对比签名后数据
 func (this DSA) VerifyBytes(data []byte) DSA {
     if this.publicKey == nil {
-        err := errors.New("dsa: publicKey error.")
+        err := errors.New("publicKey error.")
         return this.AppendError(err)
     }
 
@@ -193,7 +193,7 @@ func (this DSA) VerifyBytes(data []byte) DSA {
     sig := this.data
 
     if len(sig) != 2*dsaByteLen {
-        err := errors.New("dsa: sig data error.")
+        err := errors.New("sig data error.")
         return this.AppendError(err)
     }
 

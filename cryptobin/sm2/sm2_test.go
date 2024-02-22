@@ -767,7 +767,7 @@ func Test_With(t *testing.T) {
         WithPublicKey(publicKey).
         WithMode(mode).
         WithData(data).
-        WithParedData(parsedData).
+        WithParsedData(parsedData).
         WithSignHash(hash).
         WithUID(uid).
         WithVerify(verify).
@@ -832,7 +832,7 @@ func Test_Get(t *testing.T) {
     assertEqual(obj.GetKeyData(), keyData, "GetKeyData")
     assertEqual(obj.GetMode(), mode, "GetMode")
     assertEqual(obj.GetData(), data, "GetData")
-    assertEqual(obj.GetParedData(), parsedData, "GetParedData")
+    assertEqual(obj.GetParsedData(), parsedData, "GetParsedData")
     assertEqual(obj.GetUID(), uid, "GetUID")
     assertEqual(obj.GetVerify(), verify, "GetVerify")
     assertEqual(obj.GetErrors(), errTest, "GetErrors")

@@ -98,7 +98,7 @@ func (this SM2) GetData() []byte {
 }
 
 // 获取 parsedData
-func (this SM2) GetParedData() []byte {
+func (this SM2) GetParsedData() []byte {
     return this.parsedData
 }
 

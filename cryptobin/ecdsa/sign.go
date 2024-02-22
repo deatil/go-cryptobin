@@ -14,7 +14,7 @@ func (this ECDSA) Sign() ECDSA {
         return this.AppendError(err)
     }
 
-    hashed, err := this.dataHash(this.signHash, this.data)
+    hashed, err := this.dataHash(this.data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -37,7 +37,7 @@ func (this ECDSA) Verify(data []byte) ECDSA {
         return this.AppendError(err)
     }
 
-    hashed, err := this.dataHash(this.signHash, data)
+    hashed, err := this.dataHash(data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -69,7 +69,7 @@ func (this ECDSA) SignBytes() ECDSA {
         return this.AppendError(err)
     }
 
-    hashed, err := this.dataHash(this.signHash, this.data)
+    hashed, err := this.dataHash(this.data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -99,7 +99,7 @@ func (this ECDSA) VerifyBytes(data []byte) ECDSA {
         return this.AppendError(err)
     }
 
-    hashed, err := this.dataHash(this.signHash, data)
+    hashed, err := this.dataHash(data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -123,8 +123,12 @@ func (this ECDSA) VerifyBytes(data []byte) ECDSA {
 // ===============
 
 // 签名后数据
-func (this ECDSA) dataHash(fn HashFunc, data []byte) ([]byte, error) {
-    h := fn()
+func (this ECDSA) dataHash(data []byte) ([]byte, error) {
+    if this.signHash == nil {
+        return nil, errors.New("Hash func not set.")
+    }
+
+    h := this.signHash()
     h.Write(data)
 
     return h.Sum(nil), nil

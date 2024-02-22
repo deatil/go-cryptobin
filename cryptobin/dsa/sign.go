@@ -16,7 +16,7 @@ func (this DSA) Sign(separator ...string) DSA {
         return this.AppendError(err)
     }
 
-    hashed, err := this.dataHash(this.signHash, this.data)
+    hashed, err := this.dataHash(this.data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -56,7 +56,7 @@ func (this DSA) Verify(data []byte, separator ...string) DSA {
         return this.AppendError(err)
     }
 
-    hashed, err := this.dataHash(this.signHash, data)
+    hashed, err := this.dataHash(data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -103,7 +103,7 @@ func (this DSA) SignASN1() DSA {
         return this.AppendError(err)
     }
 
-    hashed, err := this.dataHash(this.signHash, this.data)
+    hashed, err := this.dataHash(this.data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -132,7 +132,7 @@ func (this DSA) VerifyASN1(data []byte) DSA {
         return this.AppendError(err)
     }
 
-    hashed, err := this.dataHash(this.signHash, data)
+    hashed, err := this.dataHash(data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -156,7 +156,7 @@ func (this DSA) SignBytes() DSA {
         return this.AppendError(err)
     }
 
-    hashed, err := this.dataHash(this.signHash, this.data)
+    hashed, err := this.dataHash(this.data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -200,7 +200,7 @@ func (this DSA) VerifyBytes(data []byte) DSA {
     r := new(big.Int).SetBytes(sig[:dsaByteLen])
     s := new(big.Int).SetBytes(sig[dsaByteLen:])
 
-    hashed, err := this.dataHash(this.signHash, data)
+    hashed, err := this.dataHash(data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -213,8 +213,12 @@ func (this DSA) VerifyBytes(data []byte) DSA {
 // ===============
 
 // 签名后数据
-func (this DSA) dataHash(fn HashFunc, data []byte) ([]byte, error) {
-    h := fn()
+func (this DSA) dataHash(data []byte) ([]byte, error) {
+    if this.signHash == nil {
+        return nil, errors.New("Hash func not set.")
+    }
+
+    h := this.signHash()
     h.Write(data)
 
     return h.Sum(nil), nil

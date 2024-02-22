@@ -14,7 +14,7 @@ func (this SM2) Sign() SM2 {
         return this.AppendError(err)
     }
 
-    hashed, err := this.dataHash(this.signHash, this.data)
+    hashed, err := this.dataHash(this.data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -39,7 +39,7 @@ func (this SM2) Verify(data []byte) SM2 {
         return this.AppendError(err)
     }
 
-    hashed, err := this.dataHash(this.signHash, data)
+    hashed, err := this.dataHash(data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -74,7 +74,7 @@ func (this SM2) SignBytes() SM2 {
         return this.AppendError(err)
     }
 
-    hashed, err := this.dataHash(this.signHash, this.data)
+    hashed, err := this.dataHash(this.data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -105,7 +105,7 @@ func (this SM2) VerifyBytes(data []byte) SM2 {
         return this.AppendError(err)
     }
 
-    hashed, err := this.dataHash(this.signHash, data)
+    hashed, err := this.dataHash(data)
     if err != nil {
         return this.AppendError(err)
     }
@@ -120,12 +120,12 @@ func (this SM2) VerifyBytes(data []byte) SM2 {
 // ===============
 
 // 签名后数据
-func (this SM2) dataHash(fn HashFunc, data []byte) ([]byte, error) {
-    if fn == nil {
+func (this SM2) dataHash(data []byte) ([]byte, error) {
+    if this.signHash == nil {
         return data, nil
     }
 
-    h := fn()
+    h := this.signHash()
     h.Write(data)
 
     return h.Sum(nil), nil

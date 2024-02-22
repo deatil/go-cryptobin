@@ -14,7 +14,7 @@ func (this EdDSA) Sign() EdDSA {
         return this.AppendError(err)
     }
 
-    hashed := this.dataHash(this.data, this.options)
+    hashed := this.dataHash(this.data)
 
     sig, err := this.privateKey.Sign(rand.Reader, hashed, this.options)
     if err != nil {
@@ -33,7 +33,7 @@ func (this EdDSA) Verify(data []byte) EdDSA {
         return this.AppendError(err)
     }
 
-    hashed := this.dataHash(data, this.options)
+    hashed := this.dataHash(data)
 
     err := ed25519.VerifyWithOptions(this.publicKey, hashed, this.data, this.options)
     if err != nil {
@@ -45,9 +45,9 @@ func (this EdDSA) Verify(data []byte) EdDSA {
     return this
 }
 
-// 判断是否需要做 hash
-func (this EdDSA) dataHash(data []byte, opts *Options) []byte {
-    hash := opts.HashFunc()
+// 判断是否需要 hash 处理
+func (this EdDSA) dataHash(data []byte) []byte {
+    hash := this.options.HashFunc()
 
     if hash == crypto.SHA512 {
         h := hash.New()

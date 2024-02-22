@@ -28,7 +28,7 @@ var (
 // 生成私钥 pem 数据
 func (this ED448) CreatePrivateKey() ED448 {
     if this.privateKey == nil {
-        err := errors.New("privateKey error.")
+        err := errors.New("privateKey empty.")
         return this.AppendError(err)
     }
 
@@ -51,7 +51,7 @@ func (this ED448) CreatePrivateKey() ED448 {
 // CreatePrivateKeyWithPassword("123", "AES256CBC", "SHA256")
 func (this ED448) CreatePrivateKeyWithPassword(password string, opts ...any) ED448 {
     if this.privateKey == nil {
-        err := errors.New("privateKey error.")
+        err := errors.New("privateKey empty.")
         return this.AppendError(err)
     }
 
@@ -86,7 +86,7 @@ func (this ED448) CreatePrivateKeyWithPassword(password string, opts ...any) ED4
 // 生成公钥 pem 数据
 func (this ED448) CreatePublicKey() ED448 {
     if this.publicKey == nil {
-        err := errors.New("publicKey error.")
+        err := errors.New("publicKey empty.")
         return this.AppendError(err)
     }
 

@@ -99,6 +99,7 @@ func main() {
         Sign().
         // SignASN1().
         // SignBytes().
+        // SignWithSeparator().
         ToBase64String()
 
     // 公钥验证
@@ -114,6 +115,7 @@ func main() {
         Verify([]byte(data)).
         // VerifyASN1([]byte(data)).
         // VerifyBytes([]byte(data)).
+        // VerifyWithSeparator([]byte(data)).
         ToVerify()
 }
 ~~~

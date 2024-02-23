@@ -91,7 +91,7 @@ func (this DSA) CreatePKCS1PrivateKeyWithPassword(password string, opts ...strin
     }
 
     // 生成私钥
-    x509PrivateKey, err := dsa.MarshalPKCS1PrivateKey(this.privateKey)
+    privateKeyBytes, err := dsa.MarshalPKCS1PrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -100,7 +100,7 @@ func (this DSA) CreatePKCS1PrivateKeyWithPassword(password string, opts ...strin
     privateBlock, err := pkcs1.EncryptPEMBlock(
         rand.Reader,
         "DSA PRIVATE KEY",
-        x509PrivateKey,
+        privateKeyBytes,
         []byte(password),
         cipher,
     )
@@ -173,7 +173,7 @@ func (this DSA) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any) 
     }
 
     // 生成私钥
-    x509PrivateKey, err := dsa.MarshalPKCS8PrivateKey(this.privateKey)
+    privateKeyBytes, err := dsa.MarshalPKCS8PrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -182,7 +182,7 @@ func (this DSA) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any) 
     privateBlock, err := pkcs8.EncryptPEMBlock(
         rand.Reader,
         "ENCRYPTED PRIVATE KEY",
-        x509PrivateKey,
+        privateKeyBytes,
         []byte(password),
         opt,
     )

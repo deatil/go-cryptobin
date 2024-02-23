@@ -1,7 +1,6 @@
 package gost
 
 import (
-    "fmt"
     "errors"
     "encoding/asn1"
     "crypto/x509/pkix"
@@ -66,15 +65,6 @@ type publicKeyInfo struct {
     PublicKey asn1.BitString
 }
 
-// Per RFC 5915 the NamedCurveOID is marked as ASN.1 OPTIONAL, however in
-// most cases it is not.
-type gostPrivateKey struct {
-    Version       int
-    PrivateKey    []byte
-    NamedCurveOID asn1.ObjectIdentifier `asn1:"optional,explicit,tag:0"`
-    PublicKey     asn1.BitString        `asn1:"optional,explicit,tag:1"`
-}
-
 // Marshal PublicKey
 func MarshalPublicKey(pub *PublicKey) ([]byte, error) {
     var publicKeyBytes []byte
@@ -99,7 +89,7 @@ func MarshalPublicKey(pub *PublicKey) ([]byte, error) {
         return nil, errors.New("gost: invalid gost curve public key")
     }
 
-    publicKeyBytes = ToPublicKey(pub)
+    publicKeyBytes = Marshal(pub.Curve, pub.X, pub.Y)
 
     pkix := pkixPublicKey{
         Algo: publicKeyAlgorithm,
@@ -153,10 +143,16 @@ func ParsePublicKey(derBytes []byte) (pub *PublicKey, err error) {
         return
     }
 
-    pub, err = NewPublicKey(namedCurve, der)
-    if err != nil {
+    x, y := Unmarshal(namedCurve, der)
+    if x == nil || y == nil {
         err = errors.New("gost: failed to unmarshal gost curve point")
         return
+    }
+
+    pub = &PublicKey{
+        Curve: namedCurve,
+        X:     x,
+        Y:     y,
     }
 
     return
@@ -228,51 +224,4 @@ func ParsePrivateKey(derBytes []byte) (*PrivateKey, error) {
     }
 
     return key, nil
-}
-
-func marshalGostPrivateKeyWithOID(key *PrivateKey, oid asn1.ObjectIdentifier) ([]byte, error) {
-    if !key.Curve.IsOnCurve(key.X, key.Y) {
-        return nil, errors.New("invalid gost key public key")
-    }
-
-    privateKey := ToPrivateKey(key)
-    publicKey  := ToPublicKey(&key.PublicKey)
-
-    return asn1.Marshal(gostPrivateKey{
-        Version:       gostPrivKeyVersion,
-        PrivateKey:    privateKey,
-        NamedCurveOID: oid,
-        PublicKey:     asn1.BitString{
-            Bytes: publicKey,
-        },
-    })
-}
-
-func parseGostPrivateKey(namedCurveOID *asn1.ObjectIdentifier, der []byte) (key *PrivateKey, err error) {
-    var privKey gostPrivateKey
-    if _, err := asn1.Unmarshal(der, &privKey); err != nil {
-        return nil, errors.New("gost: failed to parse EC private key: " + err.Error())
-    }
-
-    if privKey.Version != gostPrivKeyVersion {
-        return nil, fmt.Errorf("gost: unknown EC private key version %d", privKey.Version)
-    }
-
-    var curve *Curve
-    if namedCurveOID != nil {
-        curve = NamedCurveFromOid(*namedCurveOID)
-    } else {
-        curve = NamedCurveFromOid(privKey.NamedCurveOID)
-    }
-
-    if curve == nil {
-        return nil, errors.New("gost: unknown gost curve")
-    }
-
-    priv, err := NewPrivateKey(curve, privKey.PrivateKey)
-    if err != nil {
-        return nil, err
-    }
-
-    return priv, nil
 }

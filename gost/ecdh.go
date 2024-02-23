@@ -20,7 +20,7 @@ func ECDHWithUkm(priv *PrivateKey, pub *PublicKey, ukm []byte) ([]byte, error) {
         t[i] = ukm[len(ukm)-i-1]
     }
 
-    ukmBigint := BytesToBigint(t)
+    ukmBigint := bytesToBigint(t)
 
     keyX, keyY, err := priv.Curve.Exp(priv.D, pub.X, pub.Y)
     if err != nil {
@@ -38,12 +38,12 @@ func ECDHWithUkm(priv *PrivateKey, pub *PublicKey, ukm []byte) ([]byte, error) {
     // use LE
     pointSize := priv.Curve.PointSize()
 
-    raw := append(
-        BytesPadding(keyY.Bytes(), pointSize),
-        BytesPadding(keyX.Bytes(), pointSize)...,
-    )
+    raw := make([]byte, 2*pointSize)
 
-    Reverse(raw)
+    keyY.FillBytes(raw[        0:  pointSize])
+    keyX.FillBytes(raw[pointSize:2*pointSize])
+
+    reverse(raw)
 
     return raw, nil
 }

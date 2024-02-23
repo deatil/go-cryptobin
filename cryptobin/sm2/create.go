@@ -54,7 +54,7 @@ func (this SM2) CreatePKCS1PrivateKey() SM2 {
     }
 
     privateBlock := &pem.Block{
-        Type:  "EC PRIVATE KEY",
+        Type:  "SM2 PRIVATE KEY",
         Bytes: privateKeyBytes,
     }
 
@@ -91,7 +91,7 @@ func (this SM2) CreatePKCS1PrivateKeyWithPassword(password string, opts ...strin
     // 生成加密数据
     privateBlock, err := pkcs1.EncryptPEMBlock(
         rand.Reader,
-        "EC PRIVATE KEY",
+        "SM2 PRIVATE KEY",
         privateKeyBytes,
         []byte(password),
         cipher,
@@ -144,7 +144,7 @@ func (this SM2) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any) 
     }
 
     // 生成私钥
-    x509PrivateKey, err := sm2.MarshalPrivateKey(this.privateKey)
+    privateKeyBytes, err := sm2.MarshalPrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -153,7 +153,7 @@ func (this SM2) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any) 
     privateBlock, err := pkcs8.EncryptPEMBlock(
         rand.Reader,
         "ENCRYPTED PRIVATE KEY",
-        x509PrivateKey,
+        privateKeyBytes,
         []byte(password),
         opt,
     )

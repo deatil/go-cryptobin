@@ -60,8 +60,8 @@ func (pub *PublicKey) VerifyBytes(digest, signature []byte) (bool, error) {
         return false, fmt.Errorf("gost: len(signature)=%d != %d", len(signature), 2*pointSize)
     }
 
-    r := BytesToBigint(signature[:pointSize])
-    s := BytesToBigint(signature[pointSize:])
+    r := bytesToBigint(signature[:pointSize])
+    s := bytesToBigint(signature[pointSize:])
 
     verify, err := VerifyWithRS(pub, digest, r, s)
     if err != nil {
@@ -120,10 +120,10 @@ func (priv *PrivateKey) SignBytes(rand io.Reader, digest []byte, opts crypto.Sig
 
     pointSize := priv.Curve.PointSize()
 
-    signed := append(
-        BytesPadding(r.Bytes(), pointSize),
-        BytesPadding(s.Bytes(), pointSize)...,
-    )
+    signed := make([]byte, 2*pointSize)
+
+    r.FillBytes(signed[        0:  pointSize])
+    s.FillBytes(signed[pointSize:2*pointSize])
 
     return signed, nil
 }
@@ -135,7 +135,7 @@ func GenerateKey(rand io.Reader, curve *Curve) (*PrivateKey, error) {
         return nil, fmt.Errorf("gost: %w", err)
     }
 
-    k := BytesToBigint(private)
+    k := bytesToBigint(private)
     if k.Cmp(zero) == 0 {
         return nil, errors.New("gost: zero private key")
     }
@@ -163,12 +163,7 @@ func GenerateKey(rand io.Reader, curve *Curve) (*PrivateKey, error) {
 
 // Unmarshal private key
 func NewPrivateKey(c *Curve, raw []byte) (*PrivateKey, error) {
-    pointSize := c.PointSize()
-    if len(raw) != pointSize {
-        return nil, fmt.Errorf("gost: len(key)=%d != %d", len(raw), pointSize)
-    }
-
-    k := BytesToBigint(raw)
+    k := bytesToBigint(raw)
     if k.Cmp(zero) == 0 {
         return nil, errors.New("gost: zero private key")
     }
@@ -186,38 +181,49 @@ func NewPrivateKey(c *Curve, raw []byte) (*PrivateKey, error) {
         Y: y,
     }
 
-    return &PrivateKey{pub, d}, nil
+    priv := &PrivateKey{
+        PublicKey: pub,
+        D: d,
+    }
+
+    return priv, nil
 }
 
 // Marshal private key
-func ToPrivateKey(priv *PrivateKey) (raw []byte) {
-    return BytesPadding(priv.D.Bytes(), priv.Curve.PointSize())
+func ToPrivateKey(priv *PrivateKey) []byte {
+    return priv.D.Bytes()
 }
 
 // Unmarshal public key
 func NewPublicKey(c *Curve, raw []byte) (*PublicKey, error) {
     pointSize := c.PointSize()
 
-    key := make([]byte, 2*pointSize)
-    if len(raw) != len(key) {
-        return nil, fmt.Errorf("gost: len(key)=%d != %d", len(key), pointSize)
+    if len(raw) != 2*pointSize {
+        return nil, fmt.Errorf("gost: publicKey length too large or short.")
     }
 
-    return &PublicKey{
-        c,
-        BytesToBigint(raw[:pointSize]),
-        BytesToBigint(raw[pointSize:]),
-    }, nil
+    x := bytesToBigint(raw[:pointSize])
+    y := bytesToBigint(raw[pointSize:])
+
+    pub := &PublicKey{
+        Curve: c,
+        X: x,
+        Y: y,
+    }
+
+    return pub, nil
 }
 
 // Marshal public key
 func ToPublicKey(pub *PublicKey) []byte {
     pointSize := pub.Curve.PointSize()
 
-    return append(
-        BytesPadding(pub.X.Bytes(), pointSize),
-        BytesPadding(pub.Y.Bytes(), pointSize)...,
-    )
+    buf := make([]byte, 2*pointSize)
+
+    pub.X.FillBytes(buf[        0:  pointSize])
+    pub.Y.FillBytes(buf[pointSize:2*pointSize])
+
+    return buf
 }
 
 // Sign hash
@@ -262,7 +268,7 @@ func VerifyBytes(pub *PublicKey, hash, sig []byte) (bool, error) {
 
 // SignToRS
 func SignToRS(rand io.Reader, priv *PrivateKey, digest []byte) (*big.Int, *big.Int, error) {
-    e := BytesToBigint(digest)
+    e := bytesToBigint(digest)
 
     e.Mod(e, priv.Curve.Q)
     if e.Cmp(zero) == 0 {
@@ -283,7 +289,7 @@ Retry:
         return nil, nil, fmt.Errorf("gost: %w", err)
     }
 
-    k = BytesToBigint(kRaw)
+    k = bytesToBigint(kRaw)
     k.Mod(k, priv.Curve.Q)
     if k.Cmp(zero) == 0 {
         goto Retry
@@ -319,7 +325,7 @@ func VerifyWithRS(pub *PublicKey, digest []byte, r, s *big.Int) (bool, error) {
         return false, nil
     }
 
-    e := BytesToBigint(digest)
+    e := bytesToBigint(digest)
     e.Mod(e, pub.Curve.Q)
     if e.Cmp(zero) == 0 {
         e = big.NewInt(1)

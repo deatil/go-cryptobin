@@ -155,16 +155,16 @@ func (c *Curve) Exp(degree, xS, yS *big.Int) (*big.Int, *big.Int, error) {
     return tx, ty, nil
 }
 
-func (our *Curve) Equal(their *Curve) bool {
-    return our.P.Cmp(their.P) == 0 &&
-        our.Q.Cmp(their.Q) == 0 &&
-        our.A.Cmp(their.A) == 0 &&
-        our.B.Cmp(their.B) == 0 &&
-        our.X.Cmp(their.X) == 0 &&
-        our.Y.Cmp(their.Y) == 0 &&
-        ((our.E == nil && their.E == nil) || our.E.Cmp(their.E) == 0) &&
-        ((our.D == nil && their.D == nil) || our.D.Cmp(their.D) == 0) &&
-        our.Co.Cmp(their.Co) == 0
+func (c *Curve) Equal(x *Curve) bool {
+    return c.P.Cmp(x.P) == 0 &&
+        c.Q.Cmp(x.Q) == 0 &&
+        c.A.Cmp(x.A) == 0 &&
+        c.B.Cmp(x.B) == 0 &&
+        c.X.Cmp(x.X) == 0 &&
+        c.Y.Cmp(x.Y) == 0 &&
+        ((c.E == nil && x.E == nil) || c.E.Cmp(x.E) == 0) &&
+        ((c.D == nil && x.D == nil) || c.D.Cmp(x.D) == 0) &&
+        c.Co.Cmp(x.Co) == 0
 }
 
 func (c *Curve) String() string {

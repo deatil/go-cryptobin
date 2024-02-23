@@ -37,14 +37,14 @@ func (this ECDH) CreatePrivateKey() ECDH {
         return this.AppendError(err)
     }
 
-    privateKey, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
+    privateKeyBytes, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
 
     privateBlock := &pem.Block{
         Type:  "PRIVATE KEY",
-        Bytes: privateKey,
+        Bytes: privateKeyBytes,
     }
 
     this.keyData = pem.EncodeToMemory(privateBlock)
@@ -66,7 +66,7 @@ func (this ECDH) CreatePrivateKeyWithPassword(password string, opts ...any) ECDH
     }
 
     // 生成私钥
-    privateKey, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
+    privateKeyBytes, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -75,7 +75,7 @@ func (this ECDH) CreatePrivateKeyWithPassword(password string, opts ...any) ECDH
     privateBlock, err := pkcs8.EncryptPEMBlock(
         rand.Reader,
         "ENCRYPTED PRIVATE KEY",
-        privateKey,
+        privateKeyBytes,
         []byte(password),
         opt,
     )
@@ -119,19 +119,19 @@ func (this ECDH) CreateECDHPrivateKey() ECDH {
         return this.AppendError(err)
     }
 
-    priv, err := ecdh.FromPrivateKey(this.privateKey)
+    privateKey, err := ecdh.FromPrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
 
-    privateKey, err := ecdh_key.MarshalPrivateKey(priv)
+    privateKeyBytes, err := ecdh_key.MarshalPrivateKey(privateKey)
     if err != nil {
         return this.AppendError(err)
     }
 
     privateBlock := &pem.Block{
         Type:  "PRIVATE KEY",
-        Bytes: privateKey,
+        Bytes: privateKeyBytes,
     }
 
     this.keyData = pem.EncodeToMemory(privateBlock)
@@ -151,13 +151,13 @@ func (this ECDH) CreateECDHPrivateKeyWithPassword(password string, opts ...any) 
         return this.AppendError(err)
     }
 
-    priv, err := ecdh.FromPrivateKey(this.privateKey)
+    privateKey, err := ecdh.FromPrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
 
     // 生成私钥
-    privateKey, err := ecdh_key.MarshalPrivateKey(priv)
+    privateKeyBytes, err := ecdh_key.MarshalPrivateKey(privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -166,7 +166,7 @@ func (this ECDH) CreateECDHPrivateKeyWithPassword(password string, opts ...any) 
     privateBlock, err := pkcs8.EncryptPEMBlock(
         rand.Reader,
         "ENCRYPTED PRIVATE KEY",
-        privateKey,
+        privateKeyBytes,
         []byte(password),
         opt,
     )
@@ -186,12 +186,12 @@ func (this ECDH) CreateECDHPublicKey() ECDH {
         return this.AppendError(err)
     }
 
-    pub, err := ecdh.FromPublicKey(this.publicKey)
+    publicKey, err := ecdh.FromPublicKey(this.publicKey)
     if err != nil {
         return this.AppendError(err)
     }
 
-    publicKeyBytes, err := ecdh_key.MarshalPublicKey(pub)
+    publicKeyBytes, err := ecdh_key.MarshalPublicKey(publicKey)
     if err != nil {
         return this.AppendError(err)
     }

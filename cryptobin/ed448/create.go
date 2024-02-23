@@ -32,14 +32,14 @@ func (this ED448) CreatePrivateKey() ED448 {
         return this.AppendError(err)
     }
 
-    x509PrivateKey, err := ed448.MarshalPrivateKey(this.privateKey)
+    privateKeyBytes, err := ed448.MarshalPrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
 
     privateBlock := &pem.Block{
         Type:  "PRIVATE KEY",
-        Bytes: x509PrivateKey,
+        Bytes: privateKeyBytes,
     }
 
     this.keyData = pem.EncodeToMemory(privateBlock)
@@ -61,7 +61,7 @@ func (this ED448) CreatePrivateKeyWithPassword(password string, opts ...any) ED4
     }
 
     // 生成私钥
-    x509PrivateKey, err := ed448.MarshalPrivateKey(this.privateKey)
+    privateKeyBytes, err := ed448.MarshalPrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -70,7 +70,7 @@ func (this ED448) CreatePrivateKeyWithPassword(password string, opts ...any) ED4
     privateBlock, err := pkcs8.EncryptPEMBlock(
         rand.Reader,
         "ENCRYPTED PRIVATE KEY",
-        x509PrivateKey,
+        privateKeyBytes,
         []byte(password),
         opt,
     )
@@ -90,14 +90,14 @@ func (this ED448) CreatePublicKey() ED448 {
         return this.AppendError(err)
     }
 
-    x509PublicKey, err := ed448.MarshalPublicKey(this.publicKey)
+    publicKeyBytes, err := ed448.MarshalPublicKey(this.publicKey)
     if err != nil {
         return this.AppendError(err)
     }
 
     publicBlock := &pem.Block{
         Type:  "PUBLIC KEY",
-        Bytes: x509PublicKey,
+        Bytes: publicKeyBytes,
     }
 
     this.keyData = pem.EncodeToMemory(publicBlock)

@@ -54,11 +54,11 @@ func (this RSA) CreatePKCS1PrivateKey() RSA {
         return this.AppendError(err)
     }
 
-    x509PrivateKey := x509.MarshalPKCS1PrivateKey(this.privateKey)
+    privateKeyBytes := x509.MarshalPKCS1PrivateKey(this.privateKey)
 
     privateBlock := &pem.Block{
         Type:  "RSA PRIVATE KEY",
-        Bytes: x509PrivateKey,
+        Bytes: privateKeyBytes,
     }
 
     this.keyData = pem.EncodeToMemory(privateBlock)
@@ -88,13 +88,13 @@ func (this RSA) CreatePKCS1PrivateKeyWithPassword(password string, opts ...strin
     }
 
     // 生成私钥
-    x509PrivateKey := x509.MarshalPKCS1PrivateKey(this.privateKey)
+    privateKeyBytes := x509.MarshalPKCS1PrivateKey(this.privateKey)
 
     // 生成加密数据
     privateBlock, err := pkcs1.EncryptPEMBlock(
         rand.Reader,
         "RSA PRIVATE KEY",
-        x509PrivateKey,
+        privateKeyBytes,
         []byte(password),
         cipher,
     )
@@ -114,11 +114,11 @@ func (this RSA) CreatePKCS1PublicKey() RSA {
         return this.AppendError(err)
     }
 
-    x509PublicKey := x509.MarshalPKCS1PublicKey(this.publicKey)
+    publicKeyBytes := x509.MarshalPKCS1PublicKey(this.publicKey)
 
     publicBlock := &pem.Block{
         Type:  "RSA PUBLIC KEY",
-        Bytes: x509PublicKey,
+        Bytes: publicKeyBytes,
     }
 
     this.keyData = pem.EncodeToMemory(publicBlock)
@@ -135,14 +135,14 @@ func (this RSA) CreatePKCS8PrivateKey() RSA {
         return this.AppendError(err)
     }
 
-    x509PrivateKey, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
+    privateKeyBytes, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
 
     privateBlock := &pem.Block{
         Type:  "PRIVATE KEY",
-        Bytes: x509PrivateKey,
+        Bytes: privateKeyBytes,
     }
 
     this.keyData = pem.EncodeToMemory(privateBlock)
@@ -164,7 +164,7 @@ func (this RSA) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any) 
     }
 
     // 生成私钥
-    x509PrivateKey, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
+    privateKeyBytes, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -173,7 +173,7 @@ func (this RSA) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any) 
     privateBlock, err := pkcs8.EncryptPEMBlock(
         rand.Reader,
         "ENCRYPTED PRIVATE KEY",
-        x509PrivateKey,
+        privateKeyBytes,
         []byte(password),
         opt,
     )
@@ -193,14 +193,14 @@ func (this RSA) CreatePKCS8PublicKey() RSA {
         return this.AppendError(err)
     }
 
-    x509PublicKey, err := x509.MarshalPKIXPublicKey(this.publicKey)
+    publicKeyBytes, err := x509.MarshalPKIXPublicKey(this.publicKey)
     if err != nil {
         return this.AppendError(err)
     }
 
     publicBlock := &pem.Block{
         Type:  "PUBLIC KEY",
-        Bytes: x509PublicKey,
+        Bytes: publicKeyBytes,
     }
 
     this.keyData = pem.EncodeToMemory(publicBlock)

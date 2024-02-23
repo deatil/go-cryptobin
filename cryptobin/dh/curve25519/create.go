@@ -35,14 +35,14 @@ func (this Curve25519) CreatePrivateKey() Curve25519 {
         return this.AppendError(err)
     }
 
-    privateKey, err := curve25519.MarshalPrivateKey(this.privateKey)
+    privateKeyBytes, err := curve25519.MarshalPrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
 
     privateBlock := &pem.Block{
         Type:  "PRIVATE KEY",
-        Bytes: privateKey,
+        Bytes: privateKeyBytes,
     }
 
     this.keyData = pem.EncodeToMemory(privateBlock)
@@ -64,7 +64,7 @@ func (this Curve25519) CreatePrivateKeyWithPassword(password string, opts ...any
     }
 
     // 生成私钥
-    privateKey, err := curve25519.MarshalPrivateKey(this.privateKey)
+    privateKeyBytes, err := curve25519.MarshalPrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -73,7 +73,7 @@ func (this Curve25519) CreatePrivateKeyWithPassword(password string, opts ...any
     privateBlock, err := pkcs8.EncryptPEMBlock(
         rand.Reader,
         "ENCRYPTED PRIVATE KEY",
-        privateKey,
+        privateKeyBytes,
         []byte(password),
         opt,
     )

@@ -50,14 +50,14 @@ func (this ECDSA) CreatePKCS1PrivateKey() ECDSA {
         return this.AppendError(err)
     }
 
-    x509PrivateKey, err := x509.MarshalECPrivateKey(this.privateKey)
+    publicKeyBytes, err := x509.MarshalECPrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
 
     privateBlock := &pem.Block{
         Type:  "EC PRIVATE KEY",
-        Bytes: x509PrivateKey,
+        Bytes: publicKeyBytes,
     }
 
     this.keyData = pem.EncodeToMemory(privateBlock)
@@ -85,7 +85,7 @@ func (this ECDSA) CreatePKCS1PrivateKeyWithPassword(password string, opts ...str
     }
 
     // 生成私钥
-    x509PrivateKey, err := x509.MarshalECPrivateKey(this.privateKey)
+    publicKeyBytes, err := x509.MarshalECPrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -94,7 +94,7 @@ func (this ECDSA) CreatePKCS1PrivateKeyWithPassword(password string, opts ...str
     privateBlock, err := pkcs1.EncryptPEMBlock(
         rand.Reader,
         "EC PRIVATE KEY",
-        x509PrivateKey,
+        publicKeyBytes,
         []byte(password),
         cipher,
     )
@@ -116,14 +116,14 @@ func (this ECDSA) CreatePKCS8PrivateKey() ECDSA {
         return this.AppendError(err)
     }
 
-    x509PrivateKey, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
+    publicKeyBytes, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
 
     privateBlock := &pem.Block{
         Type:  "PRIVATE KEY",
-        Bytes: x509PrivateKey,
+        Bytes: publicKeyBytes,
     }
 
     this.keyData = pem.EncodeToMemory(privateBlock)
@@ -145,7 +145,7 @@ func (this ECDSA) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any
     }
 
     // 生成私钥
-    x509PrivateKey, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
+    publicKeyBytes, err := x509.MarshalPKCS8PrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -154,7 +154,7 @@ func (this ECDSA) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any
     privateBlock, err := pkcs8.EncryptPEMBlock(
         rand.Reader,
         "ENCRYPTED PRIVATE KEY",
-        x509PrivateKey,
+        publicKeyBytes,
         []byte(password),
         opt,
     )
@@ -176,14 +176,14 @@ func (this ECDSA) CreatePublicKey() ECDSA {
         return this.AppendError(err)
     }
 
-    x509PublicKey, err := x509.MarshalPKIXPublicKey(this.publicKey)
+    publicKeyBytes, err := x509.MarshalPKIXPublicKey(this.publicKey)
     if err != nil {
         return this.AppendError(err)
     }
 
     publicBlock := &pem.Block{
         Type:  "PUBLIC KEY",
-        Bytes: x509PublicKey,
+        Bytes: publicKeyBytes,
     }
 
     this.keyData = pem.EncodeToMemory(publicBlock)

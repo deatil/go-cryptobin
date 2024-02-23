@@ -91,7 +91,7 @@ func (this EIGamal) CreatePKCS1PrivateKeyWithPassword(password string, opts ...s
     }
 
     // 生成私钥
-    x509PrivateKey, err := elgamal.MarshalPKCS1PrivateKey(this.privateKey)
+    privateKeyBytes, err := elgamal.MarshalPKCS1PrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -100,7 +100,7 @@ func (this EIGamal) CreatePKCS1PrivateKeyWithPassword(password string, opts ...s
     privateBlock, err := pkcs1.EncryptPEMBlock(
         rand.Reader,
         "EIGamal PRIVATE KEY",
-        x509PrivateKey,
+        privateKeyBytes,
         []byte(password),
         cipher,
     )
@@ -173,7 +173,7 @@ func (this EIGamal) CreatePKCS8PrivateKeyWithPassword(password string, opts ...a
     }
 
     // 生成私钥
-    x509PrivateKey, err := elgamal.MarshalPKCS8PrivateKey(this.privateKey)
+    privateKeyBytes, err := elgamal.MarshalPKCS8PrivateKey(this.privateKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -182,7 +182,7 @@ func (this EIGamal) CreatePKCS8PrivateKeyWithPassword(password string, opts ...a
     privateBlock, err := pkcs8.EncryptPEMBlock(
         rand.Reader,
         "ENCRYPTED PRIVATE KEY",
-        x509PrivateKey,
+        privateKeyBytes,
         []byte(password),
         opt,
     )

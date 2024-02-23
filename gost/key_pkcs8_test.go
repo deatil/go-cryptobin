@@ -123,4 +123,61 @@ func Test_Pkcs8(t *testing.T) {
     if len(pub2) == 0 {
         t.Error("expected export key PEM error: pub")
     }
+
+    // t.Error(pri2)
+    // t.Error(pub2)
+}
+
+var GostR3410_2001_CryptoPro_A_ParamSet_prikey = `
+-----BEGIN PRIVATE KEY-----
+MEUCAQAwHAYGKoUDAgITMBIGByqFAwICIwEGByqFAwICHgEEIgIgRhUDJ1WQASIf
+nx+aUM2eagzV9dCt6mQ5wdtenr2ZS/Y=
+-----END PRIVATE KEY-----
+`
+var GostR3410_2001_CryptoPro_A_ParamSet_pubkey = `
+-----BEGIN PUBLIC KEY-----
+MGMwHAYGKoUDAgITMBIGByqFAwICIwEGByqFAwICHgEDQwAEQORQaJaqv4S10bz4
+jw112dGlrtD+DyGR8TqkhmOvlJB46VUIbpBsEHs8nn0pXtzsIfEwgV8Oxo/QA0Ri
+Qu5j7SU=
+-----END PUBLIC KEY-----
+`
+
+func Test_Check_GostR3410_2001_CryptoPro_A_ParamSet(t *testing.T) {
+    pri := decodePEM(GostR3410_2001_CryptoPro_A_ParamSet_prikey)
+    if len(pri) == 0 {
+        t.Error("decodePEM prikey empty")
+    }
+
+    prikey, err := gost.ParsePrivateKey(pri)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pubkey := &prikey.PublicKey
+
+    pub, err := gost.MarshalPublicKey(pubkey)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pubPem := encodePEM(pub, "PUBLIC KEY")
+    if len(pubPem) == 0 {
+        t.Error("make pub error")
+    }
+
+    // ========
+
+    pub2 := decodePEM(GostR3410_2001_CryptoPro_A_ParamSet_pubkey)
+    if len(pub2) == 0 {
+        t.Error("decodePEM pub empty")
+    }
+
+    pubkey2, err := gost.ParsePublicKey(pub2)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    if !pubkey2.Equal(pubkey) {
+        t.Error("parse pubkey fail")
+    }
 }

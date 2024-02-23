@@ -13,7 +13,7 @@ import (
 
 // r and s data
 type gostSignature struct {
-    R, S *big.Int
+    S, R *big.Int
 }
 
 // PublicKey represents an GOST public key.
@@ -35,16 +35,18 @@ func (pub *PublicKey) Equal(x crypto.PublicKey) bool {
         pub.Curve.Equal(xx.Curve)
 }
 
-// Verify asn.1 signed data
+// Verify verifies the signature in hash using the public key, pub. It
+// reports whether the signature is valid.
 func (pub *PublicKey) Verify(digest, signature []byte) (bool, error) {
-    var sign gostSignature
-
-    _, err := asn1.Unmarshal(signature, &sign)
-    if err != nil {
-        return false, err
+    pointSize := pub.Curve.PointSize()
+    if len(signature) != 2*pointSize {
+        return false, fmt.Errorf("cryptobin/gost: len(signature)=%d != %d", len(signature), 2*pointSize)
     }
 
-    verify, err := VerifyWithRS(pub, digest, sign.R, sign.S)
+    s := bytesToBigint(signature[:pointSize])
+    r := bytesToBigint(signature[pointSize:])
+
+    verify, err := VerifyWithRS(pub, digest, r, s)
     if err != nil {
         return false, errors.New("cryptobin/gost: " + err.Error())
     }
@@ -52,18 +54,15 @@ func (pub *PublicKey) Verify(digest, signature []byte) (bool, error) {
     return verify, nil
 }
 
-// Verify verifies the signature in hash using the public key, pub. It
-// reports whether the signature is valid.
-func (pub *PublicKey) VerifyBytes(digest, signature []byte) (bool, error) {
-    pointSize := pub.Curve.PointSize()
-    if len(signature) != 2*pointSize {
-        return false, fmt.Errorf("cryptobin/gost: len(signature)=%d != %d", len(signature), 2*pointSize)
+// Verify asn.1 signed data
+func (pub *PublicKey) VerifyASN1(digest, signature []byte) (bool, error) {
+    var sign gostSignature
+    _, err := asn1.Unmarshal(signature, &sign)
+    if err != nil {
+        return false, err
     }
 
-    r := bytesToBigint(signature[:pointSize])
-    s := bytesToBigint(signature[pointSize:])
-
-    verify, err := VerifyWithRS(pub, digest, r, s)
+    verify, err := VerifyWithRS(pub, digest, sign.R, sign.S)
     if err != nil {
         return false, errors.New("cryptobin/gost: " + err.Error())
     }
@@ -93,26 +92,11 @@ func (priv *PrivateKey) Public() crypto.PublicKey {
     return &priv.PublicKey
 }
 
-// Sign data to asn.1
-func (priv *PrivateKey) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
-    r, s, err := SignToRS(rand, priv, digest)
-    if err != nil {
-        return nil, err
-    }
-
-    signedData, err := asn1.Marshal(gostSignature{r, s})
-    if err != nil {
-        return nil, err
-    }
-
-    return signedData, nil
-}
-
 // Sign signs digest with priv, reading randomness from rand. The opts argument
 // is not currently used but, in keeping with the crypto.Signer interface,
 // should be the hash function used to digest the message.
 // sig is s + r bytes
-func (priv *PrivateKey) SignBytes(rand io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
+func (priv *PrivateKey) Sign(rand io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
     r, s, err := SignToRS(rand, priv, digest)
     if err != nil {
         return nil, err
@@ -122,47 +106,31 @@ func (priv *PrivateKey) SignBytes(rand io.Reader, digest []byte, opts crypto.Sig
 
     signed := make([]byte, 2*pointSize)
 
-    r.FillBytes(signed[        0:  pointSize])
-    s.FillBytes(signed[pointSize:2*pointSize])
+    s.FillBytes(signed[        0:  pointSize])
+    r.FillBytes(signed[pointSize:2*pointSize])
 
     return signed, nil
 }
 
-// GenerateKey generates a random GOST private key of the given bit size.
-func GenerateKey(rand io.Reader, curve *Curve) (*PrivateKey, error) {
-    private := make([]byte, curve.PointSize())
-    if _, err := io.ReadFull(rand, private); err != nil {
-        return nil, fmt.Errorf("cryptobin/gost: %w", err)
-    }
-
-    k := bytesToBigint(private)
-    if k.Cmp(zero) == 0 {
-        return nil, errors.New("cryptobin/gost: zero private key")
-    }
-
-    d := k.Mod(k, curve.Q)
-
-    x, y, err := curve.Exp(d, curve.X, curve.Y)
+// Sign data to asn.1
+func (priv *PrivateKey) SignASN1(rand io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, error) {
+    r, s, err := SignToRS(rand, priv, digest)
     if err != nil {
-        return nil, fmt.Errorf("cryptobin/gost: %w", err)
+        return nil, err
     }
 
-    pub := PublicKey{
-        Curve: curve,
-        X: x,
-        Y: y,
+    signedData, err := asn1.Marshal(gostSignature{
+        R: r,
+        S: s,
+    })
+    if err != nil {
+        return nil, err
     }
 
-    priv := &PrivateKey{
-        PublicKey: pub,
-        D: d,
-    }
-
-    return priv, nil
+    return signedData, nil
 }
 
-// Unmarshal private key
-func NewPrivateKey(curve *Curve, raw []byte) (*PrivateKey, error) {
+func newPrivateKey(curve *Curve, raw []byte) (*PrivateKey, error) {
     k := bytesToBigint(raw)
     if k.Cmp(zero) == 0 {
         return nil, errors.New("cryptobin/gost: zero private key")
@@ -184,9 +152,26 @@ func NewPrivateKey(curve *Curve, raw []byte) (*PrivateKey, error) {
     return priv, nil
 }
 
+// GenerateKey generates a random GOST private key of the given bit size.
+func GenerateKey(rand io.Reader, curve *Curve) (*PrivateKey, error) {
+    private := make([]byte, curve.PointSize())
+    if _, err := io.ReadFull(rand, private); err != nil {
+        return nil, fmt.Errorf("cryptobin/gost: %w", err)
+    }
+
+    return newPrivateKey(curve, private)
+}
+
+// Unmarshal private key
+func NewPrivateKey(curve *Curve, raw []byte) (*PrivateKey, error) {
+    return newPrivateKey(curve, reverse(raw))
+}
+
 // Marshal private key
 func ToPrivateKey(priv *PrivateKey) []byte {
-    return priv.D.Bytes()
+    prikey := make([]byte, priv.Curve.PointSize())
+
+    return reverse(priv.D.FillBytes(prikey))
 }
 
 // Unmarshal public key
@@ -232,22 +217,22 @@ func Verify(pub *PublicKey, hash, sig []byte) (bool, error) {
 // using the private key, priv. If the hash is longer than the bit-length of the
 // private key's curve order, the hash will be truncated to that length. It
 // returns the ASN.1 encoded signature.
-func SignBytes(rand io.Reader, priv *PrivateKey, hash []byte) ([]byte, error) {
+func SignASN1(rand io.Reader, priv *PrivateKey, hash []byte) ([]byte, error) {
     if priv == nil {
         return nil, errors.New("Private Key is error")
     }
 
-    return priv.SignBytes(rand, hash, nil)
+    return priv.SignASN1(rand, hash, nil)
 }
 
 // VerifyASN1 verifies the ASN.1 encoded signature, sig, of hash using the
 // public key, pub. Its return value records whether the signature is valid.
-func VerifyBytes(pub *PublicKey, hash, sig []byte) (bool, error) {
+func VerifyASN1(pub *PublicKey, hash, sig []byte) (bool, error) {
     if pub == nil {
         return false, errors.New("Public Key is error")
     }
 
-    return pub.VerifyBytes(hash, sig)
+    return pub.VerifyASN1(hash, sig)
 }
 
 // SignToRS

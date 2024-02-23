@@ -8,10 +8,12 @@ func bytesToBigint(d []byte) *big.Int {
     return new(big.Int).SetBytes(d)
 }
 
-func reverse(d []byte) {
+func reverse(d []byte) []byte {
     for i, j := 0, len(d)-1; i < j; i, j = i+1, j-1 {
         d[i], d[j] = d[j], d[i]
     }
+
+    return d
 }
 
 // Marshal converts a point on the curve into the uncompressed
@@ -22,10 +24,10 @@ func Marshal(curve *Curve, x, y *big.Int) []byte {
 
     ret := make([]byte, 2*byteLen)
 
-    x.FillBytes(ret[0      :  byteLen])
-    y.FillBytes(ret[byteLen:2*byteLen])
+    y.FillBytes(ret[0      :  byteLen])
+    x.FillBytes(ret[byteLen:2*byteLen])
 
-    return ret
+    return reverse(ret)
 }
 
 // Unmarshal converts a point, serialized by Marshal, into an x, y pair. It is
@@ -37,8 +39,10 @@ func Unmarshal(curve *Curve, data []byte) (x, y *big.Int) {
         return nil, nil
     }
 
-    x = new(big.Int).SetBytes(data[:byteLen])
-    y = new(big.Int).SetBytes(data[byteLen:])
+    reverse(data)
+
+    y = new(big.Int).SetBytes(data[:byteLen])
+    x = new(big.Int).SetBytes(data[byteLen:])
 
     p := curve.Params().P
     if x.Cmp(p) >= 0 || y.Cmp(p) >= 0 {

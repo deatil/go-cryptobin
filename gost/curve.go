@@ -87,7 +87,11 @@ func (c *Curve) IsOnCurve(x, y *big.Int) bool {
 // Get the size of the point's coordinate in bytes.
 // 32 for 256-bit curves, 64 for 512-bit ones.
 func (c *Curve) PointSize() int {
-    return pointSize(c.P)
+    if c.P.BitLen() > 256 {
+        return 64
+    }
+
+    return 32
 }
 
 func (c *Curve) Params() *Curve {
@@ -170,3 +174,4 @@ func (c *Curve) Equal(x *Curve) bool {
 func (c *Curve) String() string {
     return c.Name
 }
+

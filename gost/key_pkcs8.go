@@ -158,8 +158,6 @@ func ParsePublicKey(derBytes []byte) (pub *PublicKey, err error) {
     return
 }
 
-// ====================
-
 // Marshal PrivateKey
 func MarshalPrivateKey(key *PrivateKey) ([]byte, error) {
     var privKey pkcs8
@@ -187,7 +185,6 @@ func MarshalPrivateKey(key *PrivateKey) ([]byte, error) {
     }
 
     privKey.PrivateKey, err = marshalGostPrivateKeyWithOID(key, oid)
-
     if err != nil {
         return nil, errors.New("gost: failed to marshal EC private key while building PKCS#8: " + err.Error())
     }

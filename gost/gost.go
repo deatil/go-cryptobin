@@ -46,7 +46,7 @@ func (pub *PublicKey) Verify(digest, signature []byte) (bool, error) {
 
     verify, err := VerifyWithRS(pub, digest, sign.R, sign.S)
     if err != nil {
-        return false, errors.New("gost: " + err.Error())
+        return false, errors.New("cryptobin/gost: " + err.Error())
     }
 
     return verify, nil
@@ -57,7 +57,7 @@ func (pub *PublicKey) Verify(digest, signature []byte) (bool, error) {
 func (pub *PublicKey) VerifyBytes(digest, signature []byte) (bool, error) {
     pointSize := pub.Curve.PointSize()
     if len(signature) != 2*pointSize {
-        return false, fmt.Errorf("gost: len(signature)=%d != %d", len(signature), 2*pointSize)
+        return false, fmt.Errorf("cryptobin/gost: len(signature)=%d != %d", len(signature), 2*pointSize)
     }
 
     r := bytesToBigint(signature[:pointSize])
@@ -65,7 +65,7 @@ func (pub *PublicKey) VerifyBytes(digest, signature []byte) (bool, error) {
 
     verify, err := VerifyWithRS(pub, digest, r, s)
     if err != nil {
-        return false, errors.New("gost: " + err.Error())
+        return false, errors.New("cryptobin/gost: " + err.Error())
     }
 
     return verify, nil
@@ -132,19 +132,19 @@ func (priv *PrivateKey) SignBytes(rand io.Reader, digest []byte, opts crypto.Sig
 func GenerateKey(rand io.Reader, curve *Curve) (*PrivateKey, error) {
     private := make([]byte, curve.PointSize())
     if _, err := io.ReadFull(rand, private); err != nil {
-        return nil, fmt.Errorf("gost: %w", err)
+        return nil, fmt.Errorf("cryptobin/gost: %w", err)
     }
 
     k := bytesToBigint(private)
     if k.Cmp(zero) == 0 {
-        return nil, errors.New("gost: zero private key")
+        return nil, errors.New("cryptobin/gost: zero private key")
     }
 
     d := k.Mod(k, curve.Q)
 
     x, y, err := curve.Exp(d, curve.X, curve.Y)
     if err != nil {
-        return nil, fmt.Errorf("gost: %w", err)
+        return nil, fmt.Errorf("cryptobin/gost: %w", err)
     }
 
     pub := PublicKey{
@@ -162,29 +162,24 @@ func GenerateKey(rand io.Reader, curve *Curve) (*PrivateKey, error) {
 }
 
 // Unmarshal private key
-func NewPrivateKey(c *Curve, raw []byte) (*PrivateKey, error) {
+func NewPrivateKey(curve *Curve, raw []byte) (*PrivateKey, error) {
     k := bytesToBigint(raw)
     if k.Cmp(zero) == 0 {
-        return nil, errors.New("gost: zero private key")
+        return nil, errors.New("cryptobin/gost: zero private key")
     }
 
-    d := k.Mod(k, c.Q)
+    k = k.Mod(k, curve.Q)
 
-    x, y, err := c.Exp(d, c.X, c.Y)
+    x, y, err := curve.Exp(k, curve.X, curve.Y)
     if err != nil {
-        return nil, fmt.Errorf("gost: %w", err)
+        return nil, fmt.Errorf("cryptobin/gost: %w", err)
     }
 
-    pub := PublicKey{
-        Curve: c,
-        X: x,
-        Y: y,
-    }
-
-    priv := &PrivateKey{
-        PublicKey: pub,
-        D: d,
-    }
+    priv := new(PrivateKey)
+    priv.D = k
+    priv.PublicKey.Curve = curve
+    priv.PublicKey.X = x
+    priv.PublicKey.Y = y
 
     return priv, nil
 }
@@ -195,18 +190,14 @@ func ToPrivateKey(priv *PrivateKey) []byte {
 }
 
 // Unmarshal public key
-func NewPublicKey(c *Curve, raw []byte) (*PublicKey, error) {
-    pointSize := c.PointSize()
-
-    if len(raw) != 2*pointSize {
-        return nil, fmt.Errorf("gost: publicKey length too large or short.")
+func NewPublicKey(curve *Curve, data []byte) (*PublicKey, error) {
+    x, y := Unmarshal(curve, data)
+    if x == nil || y == nil {
+        return nil, errors.New("cryptobin/gost: publicKey is incorrect.")
     }
 
-    x := bytesToBigint(raw[:pointSize])
-    y := bytesToBigint(raw[pointSize:])
-
     pub := &PublicKey{
-        Curve: c,
+        Curve: curve,
         X: x,
         Y: y,
     }
@@ -216,14 +207,7 @@ func NewPublicKey(c *Curve, raw []byte) (*PublicKey, error) {
 
 // Marshal public key
 func ToPublicKey(pub *PublicKey) []byte {
-    pointSize := pub.Curve.PointSize()
-
-    buf := make([]byte, 2*pointSize)
-
-    pub.X.FillBytes(buf[        0:  pointSize])
-    pub.Y.FillBytes(buf[pointSize:2*pointSize])
-
-    return buf
+    return Marshal(pub.Curve, pub.X, pub.Y)
 }
 
 // Sign hash
@@ -286,7 +270,7 @@ func SignToRS(rand io.Reader, priv *PrivateKey, digest []byte) (*big.Int, *big.I
 
 Retry:
     if _, err = io.ReadFull(rand, kRaw); err != nil {
-        return nil, nil, fmt.Errorf("gost: %w", err)
+        return nil, nil, fmt.Errorf("cryptobin/gost: %w", err)
     }
 
     k = bytesToBigint(kRaw)
@@ -297,7 +281,7 @@ Retry:
 
     r, _, err = priv.Curve.Exp(k, priv.Curve.X, priv.Curve.Y)
     if err != nil {
-        return nil, nil, fmt.Errorf("gost: %w", err)
+        return nil, nil, fmt.Errorf("cryptobin/gost: %w", err)
     }
 
     r.Mod(r, priv.Curve.Q)

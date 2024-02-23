@@ -20,11 +20,10 @@ func Marshal(curve *Curve, x, y *big.Int) []byte {
 
     byteLen := curve.PointSize()
 
-    ret := make([]byte, 1+2*byteLen)
-    ret[0] = 4 // uncompressed point
+    ret := make([]byte, 2*byteLen)
 
-    x.FillBytes(ret[1        :1+  byteLen])
-    y.FillBytes(ret[1+byteLen:1+2*byteLen])
+    x.FillBytes(ret[0      :  byteLen])
+    y.FillBytes(ret[byteLen:2*byteLen])
 
     return ret
 }
@@ -34,16 +33,14 @@ func Marshal(curve *Curve, x, y *big.Int) []byte {
 // the point at infinity. On error, x = nil.
 func Unmarshal(curve *Curve, data []byte) (x, y *big.Int) {
     byteLen := curve.PointSize()
-    if len(data) != 1+2*byteLen {
-        return nil, nil
-    }
-    if data[0] != 4 { // uncompressed form
+    if len(data) != 2*byteLen {
         return nil, nil
     }
 
+    x = new(big.Int).SetBytes(data[:byteLen])
+    y = new(big.Int).SetBytes(data[byteLen:])
+
     p := curve.Params().P
-    x = new(big.Int).SetBytes(data[1:1+byteLen])
-    y = new(big.Int).SetBytes(data[1+byteLen:])
     if x.Cmp(p) >= 0 || y.Cmp(p) >= 0 {
         return nil, nil
     }

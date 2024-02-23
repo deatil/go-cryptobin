@@ -4,9 +4,30 @@ import (
     "fmt"
     "testing"
     "crypto/rand"
+    "encoding/pem"
 
     "github.com/deatil/go-cryptobin/gost"
 )
+
+func decodePEM(pubPEM string) []byte {
+    block, _ := pem.Decode([]byte(pubPEM))
+    if block == nil {
+        panic("failed to parse PEM block containing the key")
+    }
+
+    return block.Bytes
+}
+
+func encodePEM(src []byte, typ string) string {
+    keyBlock := &pem.Block{
+        Type:  typ,
+        Bytes: src,
+    }
+
+    keyData := pem.EncodeToMemory(keyBlock)
+
+    return string(keyData)
+}
 
 func TestEqual(t *testing.T) {
     testOneCurve(t, gost.CurveIdGostR34102001TestParamSet())
@@ -65,4 +86,41 @@ func testOneCurve(t *testing.T, curue *gost.Curve) {
             t.Error("Marshal public error")
         }
     })
+}
+
+func Test_Pkcs8(t *testing.T) {
+    curue := gost.CurveIdGostR34102001TestParamSet()
+
+    priv, err := gost.GenerateKey(rand.Reader, curue)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pub := priv.Public().(*gost.PublicKey)
+
+    pubDer, err := gost.MarshalPublicKey(pub)
+    if err != nil {
+        t.Fatal(err)
+    }
+    privDer, err := gost.MarshalPrivateKey(priv)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    if len(privDer) == 0 {
+        t.Error("expected export key Der error: priv")
+    }
+    if len(pubDer) == 0 {
+        t.Error("expected export key Der error: pub")
+    }
+
+    pri2 := encodePEM(privDer, "PRIVATE KEY")
+    pub2 := encodePEM(pubDer, "PUBLIC KEY")
+
+    if len(pri2) == 0 {
+        t.Error("expected export key PEM error: priv")
+    }
+    if len(pub2) == 0 {
+        t.Error("expected export key PEM error: pub")
+    }
 }

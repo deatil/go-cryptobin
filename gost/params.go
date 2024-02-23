@@ -3,7 +3,7 @@ package gost
 import "math/big"
 
 var (
-    CurveGostR34102001ParamSetcc func() *Curve = func() *Curve {
+    CurveGostR34102001ParamSetcc = func() *Curve {
         curve, _ := NewCurve(
             bytesToBigint([]byte{
                 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -51,7 +51,7 @@ var (
     }
 
     // id-GostR3410-2001-TestParamSet
-    CurveIdGostR34102001TestParamSet func() *Curve = func() *Curve {
+    CurveIdGostR34102001TestParamSet = func() *Curve {
         curve, _ := NewCurve(
             bytesToBigint([]byte{
                 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -99,7 +99,7 @@ var (
     }
 
     // id-tc26-gost-3410-12-256-paramSetA
-    CurveIdtc26gost341012256paramSetA func() *Curve = func() *Curve {
+    CurveIdtc26gost341012256paramSetA = func() *Curve {
         curve, _ := NewCurve(
             bytesToBigint([]byte{
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -152,7 +152,7 @@ var (
     }
 
     // id-tc26-gost-3410-12-256-paramSetB
-    CurveIdtc26gost341012256paramSetB func() *Curve = func() *Curve {
+    CurveIdtc26gost341012256paramSetB = func() *Curve {
         curve, _ := NewCurve(
             bytesToBigint([]byte{
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -200,7 +200,7 @@ var (
     }
 
     // id-tc26-gost-3410-12-256-paramSetC
-    CurveIdtc26gost341012256paramSetC func() *Curve = func() *Curve {
+    CurveIdtc26gost341012256paramSetC = func() *Curve {
         curve, _ := NewCurve(
             bytesToBigint([]byte{
                 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -248,7 +248,7 @@ var (
     }
 
     // id-tc26-gost-3410-12-256-paramSetD
-    CurveIdtc26gost341012256paramSetD func() *Curve = func() *Curve {
+    CurveIdtc26gost341012256paramSetD = func() *Curve {
         curve, _ := NewCurve(
             bytesToBigint([]byte{
                 0x9B, 0x9F, 0x60, 0x5F, 0x5A, 0x85, 0x81, 0x07,
@@ -296,7 +296,7 @@ var (
     }
 
     // id-tc26-gost-3410-12-512-paramSetTest
-    CurveIdtc26gost341012512paramSetTest func() *Curve = func() *Curve {
+    CurveIdtc26gost341012512paramSetTest = func() *Curve {
         curve, _ := NewCurve(
             bytesToBigint([]byte{
                 0x45, 0x31, 0xAC, 0xD1, 0xFE, 0x00, 0x23, 0xC7,
@@ -359,7 +359,7 @@ var (
     }
 
     // id-tc26-gost-3410-12-512-paramSetA
-    CurveIdtc26gost341012512paramSetA func() *Curve = func() *Curve {
+    CurveIdtc26gost341012512paramSetA = func() *Curve {
         curve, _ := NewCurve(
             bytesToBigint([]byte{
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -431,7 +431,7 @@ var (
     }
 
     // id-tc26-gost-3410-12-512-paramSetB
-    CurveIdtc26gost341012512paramSetB func() *Curve = func() *Curve {
+    CurveIdtc26gost341012512paramSetB = func() *Curve {
         curve, _ := NewCurve(
             bytesToBigint([]byte{
                 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -503,7 +503,7 @@ var (
     }
 
     // id-tc26-gost-3410-12-512-paramSetC
-    CurveIdtc26gost341012512paramSetC func() *Curve = func() *Curve {
+    CurveIdtc26gost341012512paramSetC = func() *Curve {
         curve, _ := NewCurve(
             bytesToBigint([]byte{
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -586,91 +586,91 @@ var (
     // Aliases
 
     // id-GostR3410-2001-CryptoPro-A-ParamSet
-    CurveIdGostR34102001CryptoProAParamSet func() *Curve = func() *Curve {
+    CurveIdGostR34102001CryptoProAParamSet = func() *Curve {
         c := CurveIdtc26gost341012256paramSetB()
         c.Name = "id-GostR3410-2001-CryptoPro-A-ParamSet"
         return c
     }
 
     // id-GostR3410-2001-CryptoPro-B-ParamSet
-    CurveIdGostR34102001CryptoProBParamSet func() *Curve = func() *Curve {
+    CurveIdGostR34102001CryptoProBParamSet = func() *Curve {
         c := CurveIdtc26gost341012256paramSetC()
         c.Name = "id-GostR3410-2001-CryptoPro-B-ParamSet"
         return c
     }
 
     // id-GostR3410-2001-CryptoPro-C-ParamSet
-    CurveIdGostR34102001CryptoProCParamSet func() *Curve = func() *Curve {
+    CurveIdGostR34102001CryptoProCParamSet = func() *Curve {
         c := CurveIdtc26gost341012256paramSetD()
         c.Name = "id-GostR3410-2001-CryptoPro-C-ParamSet"
         return c
     }
 
     // id-GostR3410-2001-CryptoPro-XchA-ParamSet
-    CurveIdGostR34102001CryptoProXchAParamSet func() *Curve = func() *Curve {
+    CurveIdGostR34102001CryptoProXchAParamSet = func() *Curve {
         c := CurveIdGostR34102001CryptoProAParamSet()
         c.Name = "id-GostR3410-2001-CryptoPro-XchA-ParamSet"
         return c
     }
 
     // id-GostR3410-2001-CryptoPro-XchB-ParamSet
-    CurveIdGostR34102001CryptoProXchBParamSet func() *Curve = func() *Curve {
+    CurveIdGostR34102001CryptoProXchBParamSet = func() *Curve {
         c := CurveIdGostR34102001CryptoProCParamSet()
         c.Name = "id-GostR3410-2001-CryptoPro-XchB-ParamSet"
         return c
     }
 
     // id-tc26-gost-3410-2012-256-paramSetA
-    CurveIdtc26gost34102012256paramSetA func() *Curve = func() *Curve {
+    CurveIdtc26gost34102012256paramSetA = func() *Curve {
         c := CurveIdtc26gost341012256paramSetA()
         c.Name = "id-tc26-gost-3410-2012-256-paramSetA"
         return c
     }
 
     // id-tc26-gost-3410-2012-256-paramSetB
-    CurveIdtc26gost34102012256paramSetB func() *Curve = func() *Curve {
+    CurveIdtc26gost34102012256paramSetB = func() *Curve {
         c := CurveIdtc26gost341012256paramSetB()
         c.Name = "id-tc26-gost-3410-2012-256-paramSetB"
         return c
     }
 
     // id-tc26-gost-3410-2012-256-paramSetC
-    CurveIdtc26gost34102012256paramSetC func() *Curve = func() *Curve {
+    CurveIdtc26gost34102012256paramSetC = func() *Curve {
         c := CurveIdtc26gost341012256paramSetC()
         c.Name = "id-tc26-gost-3410-2012-256-paramSetC"
         return c
     }
 
     // id-tc26-gost-3410-2012-256-paramSetD
-    CurveIdtc26gost34102012256paramSetD func() *Curve = func() *Curve {
+    CurveIdtc26gost34102012256paramSetD = func() *Curve {
         c := CurveIdtc26gost341012256paramSetD()
         c.Name = "id-tc26-gost-3410-2012-256-paramSetD"
         return c
     }
 
     // id-tc26-gost-3410-2012-512-paramSetTest
-    CurveIdtc26gost34102012512paramSetTest func() *Curve = func() *Curve {
+    CurveIdtc26gost34102012512paramSetTest = func() *Curve {
         c := CurveIdtc26gost341012512paramSetTest()
         c.Name = "id-tc26-gost-3410-2012-512-paramSetTest"
         return c
     }
 
     // id-tc26-gost-3410-2012-512-paramSetA
-    CurveIdtc26gost34102012512paramSetA func() *Curve = func() *Curve {
+    CurveIdtc26gost34102012512paramSetA = func() *Curve {
         c := CurveIdtc26gost341012512paramSetA()
         c.Name = "id-tc26-gost-3410-2012-512-paramSetA"
         return c
     }
 
     // id-tc26-gost-3410-2012-512-paramSetB
-    CurveIdtc26gost34102012512paramSetB func() *Curve = func() *Curve {
+    CurveIdtc26gost34102012512paramSetB = func() *Curve {
         c := CurveIdtc26gost341012512paramSetB()
         c.Name = "id-tc26-gost-3410-2012-512-paramSetB"
         return c
     }
 
     // id-tc26-gost-3410-2012-512-paramSetC
-    CurveIdtc26gost34102012512paramSetC func() *Curve = func() *Curve {
+    CurveIdtc26gost34102012512paramSetC = func() *Curve {
         c := CurveIdtc26gost341012512paramSetC()
         c.Name = "id-tc26-gost-3410-2012-512-paramSetC"
         return c

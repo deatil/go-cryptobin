@@ -2,6 +2,7 @@ package gost
 
 import (
     "errors"
+    "math/big"
     "encoding/asn1"
     "crypto/x509/pkix"
 
@@ -9,7 +10,16 @@ import (
 )
 
 var (
-    oidPublicKeyGOST = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 19}
+    // PublicKey oid
+    oidGOSTPublicKey         = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 19}
+    oidGost2012PublicKey256  = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 1, 1}
+    oidGost2012PublicKey512  = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 1, 2}
+
+    // Digest oid
+    oidGost2012Digest256 = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 2, 2}
+    oidGost2012Digest512 = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 2, 3}
+    oidGost94Digest      = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 9}
+    oidCryptoProDigestA  = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 30, 1}
 
     oidGostR3410_2001_TestParamSet         = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 35, 0}
 
@@ -17,6 +27,11 @@ var (
     oidGostR3410_2001_CryptoPro_A_ParamSet = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 35, 1}
     oidGostR3410_2001_CryptoPro_B_ParamSet = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 35, 2}
     oidGostR3410_2001_CryptoPro_C_ParamSet = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 35, 3}
+
+    oidCryptoPro2012Sign256A = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 1, 1}
+    oidCryptoPro2012Sign512A = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 1}
+    oidCryptoPro2012Sign512B = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 2}
+    oidCryptoPro2012Sign512C = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 3}
 
     oidTc26_gost_3410_12_512_paramSetA = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 1}
     oidTc26_gost_3410_12_512_paramSetB = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 2}
@@ -52,6 +67,12 @@ type pkcs8 struct {
     PrivateKey []byte
 }
 
+// Key Algo
+type keyAlgoParam struct {
+    Curve  asn1.ObjectIdentifier
+    Digest asn1.ObjectIdentifier `asn1:"optional"`
+}
+
 // PublicKey data
 type pkixPublicKey struct {
     Algo      pkix.AlgorithmIdentifier
@@ -77,12 +98,14 @@ func MarshalPublicKey(pub *PublicKey) ([]byte, error) {
     }
 
     var paramBytes []byte
-    paramBytes, err = asn1.Marshal(oid)
+    paramBytes, err = asn1.Marshal(keyAlgoParam{
+        Curve: oid,
+    })
     if err != nil {
         return nil, err
     }
 
-    publicKeyAlgorithm.Algorithm = oidPublicKeyGOST
+    publicKeyAlgorithm.Algorithm = oidGOSTPublicKey
     publicKeyAlgorithm.Parameters.FullBytes = paramBytes
 
     if !pub.Curve.IsOnCurve(pub.X, pub.Y) {
@@ -118,26 +141,24 @@ func ParsePublicKey(derBytes []byte) (pub *PublicKey, err error) {
         return
     }
 
-    // parse
-    keyData := &pki
+    algo := pki.Algorithm.Algorithm
+    params := pki.Algorithm.Parameters
+    der := cryptobyte.String(pki.PublicKey.RightAlign())
 
-    oid := keyData.Algorithm.Algorithm
-    params := keyData.Algorithm.Parameters
-    der := cryptobyte.String(keyData.PublicKey.RightAlign())
-
-    algoEq := oid.Equal(oidPublicKeyGOST)
-    if !algoEq {
+    if !algo.Equal(oidGOSTPublicKey) &&
+        !algo.Equal(oidGost2012PublicKey256) &&
+        !algo.Equal(oidGost2012PublicKey512) {
         err = errors.New("gost: unknown public key algorithm")
         return
     }
 
-    paramsDer := cryptobyte.String(params.FullBytes)
-    namedCurveOID := new(asn1.ObjectIdentifier)
-    if !paramsDer.ReadASN1ObjectIdentifier(namedCurveOID) {
-        return nil, errors.New("gost: invalid ECDH parameters")
+    var param keyAlgoParam
+    if _, err := asn1.Unmarshal(params.FullBytes, &param); err != nil {
+        err = errors.New("gost: unknown public key algorithm curve")
+        return nil, err
     }
 
-    namedCurve := NamedCurveFromOid(*namedCurveOID)
+    namedCurve := NamedCurveFromOid(param.Curve)
     if namedCurve == nil {
         err = errors.New("gost: unsupported gost curve")
         return
@@ -168,13 +189,15 @@ func MarshalPrivateKey(key *PrivateKey) ([]byte, error) {
     }
 
     // Marshal oid
-    oidBytes, err := asn1.Marshal(oid)
+    oidBytes, err := asn1.Marshal(keyAlgoParam{
+        Curve: oid,
+    })
     if err != nil {
         return nil, errors.New("gost: failed to marshal algo param: " + err.Error())
     }
 
     privKey.Algo = pkix.AlgorithmIdentifier{
-        Algorithm:  oidPublicKeyGOST,
+        Algorithm:  oidGOSTPublicKey,
         Parameters: asn1.RawValue{
             FullBytes: oidBytes,
         },
@@ -202,23 +225,63 @@ func ParsePrivateKey(derBytes []byte) (*PrivateKey, error) {
         return nil, err
     }
 
-    algoEq := privKey.Algo.Algorithm.Equal(oidPublicKeyGOST)
-    if !algoEq {
+    algo := privKey.Algo.Algorithm
+    if !algo.Equal(oidGOSTPublicKey) &&
+        !algo.Equal(oidGost2012PublicKey256) &&
+        !algo.Equal(oidGost2012PublicKey512) {
         err = errors.New("gost: unknown private key algorithm")
         return nil, err
     }
 
     bytes := privKey.Algo.Parameters.FullBytes
 
-    namedCurveOID := new(asn1.ObjectIdentifier)
-    if _, err := asn1.Unmarshal(bytes, namedCurveOID); err != nil {
-        namedCurveOID = nil
+    var param keyAlgoParam
+    if _, err := asn1.Unmarshal(bytes, &param); err != nil {
+        err = errors.New("gost: unknown private key algorithm curve")
+        return nil, err
     }
 
-    key, err := parseGostPrivateKey(namedCurveOID, privKey.PrivateKey)
+    key, err := parseGostPrivateKey(param.Curve, privKey.PrivateKey)
     if err != nil {
         return nil, errors.New("gost: failed to parse EC private key embedded in PKCS#8: " + err.Error())
     }
 
     return key, nil
+}
+
+func marshalGostPrivateKeyWithOID(key *PrivateKey, oid asn1.ObjectIdentifier) ([]byte, error) {
+    if !key.Curve.IsOnCurve(key.X, key.Y) {
+        return nil, errors.New("invalid gost key public key")
+    }
+
+    var b cryptobyte.Builder
+    b.AddASN1BigInt(key.D)
+
+    privASN1, err := b.Bytes()
+    if err != nil {
+        return nil, err
+    }
+
+    return privASN1, nil
+}
+
+func parseGostPrivateKey(namedCurveOID asn1.ObjectIdentifier, der []byte) (key *PrivateKey, err error) {
+    var privKey big.Int
+
+    input := cryptobyte.String(der)
+    if !input.ReadASN1Integer(&privKey) {
+        return nil, errors.New("gost: failed to parse private key")
+    }
+
+    curve := NamedCurveFromOid(namedCurveOID)
+    if curve == nil {
+        return nil, errors.New("gost: unknown gost curve")
+    }
+
+    priv, err := NewPrivateKey(curve, privKey.Bytes())
+    if err != nil {
+        return nil, err
+    }
+
+    return priv, nil
 }

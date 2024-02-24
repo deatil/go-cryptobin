@@ -16,46 +16,61 @@ var (
     oidGost2012PublicKey512  = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 1, 2}
 
     // Digest oid
+    oidGost94Digest = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 9}
+
+    // param digest oid
+    oidCryptoProDigestA  = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 30, 1}
     oidGost2012Digest256 = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 2, 2}
     oidGost2012Digest512 = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 2, 3}
-    oidGost94Digest      = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 9}
-    oidCryptoProDigestA  = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 30, 1}
 
     oidGostR3410_2001_TestParamSet         = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 35, 0}
-
-    oidTc26_gost_3410_12_256_paramSetA     = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 1, 1}
     oidGostR3410_2001_CryptoPro_A_ParamSet = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 35, 1}
     oidGostR3410_2001_CryptoPro_B_ParamSet = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 35, 2}
     oidGostR3410_2001_CryptoPro_C_ParamSet = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 35, 3}
 
-    oidCryptoPro2012Sign256A = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 1, 1}
-    oidCryptoPro2012Sign512A = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 1}
-    oidCryptoPro2012Sign512B = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 2}
-    oidCryptoPro2012Sign512C = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 3}
-
-    oidTc26_gost_3410_12_512_paramSetA = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 1}
-    oidTc26_gost_3410_12_512_paramSetB = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 2}
-    oidTc26_gost_3410_12_512_paramSetC = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 3}
-
     /* OID for EC DH */
     oidGostR3410_2001_CryptoPro_XchA_ParamSet = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 36, 0}
     oidGostR3410_2001_CryptoPro_XchB_ParamSet = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 36, 1}
+
+    oidTc26_gost_3410_12_256_paramSetA = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 1, 1}
+    oidTc26_gost_3410_12_256_paramSetB = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 1, 2}
+    oidTc26_gost_3410_12_256_paramSetC = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 1, 3}
+    oidTc26_gost_3410_12_256_paramSetD = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 1, 4}
+
+    oidTc26_gost_3410_12_512_paramSetTest = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 0}
+    oidTc26_gost_3410_12_512_paramSetA    = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 1}
+    oidTc26_gost_3410_12_512_paramSetB    = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 2}
+    oidTc26_gost_3410_12_512_paramSetC    = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 3}
+
+    oidCryptoPro2012Sign256A = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 1, 1}
+    oidCryptoPro2012Sign256B = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 1, 2}
+    oidCryptoPro2012Sign256C = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 1, 3}
+    oidCryptoPro2012Sign256D = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 1, 4}
+
+    oidCryptoPro2012Sign512Test = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 0}
+    oidCryptoPro2012Sign512A    = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 1}
+    oidCryptoPro2012Sign512B    = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 2}
+    oidCryptoPro2012Sign512C    = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 2, 1, 2, 3}
 )
 
 func init() {
     AddNamedCurve(CurveIdGostR34102001TestParamSet(), oidGostR3410_2001_TestParamSet)
-
-    AddNamedCurve(CurveIdtc26gost341012256paramSetA(), oidTc26_gost_3410_12_256_paramSetA)
     AddNamedCurve(CurveIdGostR34102001CryptoProAParamSet(), oidGostR3410_2001_CryptoPro_A_ParamSet)
     AddNamedCurve(CurveIdGostR34102001CryptoProBParamSet(), oidGostR3410_2001_CryptoPro_B_ParamSet)
     AddNamedCurve(CurveIdGostR34102001CryptoProCParamSet(), oidGostR3410_2001_CryptoPro_C_ParamSet)
 
-    AddNamedCurve(CurveIdtc26gost341012512paramSetA(), oidTc26_gost_3410_12_512_paramSetA)
-    AddNamedCurve(CurveIdtc26gost341012512paramSetB(), oidTc26_gost_3410_12_512_paramSetB)
-    AddNamedCurve(CurveIdtc26gost341012512paramSetC(), oidTc26_gost_3410_12_512_paramSetC)
-
     AddNamedCurve(CurveIdGostR34102001CryptoProXchAParamSet(), oidGostR3410_2001_CryptoPro_XchA_ParamSet)
     AddNamedCurve(CurveIdGostR34102001CryptoProXchBParamSet(), oidGostR3410_2001_CryptoPro_XchB_ParamSet)
+
+    AddNamedCurve(CurveIdtc26gost34102012256paramSetA(), oidCryptoPro2012Sign256A)
+    AddNamedCurve(CurveIdtc26gost34102012256paramSetB(), oidCryptoPro2012Sign256B)
+    AddNamedCurve(CurveIdtc26gost34102012256paramSetC(), oidCryptoPro2012Sign256C)
+    AddNamedCurve(CurveIdtc26gost34102012256paramSetD(), oidCryptoPro2012Sign256D)
+
+    AddNamedCurve(CurveIdtc26gost34102012512paramSetTest(), oidCryptoPro2012Sign512Test)
+    AddNamedCurve(CurveIdtc26gost34102012512paramSetA(), oidCryptoPro2012Sign512A)
+    AddNamedCurve(CurveIdtc26gost34102012512paramSetB(), oidCryptoPro2012Sign512B)
+    AddNamedCurve(CurveIdtc26gost34102012512paramSetC(), oidCryptoPro2012Sign512C)
 }
 
 const gostPrivKeyVersion = 1
@@ -97,15 +112,22 @@ func MarshalPublicKey(pub *PublicKey) ([]byte, error) {
         return nil, errors.New("gost: unsupported gost curve")
     }
 
-    var paramBytes []byte
-    paramBytes, err = asn1.Marshal(keyAlgoParam{
+    keyAlgo := keyAlgoParam{
         Curve: oid,
-    })
+    }
+
+    digestOid, ok := HashOidFromNamedCurve(pub.Curve)
+    if ok {
+        keyAlgo.Digest = digestOid
+    }
+
+    var paramBytes []byte
+    paramBytes, err = asn1.Marshal(keyAlgo)
     if err != nil {
         return nil, err
     }
 
-    publicKeyAlgorithm.Algorithm = oidGOSTPublicKey
+    publicKeyAlgorithm.Algorithm = PublicKeyOidFromNamedCurve(pub.Curve)
     publicKeyAlgorithm.Parameters.FullBytes = paramBytes
 
     if !pub.Curve.IsOnCurve(pub.X, pub.Y) {
@@ -199,17 +221,24 @@ func MarshalPrivateKey(priv *PrivateKey) ([]byte, error) {
         return nil, errors.New("gost: unsupported gost curve")
     }
 
-    // Marshal oid
-    oidBytes, err := asn1.Marshal(keyAlgoParam{
+    keyAlgo := keyAlgoParam{
         Curve: oid,
-    })
+    }
+
+    digestOid, ok := HashOidFromNamedCurve(priv.Curve)
+    if ok {
+        keyAlgo.Digest = digestOid
+    }
+
+    // Marshal oid
+    oidBytes, err := asn1.Marshal(keyAlgo)
     if err != nil {
         return nil, errors.New("gost: failed to marshal algo param: " + err.Error())
     }
 
     var privKey pkcs8
     privKey.Algo = pkix.AlgorithmIdentifier{
-        Algorithm:  oidGOSTPublicKey,
+        Algorithm:  PublicKeyOidFromNamedCurve(priv.Curve),
         Parameters: asn1.RawValue{
             FullBytes: oidBytes,
         },
@@ -286,4 +315,49 @@ func parseGostPrivateKey(namedCurveOID asn1.ObjectIdentifier, der []byte) (key *
     }
 
     return newPrivateKey(curve, privKey.Bytes())
+}
+
+// get PublicKey oid
+func PublicKeyOidFromNamedCurve(curve *Curve) asn1.ObjectIdentifier {
+    switch {
+        case curve.Equal(CurveIdGostR34102001TestParamSet()),
+            curve.Equal(CurveIdGostR34102001CryptoProAParamSet()),
+            curve.Equal(CurveIdGostR34102001CryptoProBParamSet()),
+            curve.Equal(CurveIdGostR34102001CryptoProCParamSet()),
+            curve.Equal(CurveIdGostR34102001CryptoProXchAParamSet()),
+            curve.Equal(CurveIdGostR34102001CryptoProXchBParamSet()),
+            curve.Equal(CurveIdtc26gost34102012256paramSetA()),
+            curve.Equal(CurveIdtc26gost34102012256paramSetB()),
+            curve.Equal(CurveIdtc26gost34102012256paramSetC()),
+            curve.Equal(CurveIdtc26gost34102012256paramSetD()):
+            return oidGost2012PublicKey256
+        case curve.Equal(CurveIdtc26gost34102012512paramSetTest()),
+            curve.Equal(CurveIdtc26gost34102012512paramSetA()),
+            curve.Equal(CurveIdtc26gost34102012512paramSetB()),
+            curve.Equal(CurveIdtc26gost34102012512paramSetC()):
+            return oidGost2012PublicKey512
+        default:
+            return oidGOSTPublicKey
+    }
+}
+
+// get Hash oid
+func HashOidFromNamedCurve(curve *Curve) (asn1.ObjectIdentifier, bool) {
+    switch {
+        case curve.Equal(CurveIdGostR34102001TestParamSet()),
+            curve.Equal(CurveIdGostR34102001CryptoProAParamSet()),
+            curve.Equal(CurveIdGostR34102001CryptoProBParamSet()),
+            curve.Equal(CurveIdGostR34102001CryptoProCParamSet()),
+            curve.Equal(CurveIdGostR34102001CryptoProXchAParamSet()),
+            curve.Equal(CurveIdGostR34102001CryptoProXchBParamSet()):
+            return oidGost2012Digest256, true
+        case curve.Equal(CurveIdtc26gost34102012512paramSetTest()),
+            curve.Equal(CurveIdtc26gost34102012512paramSetA()),
+            curve.Equal(CurveIdtc26gost34102012512paramSetB()):
+            return oidGost2012Digest512, true
+        case curve.Equal(CurveGostR34102001ParamSetcc()):
+            return oidCryptoProDigestA, true
+        default:
+            return asn1.ObjectIdentifier{}, false
+    }
 }

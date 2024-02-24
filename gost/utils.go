@@ -4,11 +4,11 @@ import (
     "math/big"
 )
 
-func bytesToBigint(d []byte) *big.Int {
-    return new(big.Int).SetBytes(d)
+func BytesToBigint(b []byte) *big.Int {
+    return new(big.Int).SetBytes(b)
 }
 
-func reverse(d []byte) []byte {
+func Reverse(d []byte) []byte {
     for i, j := 0, len(d)-1; i < j; i, j = i+1, j-1 {
         d[i], d[j] = d[j], d[i]
     }
@@ -27,7 +27,7 @@ func Marshal(curve *Curve, x, y *big.Int) []byte {
     y.FillBytes(ret[0      :  byteLen])
     x.FillBytes(ret[byteLen:2*byteLen])
 
-    return reverse(ret)
+    return Reverse(ret)
 }
 
 // Unmarshal converts a point, serialized by Marshal, into an x, y pair. It is
@@ -39,7 +39,7 @@ func Unmarshal(curve *Curve, data []byte) (x, y *big.Int) {
         return nil, nil
     }
 
-    reverse(data)
+    Reverse(data)
 
     y = new(big.Int).SetBytes(data[:byteLen])
     x = new(big.Int).SetBytes(data[byteLen:])

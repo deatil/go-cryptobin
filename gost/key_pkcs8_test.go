@@ -31,18 +31,18 @@ func encodePEM(src []byte, typ string) string {
 
 func TestEqual(t *testing.T) {
     testOneCurve(t, gost.CurveIdGostR34102001TestParamSet())
-
-    testOneCurve(t, gost.CurveIdtc26gost341012256paramSetA())
     testOneCurve(t, gost.CurveIdGostR34102001CryptoProAParamSet())
     testOneCurve(t, gost.CurveIdGostR34102001CryptoProBParamSet())
     testOneCurve(t, gost.CurveIdGostR34102001CryptoProCParamSet())
 
-    testOneCurve(t, gost.CurveIdtc26gost341012512paramSetA())
-    testOneCurve(t, gost.CurveIdtc26gost341012512paramSetB())
-    testOneCurve(t, gost.CurveIdtc26gost341012512paramSetC())
-
     testOneCurve(t, gost.CurveIdGostR34102001CryptoProXchAParamSet())
     testOneCurve(t, gost.CurveIdGostR34102001CryptoProXchBParamSet())
+
+    testOneCurve(t, gost.CurveIdtc26gost34102012256paramSetA())
+
+    testOneCurve(t, gost.CurveIdtc26gost34102012512paramSetA())
+    testOneCurve(t, gost.CurveIdtc26gost34102012512paramSetB())
+    testOneCurve(t, gost.CurveIdtc26gost34102012512paramSetC())
 }
 
 func testOneCurve(t *testing.T, curue *gost.Curve) {
@@ -89,7 +89,7 @@ func testOneCurve(t *testing.T, curue *gost.Curve) {
 }
 
 func Test_Pkcs8(t *testing.T) {
-    curue := gost.CurveIdGostR34102001TestParamSet()
+    curue := gost.CurveIdtc26gost34102012512paramSetA()
 
     priv, err := gost.GenerateKey(rand.Reader, curue)
     if err != nil {

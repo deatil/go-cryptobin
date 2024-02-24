@@ -43,8 +43,8 @@ func (pub *PublicKey) Verify(digest, signature []byte) (bool, error) {
         return false, fmt.Errorf("cryptobin/gost: len(signature)=%d != %d", len(signature), 2*pointSize)
     }
 
-    s := bytesToBigint(signature[:pointSize])
-    r := bytesToBigint(signature[pointSize:])
+    s := BytesToBigint(signature[:pointSize])
+    r := BytesToBigint(signature[pointSize:])
 
     verify, err := VerifyWithRS(pub, digest, r, s)
     if err != nil {
@@ -131,7 +131,7 @@ func (priv *PrivateKey) SignASN1(rand io.Reader, digest []byte, opts crypto.Sign
 }
 
 func newPrivateKey(curve *Curve, raw []byte) (*PrivateKey, error) {
-    k := bytesToBigint(raw)
+    k := BytesToBigint(raw)
     if k.Cmp(zero) == 0 {
         return nil, errors.New("cryptobin/gost: zero private key")
     }
@@ -164,14 +164,12 @@ func GenerateKey(rand io.Reader, curve *Curve) (*PrivateKey, error) {
 
 // Unmarshal private key
 func NewPrivateKey(curve *Curve, raw []byte) (*PrivateKey, error) {
-    return newPrivateKey(curve, reverse(raw))
+    return newPrivateKey(curve, raw)
 }
 
 // Marshal private key
 func ToPrivateKey(priv *PrivateKey) []byte {
-    prikey := make([]byte, priv.Curve.PointSize())
-
-    return reverse(priv.D.FillBytes(prikey))
+    return priv.D.Bytes()
 }
 
 // Unmarshal public key
@@ -237,7 +235,7 @@ func VerifyASN1(pub *PublicKey, hash, sig []byte) (bool, error) {
 
 // SignToRS
 func SignToRS(rand io.Reader, priv *PrivateKey, digest []byte) (*big.Int, *big.Int, error) {
-    e := bytesToBigint(digest)
+    e := BytesToBigint(digest)
 
     e.Mod(e, priv.Curve.Q)
     if e.Cmp(zero) == 0 {
@@ -258,7 +256,7 @@ Retry:
         return nil, nil, fmt.Errorf("cryptobin/gost: %w", err)
     }
 
-    k = bytesToBigint(kRaw)
+    k = BytesToBigint(kRaw)
     k.Mod(k, priv.Curve.Q)
     if k.Cmp(zero) == 0 {
         goto Retry
@@ -294,7 +292,7 @@ func VerifyWithRS(pub *PublicKey, digest []byte, r, s *big.Int) (bool, error) {
         return false, nil
     }
 
-    e := bytesToBigint(digest)
+    e := BytesToBigint(digest)
     e.Mod(e, pub.Curve.Q)
     if e.Cmp(zero) == 0 {
         e = big.NewInt(1)

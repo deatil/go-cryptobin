@@ -28,8 +28,12 @@ import (
     "golang.org/x/crypto/sha3"
     "golang.org/x/crypto/ripemd160"
 
+    "github.com/deatil/go-cryptobin/gost"
     "github.com/deatil/go-cryptobin/gm/sm2"
     "github.com/deatil/go-cryptobin/hash/sm3"
+
+    "github.com/deatil/go-cryptobin/hash/gost/gost34112012256"
+    "github.com/deatil/go-cryptobin/hash/gost/gost34112012512"
 )
 
 // rsaPublicKey reflects the ASN.1 structure of a PKCS#1 public key.
@@ -80,6 +84,20 @@ func marshalPublicKey(pub interface{}) (publicKeyBytes []byte, publicKeyAlgorith
                 return
             }
             publicKeyAlgorithm.Parameters.FullBytes = paramBytes
+        case *gost.PublicKey:
+            publicKey, err := gost.MarshalPublicKey(pub)
+            if err != nil {
+                return nil, pkix.AlgorithmIdentifier{}, err
+            }
+
+            var pki publicKeyInfo
+            _, err = asn1.Unmarshal(publicKey, &pki)
+            if err != nil {
+                return nil, pkix.AlgorithmIdentifier{}, err
+            }
+
+            publicKeyBytes = pki.PublicKey.RightAlign()
+            publicKeyAlgorithm = pki.Algorithm
         default:
             return nil, pkix.AlgorithmIdentifier{}, errors.New("x509: only RSA and ECDSA(SM2) public keys supported")
     }
@@ -172,6 +190,18 @@ func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{
                 Y:     y,
             }
             return pub, nil
+        case GOST3410:
+            keyBytes, err := asn1.Marshal(*keyData)
+            if err != nil {
+                return nil, errors.New("x509: failed to unmarshal GOST publickey")
+            }
+
+            pub, err := gost.ParsePublicKey(keyBytes)
+            if err != nil {
+                return nil, errors.New("x509: failed to unmarshal GOST curve point")
+            }
+
+            return pub, nil
         default:
             return nil, nil
     }
@@ -245,6 +275,8 @@ func init() {
     RegisterHash(SHA512_224, sha512.New512_224)
     RegisterHash(SHA512_256, sha512.New512_256)
     RegisterHash(SM3, sm3.New)
+    RegisterHash(GOST34112012256, gost34112012256.New)
+    RegisterHash(GOST34112012512, gost34112012512.New)
 }
 
 // HashFunc simply returns the value of h so that Hash implements SignerOpts.
@@ -269,6 +301,8 @@ const (
     SHA512_224                 // import crypto/sha512
     SHA512_256                 // import crypto/sha512
     SM3
+    GOST34112012256
+    GOST34112012512
     maxHash
 )
 
@@ -289,6 +323,8 @@ var digestSizes = []uint8{
     MD5SHA1:    36,
     RIPEMD160:  20,
     SM3:        32,
+    GOST34112012256: 32,
+    GOST34112012512: 64,
 }
 
 // Size returns the length, in bytes, of a digest resulting from the given hash
@@ -351,6 +387,8 @@ const (
     SM2WithSM3
     SM2WithSHA1
     SM2WithSHA256
+    GOST3410WithGOST34112012256
+    GOST3410WithGOST34112012512
 )
 
 func (algo SignatureAlgorithm) isRSAPSS() bool {
@@ -382,6 +420,8 @@ var algoName = [...]string{
     SM2WithSM3:       "SM2-SM3",
     SM2WithSHA1:      "SM2-SHA1",
     SM2WithSHA256:    "SM2-SHA256",
+    GOST3410WithGOST34112012256: "GOST3410-GOST34112012256",
+    GOST3410WithGOST34112012512: "GOST3410-GOST34112012512",
 }
 
 func (algo SignatureAlgorithm) String() string {
@@ -399,6 +439,7 @@ const (
     DSA
     ECDSA
     SM2
+    GOST3410
 )
 
 // OIDs for signature algorithms
@@ -468,13 +509,20 @@ var (
     oidSignatureSM2WithSM3      = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 501}
     oidSignatureSM2WithSHA1     = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 502}
     oidSignatureSM2WithSHA256   = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 503}
-    //	oidSignatureSM3WithRSA      = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 504}
+    // oidSignatureSM3WithRSA      = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 504}
+
+    oidSignatureGOST3410WithGOST34112012256 = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 3, 2}
+    oidSignatureGOST3410WithGOST34112012512 = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 3, 3}
 
     oidSM3     = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 401, 1}
     oidSHA256  = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 2, 1}
     oidSHA384  = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 2, 2}
     oidSHA512  = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 2, 3}
     oidHashSM3 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 401}
+
+    oidGostCryptoProDigestA = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 30, 1}
+    oidGost2012Digest256    = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 2, 2}
+    oidGost2012Digest512    = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 2, 3}
 
     oidMGF1 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 8}
 
@@ -510,6 +558,8 @@ var signatureAlgorithmDetails = []struct {
     {SM2WithSHA1, oidSignatureSM2WithSHA1, ECDSA, SHA1},
     {SM2WithSHA256, oidSignatureSM2WithSHA256, ECDSA, SHA256},
     //	{SM3WithRSA, oidSignatureSM3WithRSA, RSA, SM3},
+    {GOST3410WithGOST34112012256, oidSignatureGOST3410WithGOST34112012256, GOST3410, GOST34112012256},
+    {GOST3410WithGOST34112012512, oidSignatureGOST3410WithGOST34112012512, GOST3410, GOST34112012512},
 }
 
 // pssParameters reflects the parameters in an AlgorithmIdentifier that
@@ -642,6 +692,10 @@ var (
     oidPublicKeyRSA   = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 1}
     oidPublicKeyDSA   = asn1.ObjectIdentifier{1, 2, 840, 10040, 4, 1}
     oidPublicKeyECDSA = asn1.ObjectIdentifier{1, 2, 840, 10045, 2, 1}
+
+    oidGOSTPublicKey         = asn1.ObjectIdentifier{1, 2, 643, 2, 2, 19}
+    oidGost2012PublicKey256  = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 1, 1}
+    oidGost2012PublicKey512  = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 1, 2}
 )
 
 func getPublicKeyAlgorithmFromOID(oid asn1.ObjectIdentifier) PublicKeyAlgorithm {
@@ -652,6 +706,10 @@ func getPublicKeyAlgorithmFromOID(oid asn1.ObjectIdentifier) PublicKeyAlgorithm 
         return DSA
     case oid.Equal(oidPublicKeyECDSA):
         return ECDSA
+    case oid.Equal(oidGOSTPublicKey),
+        oid.Equal(oidGost2012PublicKey256),
+        oid.Equal(oidGost2012PublicKey512):
+        return GOST3410
     }
     return UnknownPublicKeyAlgorithm
 }
@@ -1014,6 +1072,10 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
             return InsecureAlgorithmError(algo)
         case SM2WithSM3: // SM3WithRSA reserve
             hashType = SM3
+        case GOST3410WithGOST34112012256:
+            hashType = GOST34112012256
+        case GOST3410WithGOST34112012512:
+            hashType = GOST34112012512
         default:
             return ErrUnsupportedAlgorithm
     }
@@ -1078,6 +1140,13 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
                         return errors.New("x509: ECDSA verification failure")
                     }
             }
+            return
+        case *gost.PublicKey:
+            gostOk, _ := gost.Verify(pub, fnHash(), signature)
+            if !gostOk {
+                return errors.New("x509: GOST verification failure")
+            }
+
             return
     }
 
@@ -1223,6 +1292,7 @@ func parseCertificate(in *certificate) (*Certificate, error) {
     } else if len(rest) != 0 {
         return nil, errors.New("x509: trailing data after X.509 subject")
     }
+
     if rest, err := asn1.Unmarshal(in.TBSCertificate.Issuer.FullBytes, &issuer); err != nil {
         return nil, err
     } else if len(rest) != 0 {
@@ -1461,6 +1531,7 @@ func ParseCertificate(asn1Data []byte) (*Certificate, error) {
     if err != nil {
         return nil, err
     }
+
     if len(rest) > 0 {
         return nil, asn1.SyntaxError{Msg: "trailing data"}
     }
@@ -1795,8 +1866,24 @@ func signingParamsForPublicKey(pub interface{}, requestedSigAlgo SignatureAlgori
             default:
                 err = errors.New("x509: unknown SM2 curve")
         }
+    case *gost.PublicKey:
+        pubType = GOST3410
+        hashAlgo, _ := gost.HashOidFromNamedCurve(pub.Curve)
+        switch {
+        case hashAlgo.Equal(oidGost2012Digest256):
+            hashFunc = GOST34112012256
+            sigAlgo.Algorithm = oidSignatureGOST3410WithGOST34112012256
+        case hashAlgo.Equal(oidGost2012Digest512):
+            hashFunc = GOST34112012512
+            sigAlgo.Algorithm = oidSignatureGOST3410WithGOST34112012512
+        case hashAlgo.Equal(oidGostCryptoProDigestA):
+            fallthrough
+        default:
+            err = errors.New("x509: unknown GOST3410 curve")
+        }
+
     default:
-        err = errors.New("x509: only RSA and ECDSA keys supported")
+        err = errors.New("x509: only RSA, SM2, GOST3410 and ECDSA keys supported")
     }
 
     if err != nil {

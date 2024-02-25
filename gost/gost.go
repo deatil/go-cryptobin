@@ -164,12 +164,17 @@ func GenerateKey(rand io.Reader, curve *Curve) (*PrivateKey, error) {
 
 // Unmarshal private key
 func NewPrivateKey(curve *Curve, raw []byte) (*PrivateKey, error) {
-    return newPrivateKey(curve, raw)
+    return newPrivateKey(curve, Reverse(raw))
 }
 
 // Marshal private key
 func ToPrivateKey(priv *PrivateKey) []byte {
-    return priv.D.Bytes()
+    byteLen := priv.Curve.PointSize()
+    privateKey := make([]byte, 2*byteLen)
+
+    priv.D.FillBytes(privateKey)
+
+    return Reverse(privateKey)
 }
 
 // Unmarshal public key

@@ -236,7 +236,7 @@ func Test_341001(t *testing.T) {
     signature = append(signature[32:], signature[:32]...)
     c := CurveIdGostR34102001TestParamSet()
 
-    prikey, err := NewPrivateKey(c, prv)
+    prikey, err := NewPrivateKey(c, Reverse(prv))
     if err != nil {
         t.Fatal(err)
     }
@@ -266,7 +266,7 @@ func Test_34102012(t *testing.T) {
 
     pri := decodeHex("7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28")
 
-    prikey, err := NewPrivateKey(curve, pri)
+    prikey, err := NewPrivateKey(curve, Reverse(pri))
     if err != nil {
         t.Fatal(err)
     }
@@ -306,7 +306,7 @@ func Test_34102012_2(t *testing.T) {
 
     pri := decodeHex("0BA6048AADAE241BA40936D47756D7C93091A0E8514669700EE7508E508B102072E8123B2200A0563322DAD2827E2714A2636B7BFD18AADFC62967821FA18DD4")
 
-    prikey, err := NewPrivateKey(curve, pri)
+    prikey, err := NewPrivateKey(curve, Reverse(pri))
     if err != nil {
         t.Fatal(err)
     }

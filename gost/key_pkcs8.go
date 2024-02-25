@@ -73,7 +73,11 @@ func init() {
     AddNamedCurve(CurveIdtc26gost34102012512paramSetC(), oidCryptoPro2012Sign512C)
 }
 
-const gostPrivKeyVersion = 1
+const (
+    Gost2012Key bool = false
+
+    gostPrivKeyVersion = 1
+)
 
 // pkcs8 data
 type pkcs8 struct {
@@ -135,9 +139,14 @@ func MarshalPublicKey(pub *PublicKey) ([]byte, error) {
     }
 
     publicKey = Marshal(pub.Curve, pub.X, pub.Y)
-    publicKeyBytes, err = asn1.Marshal(publicKey)
-    if err != nil {
-        return nil, err
+
+    if Gost2012Key {
+        publicKeyBytes = publicKey
+    } else {
+        publicKeyBytes, err = asn1.Marshal(publicKey)
+        if err != nil {
+            return nil, err
+        }
     }
 
     pkix := pkixPublicKey{
@@ -190,19 +199,22 @@ func ParsePublicKey(publicKey []byte) (pub *PublicKey, err error) {
         return
     }
 
-    var derBytes []byte
-    rest, err = asn1.Unmarshal(der, &derBytes)
-    if err != nil {
-        return
-    } else if len(rest) != 0 {
-        err = errors.New("gost: trailing data after ASN.1 of public-key der")
-        return
-    }
-
-    x, y := Unmarshal(namedCurve, derBytes)
+    x, y := Unmarshal(namedCurve, der)
     if x == nil || y == nil {
-        err = errors.New("gost: failed to unmarshal gost curve point")
-        return
+        var derBytes []byte
+        rest, err = asn1.Unmarshal(der, &derBytes)
+        if err != nil {
+            return
+        } else if len(rest) != 0 {
+            err = errors.New("gost: trailing data after ASN.1 of public-key der")
+            return
+        }
+
+        x, y = Unmarshal(namedCurve, derBytes)
+        if x == nil || y == nil {
+            err = errors.New("gost: failed to unmarshal gost curve point")
+            return
+        }
     }
 
     pub = &PublicKey{
@@ -244,13 +256,9 @@ func MarshalPrivateKey(priv *PrivateKey) ([]byte, error) {
         },
     }
 
-    if !priv.Curve.IsOnCurve(priv.X, priv.Y) {
-        return nil, errors.New("invalid elliptic key public key")
-    }
-
     privKey.PrivateKey, err = marshalGostPrivateKey(priv)
     if err != nil {
-        return nil, errors.New("gost: failed to marshal EC private key while building PKCS#8: " + err.Error())
+        return nil, errors.New("gost: failed to marshal private key while building PKCS#8: " + err.Error())
     }
 
     return asn1.Marshal(privKey)
@@ -284,7 +292,7 @@ func ParsePrivateKey(privateKey []byte) (*PrivateKey, error) {
 
     key, err := parseGostPrivateKey(param.Curve, privKey.PrivateKey)
     if err != nil {
-        return nil, errors.New("gost: failed to parse EC private key embedded in PKCS#8: " + err.Error())
+        return nil, errors.New("gost: failed to parse private key embedded in PKCS#8: " + err.Error())
     }
 
     return key, nil
@@ -292,29 +300,42 @@ func ParsePrivateKey(privateKey []byte) (*PrivateKey, error) {
 
 func marshalGostPrivateKey(key *PrivateKey) ([]byte, error) {
     if !key.Curve.IsOnCurve(key.X, key.Y) {
-        return nil, errors.New("invalid gost key public key")
+        return nil, errors.New("invalid gost public key")
     }
 
     var b cryptobyte.Builder
-    b.AddASN1BigInt(key.D)
+
+    if Gost2012Key {
+        pointSize := key.Curve.PointSize()
+
+        b.AddBytes(key.D.FillBytes(make([]byte, pointSize)))
+    } else {
+        b.AddASN1BigInt(key.D)
+    }
 
     return b.Bytes()
 }
 
 func parseGostPrivateKey(namedCurveOID asn1.ObjectIdentifier, der []byte) (key *PrivateKey, err error) {
     var privKey big.Int
+    var private []byte
 
     input := cryptobyte.String(der)
     if !input.ReadASN1Integer(&privKey) {
-        return nil, errors.New("gost: failed to parse private key")
+        input = cryptobyte.String(der)
+        if !input.ReadBytes(&private, len(der)) {
+            return nil, errors.New("failed to parse private key")
+        }
+    } else {
+        private = privKey.Bytes()
     }
 
     curve := NamedCurveFromOid(namedCurveOID)
     if curve == nil {
-        return nil, errors.New("gost: unknown gost curve")
+        return nil, errors.New("unknown gost curve")
     }
 
-    return newPrivateKey(curve, privKey.Bytes())
+    return newPrivateKey(curve, private)
 }
 
 // get PublicKey oid

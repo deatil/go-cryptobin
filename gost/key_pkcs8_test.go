@@ -181,3 +181,34 @@ func Test_Check_GostR3410_2001_CryptoPro_A_ParamSet(t *testing.T) {
         t.Error("parse pubkey fail")
     }
 }
+
+var Openssl_Gost_Prikey = `
+-----BEGIN PRIVATE KEY-----
+MEYCAQAwHwYIKoUDBwEBAQEwEwYHKoUDAgIjAQYIKoUDBwEBAgIEIJ3L20nIrfUo
+MdMNKTx9pxh3e7Etf7abOI73mypFZToK
+-----END PRIVATE KEY-----
+`
+
+func Test_Check_Openssl_Gost_Prikey(t *testing.T) {
+    pri := decodePEM(Openssl_Gost_Prikey)
+    if len(pri) == 0 {
+        t.Error("decodePEM prikey empty")
+    }
+
+    prikey, err := gost.ParsePrivateKey(pri)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pubkey := &prikey.PublicKey
+
+    pub, err := gost.MarshalPublicKey(pubkey)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pubPem := encodePEM(pub, "PUBLIC KEY")
+    if len(pubPem) == 0 {
+        t.Error("make pub error")
+    }
+}

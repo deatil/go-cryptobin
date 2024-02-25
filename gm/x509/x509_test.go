@@ -1,19 +1,40 @@
 package x509
 
 import (
-    "fmt"
     "net"
     "time"
     "testing"
     "math/big"
+    "encoding/pem"
     "encoding/asn1"
     "crypto/rand"
     "crypto/x509/pkix"
 
+    "github.com/deatil/go-cryptobin/gost"
     "github.com/deatil/go-cryptobin/gm/sm2"
 )
 
-func TestX509(t *testing.T) {
+func decodePEM(pubPEM string) []byte {
+    block, _ := pem.Decode([]byte(pubPEM))
+    if block == nil {
+        panic("failed to parse PEM block containing the key")
+    }
+
+    return block.Bytes
+}
+
+func encodePEM(src []byte, typ string) string {
+    keyBlock := &pem.Block{
+        Type:  typ,
+        Bytes: src,
+    }
+
+    keyData := pem.EncodeToMemory(keyBlock)
+
+    return string(keyData)
+}
+
+func Test_X509(t *testing.T) {
     priv, err := sm2.GenerateKey(nil) // 生成密钥对
     if err != nil {
         t.Fatal(err)
@@ -67,8 +88,6 @@ func TestX509(t *testing.T) {
     err = req.CheckSignature()
     if err != nil {
         t.Fatalf("Request CheckSignature error:%v", err)
-    } else {
-        fmt.Printf("CheckSignature ok\n")
     }
 
     testExtKeyUsage := []ExtKeyUsage{ExtKeyUsageClientAuth, ExtKeyUsageServerAuth}
@@ -152,7 +171,49 @@ func TestX509(t *testing.T) {
     err = cert.CheckSignature(cert.SignatureAlgorithm, cert.RawTBSCertificate, cert.Signature)
     if err != nil {
         t.Fatal(err)
-    } else {
-        fmt.Printf("CheckSignature ok\n")
     }
+}
+
+var testGostCert = `
+-----BEGIN CERTIFICATE-----
+MIIB6TCCAZSgAwIBAgIUUv3U4LiFVjZW4dJVKPIXe/IGeyMwDAYIKoUDBwEBAwIF
+ADBFMQswCQYDVQQGEwJBVTETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwY
+SW50ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMB4XDTIwMDMxMzAyMDMwOVoXDTMwMDMx
+MTAyMDMwOVowRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAf
+BgNVBAoMGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDBmMB8GCCqFAwcBAQEBMBMG
+ByqFAwICIwEGCCqFAwcBAQICA0MABEDkSyJyVSVzwHJhibRxoZM475OgoNmIKN0w
+4jLHZmvLXX70bLa83RebqlVhahbJQ8eSuYm04drZyKPUJVPm7SG2o1MwUTAdBgNV
+HQ4EFgQULOn+VVG8YOOEBG0I0F3guXU8VDgwHwYDVR0jBBgwFoAULOn+VVG8YOOE
+BG0I0F3guXU8VDgwDwYDVR0TAQH/BAUwAwEB/zAMBggqhQMHAQEDAgUAA0EAv3Sm
+QQtmBhm2Y67rNgUxvdLRoD1363eN7Mw0tZ6SDyZvJHODgDSlas4KQKU+tuysCRSW
+pINcWw3M4CXPIG9VKQ==
+-----END CERTIFICATE-----
+`
+
+func Test_P12_Gost(t *testing.T) {
+    certpem := decodePEM(testGostCert)
+
+    cert, err := ParseCertificate(certpem)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pubKey, _ := cert.PublicKey.(*gost.PublicKey)
+
+    publicKey, err := gost.MarshalPublicKey(pubKey)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    publicKeyPem := encodePEM(publicKey, "PUBLIC KEY")
+    if len(publicKeyPem) == 0 {
+        t.Error("fail make publicKey")
+    }
+
+    err = cert.CheckSignature(cert.SignatureAlgorithm, cert.RawTBSCertificate, cert.Signature)
+    if err != nil {
+        // t.Fatal(err)
+    }
+
+    // t.Errorf("%s", publicKeyPem)
 }

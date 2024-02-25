@@ -4,6 +4,8 @@ import (
     "fmt"
     "hash"
     "testing"
+    "crypto/hmac"
+    "encoding/hex"
     "encoding/binary"
 )
 
@@ -56,5 +58,20 @@ func Test_Check(t *testing.T) {
 
     if fmt.Sprintf("%x", out) != check {
         t.Errorf("Check error. got %x, want %s", out, check)
+    }
+}
+
+func Test_Check_2(t *testing.T) {
+    in, _ := hex.DecodeString("0126bdb87800af214341456563780100")
+    key, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
+    check := "a1aa5f7de402d7b3d323f2991c8d4534013137010a83754fd0af6d7cd4922ed9"
+
+    mac := hmac.New(New, key)
+    mac.Write(in)
+
+    out := mac.Sum(nil)
+
+    if fmt.Sprintf("%x", out) != check {
+        t.Errorf("Check 2 error. got %x, want %s", out, check)
     }
 }

@@ -24,7 +24,7 @@ func NewCurve(p, q, a, b, x, y, e, d, co *big.Int) (*Curve, error) {
         Y:    y,
     }
     if !c.IsOnCurve(c.X, c.Y) {
-        return nil, errors.New("gost: invalid curve parameters")
+        return nil, errors.New("cryptobin/gost: invalid curve parameters")
     }
 
     if e != nil && d != nil {
@@ -142,7 +142,7 @@ func (c *Curve) add(p1x, p1y, p2x, p2y *big.Int) {
 
 func (c *Curve) Exp(degree, xS, yS *big.Int) (*big.Int, *big.Int, error) {
     if degree.Cmp(zero) == 0 {
-        return nil, nil, errors.New("gost: zero degree value")
+        return nil, nil, errors.New("cryptobin/gost: zero degree value")
     }
     dg := big.NewInt(0).Sub(degree, bigInt1)
     tx := big.NewInt(0).Set(xS)

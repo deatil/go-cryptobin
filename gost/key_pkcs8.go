@@ -74,7 +74,7 @@ func init() {
 }
 
 const (
-    Gost2012Key bool = false
+    Gost2012ParamOption bool = true
 
     gostPrivKeyVersion = 1
 )
@@ -113,7 +113,7 @@ func MarshalPublicKey(pub *PublicKey) ([]byte, error) {
 
     oid, ok := OidFromNamedCurve(pub.Curve)
     if !ok {
-        return nil, errors.New("gost: unsupported gost curve")
+        return nil, errors.New("cryptobin/gost: unsupported gost curve")
     }
 
     keyAlgo := keyAlgoParam{
@@ -135,18 +135,18 @@ func MarshalPublicKey(pub *PublicKey) ([]byte, error) {
     publicKeyAlgorithm.Parameters.FullBytes = paramBytes
 
     if !pub.Curve.IsOnCurve(pub.X, pub.Y) {
-        return nil, errors.New("gost: invalid gost curve public key")
+        return nil, errors.New("cryptobin/gost: invalid gost curve public key")
     }
 
     publicKey = Marshal(pub.Curve, pub.X, pub.Y)
 
-    if Gost2012Key {
-        publicKeyBytes = publicKey
-    } else {
+    if Gost2012ParamOption {
         publicKeyBytes, err = asn1.Marshal(publicKey)
         if err != nil {
             return nil, err
         }
+    } else {
+        publicKeyBytes = publicKey
     }
 
     pkix := pkixPublicKey{
@@ -167,7 +167,7 @@ func ParsePublicKey(publicKey []byte) (pub *PublicKey, err error) {
     if err != nil {
         return
     } else if len(rest) != 0 {
-        err = errors.New("gost: trailing data after ASN.1 of public-key")
+        err = errors.New("cryptobin/gost: trailing data after ASN.1 of public-key")
         return
     }
 
@@ -183,19 +183,19 @@ func ParsePublicKey(publicKey []byte) (pub *PublicKey, err error) {
     if !algo.Equal(oidGOSTPublicKey) &&
         !algo.Equal(oidGost2012PublicKey256) &&
         !algo.Equal(oidGost2012PublicKey512) {
-        err = errors.New("gost: unknown public key algorithm")
+        err = errors.New("cryptobin/gost: unknown public key algorithm")
         return
     }
 
     var param keyAlgoParam
     if _, err := asn1.Unmarshal(params.FullBytes, &param); err != nil {
-        err = errors.New("gost: unknown public key algorithm curve")
+        err = errors.New("cryptobin/gost: unknown public key algorithm curve")
         return nil, err
     }
 
     namedCurve := NamedCurveFromOid(param.Curve)
     if namedCurve == nil {
-        err = errors.New("gost: unsupported gost curve")
+        err = errors.New("cryptobin/gost: unsupported gost curve")
         return
     }
 
@@ -206,13 +206,13 @@ func ParsePublicKey(publicKey []byte) (pub *PublicKey, err error) {
         if err != nil {
             return
         } else if len(rest) != 0 {
-            err = errors.New("gost: trailing data after ASN.1 of public-key der")
+            err = errors.New("cryptobin/gost: trailing data after ASN.1 of public-key der")
             return
         }
 
         x, y = Unmarshal(namedCurve, derBytes)
         if x == nil || y == nil {
-            err = errors.New("gost: failed to unmarshal gost curve point")
+            err = errors.New("cryptobin/gost: failed to unmarshal gost curve point")
             return
         }
     }
@@ -230,7 +230,7 @@ func ParsePublicKey(publicKey []byte) (pub *PublicKey, err error) {
 func MarshalPrivateKey(priv *PrivateKey) ([]byte, error) {
     oid, ok := OidFromNamedCurve(priv.Curve)
     if !ok {
-        return nil, errors.New("gost: unsupported gost curve")
+        return nil, errors.New("cryptobin/gost: unsupported gost curve")
     }
 
     keyAlgo := keyAlgoParam{
@@ -245,7 +245,7 @@ func MarshalPrivateKey(priv *PrivateKey) ([]byte, error) {
     // Marshal oid
     oidBytes, err := asn1.Marshal(keyAlgo)
     if err != nil {
-        return nil, errors.New("gost: failed to marshal algo param: " + err.Error())
+        return nil, errors.New("cryptobin/gost: failed to marshal algo param: " + err.Error())
     }
 
     var privKey pkcs8
@@ -258,7 +258,7 @@ func MarshalPrivateKey(priv *PrivateKey) ([]byte, error) {
 
     privKey.PrivateKey, err = marshalGostPrivateKey(priv)
     if err != nil {
-        return nil, errors.New("gost: failed to marshal private key while building PKCS#8: " + err.Error())
+        return nil, errors.New("cryptobin/gost: failed to marshal private key while building PKCS#8: " + err.Error())
     }
 
     return asn1.Marshal(privKey)
@@ -278,7 +278,7 @@ func ParsePrivateKey(privateKey []byte) (*PrivateKey, error) {
     if !algo.Equal(oidGOSTPublicKey) &&
         !algo.Equal(oidGost2012PublicKey256) &&
         !algo.Equal(oidGost2012PublicKey512) {
-        err = errors.New("gost: unknown private key algorithm")
+        err = errors.New("cryptobin/gost: unknown private key algorithm")
         return nil, err
     }
 
@@ -286,13 +286,13 @@ func ParsePrivateKey(privateKey []byte) (*PrivateKey, error) {
 
     var param keyAlgoParam
     if _, err := asn1.Unmarshal(bytes, &param); err != nil {
-        err = errors.New("gost: unknown private key algorithm curve")
+        err = errors.New("cryptobin/gost: unknown private key algorithm curve")
         return nil, err
     }
 
     key, err := parseGostPrivateKey(param.Curve, privKey.PrivateKey)
     if err != nil {
-        return nil, errors.New("gost: failed to parse private key embedded in PKCS#8: " + err.Error())
+        return nil, errors.New("cryptobin/gost: failed to parse private key embedded in PKCS#8: " + err.Error())
     }
 
     return key, nil
@@ -303,17 +303,16 @@ func marshalGostPrivateKey(key *PrivateKey) ([]byte, error) {
         return nil, errors.New("invalid gost public key")
     }
 
-    var b cryptobyte.Builder
-
-    if Gost2012Key {
-        pointSize := key.Curve.PointSize()
-
-        b.AddBytes(key.D.FillBytes(make([]byte, pointSize)))
-    } else {
+    if Gost2012ParamOption {
+        var b cryptobyte.Builder
         b.AddASN1BigInt(key.D)
+        return b.Bytes()
     }
 
-    return b.Bytes()
+    pointSize := key.Curve.PointSize()
+    d := key.D.FillBytes(make([]byte, pointSize))
+
+    return Reverse(d), nil
 }
 
 func parseGostPrivateKey(namedCurveOID asn1.ObjectIdentifier, der []byte) (key *PrivateKey, err error) {
@@ -322,10 +321,8 @@ func parseGostPrivateKey(namedCurveOID asn1.ObjectIdentifier, der []byte) (key *
 
     input := cryptobyte.String(der)
     if !input.ReadASN1Integer(&privKey) {
-        input = cryptobyte.String(der)
-        if !input.ReadBytes(&private, len(der)) {
-            return nil, errors.New("failed to parse private key")
-        }
+        private = make([]byte, len(der))
+        copy(private, Reverse(der))
     } else {
         private = privKey.Bytes()
     }

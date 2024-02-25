@@ -18,24 +18,24 @@ func NewUKM(raw []byte) *big.Int {
         t[i] = raw[len(raw)-i-1]
     }
 
-    return BytesToBigint(t)
+    return bytesToBigint(t)
 }
 
 func (prv *PrivateKey) KEK(pub *PublicKey, ukm *big.Int) ([]byte, error) {
     if pub == nil {
-        return nil, fmt.Errorf("gost/KEK: PublicKey empty")
+        return nil, fmt.Errorf("cryptobin/gost.KEK: PublicKey empty")
     }
 
     keyX, keyY, err := prv.Curve.Exp(prv.D, pub.X, pub.Y)
     if err != nil {
-        return nil, fmt.Errorf("gost/KEK: %w", err)
+        return nil, fmt.Errorf("cryptobin/gost.KEK: %w", err)
     }
 
     u := big.NewInt(0).Set(ukm).Mul(ukm, prv.Curve.Co)
     if u.Cmp(bigInt1) != 0 {
         keyX, keyY, err = prv.Curve.Exp(u, keyX, keyY)
         if err != nil {
-            return nil, fmt.Errorf("gost/KEK: %w", err)
+            return nil, fmt.Errorf("cryptobin/gost.KEK: %w", err)
         }
     }
 
@@ -44,11 +44,11 @@ func (prv *PrivateKey) KEK(pub *PublicKey, ukm *big.Int) ([]byte, error) {
 
 func KEK(prv *PrivateKey, pub *PublicKey, ukm *big.Int) ([]byte, error) {
     if prv == nil {
-        return nil, fmt.Errorf("gost/KEK: PrivateKey empty")
+        return nil, fmt.Errorf("cryptobin/gost.KEK: PrivateKey empty")
     }
 
     if pub == nil {
-        return nil, fmt.Errorf("gost/KEK: PublicKey empty")
+        return nil, fmt.Errorf("cryptobin/gost.KEK: PublicKey empty")
     }
 
     return prv.KEK(pub, ukm)
@@ -58,12 +58,12 @@ func KEK(prv *PrivateKey, pub *PublicKey, ukm *big.Int) ([]byte, error) {
 // UKM is user keying material, also called VKO-factor.
 func (prv *PrivateKey) KEK2001(pub *PublicKey, ukm *big.Int) ([]byte, error) {
     if prv.Curve.PointSize() != 32 {
-        return nil, errors.New("gost/KEK2001: KEK2001 is only for 256-bit curves")
+        return nil, errors.New("cryptobin/gost.KEK2001: KEK2001 is only for 256-bit curves")
     }
 
     key, err := prv.KEK(pub, ukm)
     if err != nil {
-        return nil, fmt.Errorf("gost/KEK2001: %w", err)
+        return nil, fmt.Errorf("cryptobin/gost.KEK2001: %w", err)
     }
 
     h := gost341194.New(func(key []byte) cipher.Block {
@@ -72,7 +72,7 @@ func (prv *PrivateKey) KEK2001(pub *PublicKey, ukm *big.Int) ([]byte, error) {
         return cip
     })
     if _, err = h.Write(key); err != nil {
-        return nil, fmt.Errorf("gost/KEK2001: %w", err)
+        return nil, fmt.Errorf("cryptobin/gost.KEK2001: %w", err)
     }
 
     return h.Sum(key[:0]), nil
@@ -80,11 +80,11 @@ func (prv *PrivateKey) KEK2001(pub *PublicKey, ukm *big.Int) ([]byte, error) {
 
 func KEK2001(prv *PrivateKey, pub *PublicKey, ukm *big.Int) ([]byte, error) {
     if prv == nil {
-        return nil, fmt.Errorf("gost/KEK2001: PrivateKey empty")
+        return nil, fmt.Errorf("cryptobin/gost.KEK2001: PrivateKey empty")
     }
 
     if pub == nil {
-        return nil, fmt.Errorf("gost/KEK2001: PublicKey empty")
+        return nil, fmt.Errorf("cryptobin/gost.KEK2001: PublicKey empty")
     }
 
     return prv.KEK2001(pub, ukm)
@@ -95,12 +95,12 @@ func KEK2001(prv *PrivateKey, pub *PublicKey, ukm *big.Int) ([]byte, error) {
 func (prv *PrivateKey) KEK2012256(pub *PublicKey, ukm *big.Int) ([]byte, error) {
     key, err := prv.KEK(pub, ukm)
     if err != nil {
-        return nil, fmt.Errorf("gost/KEK2012256: %w", err)
+        return nil, fmt.Errorf("cryptobin/gost.KEK2012256: %w", err)
     }
 
     h := gost34112012256.New()
     if _, err = h.Write(key); err != nil {
-        return nil, fmt.Errorf("gost/KEK2012256: %w", err)
+        return nil, fmt.Errorf("cryptobin/gost.KEK2012256: %w", err)
     }
 
     return h.Sum(key[:0]), nil
@@ -108,11 +108,11 @@ func (prv *PrivateKey) KEK2012256(pub *PublicKey, ukm *big.Int) ([]byte, error) 
 
 func KEK2012256(prv *PrivateKey, pub *PublicKey, ukm *big.Int) ([]byte, error) {
     if prv == nil {
-        return nil, fmt.Errorf("gost/KEK2012256: PrivateKey empty")
+        return nil, fmt.Errorf("cryptobin/gost.KEK2012256: PrivateKey empty")
     }
 
     if pub == nil {
-        return nil, fmt.Errorf("gost/KEK2012256: PublicKey empty")
+        return nil, fmt.Errorf("cryptobin/gost.KEK2012256: PublicKey empty")
     }
 
     return prv.KEK2012256(pub, ukm)
@@ -123,12 +123,12 @@ func KEK2012256(prv *PrivateKey, pub *PublicKey, ukm *big.Int) ([]byte, error) {
 func (prv *PrivateKey) KEK2012512(pub *PublicKey, ukm *big.Int) ([]byte, error) {
     key, err := prv.KEK(pub, ukm)
     if err != nil {
-        return nil, fmt.Errorf("gost/KEK2012512: %w", err)
+        return nil, fmt.Errorf("cryptobin/gost.KEK2012512: %w", err)
     }
 
     h := gost34112012512.New()
     if _, err = h.Write(key); err != nil {
-        return nil, fmt.Errorf("gost/KEK2012512: %w", err)
+        return nil, fmt.Errorf("cryptobin/gost.KEK2012512: %w", err)
     }
 
     return h.Sum(key[:0]), nil
@@ -136,11 +136,11 @@ func (prv *PrivateKey) KEK2012512(pub *PublicKey, ukm *big.Int) ([]byte, error) 
 
 func KEK2012512(prv *PrivateKey, pub *PublicKey, ukm *big.Int) ([]byte, error) {
     if prv == nil {
-        return nil, fmt.Errorf("gost/KEK2012512: PrivateKey empty")
+        return nil, fmt.Errorf("cryptobin/gost.KEK2012512: PrivateKey empty")
     }
 
     if pub == nil {
-        return nil, fmt.Errorf("gost/KEK2012512: PublicKey empty")
+        return nil, fmt.Errorf("cryptobin/gost.KEK2012512: PublicKey empty")
     }
 
     return prv.KEK2012512(pub, ukm)

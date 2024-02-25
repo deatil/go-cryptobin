@@ -201,7 +201,6 @@ func Test_Check_Openssl_Gost_Prikey(t *testing.T) {
     }
 
     pubkey := &prikey.PublicKey
-
     pub, err := gost.MarshalPublicKey(pubkey)
     if err != nil {
         t.Fatal(err)
@@ -211,4 +210,16 @@ func Test_Check_Openssl_Gost_Prikey(t *testing.T) {
     if len(pubPem) == 0 {
         t.Error("make pub error")
     }
+
+    prv, err := gost.MarshalPrivateKey(prikey)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    prikeyPem := encodePEM(prv, "PRIVATE KEY")
+    if len(prikeyPem) == 0 {
+        t.Error("make prikey error")
+    }
+
+    // t.Error(prikeyPem)
 }

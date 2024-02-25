@@ -4,16 +4,20 @@ import (
     "math/big"
 )
 
-func BytesToBigint(b []byte) *big.Int {
-    return new(big.Int).SetBytes(b)
-}
+// Reverse bytes
+func Reverse(b []byte) []byte {
+    d := make([]byte, len(b))
+    copy(d, b)
 
-func Reverse(d []byte) []byte {
     for i, j := 0, len(d)-1; i < j; i, j = i+1, j-1 {
         d[i], d[j] = d[j], d[i]
     }
 
     return d
+}
+
+func bytesToBigint(b []byte) *big.Int {
+    return new(big.Int).SetBytes(b)
 }
 
 // Marshal converts a point on the curve into the uncompressed
@@ -39,7 +43,7 @@ func Unmarshal(curve *Curve, data []byte) (x, y *big.Int) {
         return nil, nil
     }
 
-    Reverse(data)
+    data = Reverse(data)
 
     y = new(big.Int).SetBytes(data[:byteLen])
     x = new(big.Int).SetBytes(data[byteLen:])

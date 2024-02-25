@@ -42,7 +42,7 @@ type rsaPublicKey struct {
     E int
 }
 
-func marshalPublicKey(pub interface{}) (publicKeyBytes []byte, publicKeyAlgorithm pkix.AlgorithmIdentifier, err error) {
+func marshalPublicKey(pub any) (publicKeyBytes []byte, publicKeyAlgorithm pkix.AlgorithmIdentifier, err error) {
     switch pub := pub.(type) {
         case *rsa.PublicKey:
             publicKeyBytes, err = asn1.Marshal(rsaPublicKey{
@@ -105,7 +105,7 @@ func marshalPublicKey(pub interface{}) (publicKeyBytes []byte, publicKeyAlgorith
     return publicKeyBytes, publicKeyAlgorithm, nil
 }
 
-func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{}, error) {
+func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (any, error) {
     asn1Data := keyData.PublicKey.RightAlign()
     switch algo {
         case RSA:
@@ -883,7 +883,7 @@ type Certificate struct {
     SignatureAlgorithm SignatureAlgorithm
 
     PublicKeyAlgorithm PublicKeyAlgorithm
-    PublicKey          interface{}
+    PublicKey          any
 
     Version             int
     SerialNumber        *big.Int
@@ -1060,9 +1060,11 @@ func (c *Certificate) CheckSignature(algo SignatureAlgorithm, signed, signature 
 func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey crypto.PublicKey) (err error) {
     var hashType Hash
     switch algo {
-        case SHA1WithRSA, DSAWithSHA1, ECDSAWithSHA1, SM2WithSHA1:
+        case SHA1WithRSA, DSAWithSHA1, ECDSAWithSHA1,
+            SM2WithSHA1:
             hashType = SHA1
-        case SHA256WithRSA, SHA256WithRSAPSS, DSAWithSHA256, ECDSAWithSHA256, SM2WithSHA256:
+        case SHA256WithRSA, SHA256WithRSAPSS, DSAWithSHA256,
+            ECDSAWithSHA256, SM2WithSHA256:
             hashType = SHA256
         case SHA384WithRSA, SHA384WithRSAPSS, ECDSAWithSHA384:
             hashType = SHA384
@@ -1830,7 +1832,7 @@ func subjectBytes(cert *Certificate) ([]byte, error) {
 // signingParamsForPublicKey returns the parameters to use for signing with
 // priv. If requestedSigAlgo is not zero then it overrides the default
 // signature algorithm.
-func signingParamsForPublicKey(pub interface{}, requestedSigAlgo SignatureAlgorithm) (hashFunc Hash, sigAlgo pkix.AlgorithmIdentifier, err error) {
+func signingParamsForPublicKey(pub any, requestedSigAlgo SignatureAlgorithm) (hashFunc Hash, sigAlgo pkix.AlgorithmIdentifier, err error) {
     var pubType PublicKeyAlgorithm
 
     switch pub := pub.(type) {
@@ -1901,11 +1903,13 @@ func signingParamsForPublicKey(pub interface{}, requestedSigAlgo SignatureAlgori
                 err = errors.New("x509: requested SignatureAlgorithm does not match private key type")
                 return
             }
+
             sigAlgo.Algorithm, hashFunc = details.oid, details.hash
             if hashFunc == 0 {
                 err = errors.New("x509: cannot sign with hash function requested")
                 return
             }
+
             if requestedSigAlgo.isRSAPSS() {
                 sigAlgo.Parameters = rsaPSSParameters(hashFunc)
             }
@@ -1970,7 +1974,7 @@ func ParseDERCRL(derBytes []byte) (*pkix.CertificateList, error) {
 
 // CreateCRL returns a DER encoded CRL, signed by this Certificate, that
 // contains the given list of revoked certificates.
-func (c *Certificate) CreateCRL(rand io.Reader, priv interface{}, revokedCerts []pkix.RevokedCertificate, now, expiry time.Time) (crlBytes []byte, err error) {
+func (c *Certificate) CreateCRL(rand io.Reader, priv any, revokedCerts []pkix.RevokedCertificate, now, expiry time.Time) (crlBytes []byte, err error) {
     key, ok := priv.(crypto.Signer)
     if !ok {
         return nil, errors.New("x509: certificate private key does not implement crypto.Signer")
@@ -2048,7 +2052,7 @@ type CertificateRequest struct {
     SignatureAlgorithm SignatureAlgorithm
 
     PublicKeyAlgorithm PublicKeyAlgorithm
-    PublicKey          interface{}
+    PublicKey          any
 
     Subject pkix.Name
 
@@ -2511,7 +2515,7 @@ func (c *Certificate) FromX509Certificate(x509Cert *x509.Certificate) {
 //
 // All keys types that are implemented via crypto.Signer are supported (This
 // includes *rsa.PublicKey and *ecdsa.PublicKey.)
-func CreateCertificate(template, parent *Certificate, publicKey *sm2.PublicKey, signer crypto.Signer) ([]byte, error) {
+func CreateCertificate(template, parent *Certificate, publicKey any, signer crypto.Signer) ([]byte, error) {
     if template.SerialNumber == nil {
         return nil, errors.New("x509: no SerialNumber given")
     }

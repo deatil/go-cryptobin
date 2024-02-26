@@ -13,6 +13,7 @@ import (
     "crypto"
     "crypto/dsa"
     "crypto/ecdsa"
+    "crypto/cipher"
     "crypto/elliptic"
     "crypto/md5"
     "crypto/rsa"
@@ -32,6 +33,8 @@ import (
     "github.com/deatil/go-cryptobin/gm/sm2"
     "github.com/deatil/go-cryptobin/hash/sm3"
 
+    cipher_gost "github.com/deatil/go-cryptobin/cipher/gost"
+    "github.com/deatil/go-cryptobin/hash/gost/gost341194"
     "github.com/deatil/go-cryptobin/hash/gost/gost34112012256"
     "github.com/deatil/go-cryptobin/hash/gost/gost34112012512"
 )
@@ -256,6 +259,14 @@ type authKeyId struct {
 
 type SignatureAlgorithm int
 
+var newGOST34112001 = func() hash.Hash {
+    return gost341194.New(func(key []byte) cipher.Block {
+        cip, _ := cipher_gost.NewCipher(key, cipher_gost.CryptoProSbox)
+
+        return cip
+    })
+}
+
 type Hash uint
 
 func init() {
@@ -275,6 +286,7 @@ func init() {
     RegisterHash(SHA512_224, sha512.New512_224)
     RegisterHash(SHA512_256, sha512.New512_256)
     RegisterHash(SM3, sm3.New)
+    RegisterHash(GOST34112001, newGOST34112001)
     RegisterHash(GOST34112012256, gost34112012256.New)
     RegisterHash(GOST34112012512, gost34112012512.New)
 }
@@ -301,6 +313,7 @@ const (
     SHA512_224                 // import crypto/sha512
     SHA512_256                 // import crypto/sha512
     SM3
+    GOST34112001
     GOST34112012256
     GOST34112012512
     maxHash
@@ -323,6 +336,7 @@ var digestSizes = []uint8{
     MD5SHA1:    36,
     RIPEMD160:  20,
     SM3:        32,
+    GOST34112001:    32,
     GOST34112012256: 32,
     GOST34112012512: 64,
 }
@@ -387,6 +401,7 @@ const (
     SM2WithSM3
     SM2WithSHA1
     SM2WithSHA256
+    GOST3410WithGOST34112001
     GOST3410WithGOST34112012256
     GOST3410WithGOST34112012512
 )
@@ -420,6 +435,7 @@ var algoName = [...]string{
     SM2WithSM3:       "SM2-SM3",
     SM2WithSHA1:      "SM2-SHA1",
     SM2WithSHA256:    "SM2-SHA256",
+    GOST3410WithGOST34112001:    "GOST3410-GOST34112001",
     GOST3410WithGOST34112012256: "GOST3410-GOST34112012256",
     GOST3410WithGOST34112012512: "GOST3410-GOST34112012512",
 }
@@ -511,6 +527,7 @@ var (
     oidSignatureSM2WithSHA256   = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 503}
     // oidSignatureSM3WithRSA      = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 504}
 
+    oidSignatureGOST3410WithGOST3411        = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 3}
     oidSignatureGOST3410WithGOST34112012256 = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 3, 2}
     oidSignatureGOST3410WithGOST34112012512 = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 3, 3}
 
@@ -558,6 +575,7 @@ var signatureAlgorithmDetails = []struct {
     {SM2WithSHA1, oidSignatureSM2WithSHA1, ECDSA, SHA1},
     {SM2WithSHA256, oidSignatureSM2WithSHA256, ECDSA, SHA256},
     //	{SM3WithRSA, oidSignatureSM3WithRSA, RSA, SM3},
+    {GOST3410WithGOST34112001, oidSignatureGOST3410WithGOST3411, GOST3410, GOST34112001},
     {GOST3410WithGOST34112012256, oidSignatureGOST3410WithGOST34112012256, GOST3410, GOST34112012256},
     {GOST3410WithGOST34112012512, oidSignatureGOST3410WithGOST34112012512, GOST3410, GOST34112012512},
 }
@@ -1074,6 +1092,8 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
             return InsecureAlgorithmError(algo)
         case SM2WithSM3: // SM3WithRSA reserve
             hashType = SM3
+        case GOST3410WithGOST34112001:
+            hashType = GOST34112001
         case GOST3410WithGOST34112012256:
             hashType = GOST34112012256
         case GOST3410WithGOST34112012512:
@@ -1872,14 +1892,15 @@ func signingParamsForPublicKey(pub any, requestedSigAlgo SignatureAlgorithm) (ha
         pubType = GOST3410
         hashAlgo, _ := gost.HashOidFromNamedCurve(pub.Curve)
         switch {
+        case hashAlgo.Equal(oidGostCryptoProDigestA):
+            hashFunc = GOST34112001
+            sigAlgo.Algorithm = oidSignatureGOST3410WithGOST3411
         case hashAlgo.Equal(oidGost2012Digest256):
             hashFunc = GOST34112012256
             sigAlgo.Algorithm = oidSignatureGOST3410WithGOST34112012256
         case hashAlgo.Equal(oidGost2012Digest512):
             hashFunc = GOST34112012512
             sigAlgo.Algorithm = oidSignatureGOST3410WithGOST34112012512
-        case hashAlgo.Equal(oidGostCryptoProDigestA):
-            fallthrough
         default:
             err = errors.New("x509: unknown GOST3410 curve")
         }

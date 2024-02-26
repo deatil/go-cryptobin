@@ -40,6 +40,9 @@ type Gost struct {
     // 解析后的数据
     parsedData []byte
 
+    // 密码数据
+    secretData []byte
+
     // 验证结果
     verify bool
 

@@ -44,6 +44,11 @@ func (this Gost) GetVerify() bool {
     return this.verify
 }
 
+// 获取 secretData
+func (this Gost) GetSecretData() []byte {
+    return this.secretData
+}
+
 // 获取错误
 func (this Gost) GetErrors() []error {
     return this.Errors

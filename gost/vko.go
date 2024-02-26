@@ -31,7 +31,7 @@ func (prv *PrivateKey) KEK(pub *PublicKey, ukm *big.Int) ([]byte, error) {
         return nil, fmt.Errorf("cryptobin/gost.KEK: %w", err)
     }
 
-    u := big.NewInt(0).Set(ukm).Mul(ukm, prv.Curve.Co)
+    u := new(big.Int).Set(ukm).Mul(ukm, prv.Curve.Co)
     if u.Cmp(bigInt1) != 0 {
         keyX, keyY, err = prv.Curve.Exp(u, keyX, keyY)
         if err != nil {

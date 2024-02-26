@@ -75,3 +75,33 @@ func Test_Check_2(t *testing.T) {
         t.Errorf("Check 2 error. got %x, want %s", out, check)
     }
 }
+
+func test_Check_Vectors(t *testing.T) {
+    t.Run("test_m1", func(t *testing.T) {
+        in, _ := hex.DecodeString("323130393837363534333231303938373635343332313039383736353433323130393837363534333231303938373635343332313039383736353433323130")
+        check := "00557be5e584fd52a449b16b0251d05d27f94ab76cbaa6da890b59d8ef1e159d"
+
+        h := New()
+        h.Write(in)
+
+        out := h.Sum(nil)
+
+        if fmt.Sprintf("%x", out) != check {
+            t.Errorf("Check_Vectors error. got %x, want %s", out, check)
+        }
+    })
+
+    t.Run("test_m2", func(t *testing.T) {
+        in, _ := hex.DecodeString("fbe2e5f0eee3c820fbeafaebef20fffbf0e1e0f0f520e0ed20e8ece0ebe5f0f2f120fff0eeec20f120faf2fee5e2202ce8f6f3ede220e8e6eee1e8f0f2d1202ce8f0f2e5e220e5d1")
+        check := "508f7e553c06501d749a66fc28c6cac0b005746d97537fa85d9e40904efed29d"
+
+        h := New()
+        h.Write(in)
+
+        out := h.Sum(nil)
+
+        if fmt.Sprintf("%x", out) != check {
+            t.Errorf("Check_Vectors error. got %x, want %s", out, check)
+        }
+    })
+}

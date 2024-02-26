@@ -51,3 +51,25 @@ func (this Gost) ToVerifyInt() int {
 
     return 0
 }
+
+// =================
+
+// 输出密钥字节
+func (this Gost) ToSecretBytes() []byte {
+    return this.secretData
+}
+
+// 输出密钥字符
+func (this Gost) ToSecretString() string {
+    return string(this.secretData)
+}
+
+// 输出密钥 Base64
+func (this Gost) ToSecretBase64String() string {
+    return tool.Base64Encode(this.secretData)
+}
+
+// 输出密钥 Hex
+func (this Gost) ToSecretHexString() string {
+    return tool.HexEncode(this.secretData)
+}

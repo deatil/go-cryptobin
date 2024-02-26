@@ -120,6 +120,13 @@ func (this Gost) WithVerify(data bool) Gost {
     return this
 }
 
+// 设置 secretData
+func (this Gost) WithSecretData(data []byte) Gost {
+    this.secretData = data
+
+    return this
+}
+
 // 设置错误
 func (this Gost) WithErrors(errs []error) Gost {
     this.Errors = errs

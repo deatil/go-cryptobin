@@ -355,3 +355,149 @@ func Test_P12_Gost(t *testing.T) {
 
     // t.Errorf("%s", publicKeyPem)
 }
+
+var testGostCert256 = `
+-----BEGIN CERTIFICATE-----
+MIICYjCCAg+gAwIBAgIBATAKBggqhQMHAQEDAjBWMSkwJwYJKoZIhvcNAQkBFhpH
+b3N0UjM0MTAtMjAxMkBleGFtcGxlLmNvbTEpMCcGA1UEAxMgR29zdFIzNDEwLTIw
+MTIgKDI1NiBiaXQpIGV4YW1wbGUwHhcNMTMxMTA1MTQwMjM3WhcNMzAxMTAxMTQw
+MjM3WjBWMSkwJwYJKoZIhvcNAQkBFhpHb3N0UjM0MTAtMjAxMkBleGFtcGxlLmNv
+bTEpMCcGA1UEAxMgR29zdFIzNDEwLTIwMTIgKDI1NiBiaXQpIGV4YW1wbGUwZjAf
+BggqhQMHAQEBATATBgcqhQMCAiQABggqhQMHAQECAgNDAARAut/Qw1MUq9KPqkdH
+C2xAF3K7TugHfo9n525D2s5mFZdD5pwf90/i4vF0mFmr9nfRwMYP4o0Pg1mOn5Rl
+aXNYraOBwDCBvTAdBgNVHQ4EFgQU1fIeN1HaPbw+XWUzbkJ+kHJUT0AwCwYDVR0P
+BAQDAgHGMA8GA1UdEwQIMAYBAf8CAQEwfgYDVR0BBHcwdYAU1fIeN1HaPbw+XWUz
+bkJ+kHJUT0ChWqRYMFYxKTAnBgkqhkiG9w0BCQEWGkdvc3RSMzQxMC0yMDEyQGV4
+YW1wbGUuY29tMSkwJwYDVQQDEyBHb3N0UjM0MTAtMjAxMiAoMjU2IGJpdCkgZXhh
+bXBsZYIBATAKBggqhQMHAQEDAgNBAF5bm4BbARR6hJLEoWJkOsYV3Hd7kXQQjz3C
+dqQfmHrz6TI6Xojdh/t8ckODv/587NS5/6KsM77vc6Wh90NAT2s=
+-----END CERTIFICATE-----
+`
+
+func Test_P12_Gost_256(t *testing.T) {
+    certpem := decodePEM(testGostCert256)
+
+    cert, err := ParseCertificate(certpem)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pubKey, _ := cert.PublicKey.(*gost.PublicKey)
+
+    publicKey, err := gost.MarshalPublicKey(pubKey)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    publicKeyPem := encodePEM(publicKey, "PUBLIC KEY")
+    if len(publicKeyPem) == 0 {
+        t.Error("fail make publicKey")
+    }
+
+    c := gost.CurveIdGostR34102001CryptoProXchAParamSet()
+
+    prvkeyRaw, _ := new(big.Int).SetString("BFCF1D623E5CDD3032A7C6EABB4A923C46E43D640FFEAAF2C3ED39A8FA399924", 16)
+    prvkey, err := gost.NewPrivateKey(c, gost.Reverse(prvkeyRaw.Bytes()))
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pubKey2 := &prvkey.PublicKey
+
+    publicKey2, err := gost.MarshalPublicKey(pubKey2)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    publicKeyPem2 := encodePEM(publicKey2, "PUBLIC KEY")
+    if len(publicKeyPem2) == 0 {
+        t.Error("fail make publicKey2")
+    }
+
+    if publicKeyPem != publicKeyPem2 {
+        t.Errorf("publicKey2 not eq publicKey, got %s, want %s", publicKeyPem, publicKeyPem2)
+    }
+
+    err = cert.CheckSignature(cert.SignatureAlgorithm, cert.RawTBSCertificate, cert.Signature)
+    if err != nil {
+        // t.Fatal(err)
+    }
+
+    // t.Errorf("%s \n", publicKeyPem)
+    // t.Errorf("%s \n", publicKeyPem2)
+}
+
+var testGostCert512 = `
+-----BEGIN CERTIFICATE-----
+MIIC6DCCAlSgAwIBAgIBATAKBggqhQMHAQEDAzBWMSkwJwYJKoZIhvcNAQkBFhpH
+b3N0UjM0MTAtMjAxMkBleGFtcGxlLmNvbTEpMCcGA1UEAxMgR29zdFIzNDEwLTIw
+MTIgKDUxMiBiaXQpIGV4YW1wbGUwHhcNMTMxMDA0MDczNjA0WhcNMzAxMDAxMDcz
+NjA0WjBWMSkwJwYJKoZIhvcNAQkBFhpHb3N0UjM0MTAtMjAxMkBleGFtcGxlLmNv
+bTEpMCcGA1UEAxMgR29zdFIzNDEwLTIwMTIgKDUxMiBiaXQpIGV4YW1wbGUwgaow
+IQYIKoUDBwEBAQIwFQYJKoUDBwECAQICBggqhQMHAQECAwOBhAAEgYATGQ9VCiM5
+FRGCQ8MEz2F1dANqhaEuywa8CbxOnTvaGJpFQVXQwkwvLFAKh7hk542vOEtxpKtT
+CXfGf84nRhMH/Q9bZeAc2eO/yhxrsQhTBufa1Fuou2oe/jUOaG6RAtUUvRzhNTpp
+RGGl1+EIY2vzzUua9j9Ol/gAoy/LNKQIfqOBwDCBvTAdBgNVHQ4EFgQUPcbTRXJZ
+nHtjj+eBP7b5lcTMekIwCwYDVR0PBAQDAgHGMA8GA1UdEwQIMAYBAf8CAQEwfgYD
+VR0BBHcwdYAUPcbTRXJZnHtjj+eBP7b5lcTMekKhWqRYMFYxKTAnBgkqhkiG9w0B
+CQEWGkdvc3RSMzQxMC0yMDEyQGV4YW1wbGUuY29tMSkwJwYDVQQDEyBHb3N0UjM0
+MTAtMjAxMiAoNTEyIGJpdCkgZXhhbXBsZYIBATAKBggqhQMHAQEDAwOBgQBObS7o
+ppPTXzHyVR1DtPa8b57nudJzI4czhsfeX5HDntOq45t9B/qSs8dC6eGxbhHZ9zCO
+SFtxWYdmg0au8XI9Xb8vTC1qdwWID7FFjMWDNQZb6lYh/J+8F2xKylvB5nIlRZqO
+o3eUNFkNyHJwQCk2WoOlO16zwGk2tdKH4KmD5w==
+-----END CERTIFICATE-----
+`
+
+func Test_P12_Gost_512(t *testing.T) {
+    certpem := decodePEM(testGostCert512)
+
+    cert, err := ParseCertificate(certpem)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pubKey, _ := cert.PublicKey.(*gost.PublicKey)
+
+    publicKey, err := gost.MarshalPublicKey(pubKey)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    publicKeyPem := encodePEM(publicKey, "PUBLIC KEY")
+    if len(publicKeyPem) == 0 {
+        t.Error("fail make publicKey")
+    }
+
+    c := gost.CurveIdtc26gost34102012512paramSetB()
+
+    prvkeyRaw, _ := new(big.Int).SetString("3FC01CDCD4EC5F972EB482774C41E66DB7F380528DFE9E67992BA05AEE462435757530E641077CE587B976C8EEB48C48FD33FD175F0C7DE6A44E014E6BCB074B", 16)
+    prvkey, err := gost.NewPrivateKey(c, gost.Reverse(prvkeyRaw.Bytes()))
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pubKey2 := &prvkey.PublicKey
+
+    publicKey2, err := gost.MarshalPublicKey(pubKey2)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    publicKeyPem2 := encodePEM(publicKey2, "PUBLIC KEY")
+    if len(publicKeyPem2) == 0 {
+        t.Error("fail make publicKey2")
+    }
+
+    if publicKeyPem != publicKeyPem2 {
+        t.Errorf("publicKey2 not eq publicKey, got %s, want %s", publicKeyPem, publicKeyPem2)
+    }
+
+    // cert.PublicKey = pubKey2
+    err = cert.CheckSignature(cert.SignatureAlgorithm, cert.RawTBSCertificate, cert.Signature)
+    if err != nil {
+        // t.Fatal(err)
+    }
+
+    // t.Errorf("%s \n", publicKeyPem)
+    // t.Errorf("%s \n", publicKeyPem2)
+}

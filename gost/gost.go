@@ -240,6 +240,8 @@ func VerifyASN1(pub *PublicKey, hash, sig []byte) (bool, error) {
 
 // SignToRS
 func SignToRS(rand io.Reader, priv *PrivateKey, digest []byte) (*big.Int, *big.Int, error) {
+    digest = Reverse(digest)
+
     e := bytesToBigint(digest)
 
     e.Mod(e, priv.Curve.Q)
@@ -296,6 +298,8 @@ func VerifyWithRS(pub *PublicKey, digest []byte, r, s *big.Int) (bool, error) {
         s.Cmp(pub.Curve.Q) >= 0 {
         return false, nil
     }
+
+    digest = Reverse(digest)
 
     e := bytesToBigint(digest)
     e.Mod(e, pub.Curve.Q)

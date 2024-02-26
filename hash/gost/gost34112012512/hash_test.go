@@ -35,3 +35,29 @@ func Test_Check_2(t *testing.T) {
         t.Errorf("Check 2 error. got %x, want %s", out, check)
     }
 }
+
+func reverse(b []byte) []byte {
+    d := make([]byte, len(b))
+    copy(d, b)
+
+    for i, j := 0, len(d)-1; i < j; i, j = i+1, j-1 {
+        d[i], d[j] = d[j], d[i]
+    }
+
+    return d
+}
+
+func Test_Check_Vectors(t *testing.T) {
+    t.Run("test_m1", func(t *testing.T) {
+        in, _ := hex.DecodeString("323130393837363534333231303938373635343332313039383736353433323130393837363534333231303938373635343332313039383736353433323130")
+        check := "486f64c1917879417fef082b3381a4e211c324f074654c38823a7b76f830ad00fa1fbae42b1285c0352f227524bc9ab16254288dd6863dccd5b9f54a1ad0541b"
+
+        h := New()
+        h.Write(reverse(in))
+        out := h.Sum(nil)
+
+        if fmt.Sprintf("%x", reverse(out)) != check {
+            t.Errorf("Check_Vectors error. got %x, want %s", out, check)
+        }
+    })
+}

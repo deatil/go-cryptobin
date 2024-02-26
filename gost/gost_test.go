@@ -254,7 +254,7 @@ func Test_341001(t *testing.T) {
     veri, _ := Verify(pub, digest, s)
     ifbool(veri, "Test_341001-Verify-1")
 
-    veri2, _ := Verify(pub, digest, signature)
+    veri2, _ := Verify(pub, Reverse(digest), signature)
     ifbool(veri2, "Test_341001-Verify-2")
 
 }
@@ -274,7 +274,7 @@ func Test_34102012(t *testing.T) {
     digest := decodeHex("2DFBC1B372D89A1188C09C52E0EEC61FCE52032AB1022E8E67ECE6672B043EE5")
     rand := decodeHex("77105C9B20BCD3122823C8CF6FCC7B956DE33814E95B7FE64FED924594DCEAB3")
 
-    signature, err := Sign(bytes.NewBuffer(rand), prikey, digest)
+    signature, err := Sign(bytes.NewBuffer(rand), prikey, Reverse(digest))
     if err != nil {
         t.Fatal(err)
     }
@@ -314,7 +314,7 @@ func Test_34102012_2(t *testing.T) {
     digest := decodeHex("3754F3CFACC9E0615C4F4A7C4D8DAB531B09B6F9C170C533A71D147035B0C5917184EE536593F4414339976C647C5D5A407ADEDB1D560C4FC6777D2972075B8C")
     rand := decodeHex("0359E7F4B1410FEACC570456C6801496946312120B39D019D455986E364F365886748ED7A44B3E794434006011842286212273A6D14CF70EA3AF71BB1AE679F1")
 
-    signature, err := Sign(bytes.NewBuffer(rand), prikey, digest)
+    signature, err := Sign(bytes.NewBuffer(rand), prikey, Reverse(digest))
     if err != nil {
         t.Fatal(err)
     }

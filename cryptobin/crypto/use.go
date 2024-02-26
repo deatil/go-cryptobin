@@ -676,6 +676,20 @@ func (this Cryptobin) HCTR(tweak, hkey []byte) Cryptobin {
     return this
 }
 
+// MGM
+// ccm nounce size, should be 16 bytes
+func (this Cryptobin) MGM(nonce string, additional ...string) Cryptobin {
+    this.mode = MGM
+
+    this.config.Set("nonce", []byte(nonce))
+
+    if len(additional) > 0 {
+        this.config.Set("additional", []byte(additional[0]))
+    }
+
+    return this
+}
+
 // 使用模式
 func (this Cryptobin) ModeBy(mode Mode, cfg ...map[string]any) Cryptobin {
     this.mode = mode

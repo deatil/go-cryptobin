@@ -420,7 +420,7 @@ func Test_P12_Gost_256(t *testing.T) {
 
     err = cert.CheckSignature(cert.SignatureAlgorithm, cert.RawTBSCertificate, cert.Signature)
     if err != nil {
-        // t.Fatal(err)
+        t.Fatal(err)
     }
 
     // t.Errorf("%s \n", publicKeyPem)
@@ -495,7 +495,7 @@ func Test_P12_Gost_512(t *testing.T) {
     // cert.PublicKey = pubKey2
     err = cert.CheckSignature(cert.SignatureAlgorithm, cert.RawTBSCertificate, cert.Signature)
     if err != nil {
-        // t.Fatal(err)
+        t.Fatal(err)
     }
 
     // t.Errorf("%s \n", publicKeyPem)

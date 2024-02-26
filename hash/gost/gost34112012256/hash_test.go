@@ -68,7 +68,6 @@ func Test_Check_2(t *testing.T) {
 
     mac := hmac.New(New, key)
     mac.Write(in)
-
     out := mac.Sum(nil)
 
     if fmt.Sprintf("%x", out) != check {
@@ -76,17 +75,41 @@ func Test_Check_2(t *testing.T) {
     }
 }
 
-func test_Check_Vectors(t *testing.T) {
+func Test_Check_3(t *testing.T) {
+    check := "e3c9fd89226d93b489a9fe27d686806e24a514e3787bca053c698ec4616ceb78"
+
+    mac := New()
+    mac.Write([]byte("foo"))
+    mac.Write([]byte("bar"))
+
+    out := mac.Sum(nil)
+
+    if fmt.Sprintf("%x", out) != check {
+        t.Errorf("Check 3 error. got %x, want %s", out, check)
+    }
+}
+
+func reverse(b []byte) []byte {
+    d := make([]byte, len(b))
+    copy(d, b)
+
+    for i, j := 0, len(d)-1; i < j; i, j = i+1, j-1 {
+        d[i], d[j] = d[j], d[i]
+    }
+
+    return d
+}
+
+func Test_Check_Vectors(t *testing.T) {
     t.Run("test_m1", func(t *testing.T) {
         in, _ := hex.DecodeString("323130393837363534333231303938373635343332313039383736353433323130393837363534333231303938373635343332313039383736353433323130")
         check := "00557be5e584fd52a449b16b0251d05d27f94ab76cbaa6da890b59d8ef1e159d"
 
         h := New()
-        h.Write(in)
-
+        h.Write(reverse(in))
         out := h.Sum(nil)
 
-        if fmt.Sprintf("%x", out) != check {
+        if fmt.Sprintf("%x", reverse(out)) != check {
             t.Errorf("Check_Vectors error. got %x, want %s", out, check)
         }
     })
@@ -96,8 +119,20 @@ func test_Check_Vectors(t *testing.T) {
         check := "508f7e553c06501d749a66fc28c6cac0b005746d97537fa85d9e40904efed29d"
 
         h := New()
-        h.Write(in)
+        h.Write(reverse(in))
+        out := h.Sum(nil)
 
+        if fmt.Sprintf("%x", reverse(out)) != check {
+            t.Errorf("Check_Vectors error. got %x, want %s", out, check)
+        }
+    })
+
+    t.Run("test_habr144", func(t *testing.T) {
+        in, _ := hex.DecodeString("d0cf11e0a1b11ae1000000000000000000000000000000003e000300feff0900060000000000000000000000010000000100000000000000001000002400000001000000feffffff0000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+        check := "c766085540caaa8953bfcf7a1ba220619cee50d65dc242f82f23ba4b180b18e0"
+
+        h := New()
+        h.Write(in)
         out := h.Sum(nil)
 
         if fmt.Sprintf("%x", out) != check {

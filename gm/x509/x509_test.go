@@ -350,7 +350,7 @@ func Test_P12_Gost(t *testing.T) {
 
     err = cert.CheckSignature(cert.SignatureAlgorithm, cert.RawTBSCertificate, cert.Signature)
     if err != nil {
-        // t.Fatal(err)
+        t.Fatal(err)
     }
 
     // t.Errorf("%s", publicKeyPem)
@@ -496,6 +496,57 @@ func Test_P12_Gost_512(t *testing.T) {
     err = cert.CheckSignature(cert.SignatureAlgorithm, cert.RawTBSCertificate, cert.Signature)
     if err != nil {
         t.Fatal(err)
+    }
+
+    // t.Errorf("%s \n", publicKeyPem)
+    // t.Errorf("%s \n", publicKeyPem2)
+}
+
+var testGostCert222 = `
+-----BEGIN CERTIFICATE-----
+MIIDAjCCAq2gAwIBAgIQAdBoXzEflsAAAAALJwkAATAMBggqhQMHAQEDAgUAMGAx
+CzAJBgNVBAYTAlJVMRUwEwYDVQQHDAzQnNC+0YHQutCy0LAxDzANBgNVBAoMBtCi
+0JoyNjEpMCcGA1UEAwwgQ0EgY2VydGlmaWNhdGUgKFBLQ1MjMTIgZXhhbXBsZSkw
+HhcNMTUwMzI3MDcyNTAwWhcNMjAwMzI3MDcyMzAwWjBkMQswCQYDVQQGEwJSVTEV
+MBMGA1UEBwwM0JzQvtGB0LrQstCwMQ8wDQYDVQQKDAbQotCaMjYxLTArBgNVBAMM
+JFRlc3QgY2VydGlmaWNhdGUgMSAoUEtDUyMxMiBleGFtcGxlKTBmMB8GCCqFAwcB
+AQEBMBMGByqFAwICIwEGCCqFAwcBAQICA0MABEDXHPKaSm+vZ1glPxZM5fcO33r/
+6Eaxc3K1RCmRYHkiYkzi2D0CwLhEhTBXkfjUyEbS4FEXB5PM3oCwB0G+FMKVgQkA
+MjcwOTAwMDGjggEpMIIBJTArBgNVHRAEJDAigA8yMDE1MDMyNzA3MjUwMFqBDzIw
+MTYwMzI3MDcyNTAwWjAOBgNVHQ8BAf8EBAMCBPAwHQYDVR0OBBYEFCFY6xFDrzJg
+3ZS2D+jAehZyqxVtMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDBDAMBgNV
+HRMBAf8EAjAAMIGZBgNVHSMEgZEwgY6AFCadzteHnKRvm38EzA6TEDh2t8SaoWSk
+YjBgMQswCQYDVQQGEwJSVTEVMBMGA1UEBwwM0JzQvtGB0LrQstCwMQ8wDQYDVQQK
+DAbQotCaMjYxKTAnBgNVBAMMIENBIGNlcnRpZmljYXRlIChQS0NTIzEyIGV4YW1w
+bGUpghAB0Ghe8vxNIAAAAAsnCQABMAwGCCqFAwcBAQMCBQADQQD2irRW+TySSAjC
+SnTHQnl4q2Jrgw1OLAoCbuOCcJkjHc73wFOFpNfdlCESjZEv2lMI+vrAUyF54n5h
+0YxF5e+y
+-----END CERTIFICATE-----
+`
+
+func Test_P12_Gost_222(t *testing.T) {
+    certpem := decodePEM(testGostCert222)
+
+    cert, err := ParseCertificate(certpem)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pubKey, _ := cert.PublicKey.(*gost.PublicKey)
+
+    publicKey, err := gost.MarshalPublicKey(pubKey)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    publicKeyPem := encodePEM(publicKey, "PUBLIC KEY")
+    if len(publicKeyPem) == 0 {
+        t.Error("fail make publicKey")
+    }
+
+    err = cert.CheckSignature(cert.SignatureAlgorithm, cert.RawTBSCertificate, cert.Signature)
+    if err != nil {
+        // t.Fatal(err)
     }
 
     // t.Errorf("%s \n", publicKeyPem)

@@ -67,7 +67,7 @@ func (prv *PrivateKey) KEK2001(pub *PublicKey, ukm *big.Int) ([]byte, error) {
     }
 
     h := gost341194.New(func(key []byte) cipher.Block {
-        cip, _ := cipher_gost.NewCipher(key, cipher_gost.CryptoProSbox)
+        cip, _ := cipher_gost.NewCipher(key, cipher_gost.SboxGostR341194CryptoProParamSet)
 
         return cip
     })

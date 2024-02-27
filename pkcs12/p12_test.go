@@ -946,7 +946,10 @@ JSg6M8RBUYpw/8ym5ou1o2nDa09M5zF3BCCpzyCQBI+rzfISeKvPV1ROfcXiYU93
 mwcl1xQV2G5/fgICB9A=
 -----END CERTIFICATE-----`
 
-func test_P12_Gost(t *testing.T) {
+func Test_P12_Gost(t *testing.T) {
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
     pfxData := decodePEM(testGostP12Pem)
 
     password := "Пароль для PFX"
@@ -956,5 +959,17 @@ func test_P12_Gost(t *testing.T) {
         t.Fatal(err)
     }
 
-    t.Errorf("%#v", p12)
+    blocks, err := p12.ToOriginalPEM()
+    assertError(err, "Test_P12_Gost-ToPEM")
+    assertNotEmpty(blocks, "Test_P12_Gost-ToPEM")
+
+    var pemData [][]byte
+    for _, b := range blocks {
+        pemData = append(pemData, pem.EncodeToMemory(b))
+    }
+
+    for _, pemInfo := range pemData {
+        assertNotEmpty(pemInfo, "Test_P12_Gost-ToPEM-Pem")
+        // t.Error(string(pemInfo))
+    }
 }

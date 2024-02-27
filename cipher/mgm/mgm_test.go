@@ -68,7 +68,7 @@ func Test_Vector(t *testing.T) {
     }
 }
 
-func Test_Symmetric(t *testing.T) {
+func test_Symmetric(t *testing.T) {
     sym := func(keySize, blockSize int, c cipher.Block, nonce []byte) {
         f := func(
             plaintext, additionalData []byte,

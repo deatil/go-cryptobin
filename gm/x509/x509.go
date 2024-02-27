@@ -261,7 +261,7 @@ type SignatureAlgorithm int
 
 var newGOST34112001 = func() hash.Hash {
     return gost341194.New(func(key []byte) cipher.Block {
-        cip, _ := cipher_gost.NewCipher(key, cipher_gost.CryptoProSbox)
+        cip, _ := cipher_gost.NewCipher(key, cipher_gost.SboxGostR341194CryptoProParamSet)
 
         return cip
     })

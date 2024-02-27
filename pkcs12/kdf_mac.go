@@ -15,6 +15,7 @@ import (
     "golang.org/x/crypto/md4"
 
     "github.com/deatil/go-cryptobin/hash/sm3"
+    "github.com/deatil/go-cryptobin/kdf/gost_pbkdf2"
     "github.com/deatil/go-cryptobin/hash/gost/gost34112012256"
     "github.com/deatil/go-cryptobin/hash/gost/gost34112012512"
     cryptobin_md2 "github.com/deatil/go-cryptobin/hash/md2"
@@ -163,9 +164,24 @@ func (this MacData) Verify(message []byte, password []byte) (err error) {
         }
     }
 
-    hashSize := h().Size()
+    oid := this.Mac.Algorithm.Algorithm
 
-    key := cryptobin_pbkdf.Key(h, hashSize, 64, this.MacSalt, password, this.Iterations, 3, hashSize)
+    var key []byte
+    switch {
+        case oid.Equal(oidGOST34112012256),
+            oid.Equal(oidGOST34112012512):
+            pass, err := decodeBMPString(password)
+            if err != nil {
+                return err
+            }
+
+            key = gost_pbkdf2.Key(h, []byte(pass), this.MacSalt, this.Iterations, 96)
+            key = key[len(key)-32:]
+        default:
+            hashSize := h().Size()
+
+            key = cryptobin_pbkdf.Key(h, hashSize, 64, this.MacSalt, password, this.Iterations, 3, hashSize)
+    }
 
     mac := hmac.New(h, key)
     mac.Write(message)
@@ -216,9 +232,22 @@ func (this MacOpts) Compute(message []byte, password []byte) (data MacKDFParamet
         return nil, err
     }
 
-    hashSize := h().Size()
+    var key []byte
+    switch {
+        case alg.Equal(oidGOST34112012256),
+            alg.Equal(oidGOST34112012512):
+            pass, err := decodeBMPString(password)
+            if err != nil {
+                return nil, err
+            }
 
-    key := cryptobin_pbkdf.Key(h, hashSize, 64, macSalt, password, this.IterationCount, 3, hashSize)
+            key = gost_pbkdf2.Key(h, []byte(pass), macSalt, this.IterationCount, 96)
+            key = key[len(key)-32:]
+        default:
+            hashSize := h().Size()
+
+            key = cryptobin_pbkdf.Key(h, hashSize, 64, macSalt, password, this.IterationCount, 3, hashSize)
+    }
 
     mac := hmac.New(h, key)
     mac.Write(message)

@@ -40,6 +40,43 @@ func Test_SignerInterface(t *testing.T) {
     var _ crypto.PublicKey = pub
 }
 
+func Test_NewPrivateKey(t *testing.T) {
+    c := CurveIdGostR34102001TestParamSet()
+
+    priv, err := GenerateKey(rand.Reader, c)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pub := &priv.PublicKey
+
+    priBytes := ToPrivateKey(priv)
+    if len(priBytes) == 0 {
+        t.Error("fail ToPrivateKey")
+    }
+    pubBytes := ToPublicKey(pub)
+    if len(pubBytes) == 0 {
+        t.Error("fail ToPublicKey")
+    }
+
+    priv2, err := NewPrivateKey(c, priBytes)
+    if err != nil {
+        t.Fatal(err)
+    }
+    pub2, err := NewPublicKey(c, pubBytes)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    if !priv2.Equal(priv) {
+        t.Error("NewPrivateKey make fail")
+    }
+
+    if !pub2.Equal(pub) {
+        t.Error("NewPublicKey make fail")
+    }
+}
+
 func Test_Sign(t *testing.T) {
     message := make([]byte, 32)
     _, err := io.ReadFull(rand.Reader, message)

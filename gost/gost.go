@@ -9,7 +9,10 @@ import (
     "encoding/asn1"
 )
 
-// GOST 3410
+// GOST R 34.10-2001 (RFC 5832),
+// GOST R 34.10-2012 (RFC 7091) signature algorithms and
+// VKO GOST R 34.10-2001 (RFC 4357),
+// VKO GOST R 34.10-2012 (RFC 7836) key agreement algorithms.
 
 // r and s data
 type gostSignature struct {
@@ -84,7 +87,7 @@ func (priv *PrivateKey) Equal(x crypto.PrivateKey) bool {
     }
 
     return priv.D.Cmp(xx.D) == 0 &&
-        priv.Curve.Equal(xx.Curve)
+        priv.PublicKey.Equal(&xx.PublicKey)
 }
 
 // Public returns the public key corresponding to priv.
@@ -119,7 +122,7 @@ func (priv *PrivateKey) SignASN1(rand io.Reader, digest []byte, opts crypto.Sign
         return nil, err
     }
 
-    signedData, err := asn1.Marshal(gostSignature{
+    signed, err := asn1.Marshal(gostSignature{
         R: r,
         S: s,
     })
@@ -127,7 +130,7 @@ func (priv *PrivateKey) SignASN1(rand io.Reader, digest []byte, opts crypto.Sign
         return nil, err
     }
 
-    return signedData, nil
+    return signed, nil
 }
 
 func newPrivateKey(curve *Curve, raw []byte) (*PrivateKey, error) {
@@ -169,9 +172,7 @@ func NewPrivateKey(curve *Curve, raw []byte) (*PrivateKey, error) {
 
 // Marshal private key
 func ToPrivateKey(priv *PrivateKey) []byte {
-    byteLen := priv.Curve.PointSize()
-    privateKey := make([]byte, 2*byteLen)
-
+    privateKey := make([]byte, priv.Curve.PointSize())
     priv.D.FillBytes(privateKey)
 
     return Reverse(privateKey)

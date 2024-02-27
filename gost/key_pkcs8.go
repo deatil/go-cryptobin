@@ -54,7 +54,7 @@ var (
 )
 
 func init() {
-    AddNamedCurve(CurveIdGostR34102001TestParamSet(), oidGostR3410_2001_TestParamSet)
+    AddNamedCurve(CurveIdGostR34102001TestParamSet(),       oidGostR3410_2001_TestParamSet)
     AddNamedCurve(CurveIdGostR34102001CryptoProAParamSet(), oidGostR3410_2001_CryptoPro_A_ParamSet)
     AddNamedCurve(CurveIdGostR34102001CryptoProBParamSet(), oidGostR3410_2001_CryptoPro_B_ParamSet)
     AddNamedCurve(CurveIdGostR34102001CryptoProCParamSet(), oidGostR3410_2001_CryptoPro_C_ParamSet)
@@ -68,9 +68,9 @@ func init() {
     AddNamedCurve(CurveIdtc26gost34102012256paramSetD(), oidCryptoPro2012Sign256D)
 
     AddNamedCurve(CurveIdtc26gost34102012512paramSetTest(), oidCryptoPro2012Sign512Test)
-    AddNamedCurve(CurveIdtc26gost34102012512paramSetA(), oidCryptoPro2012Sign512A)
-    AddNamedCurve(CurveIdtc26gost34102012512paramSetB(), oidCryptoPro2012Sign512B)
-    AddNamedCurve(CurveIdtc26gost34102012512paramSetC(), oidCryptoPro2012Sign512C)
+    AddNamedCurve(CurveIdtc26gost34102012512paramSetA(),    oidCryptoPro2012Sign512A)
+    AddNamedCurve(CurveIdtc26gost34102012512paramSetB(),    oidCryptoPro2012Sign512B)
+    AddNamedCurve(CurveIdtc26gost34102012512paramSetC(),    oidCryptoPro2012Sign512C)
 }
 
 const (

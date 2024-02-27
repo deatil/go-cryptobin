@@ -153,6 +153,32 @@ func (this Gost) FromPKCS8PublicKeyDer(der []byte) Gost {
 
 // ==========
 
+// 私钥明文, hex 或者 base64 解码后
+func (this Gost) FromPrivateKeyBytes(priBytes []byte) Gost {
+    parsedKey, err := gost.NewPrivateKey(this.curve, priBytes)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.privateKey = parsedKey
+
+    return this
+}
+
+// 公钥明文, hex 或者 base64 解码后
+func (this Gost) FromPublicKeyBytes(pubBytes []byte) Gost {
+    parsedKey, err := gost.NewPublicKey(this.curve, pubBytes)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    this.publicKey = parsedKey
+
+    return this
+}
+
+// ==========
+
 // 字节
 func (this Gost) FromBytes(data []byte) Gost {
     this.data = data

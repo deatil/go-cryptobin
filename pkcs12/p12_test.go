@@ -973,3 +973,60 @@ func Test_P12_Gost(t *testing.T) {
         // t.Error(string(pemInfo))
     }
 }
+
+func Test_P12_Gost_En(t *testing.T) {
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    pfxData := decodePEM(testGostP12Pem)
+
+    password := "Пароль для PFX"
+
+    p12, err := LoadPKCS12FromBytes(pfxData, password)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    prikey, _, err := p12.GetPrivateKey()
+    assertError(err, "Test_P12_Gost_En-GetPrivateKey")
+    assertNotEmpty(prikey, "Test_P12_Gost_En-GetPrivateKey")
+
+    cert, _, err := p12.GetCert()
+    assertError(err, "Test_P12_Gost_En-GetCert")
+    assertNotEmpty(cert, "Test_P12_Gost_En-GetCert")
+
+    // =======
+
+    pkcs12 := NewPKCS12Encode()
+    pkcs12.WithLocalKeyId([]byte("01000000"))
+    pkcs12.AddPrivateKey(prikey)
+    pkcs12.AddCert(cert)
+
+    pass := "123123123"
+    opts := LegacyGostOpts
+
+    pfxEnData, err := pkcs12.Marshal(rand.Reader, pass, opts)
+    assertError(err, "Test_P12_Gost_En-pfxEnData")
+
+    assertNotEmpty(pfxEnData, "Test_P12_Gost_En-pfxEnData")
+
+    // newCert := encodePEM(pfxEnData, "CERTIFICATE")
+    // t.Error(newCert)
+
+    // 解析
+    p12De, err := LoadPKCS12FromBytes(pfxEnData, pass)
+    assertError(err, "Test_P12_Gost_En-pfxEnData")
+
+    blocks, err := p12De.ToOriginalPEM()
+    assertError(err, "Test_P12_Gost_En-ToOriginalPEM")
+    assertNotEmpty(blocks, "Test_P12_Gost_En-ToOriginalPEM")
+
+    var pemData [][]byte
+    for _, b := range blocks {
+        pemData = append(pemData, pem.EncodeToMemory(b))
+    }
+
+    for _, pemInfo := range pemData {
+        assertNotEmpty(pemInfo, "Test_P12_Gost_En-ToOriginalPEM-Pem")
+    }
+}

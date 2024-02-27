@@ -2,9 +2,9 @@ package gost
 
 import (
     "hash"
-    "crypto/sha256"
 
     "github.com/deatil/go-cryptobin/gost"
+    "github.com/deatil/go-cryptobin/hash/gost/gost34112012256"
 )
 
 type (
@@ -54,7 +54,7 @@ type Gost struct {
 func NewGost() Gost {
     return Gost{
         curve:    gost.CurveDefault(),
-        signHash: sha256.New,
+        signHash: gost34112012256.New,
         verify:   false,
         Errors:   make([]error, 0),
     }

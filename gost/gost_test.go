@@ -3,11 +3,11 @@ package gost
 import (
     "io"
     "bytes"
+    "math/big"
     "crypto"
     "crypto/rand"
     "testing"
     "encoding/hex"
-    "math/big"
 
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )

@@ -312,7 +312,7 @@ func Test_Gost(t *testing.T) {
     }
 }
 
-var testGostCert = `
+var testOpensslGostCert = `
 -----BEGIN CERTIFICATE-----
 MIIB6TCCAZSgAwIBAgIUUv3U4LiFVjZW4dJVKPIXe/IGeyMwDAYIKoUDBwEBAwIF
 ADBFMQswCQYDVQQGEwJBVTETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwY
@@ -328,8 +328,8 @@ pINcWw3M4CXPIG9VKQ==
 -----END CERTIFICATE-----
 `
 
-func Test_P12_Gost(t *testing.T) {
-    certpem := decodePEM(testGostCert)
+func Test_P12_Openssl_Gost(t *testing.T) {
+    certpem := decodePEM(testOpensslGostCert)
 
     cert, err := ParseCertificate(certpem)
     if err != nil {
@@ -352,8 +352,6 @@ func Test_P12_Gost(t *testing.T) {
     if err != nil {
         t.Fatal(err)
     }
-
-    // t.Errorf("%s", publicKeyPem)
 }
 
 var testGostCert256 = `
@@ -497,9 +495,6 @@ func Test_P12_Gost_512(t *testing.T) {
     if err != nil {
         t.Fatal(err)
     }
-
-    // t.Errorf("%s \n", publicKeyPem)
-    // t.Errorf("%s \n", publicKeyPem2)
 }
 
 var testGostCert222 = `
@@ -548,7 +543,4 @@ func Test_P12_Gost_222(t *testing.T) {
     if err != nil {
         // t.Fatal(err)
     }
-
-    // t.Errorf("%s \n", publicKeyPem)
-    // t.Errorf("%s \n", publicKeyPem2)
 }

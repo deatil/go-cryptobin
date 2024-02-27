@@ -12,7 +12,7 @@ import (
 
     "github.com/deatil/go-cryptobin/pkcs12"
     "github.com/deatil/go-cryptobin/gm/sm2"
-    cryptobin_x509 "github.com/deatil/go-cryptobin/gm/x509"
+    cryptobin_x509 "github.com/deatil/go-cryptobin/x509"
 )
 
 // 证书请求

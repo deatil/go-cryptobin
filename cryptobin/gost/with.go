@@ -42,7 +42,7 @@ func (this Gost) WithCurve(curve *gost.Curve) Gost {
 
 // 设置曲线类型
 // 可选参数:
-// CurveGostR34102001ParamSetcc
+// CurveIdGostR34102001TestParamSet
 // CurveIdGostR34102001CryptoProAParamSet
 // CurveIdGostR34102001CryptoProBParamSet
 // CurveIdGostR34102001CryptoProCParamSet
@@ -58,14 +58,15 @@ func (this Gost) WithCurve(curve *gost.Curve) Gost {
 // CurveIdtc26gost34102012512paramSetC
 func (this Gost) SetCurve(curve string) Gost {
     switch curve {
-        case "CurveGostR34102001ParamSetcc":
-            this.curve = gost.CurveGostR34102001ParamSetcc()
+        case "CurveIdGostR34102001TestParamSet":
+            this.curve = gost.CurveIdGostR34102001TestParamSet()
         case "CurveIdGostR34102001CryptoProAParamSet":
             this.curve = gost.CurveIdGostR34102001CryptoProAParamSet()
         case "CurveIdGostR34102001CryptoProBParamSet":
             this.curve = gost.CurveIdGostR34102001CryptoProBParamSet()
         case "CurveIdGostR34102001CryptoProCParamSet":
             this.curve = gost.CurveIdGostR34102001CryptoProCParamSet()
+
         case "CurveIdGostR34102001CryptoProXchAParamSet":
             this.curve = gost.CurveIdGostR34102001CryptoProXchAParamSet()
         case "CurveIdGostR34102001CryptoProXchBParamSet":

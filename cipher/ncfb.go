@@ -9,7 +9,7 @@ import (
 
 /**
  * ncfb 模式
- * CFB (Cipher Feedback) Mode.
+ * n CFB (Cipher Feedback) Mode.
  *
  * @create 2023-11-23
  * @author deatil

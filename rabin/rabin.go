@@ -81,13 +81,8 @@ func (priv *PrivateKey) Decrypt(_ io.Reader, ciphertext []byte, opts crypto.Decr
 
     c := new(big.Int).SetBytes(ciphertext)
 
-    p := priv.P
-    q := priv.Q
-
-    n := new(big.Int).Mul(p, q)
-
     // decrypt ciphertext
-    m1, m2, m3, m4 := decrypt(p, q, c, n)
+    m1, m2, m3, m4 := decrypt(priv.P, priv.Q, c, priv.N)
 
     switch {
         case hashEqual(m1, h):
@@ -121,14 +116,14 @@ func Decrypt(priv *PrivateKey, ciphertext []byte, opts crypto.DecrypterOpts) ([]
 
 // GenerateKey generates a random Rabin private key of the given bit size.
 func GenerateKey(rand io.Reader) (*PrivateKey, error) {
-    return GenerateKeyWithBitLength(rand, 128)
+    return GenerateKeyWithBitLength(rand, 64)
 }
 
 // GenerateKey generates a random Rabin private key of the given bit size.
-// bitLength = 64 * 2
+// bitLength = 64
 func GenerateKeyWithBitLength(rand io.Reader, bitLength int) (*PrivateKey, error) {
-    p := generateRabinPrimeNumber(rand, bitLength/2)
-    q := generateRabinPrimeNumber(rand, bitLength/2)
+    p := generateRabinPrimeNumber(rand, bitLength)
+    q := generateRabinPrimeNumber(rand, bitLength)
 
     n := new(big.Int).Mul(p, q)
 

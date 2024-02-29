@@ -2012,3 +2012,33 @@ func Test_RijndaelPKCS7Padding(t *testing.T) {
 
     assert(data, cyptdeStr, "RijndaelPKCS7Padding-res")
 }
+
+func Test_GostGOFBPKCS7Padding(t *testing.T) {
+    assert := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
+    cypt := FromString(data).
+        SetKey("dfertf12dfertf12dfertf12dfertf12").
+        SetIv("dfertf12").
+        Gost("SboxDESDerivedParamSet").
+        GOFB().
+        PKCS7Padding().
+        Encrypt()
+    cyptStr := cypt.ToBase64String()
+
+    assertError(cypt.Error(), "Test_GostGOFBPKCS7Padding-Encode")
+
+    cyptde := FromBase64String(cyptStr).
+        SetKey("dfertf12dfertf12dfertf12dfertf12").
+        SetIv("dfertf12").
+        Gost("SboxDESDerivedParamSet").
+        GOFB().
+        PKCS7Padding().
+        Decrypt()
+    cyptdeStr := cyptde.ToString()
+
+    assertError(cyptde.Error(), "Test_GostGOFBPKCS7Padding-Decode")
+
+    assert(data, cyptdeStr, "Test_GostGOFBPKCS7Padding-res")
+}

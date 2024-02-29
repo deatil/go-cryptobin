@@ -798,3 +798,35 @@ func init() {
         return ModeMGM{}
     })
 }
+
+// ===================
+
+type ModeGOFB struct {}
+
+// 加密
+func (this ModeGOFB) Encrypt(plain []byte, block cipher.Block, opt IOption) ([]byte, error) {
+    // 向量
+    iv := opt.Iv()
+
+    cryptText := make([]byte, len(plain))
+    cryptobin_cipher.NewGOFB(block, iv).XORKeyStream(cryptText, plain)
+
+    return cryptText, nil
+}
+
+// 解密
+func (this ModeGOFB) Decrypt(data []byte, block cipher.Block, opt IOption) ([]byte, error) {
+    // 向量
+    iv := opt.Iv()
+
+    dst := make([]byte, len(data))
+    cryptobin_cipher.NewGOFB(block, iv).XORKeyStream(dst, data)
+
+    return dst, nil
+}
+
+func init() {
+    UseMode.Add(GOFB, func() IMode {
+        return ModeGOFB{}
+    })
+}

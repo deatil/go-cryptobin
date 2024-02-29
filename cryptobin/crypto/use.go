@@ -690,6 +690,13 @@ func (this Cryptobin) MGM(nonce string, additional ...string) Cryptobin {
     return this
 }
 
+// GOFB
+func (this Cryptobin) GOFB() Cryptobin {
+    this.mode = GOFB
+
+    return this
+}
+
 // 使用模式
 func (this Cryptobin) ModeBy(mode Mode, cfg ...map[string]any) Cryptobin {
     this.mode = mode

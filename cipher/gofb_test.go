@@ -15,7 +15,7 @@ func Test_GOFB(t *testing.T) {
 
     key := []byte("kkinjkijeel22plokkinjkijeel22plo")
     iv := []byte("11injkij")
-    plaintext := []byte("kjinjkijkolkdplo")
+    plaintext := []byte("kjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplo")
 
     c, err := gost.NewCipher(key, gost.SboxGost2814789TestParamSet)
     assertError(err, "Test_GOFB-NewCipher")

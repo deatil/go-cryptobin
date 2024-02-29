@@ -291,6 +291,14 @@ func (this Mode) String() string {
             return "MGM"
         case GOFB:
             return "GOFB"
+        case G3413CBC:
+            return "G3413CBC"
+        case G3413CFB:
+            return "G3413CFB"
+        case G3413CTR:
+            return "G3413CTR"
+        case G3413OFB:
+            return "G3413OFB"
         default:
             if TypeMode.Names().Has(this) {
                 return (TypeMode.Names().Get(this))()
@@ -325,6 +333,10 @@ const (
     HCTR
     MGM
     GOFB
+    G3413CBC
+    G3413CFB
+    G3413CTR
+    G3413OFB
     maxMode
 )
 

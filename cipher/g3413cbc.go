@@ -63,7 +63,7 @@ func NewG3413CBCEncrypter(b cipher.Block, iv []byte) cipher.BlockMode {
 // in fuzz testing.
 func newG3413CBCGenericEncrypter(b cipher.Block, iv []byte) cipher.BlockMode {
     if len(iv) != 2*b.BlockSize() {
-        panic("cryptobin/g3413cbc.newG3413CBCGenericEncrypter: IV length must equal two block size")
+        panic("cryptobin/g3413cbc.NewG3413CBCEncrypter: IV length must equal two block size")
     }
     return (*g3413cbcEncrypter)(newG3413CBC(b, iv))
 }
@@ -136,7 +136,7 @@ func NewG3413CBCDecrypter(b cipher.Block, iv []byte) cipher.BlockMode {
 // fuzz testing.
 func newG3413CBCGenericDecrypter(b cipher.Block, iv []byte) cipher.BlockMode {
     if len(iv) != 2*b.BlockSize() {
-        panic("cryptobin/g3413cbc.newG3413CBCGenericDecrypter: IV length must equal two block size")
+        panic("cryptobin/g3413cbc.NewG3413CBCDecrypter: IV length must equal two block size")
     }
     return (*g3413cbcDecrypter)(newG3413CBC(b, iv))
 }

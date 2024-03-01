@@ -1,5 +1,4 @@
 // implements the GOST 28147 OFB counter mode (GCTR).
-
 package cipher
 
 import (
@@ -10,6 +9,9 @@ import (
     "github.com/deatil/go-cryptobin/tool/alias"
 )
 
+/**
+ * implements the GOST 28147 OFB counter mode (GCTR).
+ */
 type gofb struct {
     b       cipher.Block
     cipher  []byte
@@ -27,7 +29,7 @@ type gofb struct {
 func NewGOFB(b cipher.Block, iv []byte) cipher.Stream {
     blockSize := b.BlockSize()
     if len(iv) != blockSize {
-        panic("cipher.NewGOFB: IV length must equal block size")
+        panic("cryptobin/gofb.NewGOFB: IV length must equal block size")
     }
 
     bufSize := streamBufferSize
@@ -84,11 +86,11 @@ func (x *gofb) refill() {
 
 func (x *gofb) XORKeyStream(dst, src []byte) {
     if len(dst) < len(src) {
-        panic("crypto/cipher: output smaller than input")
+        panic("cryptobin/gofb: output smaller than input")
     }
 
     if alias.InexactOverlap(dst[:len(src)], src) {
-        panic("crypto/cipher: invalid buffer overlap")
+        panic("cryptobin/gofb: invalid buffer overlap")
     }
 
     ofbOutV := make([]byte, x.b.BlockSize())

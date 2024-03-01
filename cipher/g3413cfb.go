@@ -8,6 +8,10 @@ import (
     "github.com/deatil/go-cryptobin/tool/alias"
 )
 
+/**
+ * An implementation of the CFB mode for GOST 3412 2015 cipher.
+ * See  <a href="https://www.tc26.ru/standard/gost/GOST_R_3413-2015.pdf">GOST R 3413 2015</a>
+ */
 type g3413cfb struct {
     b       cipher.Block
     next    []byte
@@ -21,10 +25,10 @@ type g3413cfb struct {
 
 func (x *g3413cfb) XORKeyStream(dst, src []byte) {
     if len(dst) < len(src) {
-        panic("crypto/cipher: output smaller than input")
+        panic("cryptobin/g3413cfb: output smaller than input")
     }
     if alias.InexactOverlap(dst[:len(src)], src) {
-        panic("crypto/cipher: invalid buffer overlap")
+        panic("cryptobin/g3413cfb: invalid buffer overlap")
     }
 
     bs := x.b.BlockSize()
@@ -78,11 +82,11 @@ func newG3413CFB(block cipher.Block, iv []byte, bitBlockSize int, decrypt bool) 
     blockSize := block.BlockSize()
     if len(iv) != 2*blockSize {
         // stack trace will indicate whether it was de or encryption
-        panic("cipher.newG3413CFB: IV length must equal two block size")
+        panic("cryptobin/g3413cfb.newG3413CFB: IV length must equal two block size")
     }
 
     if bitBlockSize < 0 || bitBlockSize > blockSize * 8 {
-        panic(fmt.Sprintf("cipher.newG3413CFB: Parameter bitBlockSize must be in range 0 < bitBlockSize <= %d", blockSize * 8))
+        panic(fmt.Sprintf("cryptobin/g3413cfb: Parameter bitBlockSize must be in range 0 < bitBlockSize <= %d", blockSize * 8))
     }
 
     s := bitBlockSize / 8

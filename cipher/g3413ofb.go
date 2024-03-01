@@ -7,6 +7,10 @@ import (
     "github.com/deatil/go-cryptobin/tool/alias"
 )
 
+/**
+ * An implementation of the OFB mode for GOST 3412 2015 cipher.
+ * See  <a href="https://www.tc26.ru/standard/gost/GOST_R_3413-2015.pdf">GOST R 3413 2015</a>
+ */
 type g3413ofb struct {
     b       cipher.Block
     cipher  []byte
@@ -21,7 +25,7 @@ type g3413ofb struct {
 func NewG3413OFB(b cipher.Block, iv []byte) cipher.Stream {
     blockSize := b.BlockSize()
     if len(iv) != 2*blockSize {
-        panic("cipher.NewG3413OFB: IV length must equal two block size")
+        panic("cryptobin/g3413ofb.NewG3413OFB: IV length must equal two block size")
     }
 
     bufSize := streamBufferSize
@@ -68,10 +72,10 @@ func (x *g3413ofb) refill() {
 
 func (x *g3413ofb) XORKeyStream(dst, src []byte) {
     if len(dst) < len(src) {
-        panic("crypto/cipher: output smaller than input")
+        panic("cryptobin/g3413ofb: output smaller than input")
     }
     if alias.InexactOverlap(dst[:len(src)], src) {
-        panic("crypto/cipher: invalid buffer overlap")
+        panic("cryptobin/g3413ofb: invalid buffer overlap")
     }
 
     for len(src) > 0 {

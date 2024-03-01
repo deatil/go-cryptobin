@@ -33,6 +33,56 @@ func Test_G3413CBC(t *testing.T) {
     assertEqual(string(plaintext2), string(plaintext), "Test_G3413CBC-Equal")
 }
 
+func Test_G3413CBC_1(t *testing.T) {
+    assertEqual := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    key := []byte("kkinjkijeel22plokkinjkijeel22plo")
+    iv := []byte("t1i-66ij11injki33njknjeel22plovk")
+    plaintext := []byte("y7u9jkijkolkdp12")
+
+    c, err := kuznyechik.NewCipher(key)
+    assertError(err, "Test_G3413CBC_1-NewCipher")
+
+    cbc := NewG3413CBCEncrypter(c, iv)
+    ciphertext := make([]byte, len(plaintext))
+    cbc.CryptBlocks(ciphertext, plaintext)
+
+    cbc2 := NewG3413CBCDecrypter(c, iv)
+    plaintext2 := make([]byte, len(ciphertext))
+    cbc2.CryptBlocks(plaintext2, ciphertext)
+
+    assertNotEmpty(plaintext2, "Test_G3413CBC_1-CryptBlocks")
+
+    assertEqual(string(plaintext2), string(plaintext), "Test_G3413CBC_1-Equal")
+}
+
+func Test_G3413CBC_2(t *testing.T) {
+    assertEqual := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    key := []byte("kkinjkijeel22plokkinjkijeel22plo")
+    iv := []byte("t1i-66ij11injki33njknjeel22plovk")
+    plaintext := []byte("y7u9jkijkolkdp12y7i9j33jkogkdp12")
+
+    c, err := kuznyechik.NewCipher(key)
+    assertError(err, "Test_G3413CBC_1-NewCipher")
+
+    cbc := NewG3413CBCEncrypter(c, iv)
+    ciphertext := make([]byte, len(plaintext))
+    cbc.CryptBlocks(ciphertext, plaintext)
+
+    cbc2 := NewG3413CBCDecrypter(c, iv)
+    plaintext2 := make([]byte, len(ciphertext))
+    cbc2.CryptBlocks(plaintext2, ciphertext)
+
+    assertNotEmpty(plaintext2, "Test_G3413CBC_1-CryptBlocks")
+
+    assertEqual(string(plaintext2), string(plaintext), "Test_G3413CBC_1-Equal")
+}
+
 func Test_G3413CBC_Check(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertError := cryptobin_test.AssertErrorT(t)

@@ -15,6 +15,9 @@ var gcfbC = []byte{
 
 type GCFBCipherFunc = func([]byte) (cipher.Block, error)
 
+/**
+ * An implementation of the GOST CFB mode with CryptoPro key meshing as described in RFC 4357.
+ */
 type gcfb struct {
     b         GCFBCipherFunc
     cfbEngine cipher.Stream
@@ -28,11 +31,11 @@ type gcfb struct {
 
 func (x *gcfb) XORKeyStream(dst, src []byte) {
     if len(dst) < len(src) {
-        panic("crypto/cipher: output smaller than input")
+        panic("cryptobin/gcfb: output smaller than input")
     }
 
     if alias.InexactOverlap(dst[:len(src)], src) {
-        panic("crypto/cipher: invalid buffer overlap")
+        panic("cryptobin/gcfb: invalid buffer overlap")
     }
 
     for len(src) > 0 {
@@ -96,13 +99,13 @@ func NewGCFBDecrypter(block GCFBCipherFunc, key, iv []byte) cipher.Stream {
 func newGCFB(block GCFBCipherFunc, key, iv []byte, decrypt bool) cipher.Stream {
     cip, err := block(key)
     if err != nil {
-        panic("cipher.newGCFB: invalid block")
+        panic("cryptobin/gcfb.newGCFB: invalid block")
     }
 
     blockSize := cip.BlockSize()
     if len(iv) != blockSize {
         // stack trace will indicate whether it was de or encryption
-        panic("cipher.newGCFB: IV length must equal block size")
+        panic("cryptobin/gcfb.newGCFB: IV length must equal block size")
     }
 
     x := &gcfb{

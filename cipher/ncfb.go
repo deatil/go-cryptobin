@@ -25,11 +25,11 @@ type ncfb struct {
 
 func (x *ncfb) XORKeyStream(dst, src []byte) {
     if len(dst) < len(src) {
-        panic("cipher/ncfb: output smaller than input")
+        panic("cryptobin/ncfb: output smaller than input")
     }
 
     if alias.InexactOverlap(dst[:len(src)], src) {
-        panic("cipher/ncfb: invalid buffer overlap")
+        panic("cryptobin/ncfb: invalid buffer overlap")
     }
 
     bs := x.b.BlockSize()
@@ -74,7 +74,7 @@ func NewNCFBDecrypter(block cipher.Block, iv []byte) cipher.Stream {
 func newNCFB(block cipher.Block, iv []byte, decrypt bool) cipher.Stream {
     blockSize := block.BlockSize()
     if len(iv) != blockSize {
-        panic("cipher/ncfb: IV length must equal block size")
+        panic("cryptobin/ncfb: IV length must equal block size")
     }
 
     x := &ncfb{

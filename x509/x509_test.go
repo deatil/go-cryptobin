@@ -8,6 +8,7 @@ import (
     "encoding/pem"
     "encoding/asn1"
     "crypto/rsa"
+    "crypto/dsa"
     "crypto/ecdsa"
     "crypto/ed25519"
     "crypto/elliptic"
@@ -150,6 +151,119 @@ func Test_RSA(t *testing.T) {
     }
 
     pubKey, _ = priv.Public().(*rsa.PublicKey)
+    certpem, err := CreateCertificate(rand.Reader, &template, &template, pubKey, priv)
+    if err != nil {
+        t.Fatal("failed to create cert file")
+    }
+
+    cert, err := ParseCertificate(certpem)
+    if err != nil {
+        t.Fatal("failed to read cert file")
+    }
+
+    err = cert.CheckSignature(cert.SignatureAlgorithm, cert.RawTBSCertificate, cert.Signature)
+    if err != nil {
+        t.Fatal(err)
+    }
+}
+
+func Test_DSA(t *testing.T) {
+    priv := &dsa.PrivateKey{}
+    dsa.GenerateParameters(&priv.Parameters, rand.Reader, dsa.L1024N160)
+    dsa.GenerateKey(priv, rand.Reader)
+
+    pubKey := &priv.PublicKey
+
+    templateReq := CertificateRequest{
+        Subject: pkix.Name{
+            CommonName:   "test.example.com",
+            Organization: []string{"Test"},
+        },
+        SignatureAlgorithm: DSAWithSHA1,
+    }
+
+    reqPem, err := CreateCertificateRequest(rand.Reader, &templateReq, priv)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    req, err := ParseCertificateRequest(reqPem)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    err = req.CheckSignature()
+    if err != nil {
+        t.Fatalf("Request CheckSignature error:%v", err)
+    }
+
+    testExtKeyUsage := []ExtKeyUsage{ExtKeyUsageClientAuth, ExtKeyUsageServerAuth}
+    testUnknownExtKeyUsage := []asn1.ObjectIdentifier{[]int{1, 2, 3}, []int{2, 59, 1}}
+    extraExtensionData := []byte("extra extension")
+    commonName := "test.example.com"
+    template := Certificate{
+        // SerialNumber is negative to ensure that negative
+        // values are parsed. This is due to the prevalence of
+        // buggy code that produces certificates with negative
+        // serial numbers.
+        SerialNumber: big.NewInt(-1),
+        Subject: pkix.Name{
+            CommonName:   commonName,
+            Organization: []string{"TEST"},
+            Country:      []string{"China"},
+            ExtraNames: []pkix.AttributeTypeAndValue{
+                {
+                    Type:  []int{2, 5, 4, 42},
+                    Value: "Gopher",
+                },
+                // This should override the Country, above.
+                {
+                    Type:  []int{2, 5, 4, 6},
+                    Value: "NL",
+                },
+            },
+        },
+        NotBefore: time.Now(),
+        NotAfter:  time.Date(2021, time.October, 10, 12, 1, 1, 1, time.UTC),
+
+        SignatureAlgorithm: DSAWithSHA1,
+
+        SubjectKeyId: []byte{1, 2, 3, 4},
+        KeyUsage:     KeyUsageCertSign,
+
+        ExtKeyUsage:        testExtKeyUsage,
+        UnknownExtKeyUsage: testUnknownExtKeyUsage,
+
+        BasicConstraintsValid: true,
+        IsCA:                  true,
+
+        OCSPServer:            []string{"http://ocsp.example.com"},
+        IssuingCertificateURL: []string{"http://crt.example.com/ca1.crt"},
+
+        DNSNames:       []string{"test.example.com"},
+        EmailAddresses: []string{"gopher@golang.org"},
+        IPAddresses:    []net.IP{net.IPv4(127, 0, 0, 1).To4(), net.ParseIP("2001:4860:0:2001::68")},
+
+        PolicyIdentifiers:   []asn1.ObjectIdentifier{[]int{1, 2, 3}},
+        PermittedDNSDomains: []string{".example.com", "example.com"},
+
+        CRLDistributionPoints: []string{"http://crl1.example.com/ca1.crl", "http://crl2.example.com/ca1.crl"},
+
+        ExtraExtensions: []pkix.Extension{
+            {
+                Id:    []int{1, 2, 3, 4},
+                Value: extraExtensionData,
+            },
+            // This extension should override the SubjectKeyId, above.
+            {
+                Id:       oidExtensionSubjectKeyId,
+                Critical: false,
+                Value:    []byte{0x04, 0x04, 4, 3, 2, 1},
+            },
+        },
+    }
+
+    pubKey = &priv.PublicKey
     certpem, err := CreateCertificate(rand.Reader, &template, &template, pubKey, priv)
     if err != nil {
         t.Fatal("failed to create cert file")

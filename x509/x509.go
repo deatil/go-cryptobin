@@ -57,6 +57,24 @@ func marshalPublicKey(pub any) (publicKeyBytes []byte, publicKeyAlgorithm pkix.A
             publicKeyAlgorithm.Parameters = asn1.RawValue{
                 Tag: 5,
             }
+        case *dsa.PublicKey:
+            publicKeyBytes, err = asn1.Marshal(pub.Y)
+            if err != nil {
+                return nil, pkix.AlgorithmIdentifier{}, err
+            }
+
+            var paramBytes []byte
+            paramBytes, err = asn1.Marshal(dsaAlgorithmParameters{
+                P: pub.P,
+                Q: pub.Q,
+                G: pub.G,
+            })
+            if err != nil {
+                return
+            }
+
+            publicKeyAlgorithm.Algorithm = oidPublicKeyDSA
+            publicKeyAlgorithm.Parameters.FullBytes = paramBytes
         case *ecdsa.PublicKey:
             publicKeyBytes = elliptic.Marshal(pub.Curve, pub.X, pub.Y)
             oid, ok := oidFromNamedCurve(pub.Curve)
@@ -149,6 +167,7 @@ func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (any, error
             if len(rest) != 0 {
                 return nil, errors.New("x509: trailing data after DSA public key")
             }
+
             paramsData := params.FullBytes
             params := new(dsaAlgorithmParameters)
             rest, err = asn1.Unmarshal(paramsData, params)
@@ -158,9 +177,11 @@ func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (any, error
             if len(rest) != 0 {
                 return nil, errors.New("x509: trailing data after DSA parameters")
             }
+
             if p.Sign() <= 0 || params.P.Sign() <= 0 || params.Q.Sign() <= 0 || params.G.Sign() <= 0 {
                 return nil, errors.New("x509: zero or negative DSA parameter")
             }
+
             pub := &dsa.PublicKey{
                 Parameters: dsa.Parameters{
                     P: params.P,
@@ -169,6 +190,7 @@ func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (any, error
                 },
                 Y: p,
             }
+
             return pub, nil
         case ECDSA:
             paramsData := params.FullBytes
@@ -274,7 +296,6 @@ const (
     UnknownSignatureAlgorithm SignatureAlgorithm = iota
     MD2WithRSA
     MD5WithRSA
-    //	SM3WithRSA reserve
     SHA1WithRSA
     SHA256WithRSA
     SHA384WithRSA
@@ -289,6 +310,7 @@ const (
     SHA384WithRSAPSS
     SHA512WithRSAPSS
     PureEd25519
+    // SM3WithRSA
     SM2WithSM3
     SM2WithSHA1
     SM2WithSHA256
@@ -467,10 +489,10 @@ var signatureAlgorithmDetails = []struct {
     {ECDSAWithSHA384, oidSignatureECDSAWithSHA384, ECDSA, SHA384},
     {ECDSAWithSHA512, oidSignatureECDSAWithSHA512, ECDSA, SHA512},
     {PureEd25519, oidSignatureEd25519, Ed25519, Hash(0)},
+    // {SM3WithRSA, oidSignatureSM3WithRSA, RSA, SM3},
     {SM2WithSM3, oidSignatureSM2WithSM3, ECDSA, SM3},
     {SM2WithSHA1, oidSignatureSM2WithSHA1, ECDSA, SHA1},
     {SM2WithSHA256, oidSignatureSM2WithSHA256, ECDSA, SHA256},
-    //	{SM3WithRSA, oidSignatureSM3WithRSA, RSA, SM3},
     {GOST3410WithGOST34112001, oidSignatureGOST3410WithGOST3411, GOST3410, GOST34112001},
     {GOST3410WithGOST34112012256, oidSignatureGOST3410WithGOST34112012256, GOST3410, GOST34112012256},
     {GOST3410WithGOST34112012512, oidSignatureGOST3410WithGOST34112012512, GOST3410, GOST34112012512},
@@ -1894,20 +1916,28 @@ func signingParamsForPublicKey(pub any, requestedSigAlgo SignatureAlgorithm) (ha
                 Tag: 5,
             }
 
+        case *dsa.PublicKey:
+            pubType = DSA
+            hashFunc = SHA256
+            sigAlgo.Algorithm = oidSignatureDSAWithSHA256
+            sigAlgo.Parameters = asn1.RawValue{
+                Tag: 5,
+            }
+
         case *ecdsa.PublicKey:
             pubType = ECDSA
             switch pub.Curve {
-            case elliptic.P224(), elliptic.P256():
-                hashFunc = SHA256
-                sigAlgo.Algorithm = oidSignatureECDSAWithSHA256
-            case elliptic.P384():
-                hashFunc = SHA384
-                sigAlgo.Algorithm = oidSignatureECDSAWithSHA384
-            case elliptic.P521():
-                hashFunc = SHA512
-                sigAlgo.Algorithm = oidSignatureECDSAWithSHA512
-            default:
-                err = errors.New("x509: unknown elliptic curve")
+                case elliptic.P224(), elliptic.P256():
+                    hashFunc = SHA256
+                    sigAlgo.Algorithm = oidSignatureECDSAWithSHA256
+                case elliptic.P384():
+                    hashFunc = SHA384
+                    sigAlgo.Algorithm = oidSignatureECDSAWithSHA384
+                case elliptic.P521():
+                    hashFunc = SHA512
+                    sigAlgo.Algorithm = oidSignatureECDSAWithSHA512
+                default:
+                    err = errors.New("x509: unknown elliptic curve")
             }
         case ed25519.PublicKey:
             pubType = Ed25519
@@ -1926,17 +1956,17 @@ func signingParamsForPublicKey(pub any, requestedSigAlgo SignatureAlgorithm) (ha
             pubType = GOST3410
             hashAlgo, _ := gost.HashOidFromNamedCurve(pub.Curve)
             switch {
-            case hashAlgo.Equal(oidGostCryptoProDigestA):
-                hashFunc = GOST34112001
-                sigAlgo.Algorithm = oidSignatureGOST3410WithGOST3411
-            case hashAlgo.Equal(oidGost2012Digest256):
-                hashFunc = GOST34112012256
-                sigAlgo.Algorithm = oidSignatureGOST3410WithGOST34112012256
-            case hashAlgo.Equal(oidGost2012Digest512):
-                hashFunc = GOST34112012512
-                sigAlgo.Algorithm = oidSignatureGOST3410WithGOST34112012512
-            default:
-                err = errors.New("x509: unknown GOST3410 curve")
+                case hashAlgo.Equal(oidGostCryptoProDigestA):
+                    hashFunc = GOST34112001
+                    sigAlgo.Algorithm = oidSignatureGOST3410WithGOST3411
+                case hashAlgo.Equal(oidGost2012Digest256):
+                    hashFunc = GOST34112012256
+                    sigAlgo.Algorithm = oidSignatureGOST3410WithGOST34112012256
+                case hashAlgo.Equal(oidGost2012Digest512):
+                    hashFunc = GOST34112012512
+                    sigAlgo.Algorithm = oidSignatureGOST3410WithGOST34112012512
+                default:
+                    err = errors.New("x509: unknown GOST3410 curve")
             }
 
         default:
@@ -2030,12 +2060,17 @@ func ParseDERCRL(derBytes []byte) (*pkix.CertificateList, error) {
 // CreateCRL returns a DER encoded CRL, signed by this Certificate, that
 // contains the given list of revoked certificates.
 func (c *Certificate) CreateCRL(rand io.Reader, priv any, revokedCerts []pkix.RevokedCertificate, now, expiry time.Time) (crlBytes []byte, err error) {
-    key, ok := priv.(crypto.Signer)
-    if !ok {
-        return nil, errors.New("x509: certificate private key does not implement crypto.Signer")
+    var pubKey crypto.PublicKey
+    switch prikey := priv.(type) {
+        case crypto.Signer:
+            pubKey = prikey.Public()
+        case *dsa.PrivateKey:
+            pubKey = &prikey.PublicKey
+        default:
+            return nil, errors.New("x509: certificate private key does not implement crypto.Signer")
     }
 
-    hashFunc, signatureAlgorithm, err := signingParamsForPublicKey(key.Public(), 0)
+    hashFunc, signatureAlgorithm, err := signingParamsForPublicKey(pubKey, 0)
     if err != nil {
         return nil, err
     }
@@ -2085,9 +2120,25 @@ func (c *Certificate) CreateCRL(rand io.Reader, priv any, revokedCerts []pkix.Re
     }
 
     var signature []byte
-    signature, err = key.Sign(rand, digest, hashFunc)
-    if err != nil {
-        return
+    switch signer := priv.(type) {
+        case crypto.Signer:
+            signature, err = signer.Sign(rand, digest, hashFunc)
+            if err != nil {
+                return nil, err
+            }
+        case *dsa.PrivateKey:
+            r, s, err := dsa.Sign(rand, signer, digest)
+            if err != nil {
+                return nil, err
+            }
+
+            signature, err = asn1.Marshal(dsaSignature{
+                R: r,
+                S: s,
+            })
+            if err != nil {
+                return nil, err
+            }
     }
 
     return asn1.Marshal(pkix.CertificateList{
@@ -2234,21 +2285,26 @@ func parseCSRExtensions(rawAttributes []asn1.RawValue) ([]pkix.Extension, error)
 // All keys types that are implemented via crypto.Signer are supported (This
 // includes *rsa.PublicKey and *ecdsa.PublicKey.)
 func CreateCertificateRequest(rand io.Reader, template *CertificateRequest, priv any) (csr []byte, err error) {
-    signer, ok := priv.(crypto.Signer)
-    if !ok {
-        return nil, errors.New("x509: certificate private key does not implement crypto.Signer")
+    var pubKey crypto.PublicKey
+    switch prikey := priv.(type) {
+        case crypto.Signer:
+            pubKey = prikey.Public()
+        case *dsa.PrivateKey:
+            pubKey = &prikey.PublicKey
+        default:
+            return nil, errors.New("x509: certificate private key does not implement crypto.Signer")
     }
 
     var hashFunc Hash
     var sigAlgo pkix.AlgorithmIdentifier
-    hashFunc, sigAlgo, err = signingParamsForPublicKey(signer.Public(), template.SignatureAlgorithm)
+    hashFunc, sigAlgo, err = signingParamsForPublicKey(pubKey, template.SignatureAlgorithm)
     if err != nil {
         return nil, err
     }
 
     var publicKeyBytes []byte
     var publicKeyAlgorithm pkix.AlgorithmIdentifier
-    publicKeyBytes, publicKeyAlgorithm, err = marshalPublicKey(signer.Public())
+    publicKeyBytes, publicKeyAlgorithm, err = marshalPublicKey(pubKey)
     if err != nil {
         return nil, err
     }
@@ -2373,9 +2429,25 @@ func CreateCertificateRequest(rand io.Reader, template *CertificateRequest, priv
     }
 
     var signature []byte
-    signature, err = signer.Sign(rand, digest, hashFunc)
-    if err != nil {
-        return
+    switch signer := priv.(type) {
+        case crypto.Signer:
+            signature, err = signer.Sign(rand, digest, hashFunc)
+            if err != nil {
+                return nil, err
+            }
+        case *dsa.PrivateKey:
+            r, s, err := dsa.Sign(rand, signer, digest)
+            if err != nil {
+                return nil, err
+            }
+
+            signature, err = asn1.Marshal(dsaSignature{
+                R: r,
+                S: s,
+            })
+            if err != nil {
+                return nil, err
+            }
     }
 
     return asn1.Marshal(certificateRequest{
@@ -2581,16 +2653,21 @@ func (c *Certificate) FromX509Certificate(x509Cert *x509.Certificate) {
 // All keys types that are implemented via crypto.Signer are supported (This
 // includes *rsa.PublicKey and *ecdsa.PublicKey.)
 func CreateCertificate(rand io.Reader, template, parent *Certificate, publicKey any, priv any) ([]byte, error) {
-    signer, ok := priv.(crypto.Signer)
-    if !ok {
-        return nil, errors.New("x509: certificate private key does not implement crypto.Signer")
-    }
-
     if template.SerialNumber == nil {
         return nil, errors.New("x509: no SerialNumber given")
     }
 
-    hashFunc, signatureAlgorithm, err := signingParamsForPublicKey(signer.Public(), template.SignatureAlgorithm)
+    var pubKey crypto.PublicKey
+    switch prikey := priv.(type) {
+        case crypto.Signer:
+            pubKey = prikey.Public()
+        case *dsa.PrivateKey:
+            pubKey = &prikey.PublicKey
+        default:
+            return nil, errors.New("x509: certificate private key does not implement crypto.Signer")
+    }
+
+    hashFunc, signatureAlgorithm, err := signingParamsForPublicKey(pubKey, template.SignatureAlgorithm)
     if err != nil {
         return nil, err
     }
@@ -2659,9 +2736,25 @@ func CreateCertificate(rand io.Reader, template, parent *Certificate, publicKey 
     }
 
     var signature []byte
-    signature, err = signer.Sign(rand, digest, signerOpts)
-    if err != nil {
-        return nil, err
+    switch signer := priv.(type) {
+        case crypto.Signer:
+            signature, err = signer.Sign(rand, digest, signerOpts)
+            if err != nil {
+                return nil, err
+            }
+        case *dsa.PrivateKey:
+            r, s, err := dsa.Sign(rand, signer, digest)
+            if err != nil {
+                return nil, err
+            }
+
+            signature, err = asn1.Marshal(dsaSignature{
+                R: r,
+                S: s,
+            })
+            if err != nil {
+                return nil, err
+            }
     }
 
     return asn1.Marshal(certificate{

@@ -93,7 +93,7 @@ func SystemCertPool() (*CertPool, error) {
         return nil, errors.New("crypto/x509: system root pool is not available on Windows")
     }
 
-    return systemRootsPool(), systemRootsErr
+    return systemRootsPool().Clone(), systemRootsErr
 }
 
 type sum224 [sha256.Size224]byte
@@ -327,13 +327,16 @@ func (s *CertPool) Equal(other *CertPool) bool {
     if s == nil || other == nil {
         return s == other
     }
+
     if s.systemPool != other.systemPool || len(s.haveSum) != len(other.haveSum) {
         return false
     }
+
     for h := range s.haveSum {
         if !other.haveSum[h] {
             return false
         }
     }
+
     return true
 }

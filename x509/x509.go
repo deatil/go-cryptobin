@@ -3,6 +3,7 @@ package x509
 import (
     "io"
     "net"
+    "net/url"
     "fmt"
     "time"
     "bytes"
@@ -15,14 +16,23 @@ import (
     "crypto/ed25519"
     "crypto/elliptic"
     "crypto/rsa"
-    "crypto/rand"
     "crypto/x509"
     "crypto/x509/pkix"
     "encoding/asn1"
     "encoding/pem"
 
+    "golang.org/x/crypto/cryptobyte"
+    cryptobyte_asn1 "golang.org/x/crypto/cryptobyte/asn1"
+
     "github.com/deatil/go-cryptobin/gost"
     "github.com/deatil/go-cryptobin/gm/sm2"
+)
+
+const (
+    nameTypeEmail = 1
+    nameTypeDNS   = 2
+    nameTypeURI   = 6
+    nameTypeIP    = 7
 )
 
 // rsaPublicKey reflects the ASN.1 structure of a PKCS#1 public key.
@@ -827,6 +837,7 @@ type Certificate struct {
 
     BasicConstraintsValid bool // if true then the next two fields are valid.
     IsCA                  bool
+
     MaxPathLen            int
     // MaxPathLenZero indicates that BasicConstraintsValid==true and
     // MaxPathLen==0 should be interpreted as an actual maximum path length
@@ -845,10 +856,18 @@ type Certificate struct {
     DNSNames       []string
     EmailAddresses []string
     IPAddresses    []net.IP
+    URIs           []*url.URL
 
     // Name constraints
     PermittedDNSDomainsCritical bool // if true then the name constraints are marked critical.
     PermittedDNSDomains         []string
+    ExcludedDNSDomains          []string
+    PermittedIPRanges           []*net.IPNet
+    ExcludedIPRanges            []*net.IPNet
+    PermittedEmailAddresses     []string
+    ExcludedEmailAddresses      []string
+    PermittedURIDomains         []string
+    ExcludedURIDomains          []string
 
     // CRL Distribution Points
     CRLDistributionPoints []string
@@ -878,6 +897,24 @@ func (ConstraintViolationError) Error() string {
 
 func (c *Certificate) Equal(other *Certificate) bool {
     return bytes.Equal(c.Raw, other.Raw)
+}
+
+func (c *Certificate) hasSANExtension() bool {
+    return oidInExtensions(oidExtensionSubjectAltName, c.Extensions)
+}
+
+func (c *Certificate) hasNameConstraints() bool {
+    return oidInExtensions(oidExtensionNameConstraints, c.Extensions)
+}
+
+func (c *Certificate) getSANExtension() []byte {
+    for _, e := range c.Extensions {
+        if e.Id.Equal(oidExtensionSubjectAltName) {
+            return e.Value
+        }
+    }
+
+    return nil
 }
 
 // Entrust have a broken root certificate (CN=Entrust.net Certification
@@ -1133,7 +1170,7 @@ type distributionPointName struct {
 // asn1Null is the ASN.1 encoding of a NULL value.
 var asn1Null = []byte{5, 0}
 
-func parseSANExtension(value []byte) (dnsNames, emailAddresses []string, ipAddresses []net.IP, err error) {
+func parseSANExtension(value []byte) (dnsNames, emailAddresses []string, ipAddresses []net.IP, uris []*url.URL, err error) {
     // RFC 5280, 4.2.1.6
 
     // SubjectAltName ::= GeneralNames
@@ -1171,18 +1208,52 @@ func parseSANExtension(value []byte) (dnsNames, emailAddresses []string, ipAddre
             return
         }
         switch v.Tag {
-        case 1:
-            emailAddresses = append(emailAddresses, string(v.Bytes))
-        case 2:
-            dnsNames = append(dnsNames, string(v.Bytes))
-        case 7:
-            switch len(v.Bytes) {
-            case net.IPv4len, net.IPv6len:
-                ipAddresses = append(ipAddresses, v.Bytes)
-            default:
-                err = errors.New("x509: certificate contained IP address of length " + strconv.Itoa(len(v.Bytes)))
-                return
-            }
+            case nameTypeEmail:
+                email := string(v.Bytes)
+                if err = isIA5String(email); err != nil {
+                    err = errors.New("x509: SAN rfc822Name is malformed")
+                    return
+                }
+
+                emailAddresses = append(emailAddresses, email)
+            case nameTypeDNS:
+                name := string(v.Bytes)
+                if err = isIA5String(name); err != nil {
+                    err = errors.New("x509: SAN dNSName is malformed")
+                    return
+                }
+
+                dnsNames = append(dnsNames, name)
+            case nameTypeURI:
+                uriStr := string(v.Bytes)
+                if err = isIA5String(uriStr); err != nil {
+                    err = errors.New("x509: SAN uniformResourceIdentifier is malformed")
+                    return
+                }
+
+                uri, e := url.Parse(uriStr)
+                if e != nil {
+                    err = fmt.Errorf("x509: cannot parse URI %q: %s", uriStr, err)
+                    return
+                }
+
+                if len(uri.Host) > 0 {
+                    if _, ok := domainToReverseLabels(uri.Host); !ok {
+                        err = fmt.Errorf("x509: cannot parse URI %q: invalid domain", uriStr)
+                        return
+                    }
+                }
+
+                uris = append(uris, uri)
+
+            case nameTypeIP:
+                switch len(v.Bytes) {
+                    case net.IPv4len, net.IPv6len:
+                        ipAddresses = append(ipAddresses, v.Bytes)
+                    default:
+                        err = errors.New("x509: certificate contained IP address of length " + strconv.Itoa(len(v.Bytes)))
+                        return
+                }
         }
     }
 
@@ -1269,7 +1340,7 @@ func parseCertificate(in *certificate) (*Certificate, error) {
                 out.MaxPathLenZero = out.MaxPathLen == 0
 
             case 17:
-                out.DNSNames, out.EmailAddresses, out.IPAddresses, err = parseSANExtension(e.Value)
+                out.DNSNames, out.EmailAddresses, out.IPAddresses, out.URIs, err = parseSANExtension(e.Value)
                 if err != nil {
                     return nil, err
                 }
@@ -1280,40 +1351,9 @@ func parseCertificate(in *certificate) (*Certificate, error) {
                 }
 
             case 30:
-                // RFC 5280, 4.2.1.10
-
-                // NameConstraints ::= SEQUENCE {
-                //      permittedSubtrees       [0]     GeneralSubtrees OPTIONAL,
-                //      excludedSubtrees        [1]     GeneralSubtrees OPTIONAL }
-                //
-                // GeneralSubtrees ::= SEQUENCE SIZE (1..MAX) OF GeneralSubtree
-                //
-                // GeneralSubtree ::= SEQUENCE {
-                //      base                    GeneralName,
-                //      minimum         [0]     BaseDistance DEFAULT 0,
-                //      maximum         [1]     BaseDistance OPTIONAL }
-                //
-                // BaseDistance ::= INTEGER (0..MAX)
-
-                var constraints nameConstraints
-                if rest, err := asn1.Unmarshal(e.Value, &constraints); err != nil {
+                unhandled, err = parseNameConstraintsExtension(out, e)
+                if err != nil {
                     return nil, err
-                } else if len(rest) != 0 {
-                    return nil, errors.New("x509: trailing data after X.509 NameConstraints")
-                }
-
-                if len(constraints.Excluded) > 0 && e.Critical {
-                    return out, UnhandledCriticalExtension{}
-                }
-
-                for _, subtree := range constraints.Permitted {
-                    if len(subtree.Name) == 0 {
-                        if e.Critical {
-                            return out, UnhandledCriticalExtension{}
-                        }
-                        continue
-                    }
-                    out.PermittedDNSDomains = append(out.PermittedDNSDomains, subtree.Name)
                 }
 
             case 31:
@@ -1401,16 +1441,9 @@ func parseCertificate(in *certificate) (*Certificate, error) {
                 out.SubjectKeyId = keyid
 
             case 32:
-                // RFC 5280 4.2.1.4: Certificate Policies
-                var policies []policyInformation
-                if rest, err := asn1.Unmarshal(e.Value, &policies); err != nil {
+                out.PolicyIdentifiers, err = parseCertificatePoliciesExtension(e.Value)
+                if err != nil {
                     return nil, err
-                } else if len(rest) != 0 {
-                    return nil, errors.New("x509: trailing data after X.509 certificate policies")
-                }
-                out.PolicyIdentifiers = make([]asn1.ObjectIdentifier, len(policies))
-                for i, policy := range policies {
-                    out.PolicyIdentifiers[i] = policy.Policy
                 }
 
             default:
@@ -1550,14 +1583,16 @@ func oidInExtensions(oid asn1.ObjectIdentifier, extensions []pkix.Extension) boo
 
 // marshalSANs marshals a list of addresses into a the contents of an X.509
 // SubjectAlternativeName extension.
-func marshalSANs(dnsNames, emailAddresses []string, ipAddresses []net.IP) (derBytes []byte, err error) {
+func marshalSANs(dnsNames, emailAddresses []string, ipAddresses []net.IP, uris []*url.URL) (derBytes []byte, err error) {
     var rawValues []asn1.RawValue
     for _, name := range dnsNames {
         rawValues = append(rawValues, asn1.RawValue{Tag: 2, Class: 2, Bytes: []byte(name)})
     }
+
     for _, email := range emailAddresses {
         rawValues = append(rawValues, asn1.RawValue{Tag: 1, Class: 2, Bytes: []byte(email)})
     }
+
     for _, rawIP := range ipAddresses {
         // If possible, we always want to encode IPv4 addresses in 4 bytes.
         ip := rawIP.To4()
@@ -1566,6 +1601,16 @@ func marshalSANs(dnsNames, emailAddresses []string, ipAddresses []net.IP) (derBy
         }
         rawValues = append(rawValues, asn1.RawValue{Tag: 7, Class: 2, Bytes: ip})
     }
+
+    for _, uri := range uris {
+        uriStr := uri.String()
+        if err := isIA5String(uriStr); err != nil {
+            return nil, err
+        }
+
+        rawValues = append(rawValues, asn1.RawValue{Tag: nameTypeURI, Class: 2, Bytes: []byte(uriStr)})
+    }
+
     return asn1.Marshal(rawValues)
 }
 
@@ -1675,10 +1720,10 @@ func buildExtensions(template *Certificate) (ret []pkix.Extension, err error) {
         n++
     }
 
-    if (len(template.DNSNames) > 0 || len(template.EmailAddresses) > 0 || len(template.IPAddresses) > 0) &&
+    if (len(template.DNSNames) > 0 || len(template.EmailAddresses) > 0 || len(template.IPAddresses) > 0 || len(template.URIs) > 0) &&
         !oidInExtensions(oidExtensionSubjectAltName, template.ExtraExtensions) {
         ret[n].Id = oidExtensionSubjectAltName
-        ret[n].Value, err = marshalSANs(template.DNSNames, template.EmailAddresses, template.IPAddresses)
+        ret[n].Value, err = marshalSANs(template.DNSNames, template.EmailAddresses, template.IPAddresses, template.URIs)
         if err != nil {
             return
         }
@@ -1699,19 +1744,100 @@ func buildExtensions(template *Certificate) (ret []pkix.Extension, err error) {
         n++
     }
 
-    if len(template.PermittedDNSDomains) > 0 &&
+    if (len(template.PermittedDNSDomains) > 0 || len(template.ExcludedDNSDomains) > 0 ||
+        len(template.PermittedIPRanges) > 0 || len(template.ExcludedIPRanges) > 0 ||
+        len(template.PermittedEmailAddresses) > 0 || len(template.ExcludedEmailAddresses) > 0 ||
+        len(template.PermittedURIDomains) > 0 || len(template.ExcludedURIDomains) > 0) &&
         !oidInExtensions(oidExtensionNameConstraints, template.ExtraExtensions) {
         ret[n].Id = oidExtensionNameConstraints
         ret[n].Critical = template.PermittedDNSDomainsCritical
 
-        var out nameConstraints
-        out.Permitted = make([]generalSubtree, len(template.PermittedDNSDomains))
-        for i, permitted := range template.PermittedDNSDomains {
-            out.Permitted[i] = generalSubtree{Name: permitted}
+        ipAndMask := func(ipNet *net.IPNet) []byte {
+            maskedIP := ipNet.IP.Mask(ipNet.Mask)
+            ipAndMask := make([]byte, 0, len(maskedIP)+len(ipNet.Mask))
+            ipAndMask = append(ipAndMask, maskedIP...)
+            ipAndMask = append(ipAndMask, ipNet.Mask...)
+            return ipAndMask
         }
-        ret[n].Value, err = asn1.Marshal(out)
+
+        serialiseConstraints := func(dns []string, ips []*net.IPNet, emails []string, uriDomains []string) (der []byte, err error) {
+            var b cryptobyte.Builder
+
+            for _, name := range dns {
+                if err = isIA5String(name); err != nil {
+                    return nil, err
+                }
+
+                b.AddASN1(cryptobyte_asn1.SEQUENCE, func(b *cryptobyte.Builder) {
+                    b.AddASN1(cryptobyte_asn1.Tag(2).ContextSpecific(), func(b *cryptobyte.Builder) {
+                        b.AddBytes([]byte(name))
+                    })
+                })
+            }
+
+            for _, ipNet := range ips {
+                b.AddASN1(cryptobyte_asn1.SEQUENCE, func(b *cryptobyte.Builder) {
+                    b.AddASN1(cryptobyte_asn1.Tag(7).ContextSpecific(), func(b *cryptobyte.Builder) {
+                        b.AddBytes(ipAndMask(ipNet))
+                    })
+                })
+            }
+
+            for _, email := range emails {
+                if err = isIA5String(email); err != nil {
+                    return nil, err
+                }
+
+                b.AddASN1(cryptobyte_asn1.SEQUENCE, func(b *cryptobyte.Builder) {
+                    b.AddASN1(cryptobyte_asn1.Tag(1).ContextSpecific(), func(b *cryptobyte.Builder) {
+                        b.AddBytes([]byte(email))
+                    })
+                })
+            }
+
+            for _, uriDomain := range uriDomains {
+                if err = isIA5String(uriDomain); err != nil {
+                    return nil, err
+                }
+
+                b.AddASN1(cryptobyte_asn1.SEQUENCE, func(b *cryptobyte.Builder) {
+                    b.AddASN1(cryptobyte_asn1.Tag(6).ContextSpecific(), func(b *cryptobyte.Builder) {
+                        b.AddBytes([]byte(uriDomain))
+                    })
+                })
+            }
+
+            return b.Bytes()
+        }
+
+        permitted, err := serialiseConstraints(template.PermittedDNSDomains, template.PermittedIPRanges, template.PermittedEmailAddresses, template.PermittedURIDomains)
         if err != nil {
-            return
+            return nil, err
+        }
+
+        excluded, err := serialiseConstraints(template.ExcludedDNSDomains, template.ExcludedIPRanges, template.ExcludedEmailAddresses, template.ExcludedURIDomains)
+        if err != nil {
+            return nil, err
+        }
+
+        var b cryptobyte.Builder
+        b.AddASN1(cryptobyte_asn1.SEQUENCE, func(b *cryptobyte.Builder) {
+            if len(permitted) > 0 {
+                b.AddASN1(cryptobyte_asn1.Tag(0).ContextSpecific().Constructed(), func(b *cryptobyte.Builder) {
+                    b.AddBytes(permitted)
+                })
+            }
+
+            if len(excluded) > 0 {
+                b.AddASN1(cryptobyte_asn1.Tag(1).ContextSpecific().Constructed(), func(b *cryptobyte.Builder) {
+                    b.AddBytes(excluded)
+                })
+            }
+        })
+
+        ret[n].Value, err = b.Bytes()
+        if err != nil {
+            return nil, err
         }
         n++
     }
@@ -1760,61 +1886,61 @@ func signingParamsForPublicKey(pub any, requestedSigAlgo SignatureAlgorithm) (ha
     var pubType PublicKeyAlgorithm
 
     switch pub := pub.(type) {
-    case *rsa.PublicKey:
-        pubType = RSA
-        hashFunc = SHA256
-        sigAlgo.Algorithm = oidSignatureSHA256WithRSA
-        sigAlgo.Parameters = asn1.RawValue{
-            Tag: 5,
-        }
-
-    case *ecdsa.PublicKey:
-        pubType = ECDSA
-        switch pub.Curve {
-        case elliptic.P224(), elliptic.P256():
+        case *rsa.PublicKey:
+            pubType = RSA
             hashFunc = SHA256
-            sigAlgo.Algorithm = oidSignatureECDSAWithSHA256
-        case elliptic.P384():
-            hashFunc = SHA384
-            sigAlgo.Algorithm = oidSignatureECDSAWithSHA384
-        case elliptic.P521():
-            hashFunc = SHA512
-            sigAlgo.Algorithm = oidSignatureECDSAWithSHA512
-        default:
-            err = errors.New("x509: unknown elliptic curve")
-        }
-    case ed25519.PublicKey:
-        pubType = Ed25519
-        hashFunc = Hash(0)
-        sigAlgo.Algorithm = oidSignatureEd25519
-    case *sm2.PublicKey:
-        pubType = ECDSA
-        switch pub.Curve {
-            case sm2.P256():
-                hashFunc = SM3
-                sigAlgo.Algorithm = oidSignatureSM2WithSM3
-            default:
-                err = errors.New("x509: unknown SM2 curve")
-        }
-    case *gost.PublicKey:
-        pubType = GOST3410
-        hashAlgo, _ := gost.HashOidFromNamedCurve(pub.Curve)
-        switch {
-        case hashAlgo.Equal(oidGostCryptoProDigestA):
-            hashFunc = GOST34112001
-            sigAlgo.Algorithm = oidSignatureGOST3410WithGOST3411
-        case hashAlgo.Equal(oidGost2012Digest256):
-            hashFunc = GOST34112012256
-            sigAlgo.Algorithm = oidSignatureGOST3410WithGOST34112012256
-        case hashAlgo.Equal(oidGost2012Digest512):
-            hashFunc = GOST34112012512
-            sigAlgo.Algorithm = oidSignatureGOST3410WithGOST34112012512
-        default:
-            err = errors.New("x509: unknown GOST3410 curve")
-        }
+            sigAlgo.Algorithm = oidSignatureSHA256WithRSA
+            sigAlgo.Parameters = asn1.RawValue{
+                Tag: 5,
+            }
 
-    default:
-        err = errors.New("x509: only RSA, SM2, GOST3410 and ECDSA keys supported")
+        case *ecdsa.PublicKey:
+            pubType = ECDSA
+            switch pub.Curve {
+            case elliptic.P224(), elliptic.P256():
+                hashFunc = SHA256
+                sigAlgo.Algorithm = oidSignatureECDSAWithSHA256
+            case elliptic.P384():
+                hashFunc = SHA384
+                sigAlgo.Algorithm = oidSignatureECDSAWithSHA384
+            case elliptic.P521():
+                hashFunc = SHA512
+                sigAlgo.Algorithm = oidSignatureECDSAWithSHA512
+            default:
+                err = errors.New("x509: unknown elliptic curve")
+            }
+        case ed25519.PublicKey:
+            pubType = Ed25519
+            hashFunc = Hash(0)
+            sigAlgo.Algorithm = oidSignatureEd25519
+        case *sm2.PublicKey:
+            pubType = ECDSA
+            switch pub.Curve {
+                case sm2.P256():
+                    hashFunc = SM3
+                    sigAlgo.Algorithm = oidSignatureSM2WithSM3
+                default:
+                    err = errors.New("x509: unknown SM2 curve")
+            }
+        case *gost.PublicKey:
+            pubType = GOST3410
+            hashAlgo, _ := gost.HashOidFromNamedCurve(pub.Curve)
+            switch {
+            case hashAlgo.Equal(oidGostCryptoProDigestA):
+                hashFunc = GOST34112001
+                sigAlgo.Algorithm = oidSignatureGOST3410WithGOST3411
+            case hashAlgo.Equal(oidGost2012Digest256):
+                hashFunc = GOST34112012256
+                sigAlgo.Algorithm = oidSignatureGOST3410WithGOST34112012256
+            case hashAlgo.Equal(oidGost2012Digest512):
+                hashFunc = GOST34112012512
+                sigAlgo.Algorithm = oidSignatureGOST3410WithGOST34112012512
+            default:
+                err = errors.New("x509: unknown GOST3410 curve")
+            }
+
+        default:
+            err = errors.New("x509: only RSA, SM2, GOST3410 and ECDSA keys supported")
     }
 
     if err != nil {
@@ -1948,14 +2074,14 @@ func (c *Certificate) CreateCRL(rand io.Reader, priv any, revokedCerts []pkix.Re
 
     digest := tbsCertListContents
     switch hashFunc {
-    case Hash(0):
-        break
-    case SM3:
-        break
-    default:
-        h := hashFunc.New()
-        h.Write(tbsCertListContents)
-        digest = h.Sum(nil)
+        case Hash(0):
+            break
+        case SM3:
+            break
+        default:
+            h := hashFunc.New()
+            h.Write(tbsCertListContents)
+            digest = h.Sum(nil)
     }
 
     var signature []byte
@@ -2008,6 +2134,7 @@ type CertificateRequest struct {
     DNSNames       []string
     EmailAddresses []string
     IPAddresses    []net.IP
+    URIs           []*url.URL
 }
 
 // These structures reflect the ASN.1 structure of X.509 certificate
@@ -2128,9 +2255,9 @@ func CreateCertificateRequest(rand io.Reader, template *CertificateRequest, priv
 
     var extensions []pkix.Extension
 
-    if (len(template.DNSNames) > 0 || len(template.EmailAddresses) > 0 || len(template.IPAddresses) > 0) &&
+    if (len(template.DNSNames) > 0 || len(template.EmailAddresses) > 0 || len(template.IPAddresses) > 0 || len(template.URIs) > 0) &&
         !oidInExtensions(oidExtensionSubjectAltName, template.ExtraExtensions) {
-        sanBytes, err := marshalSANs(template.DNSNames, template.EmailAddresses, template.IPAddresses)
+        sanBytes, err := marshalSANs(template.DNSNames, template.EmailAddresses, template.IPAddresses, template.URIs)
         if err != nil {
             return nil, err
         }
@@ -2313,7 +2440,7 @@ func parseCertificateRequest(in *certificateRequest) (*CertificateRequest, error
 
     for _, extension := range out.Extensions {
         if extension.Id.Equal(oidExtensionSubjectAltName) {
-            out.DNSNames, out.EmailAddresses, out.IPAddresses, err = parseSANExtension(extension.Value)
+            out.DNSNames, out.EmailAddresses, out.IPAddresses, out.URIs, err = parseSANExtension(extension.Value)
             if err != nil {
                 return nil, err
             }
@@ -2453,7 +2580,7 @@ func (c *Certificate) FromX509Certificate(x509Cert *x509.Certificate) {
 //
 // All keys types that are implemented via crypto.Signer are supported (This
 // includes *rsa.PublicKey and *ecdsa.PublicKey.)
-func CreateCertificate(template, parent *Certificate, publicKey any, priv any) ([]byte, error) {
+func CreateCertificate(rand io.Reader, template, parent *Certificate, publicKey any, priv any) ([]byte, error) {
     signer, ok := priv.(crypto.Signer)
     if !ok {
         return nil, errors.New("x509: certificate private key does not implement crypto.Signer")
@@ -2532,7 +2659,7 @@ func CreateCertificate(template, parent *Certificate, publicKey any, priv any) (
     }
 
     var signature []byte
-    signature, err = signer.Sign(rand.Reader, digest, signerOpts)
+    signature, err = signer.Sign(rand, digest, signerOpts)
     if err != nil {
         return nil, err
     }

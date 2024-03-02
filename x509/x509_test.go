@@ -150,7 +150,7 @@ func Test_RSA(t *testing.T) {
     }
 
     pubKey, _ = priv.Public().(*rsa.PublicKey)
-    certpem, err := CreateCertificate(&template, &template, pubKey, priv)
+    certpem, err := CreateCertificate(rand.Reader, &template, &template, pubKey, priv)
     if err != nil {
         t.Fatal("failed to create cert file")
     }
@@ -276,7 +276,7 @@ func Test_ECDSA(t *testing.T) {
     }
 
     pubKey, _ = priv.Public().(*ecdsa.PublicKey)
-    certpem, err := CreateCertificate(&template, &template, pubKey, priv)
+    certpem, err := CreateCertificate(rand.Reader, &template, &template, pubKey, priv)
     if err != nil {
         t.Fatal("failed to create cert file")
     }
@@ -400,7 +400,7 @@ func Test_Ed25519(t *testing.T) {
         },
     }
 
-    certpem, err := CreateCertificate(&template, &template, pubKey, priv)
+    certpem, err := CreateCertificate(rand.Reader, &template, &template, pubKey, priv)
     if err != nil {
         t.Fatal("failed to create cert file")
     }
@@ -540,7 +540,7 @@ func Test_SM2(t *testing.T) {
     }
 
     pubKey, _ = priv.Public().(*sm2.PublicKey)
-    certpem, err := CreateCertificate(&template, &template, pubKey, privKey)
+    certpem, err := CreateCertificate(rand.Reader, &template, &template, pubKey, privKey)
     if err != nil {
         t.Fatal("failed to create cert file")
     }
@@ -678,7 +678,7 @@ func Test_Gost(t *testing.T) {
     }
 
     pubKey, _ = priv.Public().(*gost.PublicKey)
-    certpem, err := CreateCertificate(&template, &template, pubKey, privKey)
+    certpem, err := CreateCertificate(rand.Reader, &template, &template, pubKey, privKey)
     if err != nil {
         t.Fatal("failed to create cert file: " + err.Error())
     }

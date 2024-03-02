@@ -23,14 +23,6 @@ import (
     "github.com/deatil/go-cryptobin/hash/gost/gost34112012512"
 )
 
-var newGOST34112001 = func() hash.Hash {
-    return gost341194.New(func(key []byte) cipher.Block {
-        cip, _ := cipher_gost.NewCipher(key, cipher_gost.SboxGostR341194CryptoProParamSet)
-
-        return cip
-    })
-}
-
 type Hash uint
 
 // HashFunc simply returns the value of h so that Hash implements SignerOpts.
@@ -202,6 +194,14 @@ var (
         h, _ := blake2b.New512(nil)
         return h
     }
+
+    newHashGOST34112001 = func() hash.Hash {
+        return gost341194.New(func(key []byte) cipher.Block {
+            cip, _ := cipher_gost.NewCipher(key, cipher_gost.SboxGostR341194CryptoProParamSet)
+
+            return cip
+        })
+    }
 )
 
 func init() {
@@ -227,7 +227,7 @@ func init() {
     RegisterHash(BLAKE2b_512, newHashBlake2b_512)
 
     RegisterHash(SM3, sm3.New)
-    RegisterHash(GOST34112001, newGOST34112001)
+    RegisterHash(GOST34112001, newHashGOST34112001)
     RegisterHash(GOST34112012256, gost34112012256.New)
     RegisterHash(GOST34112012512, gost34112012512.New)
 }

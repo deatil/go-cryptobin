@@ -761,7 +761,7 @@ func (c *Certificate) Verify(opts VerifyOptions) (chains [][]*Certificate, err e
     if runtime.GOOS == "windows" || runtime.GOOS == "darwin" || runtime.GOOS == "ios" {
         // Don't use the system verifier if the system pool was replaced with a non-system pool,
         // i.e. if SetFallbackRoots was called with x509usefallbackroots=1.
-        systemPool, _ := SystemCertPool()
+        systemPool := systemRootsPool()
         if opts.Roots == nil && (systemPool == nil || systemPool.systemPool) {
             return c.systemVerify(&opts)
         }
@@ -777,10 +777,9 @@ func (c *Certificate) Verify(opts VerifyOptions) (chains [][]*Certificate, err e
     }
 
     if opts.Roots == nil {
-        var err error
-        opts.Roots, err = SystemCertPool()
+        opts.Roots = systemRootsPool()
         if opts.Roots == nil {
-            return nil, SystemRootsError{err}
+            return nil, SystemRootsError{systemRootsErr}
         }
     }
 

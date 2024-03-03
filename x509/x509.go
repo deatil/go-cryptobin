@@ -1075,10 +1075,10 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
                 return rsa.VerifyPSS(pub, crypto.Hash(hashType), fnHash(), signature, &rsa.PSSOptions{SaltLength: rsa.PSSSaltLengthEqualsHash})
             } else {
                 var cHash crypto.Hash
-                if hashType == SM3 {
-                    cHash = crypto.Hash(0)
-                } else {
+                if isRSASigHash(crypto.Hash(hashType)) {
                     cHash = crypto.Hash(hashType)
+                } else {
+                    cHash = crypto.Hash(0)
                 }
 
                 return rsa.VerifyPKCS1v15(pub, cHash, fnHash(), signature)

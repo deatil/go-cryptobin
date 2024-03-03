@@ -4,6 +4,7 @@ import (
     "fmt"
     "errors"
     "unicode"
+    "crypto"
     "crypto/rsa"
     "crypto/ecdsa"
     "crypto/elliptic"
@@ -88,4 +89,20 @@ func isValidIPMask(mask []byte) bool {
     }
 
     return true
+}
+
+func isRSASigHash(h crypto.Hash) bool {
+    switch h {
+        case crypto.MD5,
+            crypto.SHA1,
+            crypto.SHA224,
+            crypto.SHA256,
+            crypto.SHA384,
+            crypto.SHA512,
+            crypto.MD5SHA1,
+            crypto.RIPEMD160:
+            return true
+        default:
+            return false
+    }
 }

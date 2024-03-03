@@ -310,10 +310,10 @@ const (
     SHA384WithRSAPSS
     SHA512WithRSAPSS
     PureEd25519
-    // SM3WithRSA
     SM2WithSM3
     SM2WithSHA1
     SM2WithSHA256
+    SM3WithRSA
     GOST3410WithGOST34112001
     GOST3410WithGOST34112012256
     GOST3410WithGOST34112012512
@@ -332,7 +332,6 @@ var algoName = [...]string{
     MD2WithRSA:  "MD2-RSA",
     MD5WithRSA:  "MD5-RSA",
     SHA1WithRSA: "SHA1-RSA",
-    //	SM3WithRSA:       "SM3-RSA", reserve
     SHA256WithRSA:    "SHA256-RSA",
     SHA384WithRSA:    "SHA384-RSA",
     SHA512WithRSA:    "SHA512-RSA",
@@ -349,6 +348,7 @@ var algoName = [...]string{
     SM2WithSM3:       "SM2-SM3",
     SM2WithSHA1:      "SM2-SHA1",
     SM2WithSHA256:    "SM2-SHA256",
+    SM3WithRSA:       "SM3-RSA",
     GOST3410WithGOST34112001:    "GOST3410-GOST34112001",
     GOST3410WithGOST34112012256: "GOST3410-GOST34112012256",
     GOST3410WithGOST34112012512: "GOST3410-GOST34112012512",
@@ -442,7 +442,7 @@ var (
     oidSignatureSM2WithSM3      = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 501}
     oidSignatureSM2WithSHA1     = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 502}
     oidSignatureSM2WithSHA256   = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 503}
-    // oidSignatureSM3WithRSA      = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 504}
+    oidSignatureSM3WithRSA      = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 504}
 
     oidSignatureGOST3410WithGOST3411        = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 3}
     oidSignatureGOST3410WithGOST34112012256 = asn1.ObjectIdentifier{1, 2, 643, 7, 1, 1, 3, 2}
@@ -489,10 +489,10 @@ var signatureAlgorithmDetails = []struct {
     {ECDSAWithSHA384, oidSignatureECDSAWithSHA384, ECDSA, SHA384},
     {ECDSAWithSHA512, oidSignatureECDSAWithSHA512, ECDSA, SHA512},
     {PureEd25519, oidSignatureEd25519, Ed25519, Hash(0)},
-    // {SM3WithRSA, oidSignatureSM3WithRSA, RSA, SM3},
     {SM2WithSM3, oidSignatureSM2WithSM3, ECDSA, SM3},
     {SM2WithSHA1, oidSignatureSM2WithSHA1, ECDSA, SHA1},
     {SM2WithSHA256, oidSignatureSM2WithSHA256, ECDSA, SHA256},
+    {SM3WithRSA, oidSignatureSM3WithRSA, RSA, SM3},
     {GOST3410WithGOST34112001, oidSignatureGOST3410WithGOST3411, GOST3410, GOST34112001},
     {GOST3410WithGOST34112012256, oidSignatureGOST3410WithGOST34112012256, GOST3410, GOST34112012256},
     {GOST3410WithGOST34112012512, oidSignatureGOST3410WithGOST34112012512, GOST3410, GOST34112012512},
@@ -1041,7 +1041,7 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
             return InsecureAlgorithmError(algo)
         case PureEd25519:
             hashType = Hash(0)
-        case SM2WithSM3: // SM3WithRSA reserve
+        case SM2WithSM3, SM3WithRSA:
             hashType = SM3
         case GOST3410WithGOST34112001:
             hashType = GOST34112001
@@ -1074,7 +1074,14 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
             if algo.isRSAPSS() {
                 return rsa.VerifyPSS(pub, crypto.Hash(hashType), fnHash(), signature, &rsa.PSSOptions{SaltLength: rsa.PSSSaltLengthEqualsHash})
             } else {
-                return rsa.VerifyPKCS1v15(pub, crypto.Hash(hashType), fnHash(), signature)
+                var cHash crypto.Hash
+                if hashType == SM3 {
+                    cHash = crypto.Hash(0)
+                } else {
+                    cHash = crypto.Hash(hashType)
+                }
+
+                return rsa.VerifyPKCS1v15(pub, cHash, fnHash(), signature)
             }
         case *dsa.PublicKey:
             dsaSig := new(dsaSignature)
@@ -2109,14 +2116,14 @@ func (c *Certificate) CreateCRL(rand io.Reader, priv any, revokedCerts []pkix.Re
 
     digest := tbsCertListContents
     switch hashFunc {
-        case Hash(0):
-            break
         case SM3:
             break
         default:
-            h := hashFunc.New()
-            h.Write(tbsCertListContents)
-            digest = h.Sum(nil)
+            if hashFunc != 0 {
+                h := hashFunc.New()
+                h.Write(tbsCertListContents)
+                digest = h.Sum(nil)
+            }
     }
 
     var signature []byte
@@ -2428,10 +2435,23 @@ func CreateCertificateRequest(rand io.Reader, template *CertificateRequest, priv
             }
     }
 
+    var signerOpts crypto.SignerOpts
+    signerOpts = hashFunc
+    if template.SignatureAlgorithm != 0 && template.SignatureAlgorithm.isRSAPSS() {
+        signerOpts = &rsa.PSSOptions{
+            SaltLength: rsa.PSSSaltLengthEqualsHash,
+            Hash:       crypto.Hash(hashFunc),
+        }
+    }
+
+    if !isRSASigHash(crypto.Hash(hashFunc)) {
+        signerOpts = crypto.Hash(0)
+    }
+
     var signature []byte
     switch signer := priv.(type) {
         case crypto.Signer:
-            signature, err = signer.Sign(rand, digest, hashFunc)
+            signature, err = signer.Sign(rand, digest, signerOpts)
             if err != nil {
                 return nil, err
             }
@@ -2733,6 +2753,10 @@ func CreateCertificate(rand io.Reader, template, parent *Certificate, publicKey 
             SaltLength: rsa.PSSSaltLengthEqualsHash,
             Hash:       crypto.Hash(hashFunc),
         }
+    }
+
+    if !isRSASigHash(crypto.Hash(hashFunc)) {
+        signerOpts = crypto.Hash(0)
     }
 
     var signature []byte

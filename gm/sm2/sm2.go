@@ -2,6 +2,7 @@ package sm2
 
 import (
     "io"
+    "hash"
     "bytes"
     "errors"
     "math/big"
@@ -9,9 +10,11 @@ import (
     "crypto/rand"
     "crypto/subtle"
     "crypto/elliptic"
+    "crypto/sha256"
     "encoding/binary"
 
     "github.com/deatil/go-cryptobin/hash/sm3"
+    "github.com/deatil/go-cryptobin/kdf/smkdf"
     "github.com/deatil/go-cryptobin/gm/sm2/sm2curve"
 )
 
@@ -350,10 +353,7 @@ func encrypt(random io.Reader, pub *PublicKey, data []byte) ([]byte, error) {
         c = append(c, h...)
 
         // 生成密钥 / make key
-        ct, ok := kdf(length, x2Buf, y2Buf)
-        if !ok {
-            continue
-        }
+        ct := smkdf.Key(sm3.New, append(x2Buf, y2Buf...), length)
 
         // 生成密文 / make encrypt data
         subtle.XORBytes(ct, ct, data)
@@ -385,10 +385,7 @@ func decrypt(priv *PrivateKey, data []byte) ([]byte, error) {
     length := len(data)
 
     // 生成密钥 / make key
-    c, ok := kdf(length, x2Buf, y2Buf)
-    if !ok {
-        return nil, errors.New("cryptobin/sm2: failed to decrypt")
-    }
+    c := smkdf.Key(sm3.New, append(x2Buf, y2Buf...), length)
 
     // 解密密文 / decrypt data
     subtle.XORBytes(c, c, data)
@@ -407,6 +404,7 @@ func decrypt(priv *PrivateKey, data []byte) ([]byte, error) {
     return c, nil
 }
 
+// sm2 sign
 func Sign(random io.Reader, priv *PrivateKey, hash []byte) (r, s *big.Int, err error) {
     e := new(big.Int).SetBytes(hash)
     curve := priv.PublicKey.Curve
@@ -455,6 +453,7 @@ func Sign(random io.Reader, priv *PrivateKey, hash []byte) (r, s *big.Int, err e
     return
 }
 
+// sm2 verify
 func Verify(pub *PublicKey, hash []byte, r, s *big.Int) bool {
     curve := pub.Curve
     N := curve.Params().N
@@ -486,6 +485,7 @@ func Verify(pub *PublicKey, hash []byte, r, s *big.Int) bool {
     return x.Cmp(r) == 0
 }
 
+// sm2 sign with sm3
 func SignWithSM2(random io.Reader, priv *PrivateKey, msg, uid []byte) (r, s *big.Int, err error) {
     hash, err := CalculateSM2Hash(&priv.PublicKey, msg, uid)
     if err != nil {
@@ -495,6 +495,7 @@ func SignWithSM2(random io.Reader, priv *PrivateKey, msg, uid []byte) (r, s *big
     return Sign(random, priv, hash)
 }
 
+// sm2 verify with sm3
 func VerifyWithSM2(pub *PublicKey, msg, uid []byte, r, s *big.Int) bool {
     hash, err := CalculateSM2Hash(pub, msg, uid)
     if err != nil {
@@ -504,25 +505,54 @@ func VerifyWithSM2(pub *PublicKey, msg, uid []byte, r, s *big.Int) bool {
     return Verify(pub, hash, r, s)
 }
 
+// sm2 sign with Sha256
+func SignSha256WithSM2(random io.Reader, priv *PrivateKey, msg, uid []byte) (r, s *big.Int, err error) {
+    hash, err := calculateDigestHash(sha256.New, &priv.PublicKey, msg, uid)
+    if err != nil {
+        return nil, nil, err
+    }
+
+    return Sign(random, priv, hash)
+}
+
+// sm2 verify with Sha256
+func VerifySha256WithSM2(pub *PublicKey, msg, uid []byte, r, s *big.Int) bool {
+    hash, err := calculateDigestHash(sha256.New, pub, msg, uid)
+    if err != nil {
+        return false
+    }
+
+    return Verify(pub, hash, r, s)
+}
+
+// CalculateSM2Hash
 func CalculateSM2Hash(pub *PublicKey, msg, uid []byte) ([]byte, error) {
+    return calculateDigestHash(sm3.New, pub, msg, uid)
+}
+
+// CalculateZA ZA = H256(ENTLA || IDA || a || b || xG || yG || xA || yA)
+func CalculateZA(pub *PublicKey, uid []byte) ([]byte, error) {
+    return calculateZA(sm3.New, pub, uid)
+}
+
+func calculateDigestHash(h func() hash.Hash, pub *PublicKey, msg, uid []byte) ([]byte, error) {
     if len(uid) == 0 {
         uid = defaultUID
     }
 
-    za, err := CalculateZA(pub, uid)
+    za, err := calculateZA(h, pub, uid)
     if err != nil {
         return nil, err
     }
 
-    md := sm3.New()
+    md := h()
     md.Write(za)
     md.Write(msg)
 
     return md.Sum(nil), nil
 }
 
-// CalculateZA ZA = H256(ENTLA || IDA || a || b || xG || yG || xA || yA)
-func CalculateZA(pub *PublicKey, uid []byte) ([]byte, error) {
+func calculateZA(h func() hash.Hash, pub *PublicKey, uid []byte) ([]byte, error) {
     uidLen := len(uid)
     if uidLen >= 8192 {
         return []byte{}, errors.New("cryptobin/sm2: uid too large")
@@ -530,7 +560,7 @@ func CalculateZA(pub *PublicKey, uid []byte) ([]byte, error) {
 
     entla := uint16(8 * uidLen)
 
-    md := sm3.New()
+    md := h()
     md.Write([]byte{byte((entla >> 8) & 0xFF)})
     md.Write([]byte{byte(entla & 0xFF)})
 
@@ -575,39 +605,6 @@ func randFieldElement(curve elliptic.Curve, random io.Reader) (k *big.Int, err e
     k.Add(k, one)
 
     return
-}
-
-func kdf(length int, x ...[]byte) ([]byte, bool) {
-    var c []byte
-
-    ct := 1
-    h := sm3.New()
-
-    for i, j := 0, (length+31)/32; i < j; i++ {
-        h.Reset()
-        for _, xx := range x {
-            h.Write(xx)
-        }
-
-        h.Write(intToBytes(ct))
-
-        hash := h.Sum(nil)
-        if i+1 == j && length%32 != 0 {
-            c = append(c, hash[:length%32]...)
-        } else {
-            c = append(c, hash...)
-        }
-
-        ct++
-    }
-
-    for i := 0; i < length; i++ {
-        if c[i] != 0 {
-            return c, true
-        }
-    }
-
-    return c, false
 }
 
 func intToBytes(x int) []byte {

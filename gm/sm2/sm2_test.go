@@ -469,3 +469,29 @@ func Test_Encrypt_Check2(t *testing.T) {
         t.Errorf("Encrypt_Check2 DecryptAsn1 error: got %s, want %s", string(dedata), string(msg))
     }
 }
+
+func Test_SignSha256WithSM2(t *testing.T) {
+    priv, err := sm2.GenerateKey(rand.Reader)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pub := &priv.PublicKey
+
+    var defaultUID = []byte{
+        0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+        0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+    }
+
+    msg := []byte("test-passstest-passstest-passstest-passstest-passstest-passstest-passstest-passs")
+
+    r, s, err := sm2.SignSha256WithSM2(rand.Reader, priv, msg, defaultUID)
+    if err != nil {
+        t.Error(err)
+    }
+
+    veri := sm2.VerifySha256WithSM2(pub, msg, defaultUID, r, s)
+    if !veri {
+        t.Error("veri error")
+    }
+}

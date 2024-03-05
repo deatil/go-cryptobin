@@ -224,7 +224,7 @@ func Test_Check_Openssl_Gost_Prikey(t *testing.T) {
     // t.Error(prikeyPem)
 }
 
-var Openssl_Gost_PrikeyWithAttrs = `
+var Gost_PrikeyWithAttrs = `
 -----BEGIN PRIVATE KEY-----
 MIGiAgEAMCEGCCqFAwcBAQECMBUGCSqFAwcBAgECAQYIKoUDBwEBAgMEQIXnWrZ6
 ajvbCU6x9jK49PgQqCP00T/lW3laXCXueMF8X4Q1y3N9zfOJT2s/IgyPJVrUhgtO
@@ -233,8 +233,8 @@ p/diI7Cg8ig4mXg3tsIUf4vBi61b
 -----END PRIVATE KEY-----
 `
 
-func Test_Check_Openssl_Gost_PrikeyWithAttrs(t *testing.T) {
-    pri := decodePEM(Openssl_Gost_PrikeyWithAttrs)
+func Test_Check_Gost_PrikeyWithAttrs(t *testing.T) {
+    pri := decodePEM(Gost_PrikeyWithAttrs)
     if len(pri) == 0 {
         t.Error("decodePEM prikey empty")
     }

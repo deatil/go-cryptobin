@@ -22,6 +22,7 @@ type pkcs8 struct {
     Version    int
     Algo       pkix.AlgorithmIdentifier
     PrivateKey []byte
+    Attributes []asn1.RawValue `asn1:"optional,tag:0"`
 }
 
 type sm9PrivateKey struct {

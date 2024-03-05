@@ -43,6 +43,7 @@ const (
     C1C2C3
 )
 
+// Encrypter Opts
 type EncrypterOpts struct {
     Mode Mode
     Hash hashFunc
@@ -65,6 +66,7 @@ func (this EncrypterOpts) GetHash() hashFunc {
     return sm3.New
 }
 
+// Signer Opts
 type SignerOpts struct {
     Uid  []byte
     Hash hashFunc
@@ -103,11 +105,13 @@ var (
     }
 )
 
+// SM2 PublicKey
 type PublicKey struct {
     elliptic.Curve
     X, Y *big.Int
 }
 
+// Equal reports whether pub and x have the same value.
 func (pub *PublicKey) Equal(x crypto.PublicKey) bool {
     xx, ok := x.(*PublicKey)
     if !ok {
@@ -144,14 +148,17 @@ func (pub *PublicKey) VerifyBytes(msg []byte, sign []byte, opts crypto.SignerOpt
     return VerifyWithOpts(pub, msg, r, s, opts)
 }
 
+// Encrypt with bytes
 func (pub *PublicKey) Encrypt(random io.Reader, data []byte, opts crypto.DecrypterOpts) ([]byte, error) {
     return Encrypt(random, pub, data, opts)
 }
 
+// Encrypt with ASN1
 func (pub *PublicKey) EncryptASN1(random io.Reader, data []byte, opts crypto.DecrypterOpts) ([]byte, error) {
     return EncryptASN1(random, pub, data, opts)
 }
 
+// SM2 PrivateKey
 type PrivateKey struct {
     PublicKey
     D *big.Int
@@ -207,6 +214,7 @@ func (priv *PrivateKey) Decrypt(_ io.Reader, msg []byte, opts crypto.DecrypterOp
     return Decrypt(priv, msg, opts)
 }
 
+// Decrypt with ASN1
 func (priv *PrivateKey) DecryptASN1(data []byte, opts crypto.DecrypterOpts) ([]byte, error) {
     return DecryptASN1(priv, data, opts)
 }
@@ -288,7 +296,7 @@ func Encrypt(random io.Reader, pub *PublicKey, data []byte, opts crypto.Decrypte
         opt = o
     }
 
-    ct, err := encrypt(random, pub, opt.GetHash(), data)
+    ct, err := encrypt(random, pub, data, opt.GetHash())
     if err != nil {
         return nil, err
     }
@@ -313,7 +321,7 @@ func Decrypt(priv *PrivateKey, data []byte, opts crypto.DecrypterOpts) ([]byte, 
         return nil, err
     }
 
-    return decrypt(priv, opt.GetHash(), res)
+    return decrypt(priv, res, opt.GetHash())
 }
 
 // sm2 加密，返回 asn.1 编码格式的密文内容
@@ -324,7 +332,7 @@ func EncryptASN1(rand io.Reader, pub *PublicKey, data []byte, opts crypto.Decryp
         opt = o
     }
 
-    ct, err := encrypt(rand, pub, opt.GetHash(), data)
+    ct, err := encrypt(rand, pub, data, opt.GetHash())
     if err != nil {
         return nil, err
     }
@@ -341,15 +349,15 @@ func DecryptASN1(priv *PrivateKey, data []byte, opts crypto.DecrypterOpts) ([]by
     }
 
 
-    res, err := unmarshalCipherASN1(priv.Curve, data, opt.GetMode(), opt.GetHash())
+    res, err := unmarshalCipherASN1(priv.Curve, data, opt.GetMode())
     if err != nil {
         return nil, err
     }
 
-    return decrypt(priv, opt.GetHash(), res)
+    return decrypt(priv, res, opt.GetHash())
 }
 
-func encrypt(random io.Reader, pub *PublicKey, h hashFunc, data []byte) ([]byte, error) {
+func encrypt(random io.Reader, pub *PublicKey, data []byte, h hashFunc) ([]byte, error) {
     length := len(data)
 
     for {
@@ -394,7 +402,7 @@ func encrypt(random io.Reader, pub *PublicKey, h hashFunc, data []byte) ([]byte,
     }
 }
 
-func decrypt(priv *PrivateKey, h hashFunc, data []byte) ([]byte, error) {
+func decrypt(priv *PrivateKey, data []byte, h hashFunc) ([]byte, error) {
     curve := priv.Curve
 
     byteLen := (curve.Params().BitSize + 7) / 8

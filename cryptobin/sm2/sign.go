@@ -89,7 +89,7 @@ func (this SM2) VerifyBytes(data []byte) SM2 {
     }
 
     if len(this.data) != 64 {
-        err := errors.New("sig error.")
+        err := errors.New("sig data error.")
         return this.AppendError(err)
     }
 

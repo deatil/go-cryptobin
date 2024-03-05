@@ -578,7 +578,7 @@ jH2lTEple4quIBsSSl6aaiDmw3HDROEwj9bgO1chYAEWEVyhs1f3jEsdew==
 `
 
 func Test_EncryptSha1_Check(t *testing.T) {
-    blockPri := decodePEM(testPrikey2)
+    blockPri := decodePEM(testPrikey3)
     pri, err := sm2.ParsePrivateKey(blockPri.Bytes)
     if err != nil {
         t.Fatal(err)
@@ -603,7 +603,7 @@ func Test_EncryptSha1_Check(t *testing.T) {
 }
 
 func Test_EncryptSha256_Check(t *testing.T) {
-    blockPri := decodePEM(testPrikey2)
+    blockPri := decodePEM(testPrikey3)
     pri, err := sm2.ParsePrivateKey(blockPri.Bytes)
     if err != nil {
         t.Fatal(err)

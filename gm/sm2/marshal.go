@@ -107,14 +107,12 @@ func marshalCipherASN1(curve elliptic.Curve, data []byte, mode Mode, h hashFunc)
     return marshalCipherASN1New(curve, data, hashSize)
 }
 
-func unmarshalCipherASN1(curve elliptic.Curve, data []byte, mode Mode, h hashFunc) ([]byte, error) {
-    hashSize := h().Size()
-
+func unmarshalCipherASN1(curve elliptic.Curve, data []byte, mode Mode) ([]byte, error) {
     if mode == C1C2C3 {
-        return unmarshalCipherASN1Old(curve, data, hashSize)
+        return unmarshalCipherASN1Old(curve, data)
     }
 
-    return unmarshalCipherASN1New(curve, data, hashSize)
+    return unmarshalCipherASN1New(curve, data)
 }
 
 // c1c3c2 格式
@@ -140,7 +138,7 @@ func marshalCipherASN1New(curve elliptic.Curve, data []byte, hashSize int) ([]by
 }
 
 // sm2 密文 asn.1 编码格式转 C1|C3|C2 拼接格式
-func unmarshalCipherASN1New(curve elliptic.Curve, b []byte, hashSize int) ([]byte, error) {
+func unmarshalCipherASN1New(curve elliptic.Curve, b []byte) ([]byte, error) {
     var data cipherASN1New
     _, err := asn1.Unmarshal(b, &data)
     if err != nil {
@@ -182,7 +180,7 @@ func marshalCipherASN1Old(curve elliptic.Curve, data []byte, hashSize int) ([]by
 }
 
 // sm2 密文 asn.1 编码格式转 C1|C3|C2 拼接格式
-func unmarshalCipherASN1Old(curve elliptic.Curve, b []byte, hashSize int) ([]byte, error) {
+func unmarshalCipherASN1Old(curve elliptic.Curve, b []byte) ([]byte, error) {
     var data cipherASN1Old
     _, err := asn1.Unmarshal(b, &data)
     if err != nil {

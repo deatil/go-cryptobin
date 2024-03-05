@@ -2444,8 +2444,11 @@ func CreateCertificateRequest(rand io.Reader, template *CertificateRequest, priv
         }
     }
 
-    if !isRSASigHash(crypto.Hash(hashFunc)) {
-        signerOpts = crypto.Hash(0)
+    // when priv is rsa
+    if _, ok := priv.(*rsa.PrivateKey); ok {
+        if !isRSASigHash(crypto.Hash(hashFunc)) {
+            signerOpts = crypto.Hash(0)
+        }
     }
 
     var signature []byte
@@ -2755,8 +2758,11 @@ func CreateCertificate(rand io.Reader, template, parent *Certificate, publicKey 
         }
     }
 
-    if !isRSASigHash(crypto.Hash(hashFunc)) {
-        signerOpts = crypto.Hash(0)
+    // when priv is rsa
+    if _, ok := priv.(*rsa.PrivateKey); ok {
+        if !isRSASigHash(crypto.Hash(hashFunc)) {
+            signerOpts = crypto.Hash(0)
+        }
     }
 
     var signature []byte

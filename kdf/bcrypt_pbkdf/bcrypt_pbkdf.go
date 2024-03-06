@@ -28,9 +28,8 @@ func Key(password, salt []byte, rounds, keyLen int) ([]byte, error) {
     }
 
     var shapass, shasalt [sha512.Size]byte
-
-    out, tmp := make([]byte, 32), make([]byte, 32)
-    cnt := make([]byte, 4)
+    var out, tmp [32]byte
+    var cnt [4]byte
 
     numBlocks := (keyLen + len(out) - 1) / len(out)
     key := make([]byte, numBlocks*len(out))
@@ -43,18 +42,18 @@ func Key(password, salt []byte, rounds, keyLen int) ([]byte, error) {
         h.Reset()
         h.Write(salt)
 
-        binary.BigEndian.PutUint32(cnt, uint32(block))
-        h.Write(cnt)
+        binary.BigEndian.PutUint32(cnt[:], uint32(block))
+        h.Write(cnt[:])
 
-        bcryptHash(tmp, shapass[:], h.Sum(shasalt[:0]))
-        copy(out, tmp)
+        bcryptHash(tmp[:], shapass[:], h.Sum(shasalt[:0]))
+        copy(out[:], tmp[:])
 
         for i := 2; i <= rounds; i++ {
             h.Reset()
-            h.Write(tmp)
-            bcryptHash(tmp, shapass[:], h.Sum(shasalt[:0]))
+            h.Write(tmp[:])
+            bcryptHash(tmp[:], shapass[:], h.Sum(shasalt[:0]))
 
-            subtle.XORBytes(out, out, tmp)
+            subtle.XORBytes(out[:], out[:], tmp[:])
         }
 
         for i, v := range out {

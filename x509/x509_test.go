@@ -1166,3 +1166,57 @@ func Test_P12_Gost_222(t *testing.T) {
         // t.Fatal(err)
     }
 }
+
+var testSM2Cert = `
+-----BEGIN CERTIFICATE-----
+MIICTTCCAfOgAwIBAgIJAOWoGwJCndt2MAoGCCqBHM9VAYN1MGcxCzAJBgNVBAYT
+AkNOMRAwDgYDVQQIDAdCZWlqaW5nMRAwDgYDVQQHDAdIYWlEaWFuMRMwEQYDVQQK
+DApHTUNlcnQub3JnMR8wHQYDVQQDDBZHTUNlcnQgR00gUm9vdCBDQSAtIDAxMB4X
+DTI0MDEyNDA5MDAwMFoXDTI1MDEyMzA5MDAwMFowYjELMAkGA1UEBhMCNjYxCzAJ
+BgNVBAgMAjU1MQswCQYDVQQHDAI0NDELMAkGA1UEBwwCMzMxCzAJBgNVBAoMAjIy
+MQswCQYDVQQKDAIxMTESMBAGA1UEAwwJdGVzdF9OVUxMMFkwEwYHKoZIzj0CAQYI
+KoEcz1UBgi0DQgAEnA3ttWiJUt1tF0sEPALgYhevNXYSUa6lzJ4ZbGM8NQiHRlva
+bVrlmcLIG1l1byDo/trnduv5q0dQdFmfYihh2aOBjDCBiTAMBgNVHRMBAf8EAjAA
+MAsGA1UdDwQEAwIHgDAsBglghkgBhvhCAQ0EHxYdR01DZXJ0Lm9yZyBTaWduZWQg
+Q2VydGlmaWNhdGUwHQYDVR0OBBYEFLgpNzezd7Hs307jtoQXYGW3oQH3MB8GA1Ud
+IwQYMBaAFH9aXjsAhFkqD5i+oQ5vOZVDEE0HMAoGCCqBHM9VAYN1A0gAMEUCIQDh
+KwUL+a/JnoDf8cXaUkrty+t9f7H/Ob0ElI5ETcZHdAIgYHmgM/n3M5a04b+4wrna
+EUPf68vuiWz0EUndQSJ45zA=
+-----END CERTIFICATE-----
+`
+var testSM2Cert_PriKkey = `
+-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqBHM9VAYItBG0wawIBAQQgOa3ppbTLiG5kUG6n
+kubkr/0I+Ebivvodq9BaQYMpNsKhRANCAAScDe21aIlS3W0XSwQ8AuBiF681dhJR
+rqXMnhlsYzw1CIdGW9ptWuWZwsgbWXVvIOj+2ud26/mrR1B0WZ9iKGHZ
+-----END PRIVATE KEY-----
+`
+
+func Test_P12_SM2(t *testing.T) {
+    certpem := decodePEM(testSM2Cert)
+
+    cert, err := ParseCertificate(certpem)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pubKey, ok := cert.PublicKey.(*sm2.PublicKey)
+    if !ok {
+        t.Fatal("PublicKey is not sm2 PublicKey")
+    }
+
+    publicKey, err := sm2.MarshalPublicKey(pubKey)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    publicKeyPem := encodePEM(publicKey, "PUBLIC KEY")
+    if len(publicKeyPem) == 0 {
+        t.Error("fail make publicKey")
+    }
+
+    err = cert.CheckSignature(cert.SignatureAlgorithm, cert.RawTBSCertificate, cert.Signature)
+    if err != nil {
+        // t.Fatal(err)
+    }
+}

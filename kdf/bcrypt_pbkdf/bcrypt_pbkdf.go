@@ -3,6 +3,7 @@ package bcrypt_pbkdf
 import (
     "errors"
     "crypto/sha512"
+    "crypto/subtle"
     "encoding/binary"
 
     "golang.org/x/crypto/blowfish"
@@ -27,8 +28,9 @@ func Key(password, salt []byte, rounds, keyLen int) ([]byte, error) {
     }
 
     var shapass, shasalt [sha512.Size]byte
-    var out, tmp [32]byte
-    var cnt [4]byte
+
+    out, tmp := make([]byte, 32), make([]byte, 32)
+    cnt := make([]byte, 4)
 
     numBlocks := (keyLen + len(out) - 1) / len(out)
     key := make([]byte, numBlocks*len(out))
@@ -41,20 +43,18 @@ func Key(password, salt []byte, rounds, keyLen int) ([]byte, error) {
         h.Reset()
         h.Write(salt)
 
-        binary.BigEndian.PutUint32(cnt[:], uint32(block))
+        binary.BigEndian.PutUint32(cnt, uint32(block))
+        h.Write(cnt)
 
-        h.Write(cnt[:])
-        bcryptHash(tmp[:], shapass[:], h.Sum(shasalt[:0]))
-        copy(out[:], tmp[:])
+        bcryptHash(tmp, shapass[:], h.Sum(shasalt[:0]))
+        copy(out, tmp)
 
         for i := 2; i <= rounds; i++ {
             h.Reset()
-            h.Write(tmp[:])
-            bcryptHash(tmp[:], shapass[:], h.Sum(shasalt[:0]))
+            h.Write(tmp)
+            bcryptHash(tmp, shapass[:], h.Sum(shasalt[:0]))
 
-            for j := 0; j < len(out); j++ {
-                out[j] ^= tmp[j]
-            }
+            subtle.XORBytes(out, out, tmp)
         }
 
         for i, v := range out {
@@ -78,14 +78,13 @@ func bcryptHash(out, shapass, shasalt []byte) {
         blowfish.ExpandKey(shapass, c)
     }
 
-    copy(out[:], magic)
+    copy(out, magic)
     for i := 0; i < 32; i += 8 {
         for j := 0; j < 64; j++ {
             c.Encrypt(out[i:i+8], out[i:i+8])
         }
     }
 
-    // 交换数据
     for i := 0; i < 32; i += 4 {
         out[i+3], out[i+2], out[i+1], out[i] = out[i], out[i+1], out[i+2], out[i+3]
     }

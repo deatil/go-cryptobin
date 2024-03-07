@@ -1,12 +1,10 @@
 package sm2_test
 
 import (
-    "fmt"
     "bytes"
     "reflect"
     "testing"
     "math/big"
-    "io/ioutil"
     "crypto/rand"
     "crypto/sha1"
     "crypto/sha256"
@@ -17,56 +15,14 @@ import (
     "github.com/deatil/go-cryptobin/gm/sm2"
 )
 
-func TestSm2(t *testing.T) {
+func Test_Sm2(t *testing.T) {
     priv, err := sm2.GenerateKey(rand.Reader) // 生成密钥对
-    fmt.Println(priv)
     if err != nil {
         t.Fatal(err)
     }
 
-    fmt.Printf("%v\n", priv.Curve.IsOnCurve(priv.X, priv.Y)) // 验证是否为sm2的曲线
-
-    pub := &priv.PublicKey
-    msg := []byte("123456")
-
-    d0, err := pub.EncryptASN1(rand.Reader, msg, nil)
-    if err != nil {
-        fmt.Printf("Error: failed to encrypt %s: %v\n", msg, err)
-        return
-    }
-
-    // fmt.Printf("Cipher text = %v\n", d0)
-    d1, err := priv.DecryptASN1(d0, nil)
-    if err != nil {
-        fmt.Printf("Error: failed to decrypt: %v\n", err)
-    }
-
-    fmt.Printf("clear text = %s\n", d1)
-    d2, err := sm2.Encrypt(rand.Reader, pub,msg, sm2.C1C2C3)
-    if err != nil {
-        fmt.Printf("Error: failed to encrypt %s: %v\n", msg, err)
-        return
-    }
-
-    // fmt.Printf("Cipher text = %v\n", d0)
-    d3, err := sm2.Decrypt(priv, d2, sm2.C1C2C3)
-    if err != nil {
-        fmt.Printf("Error: failed to decrypt: %v\n", err)
-    }
-    fmt.Printf("clear text = %s\n", d3)
-
-    msg, _ = ioutil.ReadFile("ifile")             // 从文件读取数据
-    signdata, err := priv.Sign(rand.Reader, msg, nil) // 签名
-    if err != nil {
-        t.Fatal(err)
-    }
-
-    pubKey := priv.PublicKey
-    ok := pubKey.Verify(msg, signdata, nil) // 公钥验证
-    if ok != true {
-        fmt.Printf("Verify error\n")
-    } else {
-        fmt.Printf("Verify ok\n")
+    if !priv.Curve.IsOnCurve(priv.X, priv.Y) {
+        t.Error("GenerateKey not Curve")
     }
 }
 

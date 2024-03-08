@@ -2,6 +2,7 @@ package sm2
 
 import (
     "io"
+    "fmt"
     "hash"
     "bytes"
     "errors"
@@ -14,6 +15,7 @@ import (
 
     "github.com/deatil/go-cryptobin/hash/sm3"
     "github.com/deatil/go-cryptobin/kdf/smkdf"
+    "github.com/deatil/go-cryptobin/tool/alias"
     "github.com/deatil/go-cryptobin/gm/sm2/sm2curve"
 )
 
@@ -27,8 +29,10 @@ var defaultUID = []byte{
     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
 }
 
-var one = new(big.Int).SetInt64(1)
-var two = new(big.Int).SetInt64(2)
+var (
+    one = new(big.Int).SetInt64(1)
+    two = new(big.Int).SetInt64(2)
+)
 
 var errZeroParam = errors.New("zero parameter")
 
@@ -42,6 +46,8 @@ const (
     C1C3C2 Mode = iota
     C1C2C3
 )
+
+const maxRetryLimit = 100
 
 // 加密设置
 // Encrypter Opts
@@ -373,6 +379,8 @@ func DecryptASN1(priv *PrivateKey, data []byte, opts crypto.DecrypterOpts) ([]by
 func encrypt(random io.Reader, pub *PublicKey, data []byte, h hashFunc) ([]byte, error) {
     length := len(data)
 
+    var retryCount int = 0
+
     for {
         c := []byte{}
 
@@ -406,6 +414,16 @@ func encrypt(random io.Reader, pub *PublicKey, data []byte, h hashFunc) ([]byte,
         // 生成密钥 / make key
         ct := smkdf.Key(h, append(x2Buf, y2Buf...), length)
 
+        // 检测生成数据 / check ct data
+        if alias.ConstantTimeAllZero(ct) {
+            retryCount++
+            if retryCount > maxRetryLimit {
+                return nil, fmt.Errorf("cryptobin/sm2: failed to retry, tried %d times", retryCount)
+            }
+
+            continue
+        }
+
         // 生成密文 / make encrypt data
         subtle.XORBytes(ct, ct, data)
 
@@ -430,9 +448,11 @@ func decrypt(priv *PrivateKey, data []byte, h hashFunc) ([]byte, error) {
     x2Buf := bigIntToBytes(curve, x2)
     y2Buf := bigIntToBytes(curve, y2)
 
-    hashSize := h().Size()
+    md := h()
+
+    hashSize := md.Size()
     hash := data[:hashSize]
-    data = data[hashSize:]
+    data  = data[hashSize:]
 
     length := len(data)
 
@@ -442,7 +462,6 @@ func decrypt(priv *PrivateKey, data []byte, h hashFunc) ([]byte, error) {
     // 解密密文 / decrypt data
     subtle.XORBytes(c, c, data)
 
-    md := h()
     md.Write(x2Buf)
     md.Write(c)
     md.Write(y2Buf)
@@ -686,7 +705,6 @@ func randFieldElement(random io.Reader, curve elliptic.Curve) (k *big.Int, err e
     params := curve.Params()
 
     b := make([]byte, params.BitSize/8+8)
-
     _, err = io.ReadFull(random, b)
     if err != nil {
         return

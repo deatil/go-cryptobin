@@ -128,26 +128,21 @@ func (pub *PublicKey) Equal(x crypto.PublicKey) bool {
 // 验证 asn.1 编码的数据 ans1(r, s)
 // Verify asn.1 marshal data
 func (pub *PublicKey) Verify(msg, sign []byte, opts crypto.SignerOpts) bool {
-    r, s, err := UnmarshalSignatureASN1(sign)
-    if err != nil {
-        return false
+    if Verify(pub, msg, sign, opts) == nil {
+        return true
     }
 
-    return VerifyWithOpts(pub, msg, r, s, opts)
+    return false
 }
 
 // 验证 asn.1 编码的数据 bytes(r + s)
 // Verify Bytes marshal data
 func (pub *PublicKey) VerifyBytes(msg, sign []byte, opts crypto.SignerOpts) bool {
-    byteLen := (pub.Curve.Params().BitSize + 7) / 8
-    if len(sign) != 2*byteLen {
-        return false
+    if VerifyBytes(pub, msg, sign, opts) == nil {
+        return true
     }
 
-    r := new(big.Int).SetBytes(sign[      0:  byteLen])
-    s := new(big.Int).SetBytes(sign[byteLen:2*byteLen])
-
-    return VerifyWithOpts(pub, msg, r, s, opts)
+    return false
 }
 
 // Encrypt with bytes
@@ -208,7 +203,7 @@ func (priv *PrivateKey) Equal(x crypto.PrivateKey) bool {
 // 签名返回 asn.1 编码数据
 // sign data and return asn.1 marshal data
 func (priv *PrivateKey) Sign(random io.Reader, msg []byte, opts crypto.SignerOpts) ([]byte, error) {
-    r, s, err := SignWithOpts(random, priv, msg, opts)
+    r, s, err := SignToRS(random, priv, msg, opts)
     if err != nil {
         return nil, err
     }
@@ -219,7 +214,7 @@ func (priv *PrivateKey) Sign(random io.Reader, msg []byte, opts crypto.SignerOpt
 // 签名返回 Bytes 编码数据
 // sign data and return Bytes marshal data
 func (priv *PrivateKey) SignBytes(random io.Reader, msg []byte, opts crypto.SignerOpts) ([]byte, error) {
-    r, s, err := SignWithOpts(random, priv, msg, opts)
+    r, s, err := SignToRS(random, priv, msg, opts)
     if err != nil {
         return nil, err
     }
@@ -473,12 +468,17 @@ func Sign(random io.Reader, priv *PrivateKey, msg []byte, opts crypto.SignerOpts
 
 // 验证 asn.1 编码的数据 ans1(r, s)
 // Verify asn.1 marshal data
-func Verify(pub *PublicKey, msg, sign []byte, opts crypto.SignerOpts) bool {
+func Verify(pub *PublicKey, msg, sign []byte, opts crypto.SignerOpts) error {
     if pub == nil {
-        return false
+        return errors.New("cryptobin/sm2: incorrect public key")
     }
 
-    return pub.Verify(msg, sign, opts)
+    r, s, err := UnmarshalSignatureASN1(sign)
+    if err != nil {
+        return errors.New("cryptobin/sm2: signature contained zero or negative values")
+    }
+
+    return VerifyWithRS(pub, msg, r, s, opts)
 }
 
 // 签名返回 Bytes 编码数据
@@ -493,16 +493,24 @@ func SignBytes(random io.Reader, priv *PrivateKey, msg []byte, opts crypto.Signe
 
 // 验证 asn.1 编码的数据 bytes(r + s)
 // Verify Bytes marshal data
-func VerifyBytes(pub *PublicKey, msg, sign []byte, opts crypto.SignerOpts) bool {
+func VerifyBytes(pub *PublicKey, msg, sign []byte, opts crypto.SignerOpts) error {
     if pub == nil {
-        return false
+        return errors.New("cryptobin/sm2: incorrect public key")
     }
 
-    return pub.VerifyBytes(msg, sign, opts)
+    byteLen := (pub.Curve.Params().BitSize + 7) / 8
+    if len(sign) != 2*byteLen {
+        return errors.New("cryptobin/sm2: signature contained zero or negative values")
+    }
+
+    r := new(big.Int).SetBytes(sign[      0:  byteLen])
+    s := new(big.Int).SetBytes(sign[byteLen:2*byteLen])
+
+    return VerifyWithRS(pub, msg, r, s, opts)
 }
 
 // sm2 sign with SignerOpts
-func SignWithOpts(random io.Reader, priv *PrivateKey, msg []byte, opts crypto.SignerOpts) (r, s *big.Int, err error) {
+func SignToRS(random io.Reader, priv *PrivateKey, msg []byte, opts crypto.SignerOpts) (r, s *big.Int, err error) {
     opt := DefaultSignerOpts
     if o, ok := opts.(SignerOpts); ok {
         opt = o
@@ -517,7 +525,7 @@ func SignWithOpts(random io.Reader, priv *PrivateKey, msg []byte, opts crypto.Si
 }
 
 // sm2 verify with SignerOpts
-func VerifyWithOpts(pub *PublicKey, msg []byte, r, s *big.Int, opts crypto.SignerOpts) bool {
+func VerifyWithRS(pub *PublicKey, msg []byte, r, s *big.Int, opts crypto.SignerOpts) error {
     opt := DefaultSignerOpts
     if o, ok := opts.(SignerOpts); ok {
         opt = o
@@ -525,7 +533,7 @@ func VerifyWithOpts(pub *PublicKey, msg []byte, r, s *big.Int, opts crypto.Signe
 
     hashed, err := calculateHash(pub, opt.GetHash(), msg, opt.GetUid())
     if err != nil {
-        return false
+        return err
     }
 
     return verify(pub, hashed, r, s)
@@ -581,22 +589,21 @@ func sign(random io.Reader, priv *PrivateKey, hash []byte) (r, s *big.Int, err e
 }
 
 // sm2 verify
-func verify(pub *PublicKey, hash []byte, r, s *big.Int) bool {
+func verify(pub *PublicKey, hash []byte, r, s *big.Int) error {
     curve := pub.Curve
     N := curve.Params().N
 
     if r.Sign() <= 0 || s.Sign() <= 0 {
-        return false
+        return errors.New("cryptobin/sm2: signature contained zero or negative values")
     }
-
     if r.Cmp(N) >= 0 || s.Cmp(N) >= 0 {
-        return false
+        return errors.New("cryptobin/sm2: signature contained zero or negative values")
     }
 
     t := new(big.Int).Add(r, s)
     t.Mod(t, N)
     if t.Sign() == 0 {
-        return false
+        return errors.New("cryptobin/sm2: signature contained zero or negative values")
     }
 
     var x *big.Int
@@ -609,7 +616,11 @@ func verify(pub *PublicKey, hash []byte, r, s *big.Int) bool {
     x.Add(x, e)
     x.Mod(x, N)
 
-    return x.Cmp(r) == 0
+    if x.Cmp(r) != 0 {
+        return errors.New("cryptobin/sm2: verification failure")
+    }
+
+    return nil
 }
 
 func calculateHash(pub *PublicKey, h hashFunc, msg, uid []byte) ([]byte, error) {

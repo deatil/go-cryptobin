@@ -449,7 +449,7 @@ func Test_SignSha256WithSM2(t *testing.T) {
 
     msg := []byte("test-passstest-passstest-passstest-passstest-passstest-passstest-passstest-passs")
 
-    r, s, err := sm2.SignWithOpts(rand.Reader, priv, msg, sm2.SignerOpts{
+    r, s, err := sm2.SignToRS(rand.Reader, priv, msg, sm2.SignerOpts{
         Uid:  defaultUID,
         Hash: sha256.New,
     })
@@ -457,11 +457,11 @@ func Test_SignSha256WithSM2(t *testing.T) {
         t.Error(err)
     }
 
-    veri := sm2.VerifyWithOpts(pub, msg, r, s, sm2.SignerOpts{
+    veri := sm2.VerifyWithRS(pub, msg, r, s, sm2.SignerOpts{
         Uid:  defaultUID,
         Hash: sha256.New,
     })
-    if !veri {
+    if veri != nil {
         t.Error("veri error")
     }
 }
@@ -483,10 +483,10 @@ func Test_SignSM3Digest_Check(t *testing.T) {
     }
     pub := &priv.PublicKey
 
-    veri := sm2.VerifyWithOpts(pub, []byte(msg), rr, ss, sm2.SignerOpts{
+    veri := sm2.VerifyWithRS(pub, []byte(msg), rr, ss, sm2.SignerOpts{
         Uid: []byte(uid),
     })
-    if !veri {
+    if veri != nil {
         t.Error("veri error")
     }
 
@@ -509,11 +509,11 @@ func Test_SignSHA256Digest_Check(t *testing.T) {
     }
     pub := &priv.PublicKey
 
-    veri := sm2.VerifyWithOpts(pub, []byte(msg), rr, ss, sm2.SignerOpts{
+    veri := sm2.VerifyWithRS(pub, []byte(msg), rr, ss, sm2.SignerOpts{
         Uid:  []byte(uid),
         Hash: sha256.New,
     })
-    if !veri {
+    if veri != nil {
         t.Error("veri error")
     }
 
@@ -599,7 +599,7 @@ func Test_SignFunc(t *testing.T) {
             t.Error(err)
         }
 
-        if !sm2.Verify(pub, msg, signed, nil) {
+        if sm2.Verify(pub, msg, signed, nil) != nil {
             t.Error("veri error")
         }
     })
@@ -610,7 +610,7 @@ func Test_SignFunc(t *testing.T) {
             t.Error(err)
         }
 
-        if !sm2.VerifyBytes(pub, msg, signed, nil) {
+        if sm2.VerifyBytes(pub, msg, signed, nil) != nil {
             t.Error("veri error")
         }
     })

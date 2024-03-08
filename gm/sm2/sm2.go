@@ -475,7 +475,7 @@ func Verify(pub *PublicKey, msg, sign []byte, opts crypto.SignerOpts) error {
 
     r, s, err := UnmarshalSignatureASN1(sign)
     if err != nil {
-        return errors.New("cryptobin/sm2: signature contained zero or negative values")
+        return errors.New("cryptobin/sm2: incorrect signature")
     }
 
     return VerifyWithRS(pub, msg, r, s, opts)
@@ -500,7 +500,7 @@ func VerifyBytes(pub *PublicKey, msg, sign []byte, opts crypto.SignerOpts) error
 
     byteLen := (pub.Curve.Params().BitSize + 7) / 8
     if len(sign) != 2*byteLen {
-        return errors.New("cryptobin/sm2: signature contained zero or negative values")
+        return errors.New("cryptobin/sm2: incorrect signature")
     }
 
     r := new(big.Int).SetBytes(sign[      0:  byteLen])

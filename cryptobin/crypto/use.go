@@ -747,6 +747,13 @@ func (this Cryptobin) G3413OFB() Cryptobin {
     return this
 }
 
+// Wrap
+func (this Cryptobin) Wrap() Cryptobin {
+    this.mode = Wrap
+
+    return this
+}
+
 // 使用模式
 // use Mode By mode enum
 func (this Cryptobin) ModeBy(mode Mode, cfg ...map[string]any) Cryptobin {

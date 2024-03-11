@@ -309,6 +309,8 @@ func (this Mode) String() string {
             return "G3413CTR"
         case G3413OFB:
             return "G3413OFB"
+        case Wrap:
+            return "Wrap"
         default:
             if TypeMode.Names().Has(this) {
                 return (TypeMode.Names().Get(this))()
@@ -347,6 +349,7 @@ const (
     G3413CFB
     G3413CTR
     G3413OFB
+    Wrap
     maxMode
 )
 

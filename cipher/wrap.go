@@ -103,7 +103,7 @@ func (x *wrapEncrypter) CryptBlocks(dst, src []byte) {
         for i = 0; i < inlen; i, t, R = i+8, t+1, R[8:] {
             copy(A[8:], R[:8])
 
-            x.b.Encrypt(A[:], A[:])
+            x.b.Encrypt(A, A)
 
             A[7] ^= byte(t & 0xff)
             if t > 0xff {
@@ -112,7 +112,7 @@ func (x *wrapEncrypter) CryptBlocks(dst, src []byte) {
                 A[4] ^= byte((t >> 24) & 0xff)
             }
 
-            copy(R, A[8:16])
+            copy(R, A[8:])
         }
     }
 
@@ -175,14 +175,16 @@ func (x *wrapDecrypter) CryptBlocks(dst, src []byte) {
     iv := x.iv
     inlen := len(src)
 
+    empty := make([]byte, inlen-8)
+
     gotIv, err := x.cryptBlocks(dst, src)
     if err != nil {
-        copy(dst[:], make([]byte, inlen-8))
+        copy(dst, empty)
         return
     }
 
     if !bytes.Equal(gotIv, iv[:8]) {
-        copy(dst[:], make([]byte, inlen-8))
+        copy(dst, empty)
         return
     }
 
@@ -219,8 +221,8 @@ func (x *wrapDecrypter) cryptBlocks(out, in []byte) (iv []byte, err error) {
             R = out[inlen - 8 - i:]
 
             copy(A[8:], R[:8])
-            x.b.Decrypt(A[:], A[:])
-            copy(R, A[8:16])
+            x.b.Decrypt(A, A)
+            copy(R, A[8:])
         }
     }
 

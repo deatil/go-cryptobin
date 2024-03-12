@@ -166,6 +166,8 @@ func (x *wrapPadDecrypter) CryptBlocks(dst, src []byte) {
     icv := x.iv
     inlen := len(src)
 
+    empty := make([]byte, inlen-8)
+
     /* n: number of 64-bit blocks in the padded key data */
     var n int = inlen / 8 - 1
     var padded_len int
@@ -203,7 +205,7 @@ func (x *wrapPadDecrypter) CryptBlocks(dst, src []byte) {
 
         retiv, err := wd.(*wrapDecrypter).cryptBlocks(dst, src)
         if err != nil {
-            copy(dst[:], make([]byte, inlen-8))
+            copy(dst, empty)
             return
         }
 
@@ -216,7 +218,7 @@ func (x *wrapPadDecrypter) CryptBlocks(dst, src []byte) {
      * this).
      */
     if !bytes.Equal(aiv[:4], icv[:4]) {
-        copy(dst[:], make([]byte, inlen-8))
+        copy(dst, empty)
         return
     }
 
@@ -230,7 +232,7 @@ func (x *wrapPadDecrypter) CryptBlocks(dst, src []byte) {
                 (uint32(aiv[6]) <<  8) |
                  uint32(aiv[7])
     if (8 * (uint32(n) - 1) >= ptext_len || ptext_len > 8 * uint32(n)) {
-        copy(dst[:], make([]byte, inlen-8))
+        copy(dst, empty)
         return
     }
 
@@ -240,7 +242,7 @@ func (x *wrapPadDecrypter) CryptBlocks(dst, src []byte) {
      */
     padding_len = padded_len - int(ptext_len)
     if len(dst) > int(ptext_len) && bytes.Equal(dst[ptext_len:], zeros[:padding_len]) {
-        copy(dst[:], make([]byte, inlen-8))
+        copy(dst, empty)
         return
     }
 

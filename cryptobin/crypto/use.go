@@ -475,6 +475,22 @@ func (this Cryptobin) Rijndael256() Cryptobin {
     return this
 }
 
+// Twine
+// The key argument should be 10 or 16 bytes.
+func (this Cryptobin) Twine() Cryptobin {
+    this.multiple = Twine
+
+    return this
+}
+
+// Misty1
+// The key argument should be 16 bytes.
+func (this Cryptobin) Misty1() Cryptobin {
+    this.multiple = Misty1
+
+    return this
+}
+
 // 使用类型
 func (this Cryptobin) MultipleBy(multiple Multiple, cfg ...map[string]any) Cryptobin {
     this.multiple = multiple

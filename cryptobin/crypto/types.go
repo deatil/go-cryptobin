@@ -176,6 +176,10 @@ func (this Multiple) String() string {
             return "Rijndael192"
         case Rijndael256:
             return "Rijndael256"
+        case Twine:
+            return "Twine"
+        case Misty1:
+            return "Misty1"
         default:
             if TypeMultiple.Names().Has(this) {
                 return (TypeMultiple.Names().Get(this))()
@@ -242,6 +246,8 @@ const (
     Rijndael128
     Rijndael192
     Rijndael256
+    Twine
+    Misty1
     maxMultiple
 )
 

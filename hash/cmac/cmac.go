@@ -23,7 +23,6 @@ import (
 // tweakable block cipher. Ciphers with 64 bit blocks are
 // supported, but not recommened.
 // CMAC (with AES) is specified in RFC 4493 and RFC 4494.
-// code from github.com/aead/cmac
 
 const (
     // minimal irreducible polynomial for blocksize
@@ -45,6 +44,7 @@ func Sum(msg []byte, c cipher.Block, tagsize int) ([]byte, error) {
     if err != nil {
         return nil, err
     }
+
     h.Write(msg)
     return h.Sum(nil), nil
 }
@@ -57,6 +57,7 @@ func Verify(mac, msg []byte, c cipher.Block, tagsize int) bool {
     if err != nil {
         return false
     }
+
     return subtle.ConstantTimeCompare(mac, sum) == 1
 }
 
@@ -117,9 +118,13 @@ type macFunc struct {
     tagsize int
 }
 
-func (h *macFunc) Size() int { return h.cipher.BlockSize() }
+func (h *macFunc) Size() int {
+    return h.cipher.BlockSize()
+}
 
-func (h *macFunc) BlockSize() int { return h.cipher.BlockSize() }
+func (h *macFunc) BlockSize() int {
+    return h.cipher.BlockSize()
+}
 
 func (h *macFunc) Reset() {
     for i := range h.buf {
@@ -136,11 +141,13 @@ func (h *macFunc) Write(msg []byte) (int, error) {
         dif := bs - h.off
         if n > dif {
             xor(h.buf[h.off:], msg[:dif])
+
             msg = msg[dif:]
             h.cipher.Encrypt(h.buf, h.buf)
             h.off = 0
         } else {
             xor(h.buf[h.off:], msg)
+
             h.off += n
             return n, nil
         }
@@ -153,6 +160,7 @@ func (h *macFunc) Write(msg []byte) (int, error) {
         }
         for i := 0; i < nn; i += bs {
             xor(h.buf, msg[i:i+bs])
+
             h.cipher.Encrypt(h.buf, h.buf)
         }
         msg = msg[nn:]
@@ -160,6 +168,7 @@ func (h *macFunc) Write(msg []byte) (int, error) {
 
     if length := len(msg); length > 0 {
         xor(h.buf[h.off:], msg)
+
         h.off += length
     }
 
@@ -205,4 +214,9 @@ func shift(dst, src []byte) int {
     }
 
     return int(b)
+}
+
+// XOR the contents of b into a in-place
+func xor(a, b []byte) {
+    subtle.XORBytes(a, a, b)
 }

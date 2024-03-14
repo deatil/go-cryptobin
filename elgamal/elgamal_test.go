@@ -71,6 +71,28 @@ func Test_Encrypt_2(t *testing.T) {
     assertEqual(string(de), data, "Encrypt-Dedata")
 }
 
+func Test_EncryptLegacy(t *testing.T) {
+    assertEqual := cryptobin_test.AssertEqualT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
+    pub := &pri.PublicKey
+
+    assertError(err, "Encrypt-Error")
+    assertNotEmpty(pri, "Encrypt")
+
+    data := "123tesfd!df"
+
+    c1, c2, err := EncryptLegacy(rand.Reader, pub, []byte(data))
+    assertError(err, "EncryptLegacy-Encrypt-Error")
+
+    de, err := DecryptLegacy(pri, c1, c2)
+    assertError(err, "EncryptLegacy-Decrypt-Error")
+
+    assertEqual(string(de), data, "EncryptLegacy-Dedata")
+}
+
 func Test_EncryptAsn1(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)

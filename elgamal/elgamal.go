@@ -138,31 +138,15 @@ func Encrypt(random io.Reader, pub *PublicKey, msg []byte) (c1, c2 *big.Int, err
     em[len(em)-len(msg)-1] = 0
     copy(mm, msg)
 
-    m := new(big.Int).SetBytes(em)
-
-    k, err := rand.Int(random, pub.P)
-    if err != nil {
-        return
-    }
-
-    c1 = new(big.Int).Exp(pub.G, k, pub.P)
-    s := new(big.Int).Exp(pub.Y, k, pub.P)
-    c2 = s.Mul(s, m)
-    c2.Mod(c2, pub.P)
-
-    return
+    return EncryptLegacy(random, pub, em)
 }
 
 // Decrypt
 func Decrypt(priv *PrivateKey, c1, c2 *big.Int) (msg []byte, err error) {
-    s := new(big.Int).Exp(c1, priv.X, priv.P)
-    if s.ModInverse(s, priv.P) == nil {
-        return nil, errors.New("elgamal: invalid private key")
+    em, err := DecryptLegacy(priv, c1, c2)
+    if err != nil {
+        return nil, err
     }
-
-    s.Mul(s, c2)
-    s.Mod(s, priv.P)
-    em := s.Bytes()
 
     firstByteIsTwo := subtle.ConstantTimeByteEq(em[0], 2)
 
@@ -180,6 +164,37 @@ func Decrypt(priv *PrivateKey, c1, c2 *big.Int) (msg []byte, err error) {
     }
 
     return em[index+1:], nil
+}
+
+// EncryptLegacy
+func EncryptLegacy(random io.Reader, pub *PublicKey, msg []byte) (c1, c2 *big.Int, err error) {
+    m := new(big.Int).SetBytes(msg)
+
+    k, err := rand.Int(random, pub.P)
+    if err != nil {
+        return
+    }
+
+    c1 = new(big.Int).Exp(pub.G, k, pub.P)
+    s := new(big.Int).Exp(pub.Y, k, pub.P)
+    c2 = s.Mul(s, m)
+    c2.Mod(c2, pub.P)
+
+    return
+}
+
+// DecryptLegacy
+func DecryptLegacy(priv *PrivateKey, c1, c2 *big.Int) (msg []byte, err error) {
+    s := new(big.Int).Exp(c1, priv.X, priv.P)
+    if s.ModInverse(s, priv.P) == nil {
+        return nil, errors.New("elgamal: invalid private key")
+    }
+
+    s.Mul(s, c2)
+    s.Mod(s, priv.P)
+    em := s.Bytes()
+
+    return em, nil
 }
 
 // c1 and c2 data

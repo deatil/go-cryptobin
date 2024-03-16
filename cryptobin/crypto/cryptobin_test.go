@@ -1452,8 +1452,8 @@ func Test_Square(t *testing.T) {
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
-        SetKey("dfertf12dfertf12dfertf12dfertf12").
-        SetIv("dfertf1d2fgtyf12dfertf12dfertf12").
+        SetKey("dfertf12dfertf12").
+        SetIv("dertf1d2fgtyf12d").
         Square().
         CBC().
         PKCS7Padding().
@@ -1463,8 +1463,8 @@ func Test_Square(t *testing.T) {
     assertError(cypt.Error(), "Square-Encode")
 
     cyptde := FromBase64String(cyptStr).
-        SetKey("dfertf12dfertf12dfertf12dfertf12").
-        SetIv("dfertf1d2fgtyf12dfertf12dfertf12").
+        SetKey("dfertf12dfertf12").
+        SetIv("dertf1d2fgtyf12d").
         Square().
         CBC().
         PKCS7Padding().

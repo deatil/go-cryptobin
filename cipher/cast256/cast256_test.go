@@ -6,8 +6,6 @@ import (
     "testing"
     "math/rand"
     "encoding/hex"
-
-    "github.com/deatil/go-cryptobin/tool"
 )
 
 func Test_Cast256(t *testing.T) {
@@ -43,59 +41,7 @@ func Test_Cast256(t *testing.T) {
     }
 }
 
-// c uchar 强转到 uint32 为小端
 func Test_Check(t *testing.T) {
-    var key [32]byte
-
-    for i := 0; i < 32; i++ {
-        key[i] = byte((i * 2 + 10) % 256)
-    }
-
-    ciphertext := "5db4dd765f1d3835615a14afcb5dc2f5"
-    plaintext := "000102030405060708090a0b0c0d0e0f"
-
-    cipherBytes, _ := hex.DecodeString(ciphertext)
-    plainBytes, _ := hex.DecodeString(plaintext)
-
-    // 小端转大端
-    key2 := tool.LE2BE_32_Bytes(key[:])
-    cipherBytes = tool.LE2BE_32_Bytes(cipherBytes)
-    plainBytes = tool.LE2BE_32_Bytes(plainBytes)
-
-    cipher, err := NewCipher(key2)
-    if err != nil {
-        t.Fatal(err.Error())
-    }
-
-    var encrypted []byte = make([]byte, len(plainBytes))
-    cipher.Encrypt(encrypted, plainBytes)
-
-    // 大端转小端
-    encrypted = tool.BE2LE_32_Bytes(encrypted[:])
-
-    if ciphertext != fmt.Sprintf("%x", encrypted) {
-        t.Errorf("Encrypt error: act=%x, old=%s\n", encrypted, ciphertext)
-    }
-
-    // ==========
-
-    cipher2, err := NewCipher(key2)
-    if err != nil {
-        t.Fatal(err.Error())
-    }
-
-    var decrypted []byte = make([]byte, len(cipherBytes))
-    cipher2.Decrypt(decrypted, cipherBytes)
-
-    // 大端转小端
-    decrypted = tool.BE2LE_32_Bytes(decrypted[:])
-
-    if plaintext != fmt.Sprintf("%x", decrypted) {
-        t.Errorf("Decrypt error: act=%x, old=%s\n", decrypted, plaintext)
-    }
-}
-
-func Test_BE_Check(t *testing.T) {
     var key [32]byte
 
     for i := 0; i < 32; i++ {
@@ -132,5 +78,68 @@ func Test_BE_Check(t *testing.T) {
 
     if plaintext != fmt.Sprintf("%x", decrypted) {
         t.Errorf("Decrypt error: act=%x, old=%s\n", decrypted, plaintext)
+    }
+}
+
+func fromHex(s string) []byte {
+    h, _ := hex.DecodeString(s)
+    return h
+}
+
+type testData struct {
+    keylen int32
+    pt []byte
+    ct []byte
+    key []byte
+}
+
+func Test_Check_List(t *testing.T) {
+   tests := []testData{
+        {
+           32,
+           fromHex("000000000000000000000000bdf4e311"),
+           fromHex("fa5874ab5aba5c0ba20aa82124c8f5a5"),
+           fromHex("2342bb9efa38542cbed0ac83940ac2988d7c47ce264908461cc1b5137ae6b604"),
+        },
+        {
+           32,
+           fromHex("000000000000000000000000cf05f422"),
+           fromHex("f61772310e2160770eb7e7e92469ff32"),
+           fromHex("2342bb9efa38542cbed0ac83940ac2988d7c47ce264908461cc1b5137ae6b604"),
+        },
+        {
+           32,
+           fromHex("000000000000000000000000f0271543"),
+           fromHex("ad9493d3f4891ebba47aa9605edb432e"),
+           fromHex("2342bb9efa38542cbed0ac83940ac2988d7c47ce264908461cc1b5137ae6b604"),
+        },
+    }
+
+    for i, test := range tests {
+        c, err := NewCipher(test.key)
+        if err != nil {
+            t.Fatal(err.Error())
+        }
+
+        tmp := make([]byte, BlockSize)
+        c.Encrypt(tmp, test.pt)
+
+        if !bytes.Equal(tmp, test.ct) {
+            t.Errorf("[%d] Check error: got %x, want %x", i, tmp, test.ct)
+        }
+
+        // ===========
+
+        c2, err := NewCipher(test.key)
+        if err != nil {
+            t.Fatal(err.Error())
+        }
+
+        tmp2 := make([]byte, BlockSize)
+        c2.Decrypt(tmp2, test.ct)
+
+        if !bytes.Equal(tmp2, test.pt) {
+            t.Errorf("[%d] Check Decrypt error: got %x, want %x", i, tmp2, test.pt)
+        }
     }
 }

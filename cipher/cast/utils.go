@@ -6,7 +6,7 @@ import (
 )
 
 // Endianness option
-const littleEndian bool = true
+const littleEndian bool = false
 
 func keyToUint32s(b []byte) []uint32 {
     size := len(b) / 4
@@ -69,13 +69,6 @@ func rotater32(x uint32, n byte) uint32 {
     return rotatel32(x, 32 - n);
 }
 
-func swap_uint32(val uint32) uint32 {
-    return (val & 0xff000000) >> 24 |
-           (val & 0x00ff0000) >>  8 |
-           (val & 0x0000ff00) <<  8 |
-           (val & 0x000000ff) << 24
-}
-
 func f1(D uint32, kr byte, km uint32) uint32 {
     var I uint32 = rotatel32(km + D, kr)
     return ((S[0][byte(I >> 24)] ^ S[1][byte(I >> 16)]) - S[2][byte(I >> 8)]) + S[3][byte(I)]
@@ -100,6 +93,7 @@ func ks(i int, a, b, c, d, e, f, g, h *uint32, km []uint32, kr []byte) {
     (*b) ^= f3((*c), tr[i*2][5], tm[i*2][5])
     (*a) ^= f1((*b), tr[i*2][6], tm[i*2][6])
     (*h) ^= f2((*a), tr[i*2][7], tm[i*2][7])
+
     (*g) ^= f1((*h), tr[i*2+1][0], tm[i*2+1][0])
     (*f) ^= f2((*g), tr[i*2+1][1], tm[i*2+1][1])
     (*e) ^= f3((*f), tr[i*2+1][2], tm[i*2+1][2])
@@ -120,16 +114,8 @@ func ks(i int, a, b, c, d, e, f, g, h *uint32, km []uint32, kr []byte) {
 }
 
 func keyInit(a, b, c, d, e, f, g, h *uint32, km []uint32, kr []byte) {
-    ks(0, a, b, c, d, e, f, g, h, km, kr)
-    ks(1, a, b, c, d, e, f, g, h, km, kr)
-    ks(2, a, b, c, d, e, f, g, h, km, kr)
-    ks(3, a, b, c, d, e, f, g, h, km, kr)
-    ks(4, a, b, c, d, e, f, g, h, km, kr)
-    ks(5, a, b, c, d, e, f, g, h, km, kr)
-    ks(6, a, b, c, d, e, f, g, h, km, kr)
-    ks(7, a, b, c, d, e, f, g, h, km, kr)
-    ks(8, a, b, c, d, e, f, g, h, km, kr)
-    ks(9, a, b, c, d, e, f, g, h, km, kr)
-    ks(10, a, b, c, d, e, f, g, h, km, kr)
-    ks(11, a, b, c, d, e, f, g, h, km, kr)
+    var i int
+    for i = 0; i < 12; i++ {
+        ks(i, a, b, c, d, e, f, g, h, km, kr)
+    }
 }

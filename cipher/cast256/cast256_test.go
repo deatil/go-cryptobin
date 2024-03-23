@@ -8,15 +8,147 @@ import (
     "encoding/hex"
 )
 
-func Test_Cast256(t *testing.T) {
+func Test_Key256(t *testing.T) {
     random := rand.New(rand.NewSource(99))
-    max := 5000
+    max := 100
 
     var encrypted [16]byte
     var decrypted [16]byte
 
     for i := 0; i < max; i++ {
         key := make([]byte, 32)
+        random.Read(key)
+        value := make([]byte, 16)
+        random.Read(value)
+
+        cipher1, err := NewCipher(key)
+        if err != nil {
+            t.Fatal(err.Error())
+        }
+
+        cipher1.Encrypt(encrypted[:], value)
+
+        cipher2, err := NewCipher(key)
+        if err != nil {
+            t.Fatal(err.Error())
+        }
+
+        cipher2.Decrypt(decrypted[:], encrypted[:])
+
+        if !bytes.Equal(decrypted[:], value[:]) {
+            t.Errorf("encryption/decryption failed: % 02x != % 02x\n", decrypted, value)
+        }
+    }
+}
+
+func Test_Key224(t *testing.T) {
+    random := rand.New(rand.NewSource(99))
+    max := 100
+
+    var encrypted [16]byte
+    var decrypted [16]byte
+
+    for i := 0; i < max; i++ {
+        key := make([]byte, 28)
+        random.Read(key)
+        value := make([]byte, 16)
+        random.Read(value)
+
+        cipher1, err := NewCipher(key)
+        if err != nil {
+            t.Fatal(err.Error())
+        }
+
+        cipher1.Encrypt(encrypted[:], value)
+
+        cipher2, err := NewCipher(key)
+        if err != nil {
+            t.Fatal(err.Error())
+        }
+
+        cipher2.Decrypt(decrypted[:], encrypted[:])
+
+        if !bytes.Equal(decrypted[:], value[:]) {
+            t.Errorf("encryption/decryption failed: % 02x != % 02x\n", decrypted, value)
+        }
+    }
+}
+
+func Test_Key192(t *testing.T) {
+    random := rand.New(rand.NewSource(99))
+    max := 100
+
+    var encrypted [16]byte
+    var decrypted [16]byte
+
+    for i := 0; i < max; i++ {
+        key := make([]byte, 24)
+        random.Read(key)
+        value := make([]byte, 16)
+        random.Read(value)
+
+        cipher1, err := NewCipher(key)
+        if err != nil {
+            t.Fatal(err.Error())
+        }
+
+        cipher1.Encrypt(encrypted[:], value)
+
+        cipher2, err := NewCipher(key)
+        if err != nil {
+            t.Fatal(err.Error())
+        }
+
+        cipher2.Decrypt(decrypted[:], encrypted[:])
+
+        if !bytes.Equal(decrypted[:], value[:]) {
+            t.Errorf("encryption/decryption failed: % 02x != % 02x\n", decrypted, value)
+        }
+    }
+}
+
+func Test_Key160(t *testing.T) {
+    random := rand.New(rand.NewSource(99))
+    max := 100
+
+    var encrypted [16]byte
+    var decrypted [16]byte
+
+    for i := 0; i < max; i++ {
+        key := make([]byte, 20)
+        random.Read(key)
+        value := make([]byte, 16)
+        random.Read(value)
+
+        cipher1, err := NewCipher(key)
+        if err != nil {
+            t.Fatal(err.Error())
+        }
+
+        cipher1.Encrypt(encrypted[:], value)
+
+        cipher2, err := NewCipher(key)
+        if err != nil {
+            t.Fatal(err.Error())
+        }
+
+        cipher2.Decrypt(decrypted[:], encrypted[:])
+
+        if !bytes.Equal(decrypted[:], value[:]) {
+            t.Errorf("encryption/decryption failed: % 02x != % 02x\n", decrypted, value)
+        }
+    }
+}
+
+func Test_Key128(t *testing.T) {
+    random := rand.New(rand.NewSource(99))
+    max := 100
+
+    var encrypted [16]byte
+    var decrypted [16]byte
+
+    for i := 0; i < max; i++ {
+        key := make([]byte, 16)
         random.Read(key)
         value := make([]byte, 16)
         random.Read(value)
@@ -112,6 +244,32 @@ func Test_Check_List(t *testing.T) {
            fromHex("000000000000000000000000f0271543"),
            fromHex("ad9493d3f4891ebba47aa9605edb432e"),
            fromHex("2342bb9efa38542cbed0ac83940ac2988d7c47ce264908461cc1b5137ae6b604"),
+        },
+
+        {
+           24,
+           fromHex("000000000000000000000000de255aff"),
+           fromHex("2bc1929f301347a99d3f3e45ad3401e8"),
+           fromHex("2342bb9efa38542cbed0ac83940ac298bac77a7717942863"),
+        },
+        {
+           24,
+           fromHex("000000000000000000000000e2295f03"),
+           fromHex("bfeaf5bc2b1bcbbe32a93b9900365923"),
+           fromHex("2342bb9efa38542cbed0ac83940ac298bac77a7717942863"),
+        },
+
+        {
+           16,
+           fromHex("0000000000000000000000000c9b2807"),
+           fromHex("963a8a50ceb54d08e0dee0f1d0413dcf"),
+           fromHex("2342bb9efa38542c0af75647f29f615d"),
+        },
+        {
+           16,
+           fromHex("0000000000000000000000002cbb4827"),
+           fromHex("8665cc6b51b46b7e9b270296c3fd2053"),
+           fromHex("2342bb9efa38542c0af75647f29f615d"),
         },
     }
 

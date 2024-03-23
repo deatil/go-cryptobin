@@ -70,52 +70,45 @@ func rotater32(x uint32, n byte) uint32 {
 }
 
 func f1(D uint32, kr byte, km uint32) uint32 {
-    var I uint32 = rotatel32(km + D, kr)
+    I := rotatel32(km + D, kr)
     return ((S[0][byte(I >> 24)] ^ S[1][byte(I >> 16)]) - S[2][byte(I >> 8)]) + S[3][byte(I)]
 }
 
 func f2(D uint32, kr byte, km uint32) uint32 {
-    var I uint32 = rotatel32(km ^ D, kr)
+    I := rotatel32(km ^ D, kr)
     return ((S[0][byte(I >> 24)] - S[1][byte(I >> 16)]) + S[2][byte(I >> 8)]) ^ S[3][byte(I)]
 }
 
 func f3(D uint32, kr byte, km uint32) uint32 {
-    var I uint32 = rotatel32(km - D, kr)
+    I := rotatel32(km - D, kr)
     return ((S[0][byte(I >> 24)] + S[1][byte(I >> 16)]) ^ S[2][byte(I >> 8)]) - S[3][byte(I)]
 }
 
-func ks(i int, a, b, c, d, e, f, g, h *uint32, km []uint32, kr []byte) {
-    (*g) ^= f1((*h), tr[i*2][0], tm[i*2][0])
-    (*f) ^= f2((*g), tr[i*2][1], tm[i*2][1])
-    (*e) ^= f3((*f), tr[i*2][2], tm[i*2][2])
-    (*d) ^= f1((*e), tr[i*2][3], tm[i*2][3])
-    (*c) ^= f2((*d), tr[i*2][4], tm[i*2][4])
-    (*b) ^= f3((*c), tr[i*2][5], tm[i*2][5])
-    (*a) ^= f1((*b), tr[i*2][6], tm[i*2][6])
-    (*h) ^= f2((*a), tr[i*2][7], tm[i*2][7])
+func ks(i int, key *[8]uint32, km []uint32, kr []byte) {
+    for j := 0; j < 2; j++ {
+        key[6] ^= f1(key[7], tr[i*2+j][0], tm[i*2+j][0])
+        key[5] ^= f2(key[6], tr[i*2+j][1], tm[i*2+j][1])
+        key[4] ^= f3(key[5], tr[i*2+j][2], tm[i*2+j][2])
+        key[3] ^= f1(key[4], tr[i*2+j][3], tm[i*2+j][3])
+        key[2] ^= f2(key[3], tr[i*2+j][4], tm[i*2+j][4])
+        key[1] ^= f3(key[2], tr[i*2+j][5], tm[i*2+j][5])
+        key[0] ^= f1(key[1], tr[i*2+j][6], tm[i*2+j][6])
+        key[7] ^= f2(key[0], tr[i*2+j][7], tm[i*2+j][7])
+    }
 
-    (*g) ^= f1((*h), tr[i*2+1][0], tm[i*2+1][0])
-    (*f) ^= f2((*g), tr[i*2+1][1], tm[i*2+1][1])
-    (*e) ^= f3((*f), tr[i*2+1][2], tm[i*2+1][2])
-    (*d) ^= f1((*e), tr[i*2+1][3], tm[i*2+1][3])
-    (*c) ^= f2((*d), tr[i*2+1][4], tm[i*2+1][4])
-    (*b) ^= f3((*c), tr[i*2+1][5], tm[i*2+1][5])
-    (*a) ^= f1((*b), tr[i*2+1][6], tm[i*2+1][6])
-    (*h) ^= f2((*a), tr[i*2+1][7], tm[i*2+1][7])
+    kr[i*4+0] = byte(key[0] & 0x1f)
+    kr[i*4+1] = byte(key[2] & 0x1f)
+    kr[i*4+2] = byte(key[4] & 0x1f)
+    kr[i*4+3] = byte(key[6] & 0x1f)
 
-    kr[i*4+0] = byte((*a) & 0x1f)
-    kr[i*4+1] = byte((*c) & 0x1f)
-    kr[i*4+2] = byte((*e) & 0x1f)
-    kr[i*4+3] = byte((*g) & 0x1f)
-    km[i*4+0] = (*h)
-    km[i*4+1] = (*f)
-    km[i*4+2] = (*d)
-    km[i*4+3] = (*b)
+    km[i*4+0] = key[7]
+    km[i*4+1] = key[5]
+    km[i*4+2] = key[3]
+    km[i*4+3] = key[1]
 }
 
-func keyInit(a, b, c, d, e, f, g, h *uint32, km []uint32, kr []byte) {
-    var i int
-    for i = 0; i < 12; i++ {
-        ks(i, a, b, c, d, e, f, g, h, km, kr)
+func keyInit(key [8]uint32, km []uint32, kr []byte) {
+    for i := 0; i < 12; i++ {
+        ks(i, &key, km, kr)
     }
 }

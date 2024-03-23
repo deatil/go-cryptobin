@@ -129,7 +129,7 @@ func (this *castCipher) decrypt(dst, src []byte) {
 }
 
 func (this *castCipher) expandKey(key []byte) {
-    keys := make([]uint32, 8)
+    var keys [8]uint32
 
     inKey := keyToUint32s(key)
     for i := 0; i < len(inKey); i++ {
@@ -139,5 +139,5 @@ func (this *castCipher) expandKey(key []byte) {
     this.km = make([]uint32, 48)
     this.kr = make([]byte, 48)
 
-    keyInit(&keys[0], &keys[1], &keys[2], &keys[3], &keys[4], &keys[5], &keys[6], &keys[7], this.km, this.kr)
+    keyInit(keys, this.km, this.kr)
 }

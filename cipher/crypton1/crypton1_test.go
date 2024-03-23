@@ -27,7 +27,7 @@ func Test_Key16(t *testing.T) {
         cipher1.Encrypt(encrypted[:], value)
 
         if bytes.Equal(encrypted[:], value[:]) {
-            t.Errorf("fail: encrypted equal value\n")
+            t.Errorf("fail: encrypted equal plaintext \n")
         }
 
         cipher2, err := NewCipher(key)
@@ -64,7 +64,7 @@ func Test_Key24(t *testing.T) {
         cipher1.Encrypt(encrypted[:], value)
 
         if bytes.Equal(encrypted[:], value[:]) {
-            t.Errorf("fail: encrypted equal value\n")
+            t.Errorf("fail: encrypted equal plaintext \n")
         }
 
         cipher2, err := NewCipher(key)
@@ -101,7 +101,7 @@ func Test_Key32(t *testing.T) {
         cipher1.Encrypt(encrypted[:], value)
 
         if bytes.Equal(encrypted[:], value[:]) {
-            t.Errorf("fail: encrypted equal value\n")
+            t.Errorf("fail: encrypted equal plaintext \n")
         }
 
         cipher2, err := NewCipher(key)

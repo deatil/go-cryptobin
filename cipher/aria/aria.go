@@ -65,7 +65,7 @@ func (c *ariaCipher) Encrypt(dst, src []byte) {
         panic("cryptobin/aria: invalid buffer overlap")
     }
 
-    c.cryptBlock(c.enc, dst, src)
+    c.cryptBlock(dst, src, c.enc)
 }
 
 func (c *ariaCipher) Decrypt(dst, src []byte) {
@@ -81,14 +81,14 @@ func (c *ariaCipher) Decrypt(dst, src []byte) {
         panic("cryptobin/aria: invalid buffer overlap")
     }
 
-    c.cryptBlock(c.dec, dst, src)
+    c.cryptBlock(dst, src, c.dec)
 }
 
 func (c *ariaCipher) rounds() int {
     return c.k/4 + 8
 }
 
-func (c *ariaCipher) cryptBlock(xk []uint32, dst, src []byte) {
+func (c *ariaCipher) cryptBlock(dst, src []byte, xk []uint32) {
     n := c.rounds()
 
     var p [16]byte
@@ -140,7 +140,7 @@ func (c *ariaCipher) expandKey(key []byte) {
 
     var w0, w1, w2, w3 [16]byte
 
-    w0 = kl // TODO: use kl instead of w0
+    w0 = kl
     w1 = xor(roundOdd(w0, ck1), kr)
     w2 = xor(roundEven(w1, ck2), w0)
     w3 = xor(roundOdd(w2, ck3), w1)

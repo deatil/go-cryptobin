@@ -86,11 +86,17 @@ func roundEven(d, rk [16]byte) [16]byte {
 // Substitution Layer SL1
 func substitute1(x [16]byte) (y [16]byte) {
     var i uint
-    for i = 0; i < 16; i += 4 {
-        y[i + 0] = sb1[x[i + 0]]
-        y[i + 1] = sb2[x[i + 1]]
-        y[i + 2] = sb3[x[i + 2]]
-        y[i + 3] = sb4[x[i + 3]]
+    for i = 0; i < 16; i++ {
+        switch i%4 {
+            case 0:
+                y[i] = sb1[x[i]]
+            case 1:
+                y[i] = sb2[x[i]]
+            case 2:
+                y[i] = sb3[x[i]]
+            case 3:
+                y[i] = sb4[x[i]]
+        }
     }
 
     return
@@ -145,10 +151,8 @@ func lrot(x [16]byte, n uint) (y [16]byte) {
     q, r := n/8, n%8
     s := 8 - r
 
-    y[0] = x[q%16]<<r | x[(q+1)%16]>>s
-
     var i uint
-    for i = 1; i < 15; i++ {
+    for i = 0; i < 15; i++ {
         y[i] = x[(q+i)%16]<<r | x[(q+i+1)%16]>>s
     }
 

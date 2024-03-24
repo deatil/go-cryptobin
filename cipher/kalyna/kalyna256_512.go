@@ -240,23 +240,9 @@ func (this *kalynaCipher256_512) expandKey(key []byte) {
 
     copy(this.erk[:], rk)
 
-    IMC256(rk[68:])
-    IMC256(rk[64:])
-    IMC256(rk[60:])
-    IMC256(rk[56:])
-    IMC256(rk[52:])
-    IMC256(rk[48:])
-    IMC256(rk[44:])
-    IMC256(rk[40:])
-    IMC256(rk[36:])
-    IMC256(rk[32:])
-    IMC256(rk[28:])
-    IMC256(rk[24:])
-    IMC256(rk[20:])
-    IMC256(rk[16:])
-    IMC256(rk[12:])
-    IMC256(rk[8:])
-    IMC256(rk[4:])
+    for i := 68; i > 0; i -= 4 {
+        IMC256(rk[i:])
+    }
 
     copy(this.drk[:], rk)
 }

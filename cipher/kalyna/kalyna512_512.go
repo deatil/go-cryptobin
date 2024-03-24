@@ -240,23 +240,9 @@ func (this *kalynaCipher512_512) expandKey(key []byte) {
 
     copy(this.erk[:], rk)
 
-    IMC(rk[136:])
-    IMC(rk[128:])
-    IMC(rk[120:])
-    IMC(rk[112:])
-    IMC(rk[104:])
-    IMC(rk[96:])
-    IMC(rk[88:])
-    IMC(rk[80:])
-    IMC(rk[72:])
-    IMC(rk[64:])
-    IMC(rk[56:])
-    IMC(rk[48:])
-    IMC(rk[40:])
-    IMC(rk[32:])
-    IMC(rk[24:])
-    IMC(rk[16:])
-    IMC(rk[8:])
+    for i := 136; i > 0; i -= 8 {
+        IMC(rk[i:])
+    }
 
     copy(this.drk[:], rk)
 }

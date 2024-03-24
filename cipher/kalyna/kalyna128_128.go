@@ -72,14 +72,12 @@ func (this *kalynaCipher128_128) encrypt(out []byte, in []byte) {
 
     addkey128(ins, t1, rk)
 
-    G128(t1, t2, rk[2:]) // 1
-    G128(t2, t1, rk[4:]) // 2
-    G128(t1, t2, rk[6:]) // 3
-    G128(t2, t1, rk[8:]) // 4
-    G128(t1, t2, rk[10:]) // 5
-    G128(t2, t1, rk[12:]) // 6
-    G128(t1, t2, rk[14:]) // 7
-    G128(t2, t1, rk[16:]) // 8
+    var i int
+    for i = 2; i < 18; i += 4 {
+        G128(t1, t2, rk[i    :]) // i + 1
+        G128(t2, t1, rk[i + 2:]) // i + 2
+    }
+
     G128(t1, t2, rk[18:]) // 9
     GL128(t2, t1, rk[20:]) // 10
 
@@ -98,14 +96,13 @@ func (this *kalynaCipher128_128) decrypt(out []byte, in []byte) {
     subkey128(ins, t1, rk[20:])
 
     IMC128(t1)
-    IG128(t1, t2, rk[18:])
-    IG128(t2, t1, rk[16:])
-    IG128(t1, t2, rk[14:])
-    IG128(t2, t1, rk[12:])
-    IG128(t1, t2, rk[10:])
-    IG128(t2, t1, rk[8:])
-    IG128(t1, t2, rk[6:])
-    IG128(t2, t1, rk[4:])
+
+    var i int
+    for i = 18; i > 2; i -= 4 {
+        IG128(t1, t2, rk[i    :])
+        IG128(t2, t1, rk[i - 2:])
+    }
+
     IG128(t1, t2, rk[2:])
     IGL128(t2, t1, rk[0:])
 
@@ -135,11 +132,11 @@ func (this *kalynaCipher128_128) expandKey(key []byte) {
 
     rk := make([]uint64, 24)
 
-    // round 0
     copy(k, keys[:2])
     kswapped[1] = k[0]
     kswapped[0] = k[1]
 
+    // round 0
     add_constant128(ks, ksc, constant)
     addkey128(k, t2, ksc)
     G128(t2, t1, ksc)
@@ -187,15 +184,9 @@ func (this *kalynaCipher128_128) expandKey(key []byte) {
 
     copy(this.erk[:], rk)
 
-    IMC128(rk[18:])
-    IMC128(rk[16:])
-    IMC128(rk[14:])
-    IMC128(rk[12:])
-    IMC128(rk[10:])
-    IMC128(rk[8:])
-    IMC128(rk[6:])
-    IMC128(rk[4:])
-    IMC128(rk[2:])
+    for i := 18; i > 0; i -= 2 {
+        IMC128(rk[i:])
+    }
 
     copy(this.drk[:], rk)
 }

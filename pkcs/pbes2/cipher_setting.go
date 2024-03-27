@@ -21,7 +21,7 @@ var (
     oidDESCBC     = asn1.ObjectIdentifier{1, 3, 14, 3, 2, 7}
     oidDESEDE3CBC = asn1.ObjectIdentifier{1, 2, 840, 113549, 3, 7}
     oidRC2CBC     = asn1.ObjectIdentifier{1, 2, 840, 113549, 3, 2}
-    oidRC5PadCBC  = asn1.ObjectIdentifier{1, 2, 840, 113549, 3, 9}
+    oidRC5CBCPad  = asn1.ObjectIdentifier{1, 2, 840, 113549, 3, 9}
 
     // AES
     oidAES        = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 1}
@@ -154,7 +154,7 @@ var RC5CBC = CipherRC5CBC{
     wordSize:     32,
     rounds:       16,
     keySize:      16,
-    identifier:   oidRC5PadCBC,
+    identifier:   oidRC5CBCPad,
     hasKeyLength: true,
 }
 
@@ -803,7 +803,7 @@ func init() {
     AddCipher(oidRC2CBC, func() Cipher {
         return RC2CBC
     })
-    AddCipher(oidRC5PadCBC, func() Cipher {
+    AddCipher(oidRC5CBCPad, func() Cipher {
         return RC5CBC
     })
 

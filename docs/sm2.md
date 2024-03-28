@@ -87,6 +87,7 @@ func main() {
     var psssword string = ""
 
     // 设置 UID 值
+    // set uid data
     var uid []byte = []byte("")
 
     obj := sm2.New()
@@ -179,7 +180,9 @@ func main() {
     // 获取公钥 X, Y 明文数据
     // get public key x data and y data
     var pubKeyPem string = ""
-    public := sm2.FromPrivateKey([]byte(pubKeyPem))
+    public := sm2.
+        FromPrivateKey([]byte(pubKeyPem)).
+        MakePublicKey()
 
     x := public.GetPublicKeyXHexString()
     y := public.GetPublicKeyYHexString()

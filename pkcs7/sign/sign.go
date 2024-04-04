@@ -28,19 +28,22 @@ func NewSignedData(data []byte) (*SignedData, error) {
     if err != nil {
         return nil, err
     }
+
     ci := contentInfo{
         ContentType: oidData,
         Content:     asn1.RawValue{Class: 2, Tag: 0, Bytes: content, IsCompound: true},
     }
+
     sd := signedData{
         ContentInfo: ci,
         Version:     1,
     }
+
     return &SignedData{
         sd: sd,
         data: data,
-        digestOid: oidDigestAlgorithmSHA1,
-        encryptionOid: oidDigestAlgorithmRSASHA1,
+        digestOid: OidDigestAlgorithmSHA1,
+        encryptionOid: OidEncryptionAlgorithmRSASHA1,
     }, nil
 }
 
@@ -100,15 +103,15 @@ type issuerAndSerial struct {
 // SetDigestAlgorithm sets the digest algorithm to be used in the signing process.
 //
 // This should be called before adding signers
-func (this *SignedData) SetDigestAlgorithm(d asn1.ObjectIdentifier) {
-    this.digestOid = d
+func (this *SignedData) SetDigestAlgorithm(oid asn1.ObjectIdentifier) {
+    this.digestOid = oid
 }
 
 // SetEncryptionAlgorithm sets the encryption algorithm to be used in the signing process.
 //
 // This should be called before adding signers
-func (this *SignedData) SetEncryptionAlgorithm(d asn1.ObjectIdentifier) {
-    this.encryptionOid = d
+func (this *SignedData) SetEncryptionAlgorithm(oid asn1.ObjectIdentifier) {
+    this.encryptionOid = oid
 }
 
 // AddSigner is a wrapper around AddSignerChain() that adds a signer without any parent.
@@ -141,6 +144,7 @@ func (this *SignedData) AddSignerChain(ee *x509.Certificate, pkey crypto.Private
         if err != nil {
             return err
         }
+
         // the first parent is the issuer
         ias.IssuerName = asn1.RawValue{FullBytes: parents[0].RawSubject}
     }
@@ -156,6 +160,7 @@ func (this *SignedData) AddSignerChain(ee *x509.Certificate, pkey crypto.Private
 
     this.messageDigest = hashFunc.Sum(this.data)
 
+    // attrs append set
     attrs := &attributes{}
     attrs.Add(oidAttributeContentType, this.sd.ContentInfo.ContentType)
     attrs.Add(oidAttributeMessageDigest, this.messageDigest)

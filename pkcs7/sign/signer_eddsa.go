@@ -9,24 +9,24 @@ import (
 )
 
 // EdDsa 签名
-type KeySignWithEdDsa struct {
+type KeySignWithEdDSA struct {
     hashFunc   crypto.Hash
     hashId     asn1.ObjectIdentifier
     identifier asn1.ObjectIdentifier
 }
 
 // oid
-func (this KeySignWithEdDsa) HashOID() asn1.ObjectIdentifier {
+func (this KeySignWithEdDSA) HashOID() asn1.ObjectIdentifier {
     return this.hashId
 }
 
 // oid
-func (this KeySignWithEdDsa) OID() asn1.ObjectIdentifier {
+func (this KeySignWithEdDSA) OID() asn1.ObjectIdentifier {
     return this.identifier
 }
 
 // 签名
-func (this KeySignWithEdDsa) Sign(pkey crypto.PrivateKey, data []byte) ([]byte, []byte, error) {
+func (this KeySignWithEdDSA) Sign(pkey crypto.PrivateKey, data []byte) ([]byte, []byte, error) {
     var priv ed25519.PrivateKey
     var ok bool
 
@@ -34,18 +34,28 @@ func (this KeySignWithEdDsa) Sign(pkey crypto.PrivateKey, data []byte) ([]byte, 
         return nil, nil, errors.New("pkcs7: PrivateKey is not ed25519 PrivateKey")
     }
 
-    hashData := hashSignData(this.hashFunc, data)
+    isHash := false
+    hashData := data
+    if this.hashFunc == crypto.SHA512 {
+        hashData = hashSignData(this.hashFunc, data)
+        isHash = true
+    }
 
     signData, err := priv.Sign(rand.Reader, hashData, crypto.Hash(0))
     if err != nil {
         return nil, nil, err
     }
 
-    return hashData, signData, nil
+    var hashedData []byte
+    if isHash {
+        hashedData = hashData
+    }
+
+    return hashedData, signData, nil
 }
 
 // 验证
-func (this KeySignWithEdDsa) Verify(pkey crypto.PublicKey, signed []byte, signature []byte) (bool, error) {
+func (this KeySignWithEdDSA) Verify(pkey crypto.PublicKey, signed []byte, signature []byte) (bool, error) {
     var pub ed25519.PublicKey
     var ok bool
 
@@ -53,7 +63,10 @@ func (this KeySignWithEdDsa) Verify(pkey crypto.PublicKey, signed []byte, signat
         return false, errors.New("pkcs7: PublicKey is not ed25519 PublicKey")
     }
 
-    hashData := hashSignData(this.hashFunc, signed)
+    hashData := signed
+    if this.hashFunc == crypto.SHA512 {
+        hashData = hashSignData(this.hashFunc, signed)
+    }
 
     return ed25519.Verify(pub, hashData, signature), nil
 }

@@ -26,6 +26,41 @@ var (
     oidEncryptionAlgorithmRSA = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 1}
 )
 
+var (
+    // SM2 Signed Data OIDs
+    OidSM2Data                = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 1}
+    OidSM2SignedData          = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 2}
+    OidSM2EnvelopedData       = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 3}
+    OidSM2SignedEnvelopedData = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 4}
+    OidSM2EncryptedData       = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 5}
+
+    // Digest Algorithms
+    // OidDigestAlgorithmSM3 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 401}
+    // SM2Sign-with-SM3
+    OidDigestAlgorithmSM2SM3 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 501}
+    // Signature Algorithms SM2-1
+    OidDigestEncryptionAlgorithmSM2 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 301, 1}
+
+    // Encryption Algorithms SM2-3
+    OidKeyEncryptionAlgorithmSM2 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 301, 3}
+
+    // SM9 Signed Data OIDs
+    OidSM9Data                = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 1}
+    OidSM9SignedData          = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 2}
+    OidSM9EnvelopedData       = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 3}
+    OidSM9SignedEnvelopedData = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 4}
+    OidSM9EncryptedData       = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 5}
+
+    // SM9Sign-with-SM3
+    OidDigestAlgorithmSM9SM3 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 502}
+
+    // Signature Algorithms SM9-1
+    OidDigestEncryptionAlgorithmSM9 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 302, 1}
+
+    // Encryption Algorithms SM9-3
+    OidKeyEncryptionAlgorithmSM9 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 302, 3}
+)
+
 // PKCS7 Represents a PKCS7 structure
 type PKCS7 struct {
     Content      []byte
@@ -168,9 +203,8 @@ func parseSignFromOid(signOid asn1.ObjectIdentifier, hashOid asn1.ObjectIdentifi
 
     newSignFunc := signFunc()
 
-    hashoid := hashOid.String()
     if !newSignFunc.HashOID().Equal(hashOid) {
-        return nil, fmt.Errorf("pkcs7: signHash (OID: %s) is not same hashOid (OID: %s)", oid, hashoid)
+        return nil, fmt.Errorf("pkcs7: signHash (OID: %s) is not same hashOid (OID: %s)", oid, hashOid.String())
     }
 
     return newSignFunc, nil

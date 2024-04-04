@@ -13,169 +13,169 @@ import (
 
 var (
     // dsa 签名
-    oidDigestAlgorithmDSASHA1   = asn1.ObjectIdentifier{1, 2, 840, 10040, 4, 3}
-    oidDigestAlgorithmDSASHA224 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 3, 1}
-    oidDigestAlgorithmDSASHA256 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 3, 2}
+    OidEncryptionAlgorithmDSASHA1   = asn1.ObjectIdentifier{1, 2, 840, 10040, 4, 3}
+    OidEncryptionAlgorithmDSASHA224 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 3, 1}
+    OidEncryptionAlgorithmDSASHA256 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 3, 2}
 
     // ecdsa 签名
-    oidDigestAlgorithmECDSASHA1   = asn1.ObjectIdentifier{1, 2, 840, 10045, 4, 1}
-    oidDigestAlgorithmECDSASHA224 = asn1.ObjectIdentifier{1, 2, 840, 10045, 4, 3, 1}
-    oidDigestAlgorithmECDSASHA256 = asn1.ObjectIdentifier{1, 2, 840, 10045, 4, 3, 2}
-    oidDigestAlgorithmECDSASHA384 = asn1.ObjectIdentifier{1, 2, 840, 10045, 4, 3, 3}
-    oidDigestAlgorithmECDSASHA512 = asn1.ObjectIdentifier{1, 2, 840, 10045, 4, 3, 4}
+    OidEncryptionAlgorithmECDSASHA1   = asn1.ObjectIdentifier{1, 2, 840, 10045, 4, 1}
+    OidEncryptionAlgorithmECDSASHA224 = asn1.ObjectIdentifier{1, 2, 840, 10045, 4, 3, 1}
+    OidEncryptionAlgorithmECDSASHA256 = asn1.ObjectIdentifier{1, 2, 840, 10045, 4, 3, 2}
+    OidEncryptionAlgorithmECDSASHA384 = asn1.ObjectIdentifier{1, 2, 840, 10045, 4, 3, 3}
+    OidEncryptionAlgorithmECDSASHA512 = asn1.ObjectIdentifier{1, 2, 840, 10045, 4, 3, 4}
 
     // rsa 签名
-    oidDigestAlgorithmRSAMD5    = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 4}
-    oidDigestAlgorithmRSASHA1   = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 5}
-    oidDigestAlgorithmRSASHA224 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 14}
-    oidDigestAlgorithmRSASHA256 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 11}
-    oidDigestAlgorithmRSASHA384 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 12}
-    oidDigestAlgorithmRSASHA512 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 13}
-    oidDigestAlgorithmRSASM3    = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 504}
+    OidEncryptionAlgorithmRSAMD5    = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 4}
+    OidEncryptionAlgorithmRSASHA1   = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 5}
+    OidEncryptionAlgorithmRSASHA224 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 14}
+    OidEncryptionAlgorithmRSASHA256 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 11}
+    OidEncryptionAlgorithmRSASHA384 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 12}
+    OidEncryptionAlgorithmRSASHA512 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 13}
+    OidEncryptionAlgorithmRSASM3    = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 504}
 
     // eddsa 签名
-    oidDigestAlgorithmEd25519   = asn1.ObjectIdentifier{1, 3, 101, 112}
+    OidEncryptionAlgorithmEd25519 = asn1.ObjectIdentifier{1, 3, 101, 112}
 
     // sm2 签名
-    oidDigestAlgorithmSM2SM3    = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 501}
+    OidEncryptionAlgorithmSM2SM3 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 501}
 )
 
 var KeySignWithDSASHA1 = KeySignWithDSA{
     hashFunc:   crypto.SHA1,
-    hashId:     oidDigestAlgorithmSHA1,
-    identifier: oidDigestAlgorithmDSASHA1,
+    hashId:     OidDigestAlgorithmSHA1,
+    identifier: OidEncryptionAlgorithmDSASHA1,
 }
 var KeySignWithDSASHA224 = KeySignWithDSA{
     hashFunc:   crypto.SHA224,
-    hashId:     oidDigestAlgorithmSHA224,
-    identifier: oidDigestAlgorithmDSASHA224,
+    hashId:     OidDigestAlgorithmSHA224,
+    identifier: OidEncryptionAlgorithmDSASHA224,
 }
 var KeySignWithDSASHA256 = KeySignWithDSA{
     hashFunc:   crypto.SHA256,
-    hashId:     oidDigestAlgorithmSHA256,
-    identifier: oidDigestAlgorithmDSASHA256,
+    hashId:     OidDigestAlgorithmSHA256,
+    identifier: OidEncryptionAlgorithmDSASHA256,
 }
 
-var KeySignWithEcdsaSHA1 = KeySignWithEcdsa{
+var KeySignWithECDSASHA1 = KeySignWithECDSA{
     hashFunc:   crypto.SHA1,
-    hashId:     oidDigestAlgorithmSHA1,
-    identifier: oidDigestAlgorithmECDSASHA1,
+    hashId:     OidDigestAlgorithmSHA1,
+    identifier: OidEncryptionAlgorithmECDSASHA1,
 }
-var KeySignWithEcdsaSHA224 = KeySignWithEcdsa{
+var KeySignWithECDSASHA224 = KeySignWithECDSA{
     hashFunc:   crypto.SHA224,
-    hashId:     oidDigestAlgorithmSHA224,
-    identifier: oidDigestAlgorithmECDSASHA224,
+    hashId:     OidDigestAlgorithmSHA224,
+    identifier: OidEncryptionAlgorithmECDSASHA224,
 }
-var KeySignWithEcdsaSHA256 = KeySignWithEcdsa{
+var KeySignWithECDSASHA256 = KeySignWithECDSA{
     hashFunc:   crypto.SHA256,
-    hashId:     oidDigestAlgorithmSHA256,
-    identifier: oidDigestAlgorithmECDSASHA256,
+    hashId:     OidDigestAlgorithmSHA256,
+    identifier: OidEncryptionAlgorithmECDSASHA256,
 }
-var KeySignWithEcdsaSHA384 = KeySignWithEcdsa{
+var KeySignWithECDSASHA384 = KeySignWithECDSA{
     hashFunc:   crypto.SHA384,
-    hashId:     oidDigestAlgorithmSHA384,
-    identifier: oidDigestAlgorithmECDSASHA384,
+    hashId:     OidDigestAlgorithmSHA384,
+    identifier: OidEncryptionAlgorithmECDSASHA384,
 }
-var KeySignWithEcdsaSHA512 = KeySignWithEcdsa{
+var KeySignWithECDSASHA512 = KeySignWithECDSA{
     hashFunc:   crypto.SHA512,
-    hashId:     oidDigestAlgorithmSHA512,
-    identifier: oidDigestAlgorithmECDSASHA512,
+    hashId:     OidDigestAlgorithmSHA512,
+    identifier: OidEncryptionAlgorithmECDSASHA512,
 }
 
-var KeySignWithRsaMD5 = KeySignWithRsa{
+var KeySignWithRSAMD5 = KeySignWithRSA{
     hashFunc:   crypto.MD5,
-    hashId:     oidDigestAlgorithmMd5,
-    identifier: oidDigestAlgorithmRSAMD5,
+    hashId:     OidDigestAlgorithmMd5,
+    identifier: OidEncryptionAlgorithmRSAMD5,
 }
-var KeySignWithRsaSHA1 = KeySignWithRsa{
+var KeySignWithRSASHA1 = KeySignWithRSA{
     hashFunc:   crypto.SHA1,
-    hashId:     oidDigestAlgorithmSHA1,
-    identifier: oidDigestAlgorithmRSASHA1,
+    hashId:     OidDigestAlgorithmSHA1,
+    identifier: OidEncryptionAlgorithmRSASHA1,
 }
-var KeySignWithRsaSHA224 = KeySignWithRsa{
+var KeySignWithRSASHA224 = KeySignWithRSA{
     hashFunc:   crypto.SHA224,
-    hashId:     oidDigestAlgorithmSHA224,
-    identifier: oidDigestAlgorithmRSASHA224,
+    hashId:     OidDigestAlgorithmSHA224,
+    identifier: OidEncryptionAlgorithmRSASHA224,
 }
-var KeySignWithRsaSHA256 = KeySignWithRsa{
+var KeySignWithRSASHA256 = KeySignWithRSA{
     hashFunc:   crypto.SHA256,
-    hashId:     oidDigestAlgorithmSHA256,
-    identifier: oidDigestAlgorithmRSASHA256,
+    hashId:     OidDigestAlgorithmSHA256,
+    identifier: OidEncryptionAlgorithmRSASHA256,
 }
-var KeySignWithRsaSHA384 = KeySignWithRsa{
+var KeySignWithRSASHA384 = KeySignWithRSA{
     hashFunc:   crypto.SHA384,
-    hashId:     oidDigestAlgorithmSHA384,
-    identifier: oidDigestAlgorithmRSASHA384,
+    hashId:     OidDigestAlgorithmSHA384,
+    identifier: OidEncryptionAlgorithmRSASHA384,
 }
-var KeySignWithRsaSHA512 = KeySignWithRsa{
+var KeySignWithRSASHA512 = KeySignWithRSA{
     hashFunc:   crypto.SHA512,
-    hashId:     oidDigestAlgorithmSHA512,
-    identifier: oidDigestAlgorithmRSASHA512,
+    hashId:     OidDigestAlgorithmSHA512,
+    identifier: OidEncryptionAlgorithmRSASHA512,
 }
 
-var KeySignWithEdDsaSHA1 = KeySignWithRsa{
+var KeySignWithEdDSASHA1 = KeySignWithEdDSA{
     hashFunc:   crypto.SHA1,
-    hashId:     oidDigestAlgorithmSHA1,
-    identifier: oidDigestAlgorithmEd25519,
+    hashId:     OidDigestAlgorithmSHA1,
+    identifier: OidEncryptionAlgorithmEd25519,
 }
 
 var KeySignWithSM2SM3 = KeySignWithSM2{
     hashFunc:   sm3.New,
-    hashId:     oidDigestAlgorithmSM3,
-    identifier: oidDigestAlgorithmSM2SM3,
+    hashId:     OidDigestAlgorithmSM3,
+    identifier: OidEncryptionAlgorithmSM2SM3,
 }
 
 func init() {
-    AddKeySign(oidDigestAlgorithmDSASHA1, func() KeySign {
+    AddKeySign(OidEncryptionAlgorithmDSASHA1, func() KeySign {
         return KeySignWithDSASHA1
     })
-    AddKeySign(oidDigestAlgorithmDSASHA224, func() KeySign {
+    AddKeySign(OidEncryptionAlgorithmDSASHA224, func() KeySign {
         return KeySignWithDSASHA224
     })
-    AddKeySign(oidDigestAlgorithmDSASHA256, func() KeySign {
+    AddKeySign(OidEncryptionAlgorithmDSASHA256, func() KeySign {
         return KeySignWithDSASHA256
     })
 
-    AddKeySign(oidDigestAlgorithmECDSASHA1, func() KeySign {
-        return KeySignWithEcdsaSHA1
+    AddKeySign(OidEncryptionAlgorithmECDSASHA1, func() KeySign {
+        return KeySignWithECDSASHA1
     })
-    AddKeySign(oidDigestAlgorithmECDSASHA224, func() KeySign {
-        return KeySignWithEcdsaSHA224
+    AddKeySign(OidEncryptionAlgorithmECDSASHA224, func() KeySign {
+        return KeySignWithECDSASHA224
     })
-    AddKeySign(oidDigestAlgorithmECDSASHA256, func() KeySign {
-        return KeySignWithEcdsaSHA256
+    AddKeySign(OidEncryptionAlgorithmECDSASHA256, func() KeySign {
+        return KeySignWithECDSASHA256
     })
-    AddKeySign(oidDigestAlgorithmECDSASHA384, func() KeySign {
-        return KeySignWithEcdsaSHA384
+    AddKeySign(OidEncryptionAlgorithmECDSASHA384, func() KeySign {
+        return KeySignWithECDSASHA384
     })
-    AddKeySign(oidDigestAlgorithmECDSASHA512, func() KeySign {
-        return KeySignWithEcdsaSHA512
-    })
-
-    AddKeySign(oidDigestAlgorithmRSAMD5, func() KeySign {
-        return KeySignWithRsaMD5
-    })
-    AddKeySign(oidDigestAlgorithmRSASHA1, func() KeySign {
-        return KeySignWithRsaSHA1
-    })
-    AddKeySign(oidDigestAlgorithmRSASHA224, func() KeySign {
-        return KeySignWithRsaSHA224
-    })
-    AddKeySign(oidDigestAlgorithmRSASHA256, func() KeySign {
-        return KeySignWithRsaSHA256
-    })
-    AddKeySign(oidDigestAlgorithmRSASHA384, func() KeySign {
-        return KeySignWithRsaSHA384
-    })
-    AddKeySign(oidDigestAlgorithmRSASHA512, func() KeySign {
-        return KeySignWithRsaSHA512
+    AddKeySign(OidEncryptionAlgorithmECDSASHA512, func() KeySign {
+        return KeySignWithECDSASHA512
     })
 
-    AddKeySign(oidDigestAlgorithmEd25519, func() KeySign {
-        return KeySignWithEdDsaSHA1
+    AddKeySign(OidEncryptionAlgorithmRSAMD5, func() KeySign {
+        return KeySignWithRSAMD5
+    })
+    AddKeySign(OidEncryptionAlgorithmRSASHA1, func() KeySign {
+        return KeySignWithRSASHA1
+    })
+    AddKeySign(OidEncryptionAlgorithmRSASHA224, func() KeySign {
+        return KeySignWithRSASHA224
+    })
+    AddKeySign(OidEncryptionAlgorithmRSASHA256, func() KeySign {
+        return KeySignWithRSASHA256
+    })
+    AddKeySign(OidEncryptionAlgorithmRSASHA384, func() KeySign {
+        return KeySignWithRSASHA384
+    })
+    AddKeySign(OidEncryptionAlgorithmRSASHA512, func() KeySign {
+        return KeySignWithRSASHA512
     })
 
-    AddKeySign(oidDigestAlgorithmSM2SM3, func() KeySign {
+    AddKeySign(OidEncryptionAlgorithmEd25519, func() KeySign {
+        return KeySignWithEdDSASHA1
+    })
+
+    AddKeySign(OidEncryptionAlgorithmSM2SM3, func() KeySign {
         return KeySignWithSM2SM3
     })
 }

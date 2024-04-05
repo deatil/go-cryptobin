@@ -1,4 +1,4 @@
-package encrypt
+package pkcs7
 
 import(
     "github.com/deatil/go-cryptobin/pkcs/pbes2"

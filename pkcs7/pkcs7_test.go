@@ -10,10 +10,25 @@ import (
     "crypto/rand"
     "encoding/pem"
 
-    "github.com/deatil/go-cryptobin/pkcs7/sign"
-    "github.com/deatil/go-cryptobin/pkcs7/encrypt"
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
+
+func decodePEM(p string) []byte {
+    b, _ := pem.Decode([]byte(p))
+    return b.Bytes
+}
+
+func decodeCert(p string) *x509.Certificate {
+    der := decodePEM(p)
+    cert, _ := x509.ParseCertificate(der)
+    return cert
+}
+
+func decodePrivateKey(p string) any {
+    der := decodePEM(p)
+    parsedKey, _ := x509.ParsePKCS8PrivateKey(der)
+    return parsedKey
+}
 
 var testEncryptedTestCertificate = `-----BEGIN CERTIFICATE-----
 MIICZTCCAc6gAwIBAgIQAOj+a/ymkrFvZ7V3lPauczANBgkqhkiG9w0BAQsFADAV
@@ -47,30 +62,13 @@ eCRSVO98IPeKakI0HnOboO7AcAx8waOgz9x3jdnwZojAbAGDUg/NWGXrDV7ffIjY
 HYjNDaIbnlqN9g==
 -----END PRIVATE KEY-----`
 
-type testFixture struct {
-    Certificate *x509.Certificate
-    PrivateKey  *rsa.PrivateKey
-}
-
-var testFixtureresult testFixture
-
-func init() {
-    derBlock1, _ := pem.Decode([]byte(testEncryptedTestCertificate))
-    derBlock2, _ := pem.Decode([]byte(testEncryptedTestPrivateKey))
-
-    testFixtureresult.Certificate, _ = x509.ParseCertificate(derBlock1.Bytes)
-    parsedKey, _ := x509.ParsePKCS8PrivateKey(derBlock2.Bytes)
-
-    testFixtureresult.PrivateKey, _ = parsedKey.(*rsa.PrivateKey)
-}
-
 func signAndDetach(content []byte, cert *x509.Certificate, privkey *rsa.PrivateKey) (signed []byte, err error) {
-    toBeSigned, err := sign.NewSignedData(content)
+    toBeSigned, err := NewSignedData(content)
     if err != nil {
         err = fmt.Errorf("Cannot initialize signed data: %s", err)
         return
     }
-    if err = toBeSigned.AddSigner(cert, privkey, sign.SignerInfoConfig{}); err != nil {
+    if err = toBeSigned.AddSigner(cert, privkey, SignerInfoConfig{}); err != nil {
         err = fmt.Errorf("Cannot add signer: %s", err)
         return
     }
@@ -87,7 +85,7 @@ func signAndDetach(content []byte, cert *x509.Certificate, privkey *rsa.PrivateK
     // Verify the signature
     pem.Encode(os.Stdout, &pem.Block{Type: "PKCS7", Bytes: signed})
 
-    p7, err := sign.Parse(signed)
+    p7, err := Parse(signed)
     if err != nil {
         err = fmt.Errorf("Cannot parse our signed data: %s", err)
         return
@@ -107,12 +105,12 @@ func signAndDetach(content []byte, cert *x509.Certificate, privkey *rsa.PrivateK
 
     // 加密
     key := []byte("123456789012werfde1234567890rt32")
-    enData, err := encrypt.EncryptUsingPSK(rand.Reader, signed, key, encrypt.AES256CBC)
+    enData, err := EncryptUsingPSK(rand.Reader, signed, key, AES256CBC)
     enDataw := EncodePkcs7ToPem(enData, "ENCRYPTED PKCS7")
 
     // 解密
     deData, _ := ParsePkcs7Pem(enDataw)
-    deDataw, err := encrypt.DecryptUsingPSK(deData, key)
+    deDataw, err := DecryptUsingPSK(deData, key)
 
     if string(signed) != string(deDataw) {
         err = fmt.Errorf("Cannot Decrypt our signed data: %s", err)
@@ -126,8 +124,11 @@ func Test_SignAndDetach(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
     assertError := cryptobin_test.AssertErrorT(t)
 
-    pkcs7Data := testFixtureresult
-    pkcs7Sign, pkcs7err := signAndDetach([]byte("hello world"), pkcs7Data.Certificate, pkcs7Data.PrivateKey)
+    cert := decodeCert(testEncryptedTestCertificate)
+    parsedKey := decodePrivateKey(testEncryptedTestPrivateKey)
+    privateKey := parsedKey.(*rsa.PrivateKey)
+
+    pkcs7Sign, pkcs7err := signAndDetach([]byte("hello world"), cert, privateKey)
 
     assertError(pkcs7err, "SignAndDetach-Decode")
 
@@ -135,12 +136,12 @@ func Test_SignAndDetach(t *testing.T) {
 }
 
 func signAndDetach2(content []byte, cert *x509.Certificate, privkey *rsa.PrivateKey) (signed []byte, err error) {
-    toBeSigned, err := sign.NewSignedData(content)
+    toBeSigned, err := NewSignedData(content)
     if err != nil {
         err = fmt.Errorf("Cannot initialize signed data: %s", err)
         return
     }
-    if err = toBeSigned.AddSigner(cert, privkey, sign.SignerInfoConfig{}); err != nil {
+    if err = toBeSigned.AddSigner(cert, privkey, SignerInfoConfig{}); err != nil {
         err = fmt.Errorf("Cannot add signer: %s", err)
         return
     }
@@ -157,7 +158,7 @@ func signAndDetach2(content []byte, cert *x509.Certificate, privkey *rsa.Private
     // Verify the signature
     pem.Encode(os.Stdout, &pem.Block{Type: "PKCS7", Bytes: signed})
 
-    p7, err := sign.Parse(signed)
+    p7, err := Parse(signed)
     if err != nil {
         err = fmt.Errorf("Cannot parse our signed data: %s", err)
         return
@@ -176,12 +177,12 @@ func signAndDetach2(content []byte, cert *x509.Certificate, privkey *rsa.Private
     }
 
     // 加密
-    enData, err := encrypt.Encrypt(rand.Reader, signed, []*x509.Certificate{cert})
+    enData, err := Encrypt(rand.Reader, signed, []*x509.Certificate{cert})
     enDataw := EncodePkcs7ToPem(enData, "ENCRYPTED PKCS7")
 
     // 解密
     deData, _ := ParsePkcs7Pem(enDataw)
-    deDataw, err := encrypt.Decrypt(deData, cert, privkey)
+    deDataw, err := Decrypt(deData, cert, privkey)
 
     if string(signed) != string(deDataw) {
         err = fmt.Errorf("Cannot Decrypt our signed data: %s", err)
@@ -195,8 +196,11 @@ func Test_SignAndDetach2(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
     assertError := cryptobin_test.AssertErrorT(t)
 
-    pkcs7Data := testFixtureresult
-    pkcs7Sign, pkcs7err := signAndDetach2([]byte("hello world"), pkcs7Data.Certificate, pkcs7Data.PrivateKey)
+    cert := decodeCert(testEncryptedTestCertificate)
+    parsedKey := decodePrivateKey(testEncryptedTestPrivateKey)
+    privateKey := parsedKey.(*rsa.PrivateKey)
+
+    pkcs7Sign, pkcs7err := signAndDetach2([]byte("hello world"), cert, privateKey)
 
     assertError(pkcs7err, "SignAndDetach2-Decode")
 

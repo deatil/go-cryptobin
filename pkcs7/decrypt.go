@@ -1,4 +1,4 @@
-package encrypt
+package pkcs7
 
 import (
     "fmt"
@@ -159,8 +159,4 @@ func selectRecipientForCertificate(recipients []recipientInfo, cert *x509.Certif
     }
 
     return recipientInfo{}
-}
-
-func isCertMatchForIssuerAndSerial(cert *x509.Certificate, ias issuerAndSerial) bool {
-    return cert.SerialNumber.Cmp(ias.SerialNumber) == 0 && bytes.Equal(cert.RawIssuer, ias.IssuerName.FullBytes)
 }

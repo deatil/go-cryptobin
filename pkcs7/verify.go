@@ -1,4 +1,4 @@
-package sign
+package pkcs7
 
 import (
     "fmt"
@@ -116,7 +116,7 @@ func verifySignatureAtTime(p7 *PKCS7, signer signerInfo, truststore *x509.CertPo
     }
 
     // 签名
-    signFunc, err := parseSignFromOid(signer.DigestEncryptionAlgorithm.Algorithm, signer.DigestAlgorithm.Algorithm)
+    signFunc, err := parseSignFromOid(signer.DigestEncryptionAlgorithm.Algorithm)
     if err != nil {
         return err
     }
@@ -186,7 +186,7 @@ func verifySignature(p7 *PKCS7, signer signerInfo, truststore *x509.CertPool) (e
     }
 
     // 签名
-    signFunc, err := parseSignFromOid(signer.DigestEncryptionAlgorithm.Algorithm, signer.DigestAlgorithm.Algorithm)
+    signFunc, err := parseSignFromOid(signer.DigestEncryptionAlgorithm.Algorithm)
     if err != nil {
         return err
     }

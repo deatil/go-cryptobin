@@ -1,4 +1,4 @@
-package sign
+package pkcs7
 
 import (
     "fmt"
@@ -40,9 +40,9 @@ func NewSignedData(data []byte) (*SignedData, error) {
     }
 
     return &SignedData{
-        sd: sd,
-        data: data,
-        digestOid: OidDigestAlgorithmSHA1,
+        sd:            sd,
+        data:          data,
+        digestOid:     OidDigestAlgorithmSHA1,
         encryptionOid: OidEncryptionAlgorithmRSASHA1,
     }, nil
 }
@@ -189,7 +189,7 @@ func (this *SignedData) AddSignerChain(ee *x509.Certificate, pkey crypto.Private
         return err
     }
 
-    signFunc, err := parseSignFromOid(this.encryptionOid, this.digestOid)
+    signFunc, err := parseSignFromOid(this.encryptionOid)
 
     // create signature of signed attributes
     _, signature, err := signFunc.Sign(pkey, finalAttrsBytes)
@@ -228,13 +228,15 @@ func (this *SignedData) SignWithoutAttr(ee *x509.Certificate, pkey crypto.Privat
     this.sd.DigestAlgorithmIdentifiers = append(this.sd.DigestAlgorithmIdentifiers, pkix.AlgorithmIdentifier{Algorithm: this.digestOid})
 
     // 签名
-    signFunc, err := parseSignFromOid(this.encryptionOid, this.digestOid)
+    signFunc, err := parseSignFromOid(this.encryptionOid)
 
     // create signature of signed attributes
     hashData, signData, err := signFunc.Sign(pkey, this.data)
     if err != nil {
         return err
     }
+
+    this.digestOid = signFunc.HashOID()
 
     this.messageDigest = hashData
     signature = signData
@@ -287,7 +289,9 @@ func (this *SignedData) SetContentType(contentType asn1.ObjectIdentifier) {
 // Detach removes content from the signed data struct to make it a detached signature.
 // This must be called right before Finish()
 func (this *SignedData) Detach() {
-    this.sd.ContentInfo = contentInfo{ContentType: oidData}
+    this.sd.ContentInfo = contentInfo{
+        ContentType: oidData,
+    }
 }
 
 // GetSignedData returns the private Signed Data
@@ -379,7 +383,9 @@ func DegenerateCertificate(cert []byte) ([]byte, error) {
         return nil, err
     }
 
-    emptyContent := contentInfo{ContentType: oidData}
+    emptyContent := contentInfo{
+        ContentType: oidData,
+    }
     sd := signedData{
         Version:      1,
         ContentInfo:  emptyContent,

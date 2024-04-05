@@ -1,4 +1,4 @@
-package encrypt
+package pkcs7
 
 import (
     "errors"

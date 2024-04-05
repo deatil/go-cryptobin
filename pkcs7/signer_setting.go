@@ -1,4 +1,4 @@
-package sign
+package pkcs7
 
 import (
     "crypto"
@@ -13,6 +13,7 @@ import (
 
 var (
     // dsa 签名
+    OidEncryptionAlgorithmDSA       = asn1.ObjectIdentifier{1, 2, 840, 10040, 4, 1}
     OidEncryptionAlgorithmDSASHA1   = asn1.ObjectIdentifier{1, 2, 840, 10040, 4, 3}
     OidEncryptionAlgorithmDSASHA224 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 3, 1}
     OidEncryptionAlgorithmDSASHA256 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 3, 2}
@@ -24,7 +25,12 @@ var (
     OidEncryptionAlgorithmECDSASHA384 = asn1.ObjectIdentifier{1, 2, 840, 10045, 4, 3, 3}
     OidEncryptionAlgorithmECDSASHA512 = asn1.ObjectIdentifier{1, 2, 840, 10045, 4, 3, 4}
 
+    OidEncryptionAlgorithmECDSAP256 = asn1.ObjectIdentifier{1, 2, 840, 10045, 3, 1, 7}
+    OidEncryptionAlgorithmECDSAP384 = asn1.ObjectIdentifier{1, 3, 132, 0, 34}
+    OidEncryptionAlgorithmECDSAP521 = asn1.ObjectIdentifier{1, 3, 132, 0, 35}
+
     // rsa 签名
+    OidEncryptionAlgorithmRSA       = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 1}
     OidEncryptionAlgorithmRSAMD5    = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 4}
     OidEncryptionAlgorithmRSASHA1   = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 5}
     OidEncryptionAlgorithmRSASHA224 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 14}

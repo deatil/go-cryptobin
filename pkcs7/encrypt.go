@@ -1,25 +1,12 @@
-package encrypt
+package pkcs7
 
 import (
     "io"
     "errors"
-    "math/big"
+    "encoding/asn1"
     "crypto/x509"
     "crypto/x509/pkix"
-    "encoding/asn1"
 )
-
-var (
-    // Signed Data OIDs
-    oidData          = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 1}
-    oidEnvelopedData = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 3}
-    oidEncryptedData = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 6}
-)
-
-type issuerAndSerial struct {
-    IssuerName   asn1.RawValue
-    SerialNumber *big.Int
-}
 
 type envelopedData struct {
     Version              int
@@ -43,11 +30,6 @@ type encryptedContentInfo struct {
     ContentType                asn1.ObjectIdentifier
     ContentEncryptionAlgorithm pkix.AlgorithmIdentifier
     EncryptedContent           asn1.RawValue `asn1:"tag:0,optional"`
-}
-
-type contentInfo struct {
-    ContentType asn1.ObjectIdentifier
-    Content     asn1.RawValue `asn1:"explicit,optional,tag:0"`
 }
 
 var ErrUnsupportedEncryptionAlgorithm = errors.New("pkcs7: cannot encrypt content: only DES-CBC, AES-CBC, and AES-GCM supported")

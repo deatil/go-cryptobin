@@ -10,8 +10,9 @@ type (
 )
 
 var (
-    AddCipher = pbes2.AddCipher
-    GetCipher = pbes2.GetCipher
+    AddCipher     = pbes2.AddCipher
+    GetCipher     = pbes2.GetCipher
+    GetGmSMCipher = pbes2.GetGmSMCipher
 
     // 帮助函数
     GetCipherFromName   = pbes2.GetCipherFromName

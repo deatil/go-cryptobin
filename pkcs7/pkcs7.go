@@ -5,11 +5,11 @@ import (
     "sort"
     "errors"
     "bytes"
-    "crypto/x509"
     "crypto/x509/pkix"
     "encoding/asn1"
 
     "github.com/deatil/go-cryptobin/ber"
+    "github.com/deatil/go-cryptobin/x509"
 )
 
 var (
@@ -17,8 +17,8 @@ var (
     oidData                   = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 1}
     oidSignedData             = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 2}
     oidEnvelopedData          = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 3}
-    OIDSignedEnvelopedData    = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 4}
-    OIDDigestData             = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 5}
+    oidSignedEnvelopedData    = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 4}
+    oidDigestData             = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 5}
     oidEncryptedData          = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 7, 6}
     oidAttributeContentType   = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 9, 3}
     oidAttributeMessageDigest = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 9, 4}
@@ -27,37 +27,37 @@ var (
 
 var (
     // SM2 Signed Data OIDs
-    OidSM2Data                = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 1}
-    OidSM2SignedData          = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 2}
-    OidSM2EnvelopedData       = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 3}
-    OidSM2SignedEnvelopedData = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 4}
-    OidSM2EncryptedData       = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 5}
+    oidSM2Data                = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 1}
+    oidSM2SignedData          = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 2}
+    oidSM2EnvelopedData       = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 3}
+    oidSM2SignedEnvelopedData = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 4}
+    oidSM2EncryptedData       = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 2, 5}
 
     // Digest Algorithms
-    // OidDigestAlgorithmSM3 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 401}
+    // oidDigestAlgorithmSM3 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 401}
     // SM2Sign-with-SM3
-    OidDigestAlgorithmSM2SM3 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 501}
+    oidDigestAlgorithmSM2SM3 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 501}
     // Signature Algorithms SM2-1
-    OidDigestEncryptionAlgorithmSM2 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 301, 1}
+    oidDigestEncryptionAlgorithmSM2 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 301, 1}
 
     // Encryption Algorithms SM2-3
-    OidKeyEncryptionAlgorithmSM2 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 301, 3}
+    oidKeyEncryptionAlgorithmSM2 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 301, 3}
 
     // SM9 Signed Data OIDs
-    OidSM9Data                = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 1}
-    OidSM9SignedData          = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 2}
-    OidSM9EnvelopedData       = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 3}
-    OidSM9SignedEnvelopedData = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 4}
-    OidSM9EncryptedData       = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 5}
+    oidSM9Data                = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 1}
+    oidSM9SignedData          = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 2}
+    oidSM9EnvelopedData       = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 3}
+    oidSM9SignedEnvelopedData = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 4}
+    oidSM9EncryptedData       = asn1.ObjectIdentifier{1, 2, 156, 10197, 6, 1, 4, 4, 5}
 
     // SM9Sign-with-SM3
-    OidDigestAlgorithmSM9SM3 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 502}
+    oidDigestAlgorithmSM9SM3 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 502}
 
     // Signature Algorithms SM9-1
-    OidDigestEncryptionAlgorithmSM9 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 302, 1}
+    oidDigestEncryptionAlgorithmSM9 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 302, 1}
 
     // Encryption Algorithms SM9-3
-    OidKeyEncryptionAlgorithmSM9 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 302, 3}
+    oidKeyEncryptionAlgorithmSM9 = asn1.ObjectIdentifier{1, 2, 156, 10197, 1, 302, 3}
 )
 
 // PKCS7 Represents a PKCS7 structure
@@ -102,8 +102,13 @@ func Parse(data []byte) (p7 *PKCS7, err error) {
     }
 
     switch {
-        case info.ContentType.Equal(oidSignedData):
+        case info.ContentType.Equal(oidSignedData) ||
+            info.ContentType.Equal(oidSM2SignedData):
             return parseSignedData(info.Content.Bytes)
+
+        case info.ContentType.Equal(oidSignedEnvelopedData) ||
+            info.ContentType.Equal(oidSM2SignedEnvelopedData):
+            return parseSignedEnvelopedData(info.Content.Bytes)
     }
 
     return nil, ErrUnsupportedContentType
@@ -202,18 +207,20 @@ func parseSignFromOid(signOid asn1.ObjectIdentifier) (KeySign, error) {
     oid := signOid.String()
     signFunc, ok := keySigns[oid]
     if !ok {
-        return nil, fmt.Errorf("pkcs7: unsupported signHash (OID: %s)", oid)
+        return nil, fmt.Errorf("pkcs7: unsupported sign (OID: %s)", oid)
     }
 
     newSignFunc := signFunc()
     return newSignFunc, nil
 }
 
-func parseSignFromHashOid(hashOid asn1.ObjectIdentifier) (KeySign, error) {
+func parseSignFromHashOid(pkey any, hashOid asn1.ObjectIdentifier) (KeySign, error) {
     for _, signFunc := range keySigns {
         newSignFunc := signFunc()
         if newSignFunc.HashOID().Equal(hashOid) {
-            return newSignFunc, nil
+            if newSignFunc.Check(pkey) {
+                return newSignFunc, nil
+            }
         }
     }
 

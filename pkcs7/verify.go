@@ -6,8 +6,9 @@ import (
     "bytes"
     "errors"
     "encoding/asn1"
-    "crypto/x509"
     "crypto/subtle"
+
+    "github.com/deatil/go-cryptobin/x509"
 )
 
 type unsignedData []byte

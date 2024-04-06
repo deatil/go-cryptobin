@@ -53,3 +53,16 @@ func (this KeyEncryptWithRSA) Decrypt(ciphertext []byte, pkey crypto.PrivateKey)
 
     return rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
 }
+
+// 检测证书
+func (this KeyEncryptWithRSA) Check(pkey any) bool {
+    if _, ok := pkey.(*rsa.PrivateKey); ok {
+        return true
+    }
+
+    if _, ok := pkey.(*rsa.PublicKey); ok {
+        return true
+    }
+
+    return false
+}

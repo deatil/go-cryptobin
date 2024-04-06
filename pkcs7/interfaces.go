@@ -27,6 +27,9 @@ type KeySign interface {
 
     // 解密
     Verify(pkey crypto.PublicKey, signed []byte, signature []byte) (bool, error)
+
+    // 检测证书
+    Check(pkey any) bool
 }
 
 var signHashs = make(map[string]func() SignHash)
@@ -55,6 +58,9 @@ type KeyEncrypt interface {
 
     // 解密
     Decrypt(ciphertext []byte, pkey crypto.PrivateKey) ([]byte, error)
+
+    // 检测证书
+    Check(pkey any) bool
 }
 
 var keyens = make(map[string]func() KeyEncrypt)

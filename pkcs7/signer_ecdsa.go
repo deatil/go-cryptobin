@@ -54,3 +54,16 @@ func (this KeySignWithECDSA) Verify(pkey crypto.PublicKey, signed []byte, signat
 
     return ecdsa.VerifyASN1(pub, hashData, signature), nil
 }
+
+// 检测证书
+func (this KeySignWithECDSA) Check(pkey any) bool {
+    if _, ok := pkey.(*ecdsa.PrivateKey); ok {
+        return true
+    }
+
+    if _, ok := pkey.(*ecdsa.PublicKey); ok {
+        return true
+    }
+
+    return false
+}

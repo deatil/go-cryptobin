@@ -70,3 +70,16 @@ func (this KeySignWithEdDSA) Verify(pkey crypto.PublicKey, signed []byte, signat
 
     return ed25519.Verify(pub, hashData, signature), nil
 }
+
+// 检测证书
+func (this KeySignWithEdDSA) Check(pkey any) bool {
+    if _, ok := pkey.(ed25519.PrivateKey); ok {
+        return true
+    }
+
+    if _, ok := pkey.(ed25519.PublicKey); ok {
+        return true
+    }
+
+    return false
+}

@@ -68,3 +68,16 @@ func (this KeySignWithSM2) Verify(pkey crypto.PublicKey, signed []byte, signatur
 
     return pub.Verify(signed, signature, nil), nil
 }
+
+// 检测证书
+func (this KeySignWithSM2) Check(pkey any) bool {
+    if _, ok := pkey.(*sm2.PrivateKey); ok {
+        return true
+    }
+
+    if _, ok := pkey.(*sm2.PublicKey); ok {
+        return true
+    }
+
+    return false
+}

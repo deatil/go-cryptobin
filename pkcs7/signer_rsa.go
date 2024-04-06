@@ -76,3 +76,16 @@ func (this KeySignWithRSA) Verify(pkey crypto.PublicKey, data []byte, signature 
 
     return true, nil
 }
+
+// 检测证书
+func (this KeySignWithRSA) Check(pkey any) bool {
+    if _, ok := pkey.(*rsa.PrivateKey); ok {
+        return true
+    }
+
+    if _, ok := pkey.(*rsa.PublicKey); ok {
+        return true
+    }
+
+    return false
+}

@@ -90,7 +90,7 @@ var KeySignWithECDSASHA512 = KeySignWithECDSA{
 
 var KeySignWithRSAMD5 = KeySignWithRSA{
     hashFunc:   crypto.MD5,
-    hashId:     OidDigestAlgorithmMd5,
+    hashId:     OidDigestAlgorithmMD5,
     identifier: OidEncryptionAlgorithmRSAMD5,
 }
 var KeySignWithRSASHA1 = KeySignWithRSA{
@@ -130,8 +130,14 @@ var KeySignWithSM2SM3 = KeySignWithSM2{
     hashId:     OidDigestAlgorithmSM3,
     identifier: OidEncryptionAlgorithmSM2SM3,
 }
+var KeySignWithSM2WithSM3 = KeySignWithSM2{
+    hashFunc:   sm3.New,
+    hashId:     OidDigestAlgorithmSM3,
+    identifier: oidDigestEncryptionAlgorithmSM2,
+}
 
 func init() {
+    // DSA
     AddKeySign(OidEncryptionAlgorithmDSASHA1, func() KeySign {
         return KeySignWithDSASHA1
     })
@@ -142,6 +148,7 @@ func init() {
         return KeySignWithDSASHA256
     })
 
+    // ECDSA
     AddKeySign(OidEncryptionAlgorithmECDSASHA1, func() KeySign {
         return KeySignWithECDSASHA1
     })
@@ -158,6 +165,7 @@ func init() {
         return KeySignWithECDSASHA512
     })
 
+    // RSA
     AddKeySign(OidEncryptionAlgorithmRSAMD5, func() KeySign {
         return KeySignWithRSAMD5
     })
@@ -177,12 +185,17 @@ func init() {
         return KeySignWithRSASHA512
     })
 
+    // EdDSA
     AddKeySign(OidEncryptionAlgorithmEd25519, func() KeySign {
         return KeySignWithEdDSASHA1
     })
 
+    // SM2
     AddKeySign(OidEncryptionAlgorithmSM2SM3, func() KeySign {
         return KeySignWithSM2SM3
+    })
+    AddKeySign(oidDigestEncryptionAlgorithmSM2, func() KeySign {
+        return KeySignWithSM2WithSM3
     })
 }
 

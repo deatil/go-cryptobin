@@ -6,9 +6,10 @@ import (
     "bytes"
     "math/big"
     "crypto"
-    "crypto/x509"
     "crypto/x509/pkix"
     "encoding/asn1"
+
+    "github.com/deatil/go-cryptobin/x509"
 )
 
 // SignedData is an opaque data structure for creating signed data payloads
@@ -18,6 +19,7 @@ type SignedData struct {
     data, messageDigest []byte
     digestOid           asn1.ObjectIdentifier
     encryptionOid       asn1.ObjectIdentifier
+    mode                Mode
 }
 
 // NewSignedData takes data and initializes a PKCS7 SignedData struct that is
@@ -98,6 +100,11 @@ type rawCertificates struct {
 type issuerAndSerial struct {
     IssuerName   asn1.RawValue
     SerialNumber *big.Int
+}
+
+// This should be called before adding signers
+func (this *SignedData) SetMode(mode Mode) {
+    this.mode = mode
 }
 
 // SetDigestAlgorithm sets the digest algorithm to be used in the signing process.
@@ -290,7 +297,7 @@ func (this *SignedData) SetContentType(contentType asn1.ObjectIdentifier) {
 // This must be called right before Finish()
 func (this *SignedData) Detach() {
     this.sd.ContentInfo = contentInfo{
-        ContentType: oidData,
+        ContentType: this.mode.OidData(),
     }
 }
 
@@ -309,8 +316,13 @@ func (this *SignedData) Finish() ([]byte, error) {
     }
 
     outer := contentInfo{
-        ContentType: oidSignedData,
-        Content:     asn1.RawValue{Class: 2, Tag: 0, Bytes: inner, IsCompound: true},
+        ContentType: this.mode.OidSignedData(),
+        Content:     asn1.RawValue{
+            Class: 2,
+            Tag: 0,
+            Bytes: inner,
+            IsCompound: true,
+        },
     }
 
     return asn1.Marshal(outer)
@@ -372,20 +384,27 @@ func marshalCertificateBytes(certs []byte) (rawCertificates, error) {
     if err != nil {
         return rawCertificates{}, err
     }
+
     return rawCertificates{Raw: b}, nil
 }
 
 // DegenerateCertificate creates a signed data structure containing only the
 // provided certificate or certificate chain.
-func DegenerateCertificate(cert []byte) ([]byte, error) {
+func DegenerateCertificate(cert []byte, mode ...Mode) ([]byte, error) {
     rawCert, err := marshalCertificateBytes(cert)
     if err != nil {
         return nil, err
     }
 
-    emptyContent := contentInfo{
-        ContentType: oidData,
+    useMode := DefaultMode
+    if len(mode) > 0 {
+        useMode = mode[0]
     }
+
+    emptyContent := contentInfo{
+        ContentType: useMode.OidData(),
+    }
+
     sd := signedData{
         Version:      1,
         ContentInfo:  emptyContent,
@@ -399,7 +418,7 @@ func DegenerateCertificate(cert []byte) ([]byte, error) {
     }
 
     signedContent := contentInfo{
-        ContentType: oidSignedData,
+        ContentType: useMode.OidSignedData(),
         Content:     asn1.RawValue{Class: 2, Tag: 0, Bytes: content, IsCompound: true},
     }
 

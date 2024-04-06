@@ -76,3 +76,16 @@ func (this KeySignWithDSA) Verify(pkey crypto.PublicKey, signed []byte, signatur
 
     return dsa.Verify(pub, hashData, r, s), nil
 }
+
+// 检测证书
+func (this KeySignWithDSA) Check(pkey any) bool {
+    if _, ok := pkey.(*dsa.PrivateKey); ok {
+        return true
+    }
+
+    if _, ok := pkey.(*dsa.PublicKey); ok {
+        return true
+    }
+
+    return false
+}

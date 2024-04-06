@@ -6,10 +6,12 @@ import (
     "bytes"
     "testing"
     "crypto/rsa"
-    "crypto/x509"
     "crypto/rand"
+    "crypto/x509"
     "encoding/pem"
+    "encoding/asn1"
 
+    cryptobin_x509 "github.com/deatil/go-cryptobin/x509"
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
@@ -18,9 +20,9 @@ func decodePEM(p string) []byte {
     return b.Bytes
 }
 
-func decodeCert(p string) *x509.Certificate {
+func decodeCert(p string) *cryptobin_x509.Certificate {
     der := decodePEM(p)
-    cert, _ := x509.ParseCertificate(der)
+    cert, _ := cryptobin_x509.ParseCertificate(der)
     return cert
 }
 
@@ -62,7 +64,7 @@ eCRSVO98IPeKakI0HnOboO7AcAx8waOgz9x3jdnwZojAbAGDUg/NWGXrDV7ffIjY
 HYjNDaIbnlqN9g==
 -----END PRIVATE KEY-----`
 
-func signAndDetach(content []byte, cert *x509.Certificate, privkey *rsa.PrivateKey) (signed []byte, err error) {
+func signAndDetach(content []byte, cert *cryptobin_x509.Certificate, privkey *rsa.PrivateKey) (signed []byte, err error) {
     toBeSigned, err := NewSignedData(content)
     if err != nil {
         err = fmt.Errorf("Cannot initialize signed data: %s", err)
@@ -135,7 +137,7 @@ func Test_SignAndDetach(t *testing.T) {
     assertNotEmpty(pkcs7Sign, "SignAndDetach")
 }
 
-func signAndDetach2(content []byte, cert *x509.Certificate, privkey *rsa.PrivateKey) (signed []byte, err error) {
+func signAndDetach2(content []byte, cert *cryptobin_x509.Certificate, privkey *rsa.PrivateKey) (signed []byte, err error) {
     toBeSigned, err := NewSignedData(content)
     if err != nil {
         err = fmt.Errorf("Cannot initialize signed data: %s", err)
@@ -177,7 +179,7 @@ func signAndDetach2(content []byte, cert *x509.Certificate, privkey *rsa.Private
     }
 
     // 加密
-    enData, err := Encrypt(rand.Reader, signed, []*x509.Certificate{cert})
+    enData, err := Encrypt(rand.Reader, signed, []*cryptobin_x509.Certificate{cert})
     enDataw := EncodePkcs7ToPem(enData, "ENCRYPTED PKCS7")
 
     // 解密
@@ -205,4 +207,109 @@ func Test_SignAndDetach2(t *testing.T) {
     assertError(pkcs7err, "SignAndDetach2-Decode")
 
     assertNotEmpty(pkcs7Sign, "SignAndDetach2")
+}
+
+// =========
+
+func signWithAlgorithm(
+    content []byte,
+    cert *cryptobin_x509.Certificate,
+    privkey *rsa.PrivateKey,
+    dOid asn1.ObjectIdentifier,
+    eOid asn1.ObjectIdentifier,
+) (signed []byte, err error) {
+    toBeSigned, err := NewSignedData(content)
+    if err != nil {
+        err = fmt.Errorf("Cannot initialize signed data: %s", err)
+        return
+    }
+
+    toBeSigned.SetDigestAlgorithm(dOid)
+    toBeSigned.SetEncryptionAlgorithm(eOid)
+
+    if err = toBeSigned.AddSigner(cert, privkey, SignerInfoConfig{}); err != nil {
+        err = fmt.Errorf("Cannot add signer: %s", err)
+        return
+    }
+
+    // Detach signature, omit if you want an embedded signature
+    toBeSigned.Detach()
+
+    signed, err = toBeSigned.Finish()
+    if err != nil {
+        err = fmt.Errorf("Cannot finish signing data: %s", err)
+        return
+    }
+
+    // Verify the signature
+    pem.Encode(os.Stdout, &pem.Block{Type: "PKCS7", Bytes: signed})
+
+    p7, err := Parse(signed)
+    if err != nil {
+        err = fmt.Errorf("Cannot parse our signed data: %s", err)
+        return
+    }
+
+    // since the signature was detached, reattach the content here
+    p7.Content = content
+
+    if bytes.Compare(content, p7.Content) != 0 {
+        err = fmt.Errorf("Our content was not in the parsed data:\n\tExpected: %s\n\tActual: %s", content, p7.Content)
+        return
+    }
+    if err = p7.Verify(); err != nil {
+        err = fmt.Errorf("Cannot verify our signed data: %s", err)
+        return
+    }
+
+    return
+}
+
+func Test_SignWithAlgorithm(t *testing.T) {
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    cert := decodeCert(testEncryptedTestCertificate)
+    parsedKey := decodePrivateKey(testEncryptedTestPrivateKey)
+    privateKey := parsedKey.(*rsa.PrivateKey)
+
+    content := []byte("hello world")
+
+    tests := []struct{
+        dOid asn1.ObjectIdentifier
+        eOid asn1.ObjectIdentifier
+    }{
+        {
+            dOid: OidDigestAlgorithmMD5,
+            eOid: OidEncryptionAlgorithmRSAMD5,
+        },
+        {
+            dOid: OidDigestAlgorithmSHA1,
+            eOid: OidEncryptionAlgorithmRSASHA1,
+        },
+        {
+            dOid: OidDigestAlgorithmSHA256,
+            eOid: OidEncryptionAlgorithmRSASHA256,
+        },
+        {
+            dOid: OidDigestAlgorithmSHA512,
+            eOid: OidEncryptionAlgorithmRSASHA512,
+        },
+    }
+
+    for i, test := range tests {
+        t.Run(fmt.Sprintf("[%d] fail", i), func(t *testing.T) {
+            pkcs7Sign, pkcs7err := signWithAlgorithm(
+                content,
+                cert,
+                privateKey,
+                test.dOid,
+                test.eOid,
+            )
+
+            assertError(pkcs7err, "Test_SignWithAlgorithm")
+            assertNotEmpty(pkcs7Sign, "Test_SignWithAlgorithm")
+        })
+    }
+
 }

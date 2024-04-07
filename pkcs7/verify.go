@@ -79,7 +79,7 @@ func verifySignatureAtTime(p7 *PKCS7, signer signerInfo, truststore *x509.CertPo
             return err
         }
 
-        hashFunc, err := parseHashFromOid(signer.DigestAlgorithm.Algorithm)
+        hashFunc, err := getHashFromOid(signer.DigestAlgorithm.Algorithm)
         if err != nil {
             return err
         }
@@ -116,8 +116,8 @@ func verifySignatureAtTime(p7 *PKCS7, signer signerInfo, truststore *x509.CertPo
         }
     }
 
-    // 签名
-    signFunc, err := parseSignFromOid(signer.DigestEncryptionAlgorithm.Algorithm)
+    // sign
+    signFunc, err := getSignatureFunc(signer.DigestEncryptionAlgorithm.Algorithm, signer.DigestAlgorithm.Algorithm)
     if err != nil {
         return err
     }
@@ -148,7 +148,7 @@ func verifySignature(p7 *PKCS7, signer signerInfo, truststore *x509.CertPool) (e
             return err
         }
 
-        hashFunc, err := parseHashFromOid(signer.DigestAlgorithm.Algorithm)
+        hashFunc, err := getHashFromOid(signer.DigestAlgorithm.Algorithm)
         if err != nil {
             return err
         }
@@ -186,8 +186,8 @@ func verifySignature(p7 *PKCS7, signer signerInfo, truststore *x509.CertPool) (e
         }
     }
 
-    // 签名
-    signFunc, err := parseSignFromOid(signer.DigestEncryptionAlgorithm.Algorithm)
+    // sign
+    signFunc, err := getSignatureFunc(signer.DigestEncryptionAlgorithm.Algorithm, signer.DigestAlgorithm.Algorithm)
     if err != nil {
         return err
     }

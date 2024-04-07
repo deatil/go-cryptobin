@@ -739,9 +739,9 @@ func Test_SM2(t *testing.T) {
             },
         },
         NotBefore: time.Now(),
-        NotAfter:  time.Date(2021, time.October, 10, 12, 1, 1, 1, time.UTC),
+        NotAfter:  time.Date(2023, time.October, 10, 12, 1, 1, 1, time.UTC),
 
-        //		SignatureAlgorithm: ECDSAWithSHA256,
+        // SignatureAlgorithm: ECDSAWithSHA256,
         SignatureAlgorithm: SM2WithSM3,
 
         SubjectKeyId: []byte{1, 2, 3, 4},

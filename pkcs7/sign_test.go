@@ -93,7 +93,7 @@ func testSign(t *testing.T, isSM bool, content []byte, sigalgs []testSignOid) {
                     }
 
                     if err := p7.VerifyWithChain(truststore); err != nil {
-                        // t.Errorf("test %s/%s/%s: cannot verify signed data: %s", sigalgroot, sigalginter, sigalgsigner, err)
+                        t.Errorf("test %s/%s/%s: cannot verify signed data: %s", sigalgroot, sigalginter, sigalgsigner, err)
                     }
 
                     if !signerDigest.Equal(p7.Signers[0].DigestAlgorithm.Algorithm) {

@@ -284,7 +284,9 @@ func verifyCertChain(ee *x509.Certificate, certs []*x509.Certificate, truststore
     verifyOptions := x509.VerifyOptions{
         Roots:         truststore,
         Intermediates: intermediates,
-        KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageAny},
+        KeyUsages:     []x509.ExtKeyUsage{
+            x509.ExtKeyUsageAny,
+        },
         CurrentTime:   currentTime,
     }
 

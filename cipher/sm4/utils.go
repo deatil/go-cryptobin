@@ -8,30 +8,66 @@ import (
 // Endianness option
 const littleEndian bool = false
 
-func bytesToUint32(inp []byte) (blk uint32) {
+func GETU32(ptr []byte) uint32 {
     if littleEndian {
-        blk = binary.LittleEndian.Uint32(inp[0:])
+        return binary.LittleEndian.Uint32(ptr)
     } else {
-        blk = binary.BigEndian.Uint32(inp[0:])
+        return binary.BigEndian.Uint32(ptr)
     }
-
-    return
 }
 
-func uint32ToBytes(blk uint32) [4]byte {
-    var sav [4]byte
-
+func PUTU32(ptr []byte, a uint32) {
     if littleEndian {
-        binary.LittleEndian.PutUint32(sav[0:], blk)
+        binary.LittleEndian.PutUint32(ptr, a)
     } else {
-        binary.BigEndian.PutUint32(sav[0:], blk)
+        binary.BigEndian.PutUint32(ptr, a)
+    }
+}
+
+func bytesToUint32s(b []byte) []uint32 {
+    size := len(b) / 4
+    dst := make([]uint32, size)
+
+    for i := 0; i < size; i++ {
+        j := i * 4
+
+        if littleEndian {
+            dst[i] = binary.LittleEndian.Uint32(b[j:])
+        } else {
+            dst[i] = binary.BigEndian.Uint32(b[j:])
+        }
     }
 
-    return sav
+    return dst
+}
+
+func uint32sToBytes(w []uint32) []byte {
+    size := len(w) * 4
+    dst := make([]byte, size)
+
+    for i := 0; i < len(w); i++ {
+        j := i * 4
+
+        if littleEndian {
+            binary.LittleEndian.PutUint32(dst[j:], w[i])
+        } else {
+            binary.BigEndian.PutUint32(dst[j:], w[i])
+        }
+    }
+
+    return dst
 }
 
 func rotl(a uint32, n uint32) uint32 {
     return bits.RotateLeft32(a, int(n))
+}
+
+func l(b uint32) uint32 {
+    return b ^
+           bits.RotateLeft32(b,  2) ^
+           bits.RotateLeft32(b, 10) ^
+           bits.RotateLeft32(b, 18) ^
+           bits.RotateLeft32(b, 24)
 }
 
 func tNonLinSub(X uint32) uint32 {

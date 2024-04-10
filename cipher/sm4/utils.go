@@ -8,7 +8,7 @@ import (
 // Endianness option
 const littleEndian bool = false
 
-func GETU32(ptr []byte) uint32 {
+func getu32(ptr []byte) uint32 {
     if littleEndian {
         return binary.LittleEndian.Uint32(ptr)
     } else {
@@ -16,7 +16,7 @@ func GETU32(ptr []byte) uint32 {
     }
 }
 
-func PUTU32(ptr []byte, a uint32) {
+func putu32(ptr []byte, a uint32) {
     if littleEndian {
         binary.LittleEndian.PutUint32(ptr, a)
     } else {
@@ -58,42 +58,46 @@ func uint32sToBytes(w []uint32) []byte {
     return dst
 }
 
-func rotl(a uint32, n uint32) uint32 {
-    return bits.RotateLeft32(a, int(n))
+func rotl(a uint32, n int) uint32 {
+    return bits.RotateLeft32(a, n)
 }
 
+func tau(b uint32) uint32 {
+    var in  [4]byte
+    var out [4]byte
+
+    putu32(in[:], b)
+
+    out[0] = sbox[in[0]]
+    out[1] = sbox[in[1]]
+    out[2] = sbox[in[2]]
+    out[3] = sbox[in[3]]
+
+    return getu32(out[:])
+}
+
+// L
 func l(b uint32) uint32 {
     return b ^
-           bits.RotateLeft32(b,  2) ^
-           bits.RotateLeft32(b, 10) ^
-           bits.RotateLeft32(b, 18) ^
-           bits.RotateLeft32(b, 24)
+           rotl(b,  2) ^
+           rotl(b, 10) ^
+           rotl(b, 18) ^
+           rotl(b, 24)
 }
 
-func tNonLinSub(X uint32) uint32 {
-    var t uint32 = 0
-
-    t |= uint32(sbox[byte(X >> 24)]) << 24
-    t |= uint32(sbox[byte(X >> 16)]) << 16
-    t |= uint32(sbox[byte(X >>  8)]) <<  8
-    t |= uint32(sbox[byte(X      )])
-
-    return t
+// L2
+func lAp(b uint32) uint32 {
+    return b ^ rotl(b, 13) ^ rotl(b, 23)
 }
 
+// T
 func tSlow(X uint32) uint32 {
-    var t uint32 = tNonLinSub(X)
-
-    /*
-     * L linear transform
-     */
-    return t ^
-           rotl(t, 2) ^
-           rotl(t, 10) ^
-           rotl(t, 18) ^
-           rotl(t, 24)
+    // L linear transform
+    return l(tau(X))
 }
 
+// t(X) equal tSlow(X)
+// t(X) run fast
 func t(X uint32) uint32 {
     return sbox_t0[byte(X >> 24)] ^
            sbox_t1[byte(X >> 16)] ^
@@ -101,8 +105,7 @@ func t(X uint32) uint32 {
            sbox_t3[byte(X      )]
 }
 
+// T'
 func keySub(X uint32) uint32 {
-    var t uint32 = tNonLinSub(X)
-
-    return t ^ rotl(t, 13) ^ rotl(t, 23)
+    return lAp(tau(X))
 }

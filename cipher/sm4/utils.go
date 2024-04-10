@@ -99,10 +99,13 @@ func tSlow(X uint32) uint32 {
 // t(X) equal tSlow(X)
 // t(X) run fast
 func t(X uint32) uint32 {
-    return sbox_t0[byte(X >> 24)] ^
-           sbox_t1[byte(X >> 16)] ^
-           sbox_t2[byte(X >>  8)] ^
-           sbox_t3[byte(X      )]
+    var in [4]byte
+    putu32(in[:], X)
+
+    return sbox_t0[in[0]] ^
+           sbox_t1[in[1]] ^
+           sbox_t2[in[2]] ^
+           sbox_t3[in[3]]
 }
 
 // T'

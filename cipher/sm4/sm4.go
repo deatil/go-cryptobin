@@ -85,14 +85,13 @@ func (this *sm4Cipher) encrypt(dst, src []byte) {
      * Uses byte-wise sbox in the first and last rounds to provide some
      * protection from cache based side channels.
      */
-    this.rnds(pt,  0,  1,  2,  3, tSlow)
-    this.rnds(pt,  4,  5,  6,  7, t)
-    this.rnds(pt,  8,  9, 10, 11, t)
-    this.rnds(pt, 12, 13, 14, 15, t)
-    this.rnds(pt, 16, 17, 18, 19, t)
-    this.rnds(pt, 20, 21, 22, 23, t)
-    this.rnds(pt, 24, 25, 26, 27, t)
-    this.rnds(pt, 28, 29, 30, 31, tSlow)
+    for i := 0; i < 32; i += 4 {
+        if i == 0 || i == 28 {
+            this.rnds(pt, i, i+1, i+2, i+3, tSlow)
+        } else {
+            this.rnds(pt, i, i+1, i+2, i+3, t)
+        }
+    }
 
     putu32(dst, pt[3])
     putu32(dst[4:], pt[2])
@@ -103,14 +102,13 @@ func (this *sm4Cipher) encrypt(dst, src []byte) {
 func (this *sm4Cipher) decrypt(dst, src []byte) {
     ct := bytesToUint32s(src)
 
-    this.rnds(ct, 31, 30, 29, 28, tSlow)
-    this.rnds(ct, 27, 26, 25, 24, t)
-    this.rnds(ct, 23, 22, 21, 20, t)
-    this.rnds(ct, 19, 18, 17, 16, t)
-    this.rnds(ct, 15, 14, 13, 12, t)
-    this.rnds(ct, 11, 10,  9,  8, t)
-    this.rnds(ct,  7,  6,  5,  4, t)
-    this.rnds(ct,  3,  2,  1,  0, tSlow)
+    for i := 32; i > 0; i -= 4 {
+        if i == 32 || i == 4 {
+            this.rnds(ct, i-1, i-2, i-3, i-4, tSlow)
+        } else {
+            this.rnds(ct, i-1, i-2, i-3, i-4, t)
+        }
+    }
 
     putu32(dst, ct[3])
     putu32(dst[4:], ct[2])

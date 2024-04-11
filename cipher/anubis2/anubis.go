@@ -110,9 +110,8 @@ func (this *anubisCipher) crypt(ciphertext []byte, plaintext []byte, roundKey [1
     /*
      * last round:
      */
+    ss = uint32sToSlice(state[:])
     for j = 0; j < 4; j++ {
-        ss = uint32sToSlice(state[:])
-
         inter[j] =
             (T0[ss[0][j]] & states[0]) ^
             (T1[ss[1][j]] & states[1]) ^

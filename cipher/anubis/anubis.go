@@ -100,9 +100,8 @@ func (this *anubisCipher) crypt(out []byte, in []byte, W [][4]uint32) {
     }
 
     // could also use U[0] here instead of T[n]
+    ss = uint32sToSlice(state[:])
     for j = 0; j < 4; j++ {
-        ss = uint32sToSlice(state[:])
-
         inter[j] =
             (T[0][ss[0][j]] & states[0]) ^
             (T[1][ss[1][j]] & states[1]) ^

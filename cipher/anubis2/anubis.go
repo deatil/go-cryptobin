@@ -94,7 +94,7 @@ func (this *anubisCipher) crypt(ciphertext []byte, plaintext []byte, roundKey [1
      */
     for r = 1; r < R; r++ {
         for j = 0; j < 4; j++ {
-            ss = uint32sToSlice(state[:])
+            ss = uint32sToByteArray(state[:])
 
             inter[j] =
                 T0[ss[0][j]] ^
@@ -110,7 +110,7 @@ func (this *anubisCipher) crypt(ciphertext []byte, plaintext []byte, roundKey [1
     /*
      * last round:
      */
-    ss = uint32sToSlice(state[:])
+    ss = uint32sToByteArray(state[:])
     for j = 0; j < 4; j++ {
         inter[j] =
             (T0[ss[0][j]] & states[0]) ^
@@ -160,7 +160,7 @@ func (this *anubisCipher) expandKey(key []byte) {
      * generate R + 1 round keys:
      */
     for r = 0; r <= R; r++ {
-        kappas = uint32sToSlice(kappa[:])
+        kappas = uint32sToByteArray(kappa[:])
 
         /*
          * generate r-th round key K^r:

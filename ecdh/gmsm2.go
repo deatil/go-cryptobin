@@ -102,7 +102,7 @@ func (c *gmsm2Curve) ECDH(local *PrivateKey, remote *PublicKey) ([]byte, error) 
     return preMasterSecret, nil
 }
 
-func (c *gmsm2Curve) sm2Avf(secret *PublicKey) []byte {
+func (c *gmsm2Curve) avf(secret *PublicKey) []byte {
     bytes := secret.KeyBytes[1:33]
 
     var result [32]byte
@@ -112,16 +112,16 @@ func (c *gmsm2Curve) sm2Avf(secret *PublicKey) []byte {
     return result[:]
 }
 
-func (c *gmsm2Curve) SM2MQV(sLocal, eLocal *PrivateKey, sRemote, eRemote *PublicKey) (*PublicKey, error) {
+func (c *gmsm2Curve) ECMQV(sLocal, eLocal *PrivateKey, sRemote, eRemote *PublicKey) (*PublicKey, error) {
     // implicitSig: (sLocal + avf(eLocal.Pub) * ePriv) mod N
-    x2 := c.sm2Avf(eLocal.PublicKey())
+    x2 := c.avf(eLocal.PublicKey())
     t, err := sm2curve.ImplicitSig(sLocal.KeyBytes, eLocal.KeyBytes, x2)
     if err != nil {
         return nil, err
     }
 
     // new base point: peerPub + [x1](peerSecret)
-    x1 := c.sm2Avf(eRemote)
+    x1 := c.avf(eRemote)
     p2, err := sm2curve.NewPoint().SetBytes(eRemote.KeyBytes)
     if err != nil {
         return nil, err
@@ -144,7 +144,6 @@ func (c *gmsm2Curve) SM2MQV(sLocal, eLocal *PrivateKey, sRemote, eRemote *Public
 
     return c.NewPublicKey(p2.Bytes())
 }
-
 
 func isZero(a []byte) bool {
     var acc byte

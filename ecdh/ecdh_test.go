@@ -172,7 +172,7 @@ func testKeyBytes(t *testing.T, curue ecdh.Curve) {
     })
 }
 
-func Test_SM2MQV(t *testing.T) {
+func Test_ECMQV(t *testing.T) {
     aliceSKey, err := ecdh.GmSM2().GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
@@ -191,17 +191,17 @@ func Test_SM2MQV(t *testing.T) {
         t.Fatal(err)
     }
 
-    bobSecret, err := bobSKey.SM2MQV(bobEKey, aliceSKey.PublicKey(), aliceEKey.PublicKey())
+    bobSecret, err := bobSKey.ECMQV(bobEKey, aliceSKey.PublicKey(), aliceEKey.PublicKey())
     if err != nil {
         t.Fatal(err)
     }
 
-    aliceSecret, err := aliceSKey.SM2MQV(aliceEKey, bobSKey.PublicKey(), bobEKey.PublicKey())
+    aliceSecret, err := aliceSKey.ECMQV(aliceEKey, bobSKey.PublicKey(), bobEKey.PublicKey())
     if err != nil {
         t.Fatal(err)
     }
 
     if !aliceSecret.Equal(bobSecret) {
-        t.Error("two SM2MQV computations came out different")
+        t.Error("two ECMQV computations came out different")
     }
 }

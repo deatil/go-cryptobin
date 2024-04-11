@@ -53,9 +53,9 @@ type Curve interface {
     PrivateKeyToPublicKey(*PrivateKey) *PublicKey
 }
 
-// SM2MQV
-type SM2MQVCurve interface {
-    SM2MQV(sLocal, eLocal *PrivateKey, sRemote, eRemote *PublicKey) (*PublicKey, error)
+// ECMQVCurve
+type ECMQVCurve interface {
+    ECMQV(sLocal, eLocal *PrivateKey, sRemote, eRemote *PublicKey) (*PublicKey, error)
 }
 
 // PublicKey is an ECDH public key, usually a peer's ECDH share sent over the wire.
@@ -128,13 +128,13 @@ func (k *PrivateKey) ECDH(remote *PublicKey) ([]byte, error) {
     return k.NamedCurve.ECDH(k, remote)
 }
 
-// SM2MQV performs a SM2 specific style ECMQV exchange and return the shared secret.
-func (k *PrivateKey) SM2MQV(eLocal *PrivateKey, sRemote, eRemote *PublicKey) (*PublicKey, error) {
-    if c, ok := k.NamedCurve.(SM2MQVCurve); ok {
-        return c.SM2MQV(k, eLocal, sRemote, eRemote)
+// ECMQV performs a ECMQV exchange and return the shared secret.
+func (k *PrivateKey) ECMQV(eLocal *PrivateKey, sRemote, eRemote *PublicKey) (*PublicKey, error) {
+    if c, ok := k.NamedCurve.(ECMQVCurve); ok {
+        return c.ECMQV(k, eLocal, sRemote, eRemote)
     }
 
-    return nil, errors.New("crypto/ecdh: private key do not support MQV")
+    return nil, errors.New("crypto/ecdh: private key do not support ECMQV")
 }
 
 // Bytes returns a copy of the encoding of the private key.

@@ -75,7 +75,6 @@ func compressBlocks(digest []uint32, data []uint8, blocks int) {
     var j int32
 
     for ; blocks > 0; blocks-- {
-
         A = digest[0]
         B = digest[1]
         C = digest[2]

@@ -2,6 +2,7 @@ package ecdh
 
 import (
     "io"
+    "hash"
     "errors"
     "crypto/elliptic"
 
@@ -143,6 +144,17 @@ func (c *gmsm2Curve) ECMQV(sLocal, eLocal *PrivateKey, sRemote, eRemote *PublicK
     }
 
     return c.NewPublicKey(p2.Bytes())
+}
+
+// CalculateZA ZA = H256(ENTLA || IDA || a || b || xG || yG || xA || yA).
+// Compliance with GB/T 32918.2-2016 5.5
+func (c *gmsm2Curve) SM2ZA(h func() hash.Hash, pub *PublicKey, uid []byte) ([]byte, error) {
+    pubkey, err := sm2.NewPublicKey(pub.Bytes())
+    if err != nil {
+        return nil, err
+    }
+
+    return sm2.CalculateZALegacy(pubkey, h, uid)
 }
 
 func isZero(a []byte) bool {

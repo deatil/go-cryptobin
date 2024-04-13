@@ -1,4 +1,4 @@
-package brainpool
+package nums
 
 import (
     "testing"
@@ -31,21 +31,12 @@ type testData struct {
 
 func Test_Brainpool(t *testing.T) {
     tests := []testData{
-        {"P160t1", P160t1()},
-        {"P160r1", P160r1()},
-        {"P192t1", P192t1()},
-        {"P192r1", P192r1()},
-        {"P224t1", P224t1()},
-        {"P224r1", P224r1()},
+        {"P256d1", P256d1()},
+        {"P384d1", P384d1()},
+        {"P512d1", P512d1()},
 
-        {"P256t1", P256t1()},
-        {"P256r1", P256r1()},
-        {"P320t1", P320t1()},
-        {"P320r1", P320r1()},
-        {"P384t1", P384t1()},
-        {"P384r1", P384r1()},
-        {"P512t1", P512t1()},
-        {"P512r1", P512r1()},
+        // {"P256t1", P256t1()},
+        // {"P512t1", P512t1()},
     }
 
     for _, c := range tests {

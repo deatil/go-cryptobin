@@ -91,7 +91,7 @@ func Test_Update_Check(t *testing.T) {
     p8 = &pkcs8{
         Attributes: make([]asn1.RawValue, 0),
     }
-    err = p8.AddAttr(testOID, testAttr)
+    err = p8.AddAttr(testOID, []asn1.RawValue{testAttr})
     assertError(err, "Test_Update_Check-AddAttr")
 
     newAttr, _ := asn1.Marshal(pkcs8Attribute{

@@ -71,7 +71,7 @@ func (this *pkcs8) AddAttribute(attr asn1.RawValue) {
 }
 
 // AddAttr
-func (this *pkcs8) AddAttr(id asn1.ObjectIdentifier, attrs ...asn1.RawValue) error {
+func (this *pkcs8) AddAttr(id asn1.ObjectIdentifier, attrs []asn1.RawValue) error {
     newAttr, err := asn1.Marshal(pkcs8Attribute{
         Id: id,
         Values: attrs,
@@ -88,7 +88,7 @@ func (this *pkcs8) AddAttr(id asn1.ObjectIdentifier, attrs ...asn1.RawValue) err
 }
 
 // UpdateAttr
-func (this *pkcs8) UpdateAttr(id asn1.ObjectIdentifier, attrs ...asn1.RawValue) error {
+func (this *pkcs8) UpdateAttr(id asn1.ObjectIdentifier, attrs []asn1.RawValue) error {
     newAttr, err := asn1.Marshal(pkcs8Attribute{
         Id: id,
         Values: attrs,

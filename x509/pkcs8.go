@@ -32,6 +32,116 @@ func (this *pkcs8) GetAttributes() (attributes []pkcs8Attribute) {
     return
 }
 
+// GetAttribute
+func (this *pkcs8) GetAttribute(id asn1.ObjectIdentifier) (pa pkcs8Attribute) {
+    attrs := this.GetAttributes()
+
+    for _, attr := range attrs {
+        if attr.Id.Equal(id) {
+            return attr
+        }
+    }
+
+    return
+}
+
+// UpdateVersion
+func (this *pkcs8) UpdateVersion(ver int) {
+    this.Version = ver
+}
+
+// UpdateAlgo
+func (this *pkcs8) UpdateAlgo(algo pkix.AlgorithmIdentifier) {
+    this.Algo = algo
+}
+
+// UpdatePrivateKey
+func (this *pkcs8) UpdatePrivateKey(privateKey []byte) {
+    this.PrivateKey = privateKey
+}
+
+// UpdateAttributes
+func (this *pkcs8) UpdateAttributes(attrs []asn1.RawValue) {
+    this.Attributes = attrs
+}
+
+// AddAttribute
+func (this *pkcs8) AddAttribute(attr asn1.RawValue) {
+    this.Attributes = append(this.Attributes, attr)
+}
+
+// AddAttr
+func (this *pkcs8) AddAttr(id asn1.ObjectIdentifier, attrs ...asn1.RawValue) error {
+    newAttr, err := asn1.Marshal(pkcs8Attribute{
+        Id: id,
+        Values: attrs,
+    })
+    if err != nil {
+        return err
+    }
+
+    this.Attributes = append(this.Attributes, asn1.RawValue{
+        FullBytes: newAttr,
+    })
+
+    return nil
+}
+
+// UpdateAttr
+func (this *pkcs8) UpdateAttr(id asn1.ObjectIdentifier, attrs ...asn1.RawValue) error {
+    newAttr, err := asn1.Marshal(pkcs8Attribute{
+        Id: id,
+        Values: attrs,
+    })
+    if err != nil {
+        return err
+    }
+
+    attributes := this.GetAttributes()
+
+    for k, attr := range attributes {
+        if attr.Id.Equal(id) {
+            this.Attributes[k] = asn1.RawValue{
+                FullBytes: newAttr,
+            }
+        }
+    }
+
+    return nil
+}
+
+// DeleteAttr
+func (this *pkcs8) DeleteAttr(id asn1.ObjectIdentifier) {
+    attrKey := this.getAttr(id)
+
+    if attrKey > 0 {
+        this.Attributes = append(this.Attributes[:attrKey], this.Attributes[attrKey+1:]...)
+    }
+}
+
+// HasAttr
+func (this *pkcs8) HasAttr(id asn1.ObjectIdentifier) bool {
+    return this.getAttr(id) >= 0
+}
+
+// getAttr
+func (this *pkcs8) getAttr(id asn1.ObjectIdentifier) int {
+    attrs := this.GetAttributes()
+
+    for k, attr := range attrs {
+        if attr.Id.Equal(id) {
+            return k
+        }
+    }
+
+    return -1
+}
+
+// Marshal
+func (this *pkcs8) Marshal() ([]byte, error) {
+    return asn1.Marshal(*this)
+}
+
 // Pasrse PKCS8 Key
 func PasrsePKCS8Key(privateKey []byte) (*pkcs8, error) {
     var privKey pkcs8

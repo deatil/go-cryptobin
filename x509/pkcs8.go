@@ -112,29 +112,46 @@ func (this *pkcs8) UpdateAttr(id asn1.ObjectIdentifier, attrs []asn1.RawValue) e
 
 // DeleteAttr
 func (this *pkcs8) DeleteAttr(id asn1.ObjectIdentifier) {
-    attrKey := this.getAttr(id)
+    newAttrs := make([]asn1.RawValue, 0)
 
-    if attrKey > 0 {
-        this.Attributes = append(this.Attributes[:attrKey], this.Attributes[attrKey+1:]...)
+    for _, rawAttr := range this.Attributes {
+        var attr pkcs8Attribute
+        rest, err := asn1.Unmarshal(rawAttr.FullBytes, &attr)
+        if err == nil && len(rest) == 0 {
+            if !attr.Id.Equal(id) {
+                newAttrs = append(newAttrs, rawAttr)
+            }
+        }
     }
+
+    this.Attributes = newAttrs
 }
 
 // HasAttr
 func (this *pkcs8) HasAttr(id asn1.ObjectIdentifier) bool {
-    return this.getAttr(id) >= 0
-}
-
-// getAttr
-func (this *pkcs8) getAttr(id asn1.ObjectIdentifier) int {
     attrs := this.GetAttributes()
 
-    for k, attr := range attrs {
+    for _, attr := range attrs {
         if attr.Id.Equal(id) {
-            return k
+            return true
         }
     }
 
-    return -1
+    return false
+}
+
+// GetAttrCount
+func (this *pkcs8) GetAttrCount(id asn1.ObjectIdentifier) int {
+    attrs := this.GetAttributes()
+
+    var count int = 0
+    for _, attr := range attrs {
+        if attr.Id.Equal(id) {
+            count++
+        }
+    }
+
+    return count
 }
 
 // Marshal

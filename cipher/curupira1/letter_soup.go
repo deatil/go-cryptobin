@@ -21,7 +21,12 @@ type LetterSoup struct {
     L []byte
 }
 
-func NewLetterSoup(cipher BlockCipher, mac MAC) AEAD {
+func NewLetterSoup(cipher BlockCipher) AEAD {
+    mac := NewMarvin(cipher, nil, true)
+    return NewLetterSoupWithMAC(cipher, mac)
+}
+
+func NewLetterSoupWithMAC(cipher BlockCipher, mac MAC) AEAD {
     l := new(LetterSoup)
     l.cipher = cipher
     l.blockBytes = cipher.BlockSize()

@@ -1,6 +1,7 @@
 package curupira1
 
 type MAC interface {
+    Init()
     InitWithR(R []byte)
     Update(aData []byte)
     GetTag(tag []byte, tagBits int) []byte
@@ -27,13 +28,13 @@ func NewMarvin(cipher BlockCipher, R []byte, letterSoupMode bool) MAC {
     if R != nil {
         m.InitWithR(R)
     } else {
-        m.init()
+        m.Init()
     }
 
     return m
 }
 
-func (this *Marvin) init() {
+func (this *Marvin) Init() {
     blockBytes := this.blockBytes
 
     this.buffer = make([]byte, blockBytes)

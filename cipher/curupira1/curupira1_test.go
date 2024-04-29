@@ -14,7 +14,7 @@ func fromHex(s string) []byte {
 
 func Test_Cipher(t *testing.T) {
     random := rand.New(rand.NewSource(99))
-    max := 2
+    max := 100
 
     var encrypted [12]byte
     var decrypted [12]byte
@@ -46,7 +46,6 @@ func Test_Cipher(t *testing.T) {
 }
 
 type testData struct {
-    keylen int32
     pt []byte
     ct []byte
     key []byte
@@ -56,19 +55,16 @@ func Test_Check(t *testing.T) {
    tests := []testData{
         // 96 bits
         {
-           12,
            fromHex("000000000000000000000000"),
            fromHex("126b5eae509b2e929b1b08ff"),
            fromHex("800000000000000000000000"),
         },
         {
-           16,
            fromHex("000000000000000000000000"),
            fromHex("f505025bbd6d24e6e0827422"),
            fromHex("000800000000000000000000"),
         },
         {
-           16,
            fromHex("00f0f0f000f0f0f000f0f0f0"),
            fromHex("6868f79f7850d269d320086c"),
            fromHex("f0f0f0f0f0f0f0f0f0f0f0f0"),
@@ -76,19 +72,16 @@ func Test_Check(t *testing.T) {
 
         // 144 bits
         {
-           20,
            fromHex("000000000000000000000000"),
            fromHex("9d48b60b7808a6c9ffe698dd"),
            fromHex("008000000000000000000000000000000000"),
         },
         {
-           20,
            fromHex("000000000000000000000000"),
            fromHex("45dac2446a855db096c75465"),
            fromHex("000200000000000000000000000000000000"),
         },
         {
-           20,
            fromHex("00fdfdfd00fdfdfd00fdfdfd"),
            fromHex("4f43f354c4a5807f277ba802"),
            fromHex("fdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfd"),
@@ -96,19 +89,16 @@ func Test_Check(t *testing.T) {
 
         // 192 bits
         {
-           24,
            fromHex("000000000000000000000000"),
            fromHex("1f6178577467af7494ac6664"),
            fromHex("000200000000000000000000000000000000000000000000"),
         },
         {
-           24,
            fromHex("000000000000000000000000"),
            fromHex("0ef889e7946f47a56f224a36"),
            fromHex("800000000000000000000000000000000000000000000000"),
         },
         {
-           24,
            fromHex("000303030003030300030303"),
            fromHex("fd2d3f8ea95d3503cac89165"),
            fromHex("030303030303030303030303030303030303030303030303"),
@@ -270,44 +260,88 @@ func Test_LetterSoup_Check(t *testing.T) {
     }
 
     for _, test := range tests {
-        c, err := NewCipher(test.key[:])
-        if err != nil {
-            t.Fatal(err.Error())
+        {
+            c, err := NewCipher(test.key[:])
+            if err != nil {
+                t.Fatal(err.Error())
+            }
+
+            mac := NewMarvin(c, nil, true)
+
+            aead := NewLetterSoupWithMAC(c, mac)
+            aead.SetIV(test.nonce[:])
+
+            cipher := make([]byte, len(test.msg))
+            aead.Encrypt(cipher, test.msg)
+
+            if len(test.aad) != 0 {
+                aead.Update(test.aad[:])
+            }
+
+            tag04result := aead.GetTag(nil, 32)
+            tag08result := aead.GetTag(nil, 64)
+            tag12result := aead.GetTag(nil, 96)
+
+            decrypted := make([]byte, len(test.result))
+            aead.Decrypt(decrypted, test.result)
+
+            if !bytes.Equal(test.result, cipher) {
+                t.Errorf("Encrypt, got %x, want %x", cipher, test.result)
+            }
+            if !bytes.Equal(tag04result, test.tag04) {
+                t.Errorf("tag04, got %x, want %x", tag04result, test.tag04)
+            }
+            if !bytes.Equal(tag08result, test.tag08) {
+                t.Errorf("tag08, got %x, want %x", tag08result, test.tag08)
+            }
+            if !bytes.Equal(tag12result, test.tag12) {
+                t.Errorf("tag12, got %x, want %x", tag12result, test.tag12)
+            }
+            if !bytes.Equal(test.msg, decrypted) {
+                t.Errorf("Decrypt, got %x, want %x", decrypted, test.msg)
+            }
         }
 
-        mac := NewMarvin(c, nil, true)
+        // ===========
 
-        aead := NewLetterSoup(c, mac)
-        aead.SetIV(test.nonce[:])
+        {
+            c, err := NewCipher(test.key[:])
+            if err != nil {
+                t.Fatal(err.Error())
+            }
 
-        cipher := make([]byte, len(test.msg))
-        aead.Encrypt(cipher, test.msg)
+            aead := NewLetterSoup(c)
+            aead.SetIV(test.nonce[:])
 
-        if len(test.aad) != 0 {
-            aead.Update(test.aad[:])
-        }
+            cipher := make([]byte, len(test.msg))
+            aead.Encrypt(cipher, test.msg)
 
-        tag04result := aead.GetTag(nil, 32)
-        tag08result := aead.GetTag(nil, 64)
-        tag12result := aead.GetTag(nil, 96)
+            if len(test.aad) != 0 {
+                aead.Update(test.aad[:])
+            }
 
-        decrypted := make([]byte, len(test.result))
-        aead.Decrypt(decrypted, test.result)
+            tag04result := aead.GetTag(nil, 32)
+            tag08result := aead.GetTag(nil, 64)
+            tag12result := aead.GetTag(nil, 96)
 
-        if !bytes.Equal(test.result, cipher) {
-            t.Errorf("Decrypt, got %x, want %x", cipher, test.result)
-        }
-        if !bytes.Equal(tag04result, test.tag04) {
-            t.Errorf("tag04, got %x, want %x", tag04result, test.tag04)
-        }
-        if !bytes.Equal(tag08result, test.tag08) {
-            t.Errorf("tag08, got %x, want %x", tag08result, test.tag08)
-        }
-        if !bytes.Equal(tag12result, test.tag12) {
-            t.Errorf("tag12, got %x, want %x", tag12result, test.tag12)
-        }
-        if !bytes.Equal(test.msg, decrypted) {
-            t.Errorf("Decrypt, got %x, want %x", decrypted, test.msg)
+            decrypted := make([]byte, len(test.result))
+            aead.Decrypt(decrypted, test.result)
+
+            if !bytes.Equal(test.result, cipher) {
+                t.Errorf("Encrypt, got %x, want %x", cipher, test.result)
+            }
+            if !bytes.Equal(tag04result, test.tag04) {
+                t.Errorf("tag04, got %x, want %x", tag04result, test.tag04)
+            }
+            if !bytes.Equal(tag08result, test.tag08) {
+                t.Errorf("tag08, got %x, want %x", tag08result, test.tag08)
+            }
+            if !bytes.Equal(tag12result, test.tag12) {
+                t.Errorf("tag12, got %x, want %x", tag12result, test.tag12)
+            }
+            if !bytes.Equal(test.msg, decrypted) {
+                t.Errorf("Decrypt, got %x, want %x", decrypted, test.msg)
+            }
         }
     }
 }

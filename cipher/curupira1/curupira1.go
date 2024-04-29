@@ -39,7 +39,7 @@ func NewCipher(key []byte) (BlockCipher, error) {
     }
 
     c := new(curupira1Cipher)
-    c.makeKey(key)
+    c.expandKey(key)
 
     return c, nil
 }
@@ -83,11 +83,6 @@ func (this *curupira1Cipher) Decrypt(dst, src []byte) {
 /**
  * Applies a square-complete transform to exactly one block of ciphertext,
  * by performing 4 unkeyed Curupira rounds.
- *
- * @param cBlock
- *            ciphertext block.
- * @param mBlock
- *            plaintext block.
  */
 func (this *curupira1Cipher) Sct(dst, src []byte) {
     tmp := make([]byte, 12)
@@ -113,12 +108,13 @@ func (this *curupira1Cipher) processBlock(dst []byte, src []byte, roundKeys [][]
     copy(dst, tmp)
 }
 
-func (this *curupira1Cipher) makeKey(key []byte) {
+func (this *curupira1Cipher) expandKey(key []byte) {
     keyBits := len(key) * 8
 
+    // See end of page 9.
     switch keyBits {
         case 96:
-            this.R = 10 // See end of page 9.
+            this.R = 10
         case 144:
             this.R = 14
         case 192:
@@ -127,10 +123,10 @@ func (this *curupira1Cipher) makeKey(key []byte) {
 
     this.keyBits = keyBits
     this.t = keyBits / 48
-    this.expandKey(key)
+    this.keyRound(key)
 }
 
-func (this *curupira1Cipher) expandKey(key []byte) {
+func (this *curupira1Cipher) keyRound(key []byte) {
     // see pages 9 and 10.
     this.encryptionRoundKeys = make([][]byte, this.R + 1)
     this.decryptionRoundKeys = make([][]byte, this.R + 1)

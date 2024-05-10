@@ -142,7 +142,7 @@ func newPrivateKey(curve *Curve, raw []byte) (*PrivateKey, error) {
 
     x, y, err := curve.Exp(k, curve.X, curve.Y)
     if err != nil {
-        return nil, fmt.Errorf("cryptobin/gost: %w", err)
+        return nil, err
     }
 
     priv := new(PrivateKey)

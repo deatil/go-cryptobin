@@ -78,7 +78,7 @@ func init() {
 // gost version
 const gostPrivKeyVersion = 1
 
-// Encrypted data encoding mode
+// Gost param type mode
 type ParamMode uint
 
 const (
@@ -136,7 +136,7 @@ func MarshalPublicKey(pub *PublicKey) ([]byte, error) {
     return MarshalPublicKeyWithOpts(pub, DefaultParamOpts)
 }
 
-// Marshal PublicKey
+// Marshal PublicKey with options
 func MarshalPublicKeyWithOpts(pub *PublicKey, opts ParamOpts) ([]byte, error) {
     var publicKey, publicKeyBytes []byte
     var publicKeyAlgorithm pkix.AlgorithmIdentifier
@@ -270,7 +270,7 @@ func MarshalPrivateKey(priv *PrivateKey) ([]byte, error) {
     return MarshalPrivateKeyWithOpts(priv, DefaultParamOpts)
 }
 
-// Marshal PrivateKey
+// Marshal PrivateKey with options
 func MarshalPrivateKeyWithOpts(priv *PrivateKey, opts ParamOpts) ([]byte, error) {
     oid, ok := OidFromNamedCurve(priv.Curve)
     if !ok {

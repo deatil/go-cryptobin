@@ -12,7 +12,7 @@ func Key(h func() hash.Hash, z []byte, size int) []byte {
     mdSize := md.Size()
 
     limit := (uint64(size) + uint64(mdSize) - 1) / uint64(mdSize)
-    if limit >= uint64(1 << mdSize) - 1 {
+    if limit >= uint64(1 << 32) - 1 {
         panic("kdf: key length too long")
     }
 

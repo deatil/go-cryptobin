@@ -231,10 +231,6 @@ func (this SM2) DecryptASN1ECB() SM2 {
         var part asn1.RawValue
         cipherText, _ = asn1.Unmarshal(cipherText, &part)
 
-        if cipherText == nil {
-            break
-        }
-
         dec := this.
             FromBytes(part.FullBytes).
             DecryptASN1()
@@ -245,6 +241,10 @@ func (this SM2) DecryptASN1ECB() SM2 {
         }
 
         buffer.Write(dec.ToBytes())
+
+        if cipherText == nil || len(cipherText) == 0 {
+            break
+        }
     }
 
     this.parsedData = buffer.Bytes()

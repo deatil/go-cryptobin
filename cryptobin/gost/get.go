@@ -16,7 +16,7 @@ func (this Gost) GetPrivateKeyBytes() []byte {
         return nil
     }
 
-    return gost.MarshalPrivateKey(privateKey)
+    return gost.ToPrivateKey(privateKey)
 }
 
 // 获取 PublicKey
@@ -31,7 +31,7 @@ func (this Gost) GetPublicKeyBytes() []byte {
         return nil
     }
 
-    return gost.MarshalPublicKey(publicKey)
+    return gost.ToPublicKey(publicKey)
 }
 
 // 获取 Curve

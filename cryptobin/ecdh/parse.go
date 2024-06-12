@@ -145,7 +145,7 @@ func (this ECDH) ParseECDHPrivateKeyFromPEM(key []byte) (crypto.PrivateKey, erro
         return nil, ErrNotPrivateKey
     }
 
-    return cryptobin_ecdh.ToPrivateKey(pkey)
+    return cryptobin_ecdh.MarshalPrivateKey(pkey)
 }
 
 // 解析私钥带密码
@@ -175,7 +175,7 @@ func (this ECDH) ParseECDHPrivateKeyFromPEMWithPassword(key []byte, password str
         return nil, ErrNotPrivateKey
     }
 
-    return cryptobin_ecdh.ToPrivateKey(pkey)
+    return cryptobin_ecdh.MarshalPrivateKey(pkey)
 }
 
 // 解析公钥
@@ -201,5 +201,5 @@ func (this ECDH) ParseECDHPublicKeyFromPEM(key []byte) (crypto.PublicKey, error)
         return nil, ErrNotPublicKey
     }
 
-    return cryptobin_ecdh.ToPublicKey(pkey)
+    return cryptobin_ecdh.MarshalPublicKey(pkey)
 }

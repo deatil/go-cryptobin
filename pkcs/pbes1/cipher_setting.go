@@ -24,6 +24,9 @@ var (
     oidPbeWithSHA1AndRC2_128 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 12, 1, 5}
     oidPbeWithSHA1AndRC2_40  = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 12, 1, 6}
 
+    oidPbeWithMD5AndCAST5   = asn1.ObjectIdentifier{1, 2, 840, 113533, 7, 66, 12}
+    oidPbeWithSHAAndTwofish = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 12, 21}
+
     // PBES1
     oidPbeWithMD2AndDES      = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 1}
     oidPbeWithMD2AndRC2_64   = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 4}
@@ -31,9 +34,6 @@ var (
     oidPbeWithMD5AndRC2_64   = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 6}
     oidPbeWithSHA1AndDES     = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 10}
     oidPbeWithSHA1AndRC2_64  = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 11}
-
-    oidPbeWithMD5AndCAST5   = asn1.ObjectIdentifier{1, 2, 840, 113533, 7, 66, 12}
-    oidPbeWithSHAAndTwofish = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 21}
 )
 
 var (
@@ -120,6 +120,35 @@ var SHA1AndRC2_40 = CipherBlockCBC{
     needBmpPass:    true,
 }
 
+var MD5AndCAST5 = CipherBlockCBC{
+    cipherFunc:     newCAST5Cipher,
+    hashFunc:       md5.New,
+    derivedKeyFunc: DerivedKeyPkcs12,
+    saltSize:       cast5.BlockSize,
+    keySize:        16,
+    blockSize:      cast5.BlockSize,
+    iterationCount: 2048,
+    oid:            oidPbeWithMD5AndCAST5,
+    hasKeyLength:   false,
+    needBmpPass:    true,
+}
+var SHAAndTwofish = CipherBlockCBC{
+    cipherFunc:     newTwofishCipher,
+    hashFunc:       sha1.New,
+    derivedKeyFunc: DerivedKeyPkcs12,
+    saltSize:       twofish.BlockSize,
+    keySize:        16,
+    blockSize:      twofish.BlockSize,
+    iterationCount: 2048,
+    oid:            oidPbeWithSHAAndTwofish,
+    hasKeyLength:   true,
+    needBmpPass:    true,
+}
+
+var SHAAndTwofish_16 = SHAAndTwofish.WithKeySize(16)
+var SHAAndTwofish_24 = SHAAndTwofish.WithKeySize(24)
+var SHAAndTwofish_32 = SHAAndTwofish.WithKeySize(32)
+
 // PBES1
 var MD2AndDES = CipherBlockCBC{
     cipherFunc:     des.NewCipher,
@@ -194,35 +223,6 @@ var SHA1AndRC2_64 = CipherBlockCBC{
     needBmpPass:    false,
 }
 
-var MD5AndCAST5 = CipherBlockCBC{
-    cipherFunc:     newCAST5Cipher,
-    hashFunc:       md5.New,
-    derivedKeyFunc: DerivedKeyPkcs12,
-    saltSize:       cast5.BlockSize,
-    keySize:        16,
-    blockSize:      cast5.BlockSize,
-    iterationCount: 2048,
-    oid:            oidPbeWithMD5AndCAST5,
-    hasKeyLength:   false,
-    needBmpPass:    false,
-}
-var SHAAndTwofish = CipherBlockCBC{
-    cipherFunc:     newTwofishCipher,
-    hashFunc:       sha1.New,
-    derivedKeyFunc: DerivedKeyPkcs12,
-    saltSize:       twofish.BlockSize,
-    keySize:        16,
-    blockSize:      twofish.BlockSize,
-    iterationCount: 2048,
-    oid:            oidPbeWithSHAAndTwofish,
-    hasKeyLength:   true,
-    needBmpPass:    false,
-}
-
-var SHAAndTwofish_16 = SHAAndTwofish.WithKeySize(16)
-var SHAAndTwofish_24 = SHAAndTwofish.WithKeySize(24)
-var SHAAndTwofish_32 = SHAAndTwofish.WithKeySize(32)
-
 func init() {
     // pkcs12
     AddCipher(oidPbeWithSHA1And3DES, func() Cipher {
@@ -242,6 +242,13 @@ func init() {
     })
     AddCipher(oidPbeWithSHA1AndRC4_40, func() Cipher {
         return SHA1AndRC4_40
+    })
+
+    AddCipher(oidPbeWithMD5AndCAST5, func() Cipher {
+        return MD5AndCAST5
+    })
+    AddCipher(oidPbeWithSHAAndTwofish, func() Cipher {
+        return SHAAndTwofish
     })
 
     // PBES1
@@ -264,10 +271,4 @@ func init() {
         return SHA1AndRC2_64
     })
 
-    AddCipher(oidPbeWithMD5AndCAST5, func() Cipher {
-        return MD5AndCAST5
-    })
-    AddCipher(oidPbeWithSHAAndTwofish, func() Cipher {
-        return SHAAndTwofish
-    })
 }

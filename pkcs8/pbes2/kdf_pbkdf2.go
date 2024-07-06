@@ -88,7 +88,7 @@ func prfByOID(oid asn1.ObjectIdentifier) (func() hash.Hash, error) {
             return gost34112012512.New, nil
     }
 
-    return nil, errors.New(fmt.Sprintf("pkcs8: unknow hash oid(%s)", oid))
+    return nil, fmt.Errorf("pkcs8: unsupported hash (OID: %s)", oid)
 }
 
 // 返回使用的 Hash 对应的 asn1

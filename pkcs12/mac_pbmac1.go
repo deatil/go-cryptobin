@@ -1,6 +1,7 @@
 package pkcs12
 
 import (
+    "fmt"
     "hash"
     "errors"
     "crypto/rand"
@@ -18,6 +19,8 @@ import (
     "github.com/deatil/go-cryptobin/hash/gost/gost34112012256"
     "github.com/deatil/go-cryptobin/hash/gost/gost34112012512"
 )
+
+// see https://datatracker.ietf.org/doc/html/rfc9579
 
 type PBMAC1Hash uint
 
@@ -88,7 +91,7 @@ func prfByOIDPBMAC1(oid asn1.ObjectIdentifier) (func() hash.Hash, error) {
             return gost34112012512.New, nil
     }
 
-    return nil, errors.New("pkcs8: unsupported hash function")
+    return nil, errors.New(fmt.Sprintf("pkcs12: unknow hash oid(%s)", oid))
 }
 
 // 返回使用的 Hash 对应的 asn1
@@ -118,7 +121,7 @@ func oidByHashPBMAC1(h PBMAC1Hash) (asn1.ObjectIdentifier, error) {
             return oidHMACWithGOST34112012512, nil
     }
 
-    return nil, errors.New("pkcs8: unsupported hash function")
+    return nil, errors.New("pkcs12: unsupported hash function")
 }
 
 //  PBMAC1-params ::= SEQUENCE {
@@ -138,14 +141,9 @@ type pbkdf2Params struct {
     PrfParam       pkix.AlgorithmIdentifier `asn1:"optional"`
 }
 
-func (this pbkdf2Params) DeriveKey(password []byte, size int) (key []byte, err error) {
+func (this pbkdf2Params) DeriveKey(password []byte) (key []byte, err error) {
     var alg asn1.ObjectIdentifier
     var h func() hash.Hash
-
-    // 如果有自定义长度，使用自定义长度
-    if this.KeyLength > 0 {
-        size = this.KeyLength
-    }
 
     if this.PrfParam.Algorithm.String() != "" {
         h, err = prfByOIDPBMAC1(this.PrfParam.Algorithm)
@@ -164,7 +162,43 @@ func (this pbkdf2Params) DeriveKey(password []byte, size int) (key []byte, err e
         }
     }
 
+    size := h().Size()
+
+    // 如果有自定义长度，使用自定义长度
+    if this.KeyLength > 0 {
+        size = this.KeyLength
+    }
+
     key = pbkdf2.Key(password, this.Salt, this.IterationCount, size, h)
+
+    return
+}
+
+func ParsePBMAC1Param(param []byte, password []byte) (h func() hash.Hash, key []byte, err error) {
+    var params pbmac1Params
+    if err = unmarshal(param, &params); err != nil {
+        return
+    }
+
+    var kdfparams pbkdf2Params
+    if err = unmarshal(params.Kdf.Parameters.FullBytes, &kdfparams); err != nil {
+        return
+    }
+
+    originalPassword, err := decodeBMPString(password)
+    if err != nil {
+        return
+    }
+
+    h, err = prfByOIDPBMAC1(params.MessageAuthScheme.Algorithm)
+    if err != nil {
+        return
+    }
+
+    key, err = kdfparams.DeriveKey([]byte(originalPassword))
+    if err != nil {
+        return
+    }
 
     return
 }
@@ -174,6 +208,7 @@ type PBMAC1Opts struct {
     hasKeyLength   bool
     SaltSize       int
     IterationCount int
+    KDFHash        PBMAC1Hash
     HMACHash       PBMAC1Hash
 }
 
@@ -181,8 +216,8 @@ func (this PBMAC1Opts) Compute(message []byte, password []byte) (data MacKDFPara
     var alg asn1.ObjectIdentifier
     var prfParam pkix.AlgorithmIdentifier
 
-    if this.HMACHash != 0 {
-        alg, err = oidByHashPBMAC1(this.HMACHash)
+    if this.KDFHash != 0 {
+        alg, err = oidByHashPBMAC1(this.KDFHash)
         if err != nil {
             return nil, err
         }
@@ -225,12 +260,28 @@ func (this PBMAC1Opts) Compute(message []byte, password []byte) (data MacKDFPara
         kdfParams.KeyLength = size
     }
 
+    // hmac hash
+    alg2, err := oidByHashPBMAC1(this.HMACHash)
+    if err != nil {
+        return nil, err
+    }
+
+    h2, err := prfByOIDPBMAC1(alg2)
+    if err != nil {
+        return nil, err
+    }
+
     var params pbmac1Params
     params.Kdf.Algorithm = oidPKCS5PBKDF2
     if params.Kdf.Parameters.FullBytes, err = asn1.Marshal(kdfParams); err != nil {
         return nil, err
     }
-    params.MessageAuthScheme.Algorithm = alg
+    params.MessageAuthScheme = pkix.AlgorithmIdentifier{
+        Algorithm:  alg2,
+        Parameters: asn1.RawValue{
+            Tag: asn1.TagNull,
+        },
+    }
 
     encryptedParams, err := asn1.Marshal(params)
     if err != nil {
@@ -244,19 +295,24 @@ func (this PBMAC1Opts) Compute(message []byte, password []byte) (data MacKDFPara
         },
     }
 
-    key := pbkdf2.Key(password, salt, this.IterationCount, size, h)
+    originalPassword, err := decodeBMPString(password)
+    if err != nil {
+        return
+    }
 
-    mac := hmac.New(h, key)
+    key := pbkdf2.Key([]byte(originalPassword), salt, this.IterationCount, size, h)
+
+    mac := hmac.New(h2, key)
     mac.Write(message)
     digest := mac.Sum(nil)
 
     data = MacData{
-        DigestInfo{
-            prfParam2,
-            digest,
+        Mac: DigestInfo{
+            Algorithm: prfParam2,
+            Digest:    digest,
         },
-        salt,
-        this.IterationCount,
+        MacSalt: []byte("NOT USED"),
+        Iterations: 1,
     }
 
     return

@@ -1,6 +1,7 @@
 package pbes2
 
 import (
+    "fmt"
     "hash"
     "errors"
     "crypto/md5"
@@ -87,7 +88,7 @@ func prfByOID(oid asn1.ObjectIdentifier) (func() hash.Hash, error) {
             return gost34112012512.New, nil
     }
 
-    return nil, errors.New("pkcs8: unsupported hash function")
+    return nil, errors.New(fmt.Sprintf("pkcs8: unknow hash oid(%s)", oid))
 }
 
 // 返回使用的 Hash 对应的 asn1

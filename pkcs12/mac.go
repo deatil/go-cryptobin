@@ -1,6 +1,7 @@
 package pkcs12
 
 import (
+    "fmt"
     "hash"
     "errors"
     "crypto/rand"
@@ -96,7 +97,7 @@ func hashByOID(oid asn1.ObjectIdentifier) (func() hash.Hash, error) {
             return gost34112012512.New, nil
     }
 
-    return nil, errors.New("pkcs12: unsupported hash function")
+    return nil, errors.New(fmt.Sprintf("pkcs12: unknow hash oid(%s)", oid))
 }
 
 // 返回使用的 Hash 对应的 asn1
@@ -151,28 +152,7 @@ func (this MacData) Verify(message []byte, password []byte) (err error) {
     var key []byte
 
     if this.Mac.Algorithm.Algorithm.Equal(oidPBMAC1) {
-        var params pbmac1Params
-        if err := unmarshal(this.Mac.Algorithm.Parameters.FullBytes, &params); err != nil {
-            return err
-        }
-
-        var kdfparams pbkdf2Params
-        if err := unmarshal(params.Kdf.Parameters.FullBytes, &kdfparams); err != nil {
-            return err
-        }
-
-        originalPassword, err := decodeBMPString(password)
-        if err != nil {
-            return err
-        }
-
-        h, err = hashByOID(params.MessageAuthScheme.Algorithm)
-        if err != nil {
-            return err
-        }
-
-        size := h().Size()
-        key, err = kdfparams.DeriveKey([]byte(originalPassword), size)
+        h, key, err = ParsePBMAC1Param(this.Mac.Algorithm.Parameters.FullBytes, password)
         if err != nil {
             return err
         }
@@ -284,12 +264,12 @@ func (this MacOpts) Compute(message []byte, password []byte) (data MacKDFParamet
     digest := mac.Sum(nil)
 
     data = MacData{
-        DigestInfo{
-            prfParam,
-            digest,
+        Mac: DigestInfo{
+            Algorithm: prfParam,
+            Digest:    digest,
         },
-        macSalt,
-        this.IterationCount,
+        MacSalt:    macSalt,
+        Iterations: this.IterationCount,
     }
 
     return

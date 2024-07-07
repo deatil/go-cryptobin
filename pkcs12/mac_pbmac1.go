@@ -174,7 +174,7 @@ func (this pbkdf2Params) DeriveKey(password []byte) (key []byte, err error) {
     return
 }
 
-func ParsePBMAC1Param(param []byte, password []byte) (h func() hash.Hash, key []byte, err error) {
+func parsePBMAC1Param(param []byte, password []byte) (h func() hash.Hash, key []byte, err error) {
     var params pbmac1Params
     if err = unmarshal(param, &params); err != nil {
         return

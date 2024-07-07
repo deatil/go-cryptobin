@@ -151,46 +151,47 @@ func (this MacData) Verify(message []byte, password []byte) (err error) {
     var h func() hash.Hash
     var key []byte
 
-    if this.Mac.Algorithm.Algorithm.Equal(oidPBMAC1) {
-        h, key, err = ParsePBMAC1Param(this.Mac.Algorithm.Parameters.FullBytes, password)
-        if err != nil {
-            return err
-        }
-    } else {
-        if this.Mac.Algorithm.Algorithm.String() != "" {
-            h, err = hashByOID(this.Mac.Algorithm.Algorithm)
+    switch {
+        case this.Mac.Algorithm.Algorithm.Equal(oidPBMAC1):
+            h, key, err = parsePBMAC1Param(this.Mac.Algorithm.Parameters.FullBytes, password)
             if err != nil {
                 return err
             }
-        } else {
-            alg, err = oidByHash(DefaultHash)
-            if err != nil {
-                return err
-            }
-
-            h, err = hashByOID(alg)
-            if err != nil {
-                return err
-            }
-        }
-
-        oid := this.Mac.Algorithm.Algorithm
-
-        switch {
-            case oid.Equal(oidGOST34112012256),
-                oid.Equal(oidGOST34112012512):
-                pass, err := decodeBMPString(password)
+        default:
+            if this.Mac.Algorithm.Algorithm.String() != "" {
+                h, err = hashByOID(this.Mac.Algorithm.Algorithm)
+                if err != nil {
+                    return err
+                }
+            } else {
+                alg, err = oidByHash(DefaultHash)
                 if err != nil {
                     return err
                 }
 
-                key = gost_pbkdf2.Key(h, []byte(pass), this.MacSalt, this.Iterations, 96)
-                key = key[len(key)-32:]
-            default:
-                hashSize := h().Size()
+                h, err = hashByOID(alg)
+                if err != nil {
+                    return err
+                }
+            }
 
-                key = pbkdf.Key(h, hashSize, 64, this.MacSalt, password, this.Iterations, 3, hashSize)
-        }
+            oid := this.Mac.Algorithm.Algorithm
+
+            switch {
+                case oid.Equal(oidGOST34112012256),
+                    oid.Equal(oidGOST34112012512):
+                    pass, err := decodeBMPString(password)
+                    if err != nil {
+                        return err
+                    }
+
+                    key = gost_pbkdf2.Key(h, []byte(pass), this.MacSalt, this.Iterations, 96)
+                    key = key[len(key)-32:]
+                default:
+                    hashSize := h().Size()
+
+                    key = pbkdf.Key(h, hashSize, 64, this.MacSalt, password, this.Iterations, 3, hashSize)
+            }
     }
 
     mac := hmac.New(h, key)

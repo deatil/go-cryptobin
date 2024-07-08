@@ -44,6 +44,9 @@ var (
 )
 
 var (
+    // PKCS12-PBMAC1
+    oidPBMAC1 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 14}
+
     // key derivation functions
     oidPKCS5       = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5}
     oidPKCS5PBKDF2 = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 5, 12}
@@ -213,13 +216,72 @@ type PBMAC1Opts struct {
 }
 
 func (this PBMAC1Opts) Compute(message []byte, password []byte) (data MacKDFParameters, err error) {
+    // hmac hash
+    alg, err := oidByHashPBMAC1(this.HMACHash)
+    if err != nil {
+        return nil, err
+    }
+
+    h, err := prfByOIDPBMAC1(alg)
+    if err != nil {
+        return nil, err
+    }
+
+    key, kdf, err := this.computeKDF(password)
+    if err != nil {
+        return nil, err
+    }
+
+    var params pbmac1Params
+    params.Kdf = pkix.AlgorithmIdentifier{
+        Algorithm:  oidPKCS5PBKDF2,
+        Parameters: asn1.RawValue{
+            FullBytes: kdf,
+        },
+    }
+    params.MessageAuthScheme = pkix.AlgorithmIdentifier{
+        Algorithm:  alg,
+        Parameters: asn1.RawValue{
+            Tag: asn1.TagNull,
+        },
+    }
+
+    encryptedParams, err := asn1.Marshal(params)
+    if err != nil {
+        return nil, err
+    }
+
+    prfParam := pkix.AlgorithmIdentifier{
+        Algorithm:  oidPBMAC1,
+        Parameters: asn1.RawValue{
+            FullBytes: encryptedParams,
+        },
+    }
+
+    mac := hmac.New(h, key)
+    mac.Write(message)
+    digest := mac.Sum(nil)
+
+    data = MacData{
+        Mac: DigestInfo{
+            Algorithm: prfParam,
+            Digest:    digest,
+        },
+        MacSalt: []byte("NOT USED"),
+        Iterations: 1,
+    }
+
+    return
+}
+
+func (this PBMAC1Opts) computeKDF(password []byte) (key []byte, kdf []byte, err error) {
     var alg asn1.ObjectIdentifier
     var prfParam pkix.AlgorithmIdentifier
 
     if this.KDFHash != 0 {
         alg, err = oidByHashPBMAC1(this.KDFHash)
         if err != nil {
-            return nil, err
+            return nil, nil, err
         }
 
         prfParam = pkix.AlgorithmIdentifier{
@@ -231,7 +293,7 @@ func (this PBMAC1Opts) Compute(message []byte, password []byte) (data MacKDFPara
     } else {
         alg, err = oidByHashPBMAC1(DefaultPBMAC1Hash)
         if err != nil {
-            return nil, err
+            return nil, nil, err
         }
 
         prfParam = pkix.AlgorithmIdentifier{}
@@ -239,12 +301,12 @@ func (this PBMAC1Opts) Compute(message []byte, password []byte) (data MacKDFPara
 
     h, err := prfByOIDPBMAC1(alg)
     if err != nil {
-        return nil, err
+        return nil, nil, err
     }
 
     salt := make([]byte, this.SaltSize)
     if _, err = rand.Read(salt); err != nil {
-        return nil, err
+        return nil, nil, err
     }
 
     size := h().Size()
@@ -260,60 +322,17 @@ func (this PBMAC1Opts) Compute(message []byte, password []byte) (data MacKDFPara
         kdfParams.KeyLength = size
     }
 
-    // hmac hash
-    alg2, err := oidByHashPBMAC1(this.HMACHash)
+    kdf, err = asn1.Marshal(kdfParams)
     if err != nil {
-        return nil, err
-    }
-
-    h2, err := prfByOIDPBMAC1(alg2)
-    if err != nil {
-        return nil, err
-    }
-
-    var params pbmac1Params
-    params.Kdf.Algorithm = oidPKCS5PBKDF2
-    if params.Kdf.Parameters.FullBytes, err = asn1.Marshal(kdfParams); err != nil {
-        return nil, err
-    }
-    params.MessageAuthScheme = pkix.AlgorithmIdentifier{
-        Algorithm:  alg2,
-        Parameters: asn1.RawValue{
-            Tag: asn1.TagNull,
-        },
-    }
-
-    encryptedParams, err := asn1.Marshal(params)
-    if err != nil {
-        return nil, err
-    }
-
-    prfParam2 := pkix.AlgorithmIdentifier{
-        Algorithm:  oidPBMAC1,
-        Parameters: asn1.RawValue{
-            FullBytes: encryptedParams,
-        },
+        return nil, nil, err
     }
 
     originalPassword, err := decodeBMPString(password)
     if err != nil {
-        return
+        return nil, nil, err
     }
 
-    key := pbkdf2.Key([]byte(originalPassword), salt, this.IterationCount, size, h)
-
-    mac := hmac.New(h2, key)
-    mac.Write(message)
-    digest := mac.Sum(nil)
-
-    data = MacData{
-        Mac: DigestInfo{
-            Algorithm: prfParam2,
-            Digest:    digest,
-        },
-        MacSalt: []byte("NOT USED"),
-        Iterations: 1,
-    }
+    key = pbkdf2.Key([]byte(originalPassword), salt, this.IterationCount, size, h)
 
     return
 }

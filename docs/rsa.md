@@ -306,9 +306,9 @@ func main() {
         // FromXMLPrivateKey(priKeyXML).
         // CreatePrivateKey().
         // CreatePrivateKeyWithPassword(psssword, "AES256CBC").
-        CreatePKCS1PrivateKey(). // 转为 PKCS8 编码
+        // CreatePKCS1PrivateKey().
         // CreatePKCS1PrivateKeyWithPassword(psssword, "AES256CBC").
-        // CreatePKCS8PrivateKey().
+        CreatePKCS8PrivateKey(). // 转为 PKCS8 编码
         // CreatePKCS8PrivateKeyWithPassword(psssword, "AES256CBC", "SHA256").
         // CreateXMLPrivateKey().
         ToKeyString()

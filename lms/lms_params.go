@@ -45,7 +45,7 @@ func (this LmsParam) GetType() LmsType {
 func (this LmsParam) SigLength(otstc ILmotsParam) uint64 {
     otsSigLen := otstc.SigLength()
 
-    return uint64(4 + 4 + otsSigLen + (this.H * this.M))
+    return uint64(4 + 4) + otsSigLen + (this.H * this.M)
 }
 
 // Returns a Params
@@ -55,20 +55,20 @@ func (this LmsParam) Params() LmsParam {
 
 // ===============
 
-// 默认
+// default
 var defaultLmsParams = NewTypeParams[LmsType, ILmsParam]()
 
-// 添加类型
+// AddLmsParam
 func AddLmsParam(typ LmsType, fn func() ILmsParam) {
     defaultLmsParams.AddParam(typ, fn)
 }
 
-// 获取类型
+// GetLmsParam
 func GetLmsParam(typ LmsType) (func() ILmsParam, error) {
     return defaultLmsParams.GetParam(typ)
 }
 
-// 全部
+// AllLmsParams
 func AllLmsParams() map[LmsType]func() ILmsParam {
     return defaultLmsParams.AllParams()
 }

@@ -45,7 +45,12 @@ func (this LmotsParam) GetType() LmotsType {
 
 // Returns the expected byte length of a given LM-OTS signature algorithm
 func (this LmotsParam) SigLength() uint64 {
-    return this.SIG_LEN
+    if this.SIG_LEN > 0 {
+        return this.SIG_LEN
+    }
+
+    sigLen := 4 + this.N + (this.P * this.N)
+    return uint64(sigLen)
 }
 
 // Returns a Params
@@ -55,20 +60,20 @@ func (this LmotsParam) Params() LmotsParam {
 
 // ===============
 
-// 默认
+// default
 var defaultLmotsParams = NewTypeParams[LmotsType, ILmotsParam]()
 
-// 添加类型
+// AddLmotsParam
 func AddLmotsParam(typ LmotsType, fn func() ILmotsParam) {
     defaultLmotsParams.AddParam(typ, fn)
 }
 
-// 获取类型
+// GetLmotsParam
 func GetLmotsParam(typ LmotsType) (func() ILmotsParam, error) {
     return defaultLmotsParams.GetParam(typ)
 }
 
-// 全部
+// AllLmotsParams
 func AllLmotsParams() map[LmotsType]func() ILmotsParam {
     return defaultLmotsParams.AllParams()
 }

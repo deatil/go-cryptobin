@@ -10,9 +10,7 @@ import (
 
 // A LmsOtsPrivateKey is used to sign exactly one message.
 type LmsOtsPrivateKey struct {
-    typ   ILmotsParam
-    q     uint32
-    id    ID
+    LmsOtsPublicKey
     x     [][]byte
     valid bool
 }
@@ -55,61 +53,38 @@ func NewLmsOtsPrivateKeyFromSeed(lop ILmotsParam, q uint32, id ID, seed []byte) 
         x[i] = hasher.Sum(nil)
     }
 
-    return LmsOtsPrivateKey{
-        typ:   lop,
-        q:     q,
-        id:    id,
+    pk := LmsOtsPrivateKey{
+        LmsOtsPublicKey: LmsOtsPublicKey{
+            typ: lop,
+            q:   q,
+            id:  id,
+        },
         x:     x,
         valid: true,
-    }, nil
+    }
+    pk.LmsOtsPublicKey.k = pk.computeRoot()
+
+    return pk, nil
 }
 
 // Public returns an LmsOtsPublicKey that validates signatures for this private key.
-func (x *LmsOtsPrivateKey) Public() (LmsOtsPublicKey, error) {
-    var be16 [2]byte
-    var be32 [4]byte
-    var tmp []byte
-
-    params := x.typ.Params()
-
-    binary.BigEndian.PutUint32(be32[:], x.q)
-
-    hasher := params.Hash()
-    hasher.Write(x.id[:])
-    hasher.Write(be32[:])
-    hasher.Write(D_PBLC[:])
-
-    for i := uint64(0); i < params.P; i++ {
-        tmp = make([]byte, len(x.x[i]))
-        copy(tmp, x.x[i])
-
-        for j := uint64(0); j < (uint64(1)<<int(params.W.Window()))-1; j++ {
-            binary.BigEndian.PutUint32(be32[:], x.q)
-            binary.BigEndian.PutUint16(be16[:], uint16(i))
-
-            inner := params.Hash()
-            inner.Write(x.id[:])
-            inner.Write(be32[:])
-            inner.Write(be16[:])
-            inner.Write([]byte{byte(j)})
-            inner.Write(tmp)
-
-            tmp = inner.Sum(nil)
-        }
-
-        hasher.Write(tmp)
-    }
-
-    return LmsOtsPublicKey{
-        typ: x.typ,
-        q:   x.q,
-        id:  x.id,
-        k:   hasher.Sum(nil),
-    }, nil
+func (x *LmsOtsPrivateKey) Public() LmsOtsPublicKey {
+    return x.LmsOtsPublicKey
 }
 
 // Sign calculates the LM-OTS signature of a chosen message.
 func (x *LmsOtsPrivateKey) Sign(rng io.Reader, msg []byte) (LmsOtsSignature, error) {
+    params := x.typ.Params()
+
+    c := make([]byte, params.N)
+    if _, err := rng.Read(c); err != nil {
+        return LmsOtsSignature{}, err
+    }
+
+    return x.SignWithData(c, msg)
+}
+
+func (x *LmsOtsPrivateKey) SignWithData(c []byte, msg []byte) (LmsOtsSignature, error) {
     if !x.valid {
         return LmsOtsSignature{}, errors.New("Sign(): invalid private key")
     }
@@ -119,13 +94,6 @@ func (x *LmsOtsPrivateKey) Sign(rng io.Reader, msg []byte) (LmsOtsSignature, err
     var be32 [4]byte
 
     params := x.typ.Params()
-
-    c := make([]byte, params.N)
-
-    _, err = rng.Read(c)
-    if err != nil {
-        return LmsOtsSignature{}, err
-    }
 
     binary.BigEndian.PutUint32(be32[:], x.q)
 
@@ -173,6 +141,46 @@ func (x *LmsOtsPrivateKey) Sign(rng io.Reader, msg []byte) (LmsOtsSignature, err
         c:   c,
         y:   y,
     }, nil
+}
+
+func (x *LmsOtsPrivateKey) computeRoot() []byte {
+    var be16 [2]byte
+    var be32 [4]byte
+    var tmp []byte
+
+    params := x.typ.Params()
+
+    binary.BigEndian.PutUint32(be32[:], x.q)
+
+    hasher := params.Hash()
+    hasher.Write(x.id[:])
+    hasher.Write(be32[:])
+    hasher.Write(D_PBLC[:])
+
+    for i := uint64(0); i < params.P; i++ {
+        tmp = make([]byte, len(x.x[i]))
+        copy(tmp, x.x[i])
+
+        for j := uint64(0); j < (uint64(1)<<int(params.W.Window()))-1; j++ {
+            binary.BigEndian.PutUint32(be32[:], x.q)
+            binary.BigEndian.PutUint16(be16[:], uint16(i))
+
+            inner := params.Hash()
+            inner.Write(x.id[:])
+            inner.Write(be32[:])
+            inner.Write(be16[:])
+            inner.Write([]byte{byte(j)})
+            inner.Write(tmp)
+
+            tmp = inner.Sum(nil)
+        }
+
+        hasher.Write(tmp)
+    }
+
+    root := hasher.Sum(nil)
+
+    return root
 }
 
 // A LmsOtsPublicKey is used to verify exactly one message.

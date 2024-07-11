@@ -9,10 +9,8 @@ import (
 
 // A PrivateKey is used to sign a finite number of messages
 type PrivateKey struct {
-    typ      ILmsParam
-    otsType  ILmotsParam
+    PublicKey
     q        uint32
-    id       ID
     seed     []byte
     authtree [][]byte
 }
@@ -46,10 +44,13 @@ func GenerateKeyFromSeed(tc ILmsParam, otstc ILmotsParam, id ID, seed []byte) (P
     }
 
     return PrivateKey{
-        typ:      tc,
-        otsType:  otstc,
+        PublicKey: PublicKey{
+            typ:     tc,
+            otsType: otstc,
+            id:      id,
+            k:       tree[0],
+        },
         q:        0,
-        id:       id,
         seed:     seed,
         authtree: tree,
     }, nil
@@ -57,12 +58,7 @@ func GenerateKeyFromSeed(tc ILmsParam, otstc ILmotsParam, id ID, seed []byte) (P
 
 // Public returns an PublicKey that validates signatures for this private key
 func (priv *PrivateKey) Public() PublicKey {
-    return PublicKey{
-        typ:      priv.typ,
-        otsType:  priv.otsType,
-        id:       priv.id,
-        k:        priv.authtree[0],
-    }
+    return priv.PublicKey
 }
 
 // Sign calculates the LMS signature of a chosen message.
@@ -82,6 +78,48 @@ func (priv *PrivateKey) Sign(rng io.Reader, msg []byte) (Signature, error) {
     }
 
     ots_sig, err := ots_priv.Sign(rng, msg)
+    if err != nil {
+        return Signature{}, err
+    }
+
+    authpath := make([][]byte, params.H)
+
+    var r uint32 = leaves + priv.q
+    var temp uint32
+    for i := 0; i < height; i++ {
+        temp = (r >> i) ^ 1
+        // We use x-1 because T[x] is indexed from 1, not 0, in the spec
+        authpath[i] = priv.authtree[temp-1][:]
+    }
+
+    // We incremenet q to signal the this keys should not be reused
+    priv.incrementQ()
+
+    return Signature{
+        typ:  priv.typ,
+        q:    priv.q - 1,
+        ots:  ots_sig,
+        path: authpath,
+    }, nil
+}
+
+// Sign calculates the LMS signature of a chosen message.
+func (priv *PrivateKey) SignWithData(c, msg []byte) (Signature, error) {
+    params := priv.typ.Params()
+
+    height := int(params.H)
+    var leaves uint32 = 1 << height
+    if priv.q >= leaves {
+        return Signature{}, errors.New("Sign(): invalid private key")
+    }
+
+    // ots_params := ots_tc.Params()
+    ots_priv, err := NewLmsOtsPrivateKeyFromSeed(priv.otsType, priv.q, priv.id, priv.seed)
+    if err != nil {
+        return Signature{}, err
+    }
+
+    ots_sig, err := ots_priv.SignWithData(c, msg)
     if err != nil {
         return Signature{}, err
     }
@@ -139,7 +177,7 @@ func (priv *PrivateKey) ToBytes() []byte {
     // Next 16 bytes: id
     serialized = append(serialized, priv.id[:]...)
 
-    // Next 32 bytes: seed
+    // Next params.M bytes: seed, it can 32 bytes
     serialized = append(serialized, priv.seed[:]...)
 
     return serialized
@@ -219,10 +257,7 @@ func GeneratePKTree(tc ILmsParam, otstc ILmotsParam, id ID, seed []byte) ([][]by
             return nil, err
         }
 
-        ots_pub, err := ots_priv.Public()
-        if err != nil {
-            return nil, err
-        }
+        ots_pub := ots_priv.Public()
 
         binary.BigEndian.PutUint32(r_be[:], r)
 
@@ -367,7 +402,7 @@ func (pub *PublicKey) ID() ID {
     return pub.id
 }
 
-// PublicKeyFromBytes returns an PublicKey that represents b.
+// NewPublicKeyFromBytes returns an PublicKey that represents b.
 // This is the inverse of the ToBytes() method on the PublicKey object.
 func NewPublicKeyFromBytes(b []byte) (PublicKey, error) {
     if len(b) < 8 {

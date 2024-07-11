@@ -12,10 +12,10 @@ type TypeDataName interface {
 
 // TypeParams
 type TypeParams[N TypeDataName, M any] struct {
-    // 读写锁
+    // RWMutex
     mu sync.RWMutex
 
-    // 列表
+    // datas
     data map[N]func() M
 }
 
@@ -25,7 +25,7 @@ func NewTypeParams[N TypeDataName, M any]() *TypeParams[N, M] {
     }
 }
 
-// 添加类型
+// AddParam
 func (this *TypeParams[N, M]) AddParam(typ N, fn func() M) {
     this.mu.Lock()
     defer this.mu.Unlock()
@@ -33,7 +33,7 @@ func (this *TypeParams[N, M]) AddParam(typ N, fn func() M) {
     this.data[typ] = fn
 }
 
-// 获取类型
+// GetParam
 func (this *TypeParams[N, M]) GetParam(typ N) (func() M, error) {
     this.mu.RLock()
     defer this.mu.RUnlock()
@@ -47,7 +47,7 @@ func (this *TypeParams[N, M]) GetParam(typ N) (func() M, error) {
     return param, nil
 }
 
-// 全部
+// AllParams
 func (this *TypeParams[N, M]) AllParams() map[N]func() M {
     this.mu.RLock()
     defer this.mu.RUnlock()

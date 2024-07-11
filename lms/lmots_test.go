@@ -23,10 +23,7 @@ func test_OtsSignVerify(t *testing.T, otstc ILmotsParam) {
         panic(err)
     }
 
-    ots_pub, err := ots_priv.Public()
-    if err != nil {
-        panic(err)
-    }
+    ots_pub := ots_priv.Public()
 
     ots_sig, err := ots_priv.Sign(rand.Reader, []byte("example"))
     if err != nil {
@@ -80,10 +77,7 @@ func test_OtsSignVerifyFail(t *testing.T, otstc ILmotsParam) {
         panic(err)
     }
 
-    ots_pub, err := ots_priv.Public()
-    if err != nil {
-        panic(err)
-    }
+    ots_pub := ots_priv.Public()
 
     ots_sig, err := ots_priv.Sign(rand.Reader, []byte("example"))
     if err != nil {

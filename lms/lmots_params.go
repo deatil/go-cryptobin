@@ -15,10 +15,10 @@ const (
     LMOTS_SHA256_N32_W4 LmotsType = 3
     LMOTS_SHA256_N32_W8 LmotsType = 4
 
-    LMOTS_SM3_N32_W1 LmotsType = 11
-    LMOTS_SM3_N32_W2 LmotsType = 12
-    LMOTS_SM3_N32_W4 LmotsType = 13
-    LMOTS_SM3_N32_W8 LmotsType = 14
+    LMOTS_SM3_N32_W1 LmotsType = 17
+    LMOTS_SM3_N32_W2 LmotsType = 18
+    LMOTS_SM3_N32_W4 LmotsType = 19
+    LMOTS_SM3_N32_W8 LmotsType = 20
 )
 
 // ILmotsParam represents a specific instance of LM-OTS

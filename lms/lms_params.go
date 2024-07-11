@@ -15,11 +15,11 @@ const (
     LMS_SHA256_M32_H20 LmsType = 8
     LMS_SHA256_M32_H25 LmsType = 9
 
-    LMS_SM3_M32_H5  LmsType = 19
-    LMS_SM3_M32_H10 LmsType = 20
-    LMS_SM3_M32_H15 LmsType = 21
-    LMS_SM3_M32_H20 LmsType = 22
-    LMS_SM3_M32_H25 LmsType = 23
+    LMS_SM3_M32_H5  LmsType = 25
+    LMS_SM3_M32_H10 LmsType = 26
+    LMS_SM3_M32_H15 LmsType = 27
+    LMS_SM3_M32_H20 LmsType = 28
+    LMS_SM3_M32_H25 LmsType = 29
 )
 
 // ILmsParam represents a specific instance of LMS

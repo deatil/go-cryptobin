@@ -30,8 +30,8 @@ func Test_PKTreeKAT1(t *testing.T) {
     tc := LMS_SHA256_M32_H10_Param
     otstc := LMOTS_SHA256_N32_W4_Param
 
-    lms_priv, err := NewPrivateKeyFromSeed(tc, otstc, ID(id), seed)
-    assertError(err, "NewPrivateKeyFromSeed")
+    lms_priv, err := GenerateKeyFromSeed(tc, otstc, ID(id), seed)
+    assertError(err, "GenerateKeyFromSeed")
 
     lms_pub := lms_priv.Public()
 
@@ -811,8 +811,8 @@ func test_SignVerify(t *testing.T, tc ILmsParam, otstc ILmotsParam) {
         panic(err)
     }
 
-    lms_priv, err := NewPrivateKeyFromSeed(tc, otstc, ID(id), seed)
-    assertError(err, "NewPrivateKeyFromSeed")
+    lms_priv, err := GenerateKeyFromSeed(tc, otstc, ID(id), seed)
+    assertError(err, "GenerateKeyFromSeed")
 
     lms_pub := lms_priv.Public()
 

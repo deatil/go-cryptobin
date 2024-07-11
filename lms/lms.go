@@ -34,12 +34,12 @@ func GenerateKey(rng io.Reader, tc ILmsParam, otstc ILmotsParam) (PrivateKey, er
 
     id := ID(idbytes)
 
-    return NewPrivateKeyFromSeed(tc, otstc, id, seed)
+    return GenerateKeyFromSeed(tc, otstc, id, seed)
 }
 
-// NewPrivateKeyFromSeed returns a new PrivateKey, using the algorithm from
+// GenerateKeyFromSeed returns a new PrivateKey, using the algorithm from
 // Appendix A of <https://datatracker.ietf.org/doc/html/rfc8554#appendix-A>
-func NewPrivateKeyFromSeed(tc ILmsParam, otstc ILmotsParam, id ID, seed []byte) (PrivateKey, error) {
+func GenerateKeyFromSeed(tc ILmsParam, otstc ILmotsParam, id ID, seed []byte) (PrivateKey, error) {
     tree, err := GeneratePKTree(tc, otstc, id, seed)
     if err != nil {
         return PrivateKey{}, err
@@ -189,7 +189,7 @@ func NewPrivateKeyFromBytes(b []byte) (PrivateKey, error) {
     seed := b[28:seed_end]
 
     // Load private key, then set q to what was persisted
-    privateKey, err := NewPrivateKeyFromSeed(typecode, otstype, id, seed)
+    privateKey, err := GenerateKeyFromSeed(typecode, otstype, id, seed)
     if err != nil {
         return PrivateKey{}, err
     }

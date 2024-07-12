@@ -173,3 +173,55 @@ func Test_HSS_PrivateKey_ToBytes(t *testing.T) {
     sig0, _ := priv.LmsSig[0].ToBytes()
     assertEqual(sig0_2, sig0, "priv.LmsSig[0].ToBytes")
 }
+
+func Test_HSS_Equal(t *testing.T) {
+    assertBool := test.AssertBoolT(t)
+    assertNotBool := test.AssertNotBoolT(t)
+
+    t.Run("good", func(t *testing.T) {
+        priv, err := GenerateHSSKey(rand.Reader, DefaultOpts)
+        if err != nil {
+            panic(err)
+        }
+
+        pub := priv.HSSPublicKey
+
+        priv2 := priv
+        pub2 := pub
+
+        assertBool(priv2.Equal(priv), "HSSPrivateKey")
+        assertBool(pub2.Equal(&pub), "HSSPublicKey")
+
+        // =========
+
+        privBytes, _ := priv.ToBytes()
+        pubBytes := pub.ToBytes()
+
+        priv3, _ := NewHSSPrivateKeyFromBytes(privBytes)
+        pub3, _ := NewHSSPublicKeyFromBytes(pubBytes)
+
+        assertBool(priv3.Equal(priv), "PrivateKey Bytes")
+        assertBool(pub3.Equal(&pub), "PublicKey Bytes")
+    })
+
+    t.Run("bad", func(t *testing.T) {
+        priv, err := GenerateHSSKey(rand.Reader, DefaultOpts)
+        if err != nil {
+            panic(err)
+        }
+
+        pub := priv.HSSPublicKey
+
+        // ===========
+
+        priv2, err := GenerateHSSKey(rand.Reader, DefaultOpts)
+        if err != nil {
+            panic(err)
+        }
+
+        pub2 := priv2.HSSPublicKey
+
+        assertNotBool(priv2.Equal(priv), "HSSPrivateKey")
+        assertNotBool(pub2.Equal(&pub), "HSSPublicKey")
+    })
+}

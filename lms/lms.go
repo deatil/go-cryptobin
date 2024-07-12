@@ -71,6 +71,18 @@ func GenerateKeyFromSeed(tc ILmsParam, otstc ILmotsParam, id ID, seed []byte) (*
     }, nil
 }
 
+// Equal reports whether priv and x have the same value.
+func (priv *PrivateKey) Equal(x crypto.PrivateKey) bool {
+    xx, ok := x.(*PrivateKey)
+    if !ok {
+        return false
+    }
+
+    return priv.PublicKey.Equal(&xx.PublicKey) &&
+        priv.q == xx.q &&
+        subtle.ConstantTimeCompare(priv.seed, xx.seed) == 1
+}
+
 // Public returns an PublicKey that validates signatures for this private key
 func (priv *PrivateKey) Public() crypto.PublicKey {
     return priv.PublicKey
@@ -299,6 +311,19 @@ func NewPublicKey(tc ILmsParam, otstc ILmotsParam, id ID, k []byte) (*PublicKey,
         id:      id,
         k:       k[:],
     }, nil
+}
+
+// Equal reports whether pub and x have the same value.
+func (pub *PublicKey) Equal(x crypto.PublicKey) bool {
+    xx, ok := x.(*PublicKey)
+    if !ok {
+        return false
+    }
+
+    return pub.typ.GetType() == xx.typ.GetType() &&
+        pub.otsType.GetType() == xx.otsType.GetType() &&
+        subtle.ConstantTimeCompare(pub.id[:], xx.id[:]) == 1 &&
+        subtle.ConstantTimeCompare(pub.k, xx.k) == 1
 }
 
 // Verify returns true if sig is valid for msg and this public key.

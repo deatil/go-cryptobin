@@ -178,8 +178,13 @@ type HSSPrivateKey struct {
     LmsSig [4]Signature
 }
 
-// Public returns an HSSPublicKey that validates signatures for this private key
+// Public returns a crypto.PublicKey that validates signatures for this private key
 func (priv *HSSPrivateKey) Public() crypto.PublicKey {
+    return priv.HSSPublicKey
+}
+
+// PublicKey returns a HSSPublicKey that validates signatures for this private key
+func (priv *HSSPrivateKey) PublicKey() HSSPublicKey {
     return priv.HSSPublicKey
 }
 

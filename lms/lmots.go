@@ -79,8 +79,13 @@ func NewLmotsPrivateKeyFromSeed(lop ILmotsParam, q uint32, id ID, seed []byte) (
     return &pk, nil
 }
 
-// Public returns an LmotsPublicKey that validates signatures for this private key.
+// Public returns a crypto.PublicKey that validates signatures for this private key.
 func (priv *LmotsPrivateKey) Public() crypto.PublicKey {
+    return priv.LmotsPublicKey
+}
+
+// PublicKey returns a LmotsPublicKey that validates signatures for this private key.
+func (priv *LmotsPrivateKey) PublicKey() LmotsPublicKey {
     return priv.LmotsPublicKey
 }
 

@@ -12,10 +12,10 @@ func Test_HSS_SignerInterface(t *testing.T) {
     var _ crypto.Signer = &HSSPrivateKey{}
 }
 
-func Test_HSS_SignVerify(t *testing.T) {
+func test_HSS_SignVerify(t *testing.T, opts []HSSOpts) {
     assertBool := test.AssertBoolT(t)
 
-    priv, err := GenerateHSSKey(rand.Reader, DefaultOpts)
+    priv, err := GenerateHSSKey(rand.Reader, opts)
     if err != nil {
         panic(err)
     }
@@ -29,6 +29,93 @@ func Test_HSS_SignVerify(t *testing.T) {
 
     result := pub.Verify([]byte("example"), sig)
     assertBool(result, "HSSSignVerify")
+}
+
+func Test_HSS_SignVerify(t *testing.T) {
+    t.Run("DefaultOpts", func(t *testing.T) {
+        test_HSS_SignVerify(t, DefaultOpts)
+    })
+    t.Run("Opts 1", func(t *testing.T) {
+        test_HSS_SignVerify(t, []HSSOpts{
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+        })
+    })
+    t.Run("Opts 2", func(t *testing.T) {
+        test_HSS_SignVerify(t, []HSSOpts{
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+        })
+    })
+    t.Run("Opts 3", func(t *testing.T) {
+        test_HSS_SignVerify(t, []HSSOpts{
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+        })
+    })
+    t.Run("Opts 4", func(t *testing.T) {
+        test_HSS_SignVerify(t, []HSSOpts{
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+        })
+    })
+    t.Run("Opts 5", func(t *testing.T) {
+        test_HSS_SignVerify(t, []HSSOpts{
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+            HSSOpts{
+                Tc:    LMS_SHA256_M32_H5_Param,
+                Otstc: LMOTS_SHA256_N32_W8_Param,
+            },
+        })
+    })
+
 }
 
 func Test_HSS_PublicKey_ToBytes(t *testing.T) {

@@ -151,6 +151,22 @@ func (priv *PrivateKey) incrementQ() {
     priv.q++
 }
 
+// Retrieve the current value of the internal counter, q.
+// Used for unit tests
+func (priv *PrivateKey) Q() uint32 {
+    return priv.q
+}
+
+// compute authtree
+func (priv *PrivateKey) Precompute() {
+    tree, err := GeneratePKTree(priv.typ, priv.otsType, priv.id, priv.seed)
+    if err != nil {
+        return
+    }
+
+    priv.authtree = tree
+}
+
 // ToBytes() serialized the private key into a byte string for storage.
 // The current value of the internal counter, q, is included.
 func (priv *PrivateKey) ToBytes() []byte {
@@ -182,12 +198,6 @@ func (priv *PrivateKey) ToBytes() []byte {
     serialized = append(serialized, priv.seed[:]...)
 
     return serialized
-}
-
-// Retrieve the current value of the internal counter, q.
-// Used for unit tests
-func (priv *PrivateKey) Q() uint32 {
-    return priv.q
 }
 
 // NewPrivateKeyFromBytes returns an PrivateKey that represents b.

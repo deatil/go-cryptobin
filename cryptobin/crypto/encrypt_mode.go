@@ -544,7 +544,7 @@ type ModeOCB struct {}
 func (this ModeOCB) Encrypt(plain []byte, block cipher.Block, opt IOption) ([]byte, error) {
     iv := opt.Iv()
 
-    aead, err := ocb.NewOCBWithNonceSize(block, len(iv))
+    aead, err := ocb.NewWithNonceSize(block, len(iv))
     if err != nil {
         return nil, err
     }
@@ -560,7 +560,7 @@ func (this ModeOCB) Encrypt(plain []byte, block cipher.Block, opt IOption) ([]by
 func (this ModeOCB) Decrypt(data []byte, block cipher.Block, opt IOption) ([]byte, error) {
     iv := opt.Iv()
 
-    aead, err := ocb.NewOCBWithNonceSize(block, len(iv))
+    aead, err := ocb.NewWithNonceSize(block, len(iv))
     if err != nil {
         return nil, err
     }

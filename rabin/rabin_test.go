@@ -2,9 +2,10 @@ package rabin
 
 import (
     "io"
+    "bytes"
+    "testing"
     "math/big"
     "crypto/rand"
-    "testing"
     "encoding/hex"
 )
 
@@ -102,5 +103,19 @@ func Test_Encrypt(t *testing.T) {
 
     if string(dedata) != string(m) {
         t.Errorf("fail Decrypt, got %x, want %x", dedata, m)
+    }
+}
+
+func Test_Bytes(t *testing.T) {
+    a := []byte("abcdef")
+    b := []byte("abcdef")
+
+    b = append([]byte{byte(0)}, b...)
+
+    p := new(big.Int).SetBytes(b)
+    b = p.Bytes()
+
+    if bytes.Compare(a, b) != 0 {
+        t.Errorf("got %x, want %x", a, b)
     }
 }

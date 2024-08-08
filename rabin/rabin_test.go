@@ -2,11 +2,14 @@ package rabin
 
 import (
     "io"
+    "fmt"
+    "time"
     "bytes"
     "testing"
     "math/big"
     "crypto/rand"
     "encoding/hex"
+    math_rand "math/rand"
 )
 
 func encodeHex(src []byte) string {
@@ -75,13 +78,12 @@ func Test_NewPrivateKey(t *testing.T) {
     }
 }
 
-func Test_Encrypt(t *testing.T) {
-    message := make([]byte, 8)
-    _, err := io.ReadFull(rand.Reader, message)
-    if err != nil {
-        t.Fatal(err)
-    }
+func getRandNum(min, max int) int {
+    math_rand.Seed(time.Now().UnixNano())
+    return math_rand.Intn(max - min + 1) + min
+}
 
+func Test_Encrypt(t *testing.T) {
     priv, err := GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
@@ -89,20 +91,30 @@ func Test_Encrypt(t *testing.T) {
 
     pub := &priv.PublicKey
 
-    endata, err := pub.Encrypt(message, nil)
-    if err != nil {
-        t.Fatal(err)
-    }
+    max := 100
 
-    dedata, err := priv.Decrypt(rand.Reader, endata, nil)
-    if err != nil {
-        t.Fatal(err)
-    }
+    for i := 0; i < max; i++ {
+        t.Run(fmt.Sprintf("Test %d", i), func(t *testing.T) {
+            message := make([]byte, getRandNum(8, 80))
+            _, err = io.ReadFull(rand.Reader, message)
+            if err != nil {
+                t.Fatal(err)
+            }
 
-    m := new(big.Int).SetBytes(message).Bytes()
+            endata, err := pub.Encrypt(message, nil)
+            if err != nil {
+                t.Fatal(err)
+            }
 
-    if string(dedata) != string(m) {
-        t.Errorf("fail Decrypt, got %x, want %x", dedata, m)
+            dedata, err := priv.Decrypt(rand.Reader, endata, nil)
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            if bytes.Compare(dedata, message) != 0 {
+                t.Errorf("fail Decrypt, got %x, want %x", dedata, message)
+            }
+        })
     }
 }
 
@@ -117,5 +129,31 @@ func Test_Bytes(t *testing.T) {
 
     if bytes.Compare(a, b) != 0 {
         t.Errorf("got %x, want %x", a, b)
+    }
+}
+
+func Test_Encrypt_FillBytes(t *testing.T) {
+    priv, err := GenerateKey(rand.Reader)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pub := &priv.PublicKey
+
+    message := []byte("abcdef")
+    message = append([]byte{byte(0), byte(0), byte(0)}, message...)
+
+    endata, err := pub.Encrypt(message, nil)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    dedata, err := priv.Decrypt(rand.Reader, endata, nil)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    if bytes.Compare(dedata, message) != 0 {
+        t.Errorf("fail Decrypt, got %x, want %x", dedata, message)
     }
 }

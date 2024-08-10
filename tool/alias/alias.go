@@ -1,6 +1,9 @@
 package alias
 
-import "unsafe"
+import (
+    "unsafe"
+    "encoding/binary"
+)
 
 // AnyOverlap reports whether x and y share memory at any (not necessarily
 // corresponding) index. The memory beyond the slice length is ignored.
@@ -46,4 +49,37 @@ func ConstantTimeAllZero(bytes []byte) bool {
     }
 
     return b == 0
+}
+
+// Clone returns a copy of b[:len(b)].
+// The result may have additional unused capacity.
+func BytesClone(b []byte) []byte {
+    if b == nil {
+        return nil
+    }
+
+    return append([]byte{}, b...)
+}
+
+func IncCtr(b []byte) {
+    switch len(b) {
+        case 1:
+            b[0]++
+        case 2:
+            v := binary.BigEndian.Uint16(b)
+            binary.BigEndian.PutUint16(b, v+1)
+        case 4:
+            v := binary.BigEndian.Uint32(b)
+            binary.BigEndian.PutUint32(b, v+1)
+        case 8:
+            v := binary.BigEndian.Uint64(b)
+            binary.BigEndian.PutUint64(b, v+1)
+        default:
+            for i := len(b) - 1; i >= 0; i-- {
+                b[i]++
+                if b[i] > 0 {
+                    return
+                }
+            }
+    }
 }

@@ -19,14 +19,14 @@ func NewHMACPRF(h func() hash.Hash) PRF {
     }
 }
 
-func (prf *hmacPRF) Sum(in, key []byte, src ...[]byte) []byte {
+func (prf *hmacPRF) Sum(key []byte, src ...[]byte) []byte {
     h := hmac.New(prf.hash, key)
 
     for _, v := range src {
         h.Write(v)
     }
 
-    return h.Sum(in)
+    return h.Sum(nil)
 }
 
 // ================
@@ -42,7 +42,7 @@ func NewCMACPRF(cip func(key []byte) (cipher.Block, error)) PRF {
     }
 }
 
-func (prf *cmacPRF) Sum(in, key []byte, src ...[]byte) []byte {
+func (prf *cmacPRF) Sum(key []byte, src ...[]byte) []byte {
     b, err := prf.cipher(key)
     if err != nil {
         panic(err)
@@ -57,5 +57,5 @@ func (prf *cmacPRF) Sum(in, key []byte, src ...[]byte) []byte {
         h.Write(v)
     }
 
-    return h.Sum(in)
+    return h.Sum(nil)
 }

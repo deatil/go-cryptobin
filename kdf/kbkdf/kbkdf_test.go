@@ -19,11 +19,11 @@ func fromHex(s string) []byte {
     return h
 }
 
-func Test_CMAC_CounterMode(t *testing.T) {
+func Test_CMAC_CounterModeKey(t *testing.T) {
     var got []byte
     for idx, tc := range testcasesCMACCtr {
         want := tc.K0
-        got = CounterMode(NewCMACPRF(tc.NewCipher), tc.KI, tc.Label, tc.Context, tc.CounterSize/8, tc.L/8)
+        got = CounterModeKey(NewCMACPRF(tc.NewCipher), tc.KI, tc.Label, tc.Context, tc.CounterSize/8, tc.L/8)
 
         if !bytes.Equal(got, want) {
             t.Errorf("failed test case %d, got %x, want %x", idx, got, want)
@@ -31,11 +31,11 @@ func Test_CMAC_CounterMode(t *testing.T) {
     }
 }
 
-func Test_CMAC_FeedbackMode(t *testing.T) {
+func Test_CMAC_FeedbackModeKey(t *testing.T) {
     var got []byte
     for idx, tc := range testcasesCMACFB {
         want := tc.K0
-        got = FeedbackMode(NewCMACPRF(tc.NewCipher), tc.KI, tc.Label, tc.Context, tc.IV, tc.CounterSize/8, tc.L/8)
+        got = FeedbackModeKey(NewCMACPRF(tc.NewCipher), tc.KI, tc.Label, tc.Context, tc.IV, tc.CounterSize/8, tc.L/8)
 
         if !bytes.Equal(got, want) {
             t.Errorf("failed test case %d, got %x, want %x", idx, got, want)
@@ -43,11 +43,11 @@ func Test_CMAC_FeedbackMode(t *testing.T) {
     }
 }
 
-func Test_CMAC_PipelineMode(t *testing.T) {
+func Test_CMAC_PipelineModeKey(t *testing.T) {
     var got []byte
     for idx, tc := range testcasesCMACDP {
         want := tc.K0
-        got = PipelineMode(NewCMACPRF(tc.NewCipher), tc.KI, tc.Label, tc.Context, tc.CounterSize/8, tc.L/8)
+        got = PipelineModeKey(NewCMACPRF(tc.NewCipher), tc.KI, tc.Label, tc.Context, tc.CounterSize/8, tc.L/8)
 
         if !bytes.Equal(got, want) {
             t.Errorf("failed test case %d, got %x, want %x", idx, got, want)
@@ -467,11 +467,11 @@ var (
 
 // ===========
 
-func TestHMAC_CounterMode(t *testing.T) {
+func Test_HMAC_CounterModeKey(t *testing.T) {
     var got []byte
     for idx, tc := range testcasesHMACCtr {
         want := tc.K0
-        got = CounterMode(NewHMACPRF(tc.Hash), tc.KI, tc.Label, tc.Context, tc.CounterSize, tc.L/8)
+        got = CounterModeKey(NewHMACPRF(tc.Hash), tc.KI, tc.Label, tc.Context, tc.CounterSize, tc.L/8)
 
         if !bytes.Equal(got, want) {
             t.Errorf("failed test case %d, got %x, want %x", idx, got, want)
@@ -479,11 +479,11 @@ func TestHMAC_CounterMode(t *testing.T) {
     }
 }
 
-func TestHMAC_FeedbackMode(t *testing.T) {
+func Test_HMAC_FeedbackModeKey(t *testing.T) {
     var got []byte
     for idx, tc := range testcasesHMACFB {
         want := tc.K0
-        got = FeedbackMode(NewHMACPRF(tc.Hash), tc.KI, tc.Label, tc.Context, tc.IV, tc.CounterSize, tc.L/8)
+        got = FeedbackModeKey(NewHMACPRF(tc.Hash), tc.KI, tc.Label, tc.Context, tc.IV, tc.CounterSize, tc.L/8)
 
         if !bytes.Equal(got, want) {
             t.Errorf("failed test case %d, got %x, want %x", idx, got, want)
@@ -491,11 +491,11 @@ func TestHMAC_FeedbackMode(t *testing.T) {
     }
 }
 
-func TestHMAC_DoublePipeMode(t *testing.T) {
+func Test_HMAC_DoublePipeModeKey(t *testing.T) {
     var got []byte
     for idx, tc := range testcasesHMACDP {
         want := tc.K0
-        got = PipelineMode(NewHMACPRF(tc.Hash), tc.KI, tc.Label, tc.Context, tc.CounterSize, tc.L/8)
+        got = PipelineModeKey(NewHMACPRF(tc.Hash), tc.KI, tc.Label, tc.Context, tc.CounterSize, tc.L/8)
 
         if !bytes.Equal(got, want) {
             t.Errorf("failed test case %d, got %x, want %x", idx, got, want)

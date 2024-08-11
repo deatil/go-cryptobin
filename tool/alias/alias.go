@@ -2,7 +2,6 @@ package alias
 
 import (
     "unsafe"
-    "encoding/binary"
 )
 
 // AnyOverlap reports whether x and y share memory at any (not necessarily
@@ -59,27 +58,4 @@ func BytesClone(b []byte) []byte {
     }
 
     return append([]byte{}, b...)
-}
-
-func IncCtr(b []byte) {
-    switch len(b) {
-        case 1:
-            b[0]++
-        case 2:
-            v := binary.BigEndian.Uint16(b)
-            binary.BigEndian.PutUint16(b, v+1)
-        case 4:
-            v := binary.BigEndian.Uint32(b)
-            binary.BigEndian.PutUint32(b, v+1)
-        case 8:
-            v := binary.BigEndian.Uint64(b)
-            binary.BigEndian.PutUint64(b, v+1)
-        default:
-            for i := len(b) - 1; i >= 0; i-- {
-                b[i]++
-                if b[i] > 0 {
-                    return
-                }
-            }
-    }
 }

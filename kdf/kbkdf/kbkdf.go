@@ -1,6 +1,8 @@
 package kbkdf
 
 import (
+    "encoding/binary"
+
     "github.com/deatil/go-cryptobin/tool/alias"
 )
 
@@ -11,16 +13,16 @@ const (
 
 // implements of Pseudo-Random Functions
 type PRF interface {
-    Sum(in []byte, K []byte, src ...[]byte) []byte
+    Sum(K []byte, src ...[]byte) []byte
 }
 
 // counterSize: 0 <= counterSize <= 8
-func CounterMode(prf PRF, key, label, context []byte, counterSize, length int) []byte {
+func CounterModeKey(prf PRF, key, label, context []byte, counterSize, length int) []byte {
     if counterSize < 0 || 8 < counterSize {
         panic(errInvalidCounterSize)
     }
 
-    out, dst := alias.SliceForAppend(nil, length)
+    out := make([]byte, length)
 
     var Lr [8]byte
     L := fillL(Lr[:], uint64(length*8))
@@ -29,10 +31,10 @@ func CounterMode(prf PRF, key, label, context []byte, counterSize, length int) [
     var K []byte
 
     for off := 0; off < length; {
-        alias.IncCtr(I)
+        incCtr(I)
 
-        K = prf.Sum(K[:0], key, I, label, []byte{0}, context, L)
-        copy(dst[off:], K)
+        K = prf.Sum(key, I, label, []byte{0}, context, L)
+        copy(out[off:], K)
 
         off += len(K)
     }
@@ -41,12 +43,12 @@ func CounterMode(prf PRF, key, label, context []byte, counterSize, length int) [
 }
 
 // counterSize: 0 <= counterSize <= 8
-func FeedbackMode(prf PRF, key, label, context, iv []byte, counterSize, length int) []byte {
+func FeedbackModeKey(prf PRF, key, label, context, iv []byte, counterSize, length int) []byte {
     if counterSize < 0 || 8 < counterSize {
         panic(errInvalidCounterSize)
     }
 
-    out, dst := alias.SliceForAppend(nil, length)
+    out := make([]byte, length)
 
     var Lr [8]byte
     L := fillL(Lr[:], uint64(length*8))
@@ -55,10 +57,10 @@ func FeedbackMode(prf PRF, key, label, context, iv []byte, counterSize, length i
     K := alias.BytesClone(iv)
 
     for off := 0; off < length; {
-        alias.IncCtr(I)
+        incCtr(I)
 
-        K = prf.Sum(K[:0], key, K, I, label, []byte{0}, context, L)
-        copy(dst[off:], K)
+        K = prf.Sum(key, K, I, label, []byte{0}, context, L)
+        copy(out[off:], K)
         off += len(K)
     }
 
@@ -66,28 +68,28 @@ func FeedbackMode(prf PRF, key, label, context, iv []byte, counterSize, length i
 }
 
 // counterSize: 0 <= counterSize <= 8
-func PipelineMode(prf PRF, key, label, context []byte, counterSize, length int) []byte {
+func PipelineModeKey(prf PRF, key, label, context []byte, counterSize, length int) []byte {
     if counterSize < 0 || 8 < counterSize {
         panic(errInvalidCounterSize)
     }
 
-    out, dst := alias.SliceForAppend(nil, length)
+    out := make([]byte, length)
 
     var Lr [8]byte
     L := fillL(Lr[:], uint64(length*8))
     I := make([]byte, counterSize)
 
-    alias.IncCtr(I)
-    A := prf.Sum(nil, key, label, []byte{0}, context, L)
-    K := prf.Sum(nil, key, A, I, label, []byte{0}, context, L)
-    off := copy(dst, K)
+    incCtr(I)
+    A := prf.Sum(key, label, []byte{0}, context, L)
+    K := prf.Sum(key, A, I, label, []byte{0}, context, L)
+    off := copy(out, K)
 
     for off < length {
-        alias.IncCtr(I)
+        incCtr(I)
 
-        A = prf.Sum(A[:0], key, A)
-        K = prf.Sum(K[:0], key, A, I, label, []byte{0}, context, L)
-        copy(dst[off:], K)
+        A = prf.Sum(key, A)
+        K = prf.Sum(key, A, I, label, []byte{0}, context, L)
+        copy(out[off:], K)
 
         off += len(K)
     }
@@ -159,3 +161,25 @@ func fillL(dst []byte, v uint64) []byte {
     }
 }
 
+func incCtr(b []byte) {
+    switch len(b) {
+        case 1:
+            b[0]++
+        case 2:
+            v := binary.BigEndian.Uint16(b)
+            binary.BigEndian.PutUint16(b, v+1)
+        case 4:
+            v := binary.BigEndian.Uint32(b)
+            binary.BigEndian.PutUint32(b, v+1)
+        case 8:
+            v := binary.BigEndian.Uint64(b)
+            binary.BigEndian.PutUint64(b, v+1)
+        default:
+            for i := len(b) - 1; i >= 0; i-- {
+                b[i]++
+                if b[i] > 0 {
+                    return
+                }
+            }
+    }
+}

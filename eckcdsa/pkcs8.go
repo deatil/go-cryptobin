@@ -14,10 +14,7 @@ import (
 const ecPrivKeyVersion = 1
 
 var (
-    oidPublicKeyKCDSA   = asn1.ObjectIdentifier{1, 0, 14888, 3, 0, 2} // {iso(1) standard(0) digital-signature-with-appendix(14888) part3(3) algorithm(0) kcdsa(2)}
-    oidPublicKeyECKCDSA = asn1.ObjectIdentifier{1, 0, 14888, 3, 0, 5} // {iso(1) standard(0) digital-signature-with-appendix(14888) part3(3) algorithm(0) ec-kcdsa(5)}
-
-    oidPublicKeyKCDSAAlteGOV   = asn1.ObjectIdentifier{1, 2, 410, 200004, 1, 1}         // eGOV-C01.0008
+    oidPublicKeyECKCDSA        = asn1.ObjectIdentifier{1, 0, 14888, 3, 0, 5} // {iso(1) standard(0) digital-signature-with-appendix(14888) part3(3) algorithm(0) ec-kcdsa(5)}
     oidPublicKeyECKCDSAAlteGOV = asn1.ObjectIdentifier{1, 2, 410, 200004, 1, 100, 2, 1} // eGOV-C01.0008
 
     oidNamedCurveP224 = asn1.ObjectIdentifier{1, 3, 132, 0, 33}
@@ -224,7 +221,7 @@ func ParsePrivateKey(derBytes []byte) (*PrivateKey, error) {
 // sets the curve ID to the given OID, or omits it if OID is nil.
 func marshalECPrivateKeyWithOID(key *PrivateKey, oid asn1.ObjectIdentifier) ([]byte, error) {
     if !key.Curve.IsOnCurve(key.X, key.Y) {
-        return nil, errors.New("invalid elliptic key public key")
+        return nil, errors.New("eckcdsa: invalid elliptic key public key")
     }
 
     privateKey := make([]byte, BitsToBytes(key.D.BitLen()))

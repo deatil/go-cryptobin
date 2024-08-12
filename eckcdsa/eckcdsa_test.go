@@ -47,6 +47,26 @@ func toBigint(s string) *big.Int {
     return result
 }
 
+func decodePEM(pubPEM string) []byte {
+    block, _ := pem.Decode([]byte(pubPEM))
+    if block == nil {
+        panic("failed to parse PEM block containing the key")
+    }
+
+    return block.Bytes
+}
+
+func encodePEM(src []byte, typ string) string {
+    keyBlock := &pem.Block{
+        Type:  typ,
+        Bytes: src,
+    }
+
+    keyData := pem.EncodeToMemory(keyBlock)
+
+    return string(keyData)
+}
+
 func Test_Interface(t *testing.T) {
     var _ crypto.Signer     = (*PrivateKey)(nil)
     var _ crypto.SignerOpts = (*SignerOpts)(nil)
@@ -410,7 +430,6 @@ var (
     }
 )
 
-
 func Test_PKCS8PrivateKey(t *testing.T) {
     test_PKCS8PrivateKey(t, elliptic.P224())
     test_PKCS8PrivateKey(t, elliptic.P256())
@@ -498,8 +517,7 @@ func test_PKCS1PrivateKey(t *testing.T, curue elliptic.Curve) {
 func Test_PKCS8PrivateKey_Check(t *testing.T) {
     for i, tc := range eckcdsaTestCases {
         t.Run(fmt.Sprintf("EC-KCDSA index %d", i), func(t *testing.T) {
-            pb, _ := pem.Decode([]byte(tc.pkcs8PrivateKey))
-            expectedDER := pb.Bytes
+            expectedDER := decodePEM(tc.pkcs8PrivateKey)
 
             actualDER, err := MarshalPrivateKey(&tc.key)
             if err != nil {
@@ -520,6 +538,14 @@ func Test_PKCS8PrivateKey_Check(t *testing.T) {
                 t.Errorf("ParsePKCS8PrivateKey fail")
                 return
             }
+
+            pubDER := decodePEM(tc.pkixPublicKey)
+            _, err = ParsePublicKey(pubDER)
+            if err != nil {
+                t.Error(err)
+                return
+            }
+
         })
     }
 

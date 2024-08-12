@@ -220,7 +220,7 @@ func signUsingK(k *big.Int, priv *PrivateKey, h hash.Hash, msg []byte) (r, s *bi
         two_8w.Exp(two_8w, big.NewInt(int64(w)), nil)
     }
 
-    // 2: kG = (x1, y1) 계산
+    // 2: kG = (x1, y1)
     x1, _ := curve.ScalarBaseMult(k.Bytes())
     x1Bytes := padLeft(x1.Bytes(), K)
 
@@ -338,7 +338,7 @@ func VerifyWithRS(pub *PublicKey, h hash.Hash, data []byte, r, s *big.Int) bool 
     x2, _ := curve.Add(x21, y21, x22, y22)
     x2Bytes := padLeft(x2.Bytes(), K)
 
-    // 6: Hash(x2′) = r′ 여부 확인
+    // 6: Hash(x2′) = r′
     h.Reset()
     h.Write(x2Bytes)
     rBytes := h.Sum(nil)

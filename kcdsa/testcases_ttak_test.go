@@ -510,7 +510,7 @@ var (
                             1d4e0bc5 877e0a0f c6b30dc6 c743f238 9bc69b8f cb7affeb dea013f8 64c68ac2
                             cb8bd7b5 c434809f c6d1b62c d9f20bb1 a7fab58c c3f5d2dc a511e2e4 077e9def
                             912141f8 47f8751d 1dc47f3d`),
-            Count: 5189, // 문서상에는 2189(0x1445)으로 되어있으나, 2189는 오타로 보이며, 실제로는 5189임
+            Count: 5189,
             P: toBigint(`d7b9afc1 04f4d53f 737db88d 6bf77e12 cd7ec3d7 1cbe3cb7 4cd224bf f348154a
                             fba6bfed 797044df c655dcc2 0c952c0e c43a97e1 ad67e687 d10729ca f622845d
                             162afca8 f0248cc4 12b3596c 4c5d3384 f7e25ee6 44ba87bb 09b164fb 465477b8

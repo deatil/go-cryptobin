@@ -21,6 +21,7 @@ https://patents.google.com/patent/KR20040064780A/ko
 P-KCDSASignatureValue ::= SEQUENCE {
     r BIT STRING,
     s INTEGER }
+
 P-KCDSAParameters ::= SEQUENCE {
     p INTEGER, -- odd prime p = 2Jq+1
     q INTEGER, -- odd prime
@@ -28,6 +29,7 @@ P-KCDSAParameters ::= SEQUENCE {
     J INTEGER OPTIONAL, -- odd prime
     Seed OCTET STRING OPTIONAL
     Count INTEGER OPTIONAL }
+
 P-KCDSAPublicKey ::= INTEGER -- Public key y
 */
 // kcdsa Parameters
@@ -139,9 +141,8 @@ func (this PKCS8Key) ParsePublicKey(der []byte) (*PublicKey, error) {
         return nil, asn1.SyntaxError{Msg: "trailing data"}
     }
 
-    algoEq := pki.Algorithm.Algorithm.Equal(oidPublicKeyKCDSA)
-    algoEqAlteGOV := pki.Algorithm.Algorithm.Equal(oidPublicKeyKCDSAAlteGOV)
-    if !algoEq && !algoEqAlteGOV {
+    if !pki.Algorithm.Algorithm.Equal(oidPublicKeyKCDSA) &&
+        !pki.Algorithm.Algorithm.Equal(oidPublicKeyKCDSAAlteGOV) {
         return nil, errors.New("kcdsa: unknown public key algorithm")
     }
 

@@ -120,8 +120,8 @@ func ParsePublicKey(derBytes []byte) (pub *PublicKey, err error) {
     params := keyData.Algorithm.Parameters
     der := cryptobyte.String(keyData.PublicKey.RightAlign())
 
-    algoEq := oid.Equal(oidPublicKeyECKCDSA)
-    if !algoEq {
+    if !oid.Equal(oidPublicKeyECKCDSA) &&
+        !oid.Equal(oidPublicKeyECKCDSAAlteGOV) {
         err = errors.New("eckcdsa: unknown public key algorithm")
         return
     }
@@ -195,9 +195,8 @@ func ParsePrivateKey(derBytes []byte) (*PrivateKey, error) {
         return nil, err
     }
 
-    algoEq := privKey.Algo.Algorithm.Equal(oidPublicKeyECKCDSA)
-    algoGOVEq := privKey.Algo.Algorithm.Equal(oidPublicKeyECKCDSAAlteGOV)
-    if !algoEq && !algoGOVEq {
+    if !privKey.Algo.Algorithm.Equal(oidPublicKeyECKCDSA) &&
+        !privKey.Algo.Algorithm.Equal(oidPublicKeyECKCDSAAlteGOV) {
         err = errors.New("eckcdsa: unknown private key algorithm")
         return nil, err
     }

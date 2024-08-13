@@ -7,6 +7,7 @@ import (
     "crypto"
     "math/big"
     "crypto/subtle"
+    encoding_asn1 "encoding/asn1"
 
     "golang.org/x/crypto/cryptobyte"
     "golang.org/x/crypto/cryptobyte/asn1"
@@ -358,7 +359,7 @@ func SignASN1(rand io.Reader, priv *PrivateKey, h Hasher, data []byte) (sig []by
         return nil, err
     }
 
-    return encodeSignature(r.Bytes(), s.Bytes())
+    return encodeSignature(r, s)
 }
 
 // VerifyASN1 verifies the ASN.1 encoded signature, sig, M, of hash using the
@@ -373,47 +374,60 @@ func VerifyASN1(pub *PublicKey, h Hasher, data []byte, sig []byte) bool {
         pub,
         h,
         data,
-        new(big.Int).SetBytes(r),
-        new(big.Int).SetBytes(s),
+        r,
+        s,
     )
 }
 
-func encodeSignature(r, s []byte) ([]byte, error) {
+/*
+P-KCDSASignatureValue ::= SEQUENCE {
+    r BIT STRING,
+    s INTEGER }
+*/
+func encodeSignature(r, s *big.Int) ([]byte, error) {
+    var rInt cryptobyte.Builder
+    rInt.AddASN1BigInt(r)
+
+    rBytes, err := rInt.Bytes()
+    if err != nil {
+        return nil, err
+    }
+
     var b cryptobyte.Builder
     b.AddASN1(asn1.SEQUENCE, func(b *cryptobyte.Builder) {
-        addASN1IntBytes(b, r)
-        addASN1IntBytes(b, s)
+        b.AddASN1BitString(rBytes)
+        b.AddASN1BigInt(s)
     })
+
     return b.Bytes()
 }
 
-func addASN1IntBytes(b *cryptobyte.Builder, bytes []byte) {
-    for len(bytes) > 0 && bytes[0] == 0 {
-        bytes = bytes[1:]
-    }
-    if len(bytes) == 0 {
-        b.SetError(errors.New(msgInvalidInteger))
-        return
-    }
-    b.AddASN1(asn1.INTEGER, func(c *cryptobyte.Builder) {
-        if bytes[0]&0x80 != 0 {
-            c.AddUint8(0)
-        }
-        c.AddBytes(bytes)
-    })
-}
-
-func parseSignature(sig []byte) (r, s []byte, err error) {
+func parseSignature(sig []byte) (r, s *big.Int, err error) {
     var inner cryptobyte.String
     input := cryptobyte.String(sig)
+
+    var rr encoding_asn1.BitString
+    var ss big.Int
+
     if !input.ReadASN1(&inner, asn1.SEQUENCE) ||
         !input.Empty() ||
-        !inner.ReadASN1Integer(&r) ||
-        !inner.ReadASN1Integer(&s) ||
+        !inner.ReadASN1BitString(&rr) ||
+        !inner.ReadASN1Integer(&ss) ||
         !inner.Empty() {
         return nil, nil, errors.New(msgInvalidASN1)
     }
-    return r, s, nil
+
+    rDer := cryptobyte.String(rr.RightAlign())
+
+    r = new(big.Int)
+    if !rDer.ReadASN1Integer(r) {
+        err = errors.New(msgInvalidASN1)
+        return
+    }
+
+    s = &ss
+
+    return
 }
 
 func sign(

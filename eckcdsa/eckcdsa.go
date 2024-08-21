@@ -352,12 +352,6 @@ func VerifyWithRS(pub *PublicKey, hashFunc Hasher, data []byte, r, s *big.Int) b
 
     t := s
 
-    var two_8w *big.Int
-    if Lh > w {
-        two_8w = big.NewInt(256)
-        two_8w.Exp(two_8w, big.NewInt(int64(w)), nil)
-    }
-
     if Lh > w {
         if (r.BitLen()+7)/8 > w {
             return false
@@ -369,6 +363,12 @@ func VerifyWithRS(pub *PublicKey, hashFunc Hasher, data []byte, r, s *big.Int) b
     }
     if t.Cmp(n) >= 0 {
         return false
+    }
+
+    var two_8w *big.Int
+    if Lh > w {
+        two_8w = big.NewInt(256)
+        two_8w.Exp(two_8w, big.NewInt(int64(w)), nil)
     }
 
     // 2: cQ ← MSB(xQ ‖ yQ, L)

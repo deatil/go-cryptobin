@@ -1,6 +1,11 @@
 package fernet
 
-import "testing"
+import (
+    "io"
+    "bytes"
+    "testing"
+    "crypto/rand"
+)
 
 func setKey(in []byte) Key {
     k := Key{}
@@ -109,5 +114,22 @@ func Test_Encode(t *testing.T) {
         if g != w.enc {
             t.Fatalf("want %q, got %q", w.enc, g)
         }
+    }
+}
+
+func Test_NewKey(t *testing.T) {
+    k := make([]byte, 32)
+    _, err := io.ReadFull(rand.Reader, k)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    key, err := NewKey(k)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    if !bytes.Equal(key.Value[:], k) {
+        t.Errorf("NewKey fail, got %x, want %x", key.Value[:], k)
     }
 }

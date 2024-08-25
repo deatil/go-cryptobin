@@ -9,13 +9,25 @@ import (
 )
 
 var (
-    errKeyLen = errors.New("fernet: key decodes to wrong size")
-    errNoKeys = errors.New("fernet: no keys provided")
+    errKeyLen   = errors.New("fernet: key decodes to wrong size")
+    errNoKeys   = errors.New("fernet: no keys provided")
+    errKeyShort = errors.New("fernet: key too short")
 )
 
 // Key represents a key.
 type Key struct {
     Value [32]byte
+}
+
+func NewKey(k []byte) (*Key, error) {
+    if len(k) != 32 {
+        return nil, errKeyShort
+    }
+
+    key := &Key{}
+    copy(key.Value[:], k)
+
+    return key, nil
 }
 
 func (k *Key) cryptBytes() []byte {

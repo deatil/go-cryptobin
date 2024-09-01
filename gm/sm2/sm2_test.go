@@ -230,8 +230,8 @@ func Test_SignBytes_Func(t *testing.T) {
         t.Error(err)
     }
 
-    err = sm2.VerifyBytes(pub, msg, signed, nil)
-    if err != nil {
+    ok := sm2.VerifyBytes(pub, msg, signed, nil)
+    if !ok {
         t.Error("veri error")
     }
 }
@@ -489,11 +489,11 @@ func Test_SignSha256WithSM2(t *testing.T) {
         t.Error(err)
     }
 
-    veri := sm2.VerifyWithRS(pub, msg, r, s, sm2.SignerOpts{
+    ok := sm2.VerifyWithRS(pub, msg, r, s, sm2.SignerOpts{
         Uid:  defaultUID,
         Hash: sha256.New,
     })
-    if veri != nil {
+    if !ok {
         t.Error("veri error")
     }
 }
@@ -515,10 +515,10 @@ func Test_SignSM3Digest_Check(t *testing.T) {
     }
     pub := &priv.PublicKey
 
-    veri := sm2.VerifyWithRS(pub, []byte(msg), rr, ss, sm2.SignerOpts{
+    ok := sm2.VerifyWithRS(pub, []byte(msg), rr, ss, sm2.SignerOpts{
         Uid: []byte(uid),
     })
-    if veri != nil {
+    if !ok {
         t.Error("veri error")
     }
 
@@ -541,11 +541,11 @@ func Test_SignSHA256Digest_Check(t *testing.T) {
     }
     pub := &priv.PublicKey
 
-    veri := sm2.VerifyWithRS(pub, []byte(msg), rr, ss, sm2.SignerOpts{
+    ok := sm2.VerifyWithRS(pub, []byte(msg), rr, ss, sm2.SignerOpts{
         Uid:  []byte(uid),
         Hash: sha256.New,
     })
-    if veri != nil {
+    if !ok {
         t.Error("veri error")
     }
 
@@ -781,7 +781,7 @@ func Test_SignFunc(t *testing.T) {
             t.Error(err)
         }
 
-        if sm2.Verify(pub, msg, signed, nil) != nil {
+        if !sm2.Verify(pub, msg, signed, nil) {
             t.Error("veri error")
         }
     })
@@ -792,7 +792,7 @@ func Test_SignFunc(t *testing.T) {
             t.Error(err)
         }
 
-        if sm2.VerifyBytes(pub, msg, signed, nil) != nil {
+        if !sm2.VerifyBytes(pub, msg, signed, nil) {
             t.Error("veri error")
         }
     })
@@ -814,7 +814,7 @@ func Test_SignLegacy(t *testing.T) {
         t.Error(err)
     }
 
-    if sm2.VerifyLegacy(pub, hash[:], r, s) != nil {
+    if !sm2.VerifyLegacy(pub, hash[:], r, s) {
         t.Error("veri error")
     }
 }
@@ -1092,8 +1092,8 @@ func test_Sign_Func_Encoding(t *testing.T, opts sm2.SignerOpts) {
         t.Error(err)
     }
 
-    err = sm2.Verify(pub, msg, signed, opts)
-    if err != nil {
+    ok := sm2.Verify(pub, msg, signed, opts)
+    if !ok {
         t.Error("veri error")
     }
 }

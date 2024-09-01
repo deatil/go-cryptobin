@@ -111,12 +111,27 @@ func Test_Sign(t *testing.T) {
 }
 
 func Test_SignBytes(t *testing.T) {
+    t.Run("sha256", func(t *testing.T) {
+        test_SignBytes(t, A2048B224SHA224, sha256.New224)
+    })
+    t.Run("sha256", func(t *testing.T) {
+        test_SignBytes(t, A2048B224SHA224, sha256.New)
+    })
+    t.Run("sha256", func(t *testing.T) {
+        test_SignBytes(t, A2048B224SHA256, sha256.New)
+    })
+    t.Run("sha256", func(t *testing.T) {
+        test_SignBytes(t, A2048B256SHA256, sha256.New)
+    })
+}
+
+func test_SignBytes(t *testing.T, sizes ParameterSizes, h Hasher) {
     assertBool := cryptobin_test.AssertBoolT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
     assertError := cryptobin_test.AssertErrorT(t)
 
     var priv PrivateKey
-    err := GenerateParameters(&priv.PublicKey.Parameters, rand.Reader, A2048B224SHA224)
+    err := GenerateParameters(&priv.PublicKey.Parameters, rand.Reader, sizes)
     assertError(err, "GenerateParameters-Error")
 
     err = GenerateKey(&priv, rand.Reader)
@@ -129,10 +144,10 @@ func Test_SignBytes(t *testing.T) {
 
     data := "123tesfd!dfsign"
 
-    sig, err := SignBytes(rand.Reader, &priv, sha256.New, []byte(data))
+    sig, err := SignBytes(rand.Reader, &priv, h, []byte(data))
     assertError(err, "Sign-sig-Error")
 
-    veri := VerifyBytes(pub, sha256.New, []byte(data), sig)
+    veri := VerifyBytes(pub, h, []byte(data), sig)
     assertBool(veri, "Sign-veri-Error")
 }
 

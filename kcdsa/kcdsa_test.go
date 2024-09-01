@@ -111,16 +111,16 @@ func Test_Sign(t *testing.T) {
 }
 
 func Test_SignBytes(t *testing.T) {
-    t.Run("sha256", func(t *testing.T) {
+    t.Run("A2048B224SHA224 sha224", func(t *testing.T) {
         test_SignBytes(t, A2048B224SHA224, sha256.New224)
     })
-    t.Run("sha256", func(t *testing.T) {
+    t.Run("A2048B224SHA224 sha256", func(t *testing.T) {
         test_SignBytes(t, A2048B224SHA224, sha256.New)
     })
-    t.Run("sha256", func(t *testing.T) {
+    t.Run("A2048B224SHA256 sha256", func(t *testing.T) {
         test_SignBytes(t, A2048B224SHA256, sha256.New)
     })
-    t.Run("sha256", func(t *testing.T) {
+    t.Run("A2048B256SHA256 sha256", func(t *testing.T) {
         test_SignBytes(t, A2048B256SHA256, sha256.New)
     })
 }

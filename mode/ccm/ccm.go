@@ -6,7 +6,6 @@ import (
     "encoding/binary"
     "crypto/subtle"
     go_cipher "crypto/cipher"
-    go_subtle "crypto/subtle"
 
     "github.com/deatil/go-cryptobin/tool/alias"
 )
@@ -246,7 +245,7 @@ func (c *ccm) Open(dst, nonce, ciphertext, data []byte) ([]byte, error) {
     ctr.XORKeyStream(out, ciphertext)
 
     expectedTag := c.auth(nonce, out, data, &tagMask)
-    if go_subtle.ConstantTimeCompare(expectedTag, tag) != 1 {
+    if subtle.ConstantTimeCompare(expectedTag, tag) != 1 {
         // The AESNI code decrypts and authenticates concurrently, and
         // so overwrites dst in the event of a tag mismatch. That
         // behavior is mimicked here in order to be consistent across

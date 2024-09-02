@@ -3,7 +3,7 @@ package xmss
 import (
     "io"
 
-    "github.com/deatil/go-cryptobin/xmss"
+    "github.com/deatil/go-cryptobin/pubkey/xmss"
 )
 
 const XMSS_OID_LEN = 4

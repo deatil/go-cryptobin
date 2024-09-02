@@ -7,7 +7,7 @@ import (
     "encoding/pem"
     "encoding/asn1"
 
-    "github.com/deatil/go-cryptobin/gost"
+    "github.com/deatil/go-cryptobin/pubkey/gost"
 )
 
 func decodePEM(pubPEM string) []byte {

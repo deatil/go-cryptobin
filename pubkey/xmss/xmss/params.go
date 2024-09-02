@@ -7,7 +7,7 @@ import (
 
     "golang.org/x/crypto/sha3"
 
-    "github.com/deatil/go-cryptobin/xmss"
+    "github.com/deatil/go-cryptobin/pubkey/xmss"
 )
 
 var newShake128 = func() hash.Hash {

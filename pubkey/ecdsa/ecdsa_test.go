@@ -9,7 +9,7 @@ import (
     "encoding/pem"
     "encoding/asn1"
 
-    cryptobin_ecdsa "github.com/deatil/go-cryptobin/ecdsa"
+    cryptobin_ecdsa "github.com/deatil/go-cryptobin/pubkey/ecdsa"
     cryptobin_koblitz "github.com/deatil/go-cryptobin/elliptic/koblitz"
 
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"

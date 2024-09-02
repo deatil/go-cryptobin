@@ -4,8 +4,8 @@ import (
     "hash"
     "errors"
 
-    "github.com/deatil/go-cryptobin/xmss"
     "github.com/deatil/go-cryptobin/hash/sm3"
+    "github.com/deatil/go-cryptobin/pubkey/xmss"
 )
 
 var oids = map[uint32]string{

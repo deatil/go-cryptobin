@@ -5,7 +5,7 @@ import (
     "crypto/rand"
     "encoding/hex"
 
-    "github.com/deatil/go-cryptobin/xmss"
+    "github.com/deatil/go-cryptobin/pubkey/xmss"
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 

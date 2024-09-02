@@ -4,13 +4,13 @@ import (
     "testing"
     "crypto/aes"
 
-    cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
+    "github.com/deatil/go-cryptobin/tool/test"
 )
 
 func Test_HCTR(t *testing.T) {
-    assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
-    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+    assertEqual := test.AssertEqualT(t)
+    assertError := test.AssertErrorT(t)
+    assertNotEmpty := test.AssertNotEmptyT(t)
 
     key := []byte("kkinjkijeel22plo")
     plaintext := []byte("kjinjkijkolkdplo")

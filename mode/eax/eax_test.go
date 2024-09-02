@@ -2,12 +2,12 @@ package eax
 
 import (
     "bytes"
+    "testing"
     "crypto/aes"
     "crypto/cipher"
     "crypto/rand"
     "encoding/hex"
     mathrand "math/rand"
-    "testing"
 )
 
 const (

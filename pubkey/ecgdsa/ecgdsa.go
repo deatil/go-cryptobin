@@ -1,4 +1,4 @@
-package eckcdsa
+package ecgdsa
 
 import (
     "io"
@@ -13,19 +13,19 @@ import (
     "golang.org/x/crypto/cryptobyte/asn1"
 )
 
-// see TTAK.KO-12.0015/R3
-
 var (
-    ErrParametersNotSetUp = errors.New("go-cryptobin/eckcdsa: parameters not set up before generating key")
-    ErrInvalidK           = errors.New("go-cryptobin/eckcdsa: use another K")
-    ErrInvalidASN1        = errors.New("go-cryptobin/eckcdsa: invalid ASN.1")
-    ErrInvalidSignerOpts  = errors.New("go-cryptobin/eckcdsa: opts must be *SignerOpts")
+    ErrParametersNotSetUp = errors.New("go-cryptobin/ecgdsa: parameters not set up before generating key")
+    ErrInvalidASN1        = errors.New("go-cryptobin/ecgdsa: invalid ASN.1")
+    ErrInvalidSignerOpts  = errors.New("go-cryptobin/ecgdsa: opts must be *SignerOpts")
 )
 
-// hash Func
+var (
+    zero = big.NewInt(0)
+)
+
 type Hasher = func() hash.Hash
 
-// SignerOpts contains options for creating and verifying EC-KCDSA signatures.
+// SignerOpts contains options for creating and verifying EC-GDSA signatures.
 type SignerOpts struct {
     Hash Hasher
 }
@@ -40,7 +40,7 @@ func (opts *SignerOpts) GetHash() Hasher {
     return opts.Hash
 }
 
-// ec-kcdsa PublicKey
+// ec-gdsa PublicKey
 type PublicKey struct {
     elliptic.Curve
 
@@ -69,7 +69,7 @@ func (pub *PublicKey) Verify(msg, sign []byte, opts crypto.SignerOpts) (bool, er
     return Verify(pub, opt.GetHash(), msg, sign), nil
 }
 
-// ec-kcdsa PrivateKey
+// ec-gdsa PrivateKey
 type PrivateKey struct {
     PublicKey
 
@@ -102,7 +102,7 @@ func (priv *PrivateKey) Sign(rand io.Reader, digest []byte, opts crypto.SignerOp
     return Sign(rand, priv, opt.GetHash(), digest)
 }
 
-// Generate the paramters
+// Generate the PrivateKey
 func GenerateKey(random io.Reader, c elliptic.Curve) (*PrivateKey, error) {
     d, err := randFieldElement(random, c)
     if err != nil {
@@ -127,7 +127,7 @@ func NewPrivateKey(curve elliptic.Curve, k []byte) (*PrivateKey, error) {
 
     n := new(big.Int).Sub(curve.Params().N, one)
     if d.Cmp(n) >= 0 {
-        return nil, errors.New("cryptobin/eckcdsa: privateKey's D is overflow")
+        return nil, errors.New("cryptobin/ecgdsa: privateKey's D is overflow")
     }
 
     dInv := fermatInverse(d, curve.Params().N)
@@ -152,7 +152,7 @@ func PrivateKeyTo(key *PrivateKey) []byte {
 func NewPublicKey(curve elliptic.Curve, k []byte) (*PublicKey, error) {
     x, y := elliptic.Unmarshal(curve, k)
     if x == nil || y == nil {
-        return nil, errors.New("cryptobin/eckcdsa: incorrect public key")
+        return nil, errors.New("cryptobin/ecgdsa: incorrect public key")
     }
 
     pub := &PublicKey{
@@ -188,13 +188,7 @@ func Verify(pub *PublicKey, h Hasher, data, sig []byte) bool {
         return false
     }
 
-    return VerifyWithRS(
-        pub,
-        h,
-        data,
-        r,
-        s,
-    )
+    return VerifyWithRS(pub, h, data, r, s)
 }
 
 func encodeSignature(r, s *big.Int) ([]byte, error) {
@@ -232,79 +226,46 @@ func SignBytes(rand io.Reader, priv *PrivateKey, h Hasher, data []byte) (sig []b
         return nil, err
     }
 
-    hsize := h().Size()
-    bitSize := priv.Curve.Params().BitSize
-    sigRLen := sigRLen(hsize, bitSize)
+    byteLen := (priv.Curve.Params().BitSize + 7) / 8
 
-    sig = make([]byte, sigLen(hsize, bitSize))
+    sig = make([]byte, 2 * byteLen)
 
-    r.FillBytes(sig[:sigRLen])
-    s.FillBytes(sig[sigRLen:])
+    r.FillBytes(sig[:byteLen])
+    s.FillBytes(sig[byteLen:])
 
     return
 }
 
 // Verify verifies the Bytes encoded signature
 func VerifyBytes(pub *PublicKey, h Hasher, data, sig []byte) bool {
-    hsize := h().Size()
-    bitSize := pub.Curve.Params().BitSize
-    sigRLen := sigRLen(hsize, bitSize)
+    byteLen := (pub.Curve.Params().BitSize + 7) / 8
 
-    if len(sig) != sigLen(hsize, bitSize) {
+    if len(sig) != 2*byteLen {
         return false
     }
 
-    r := new(big.Int).SetBytes(sig[:sigRLen])
-    s := new(big.Int).SetBytes(sig[sigRLen:])
+    r := new(big.Int).SetBytes(sig[:byteLen])
+    s := new(big.Int).SetBytes(sig[byteLen:])
 
-    return VerifyWithRS(
-        pub,
-        h,
-        data,
-        r,
-        s,
-    )
+    return VerifyWithRS(pub, h, data, r, s)
 }
 
 /**
- *| IUF - EC-KCDSA signature
+ *| IUF - EC-GDSA signature
  *|
- *| IUF  1. Compute h = H(z||m)
- *|   F  2. If |H| > bitlen(q), set h to beta' rightmost bits of
- *|         bitstring h (w/ beta' = 8 * ceil(bitlen(q) / 8)), i.e.
- *|         set h to I2BS(beta', BS2I(|H|, h) mod 2^beta')
- *|   F  3. Get a random value k in ]0,q[
- *|   F  4. Compute W = (W_x,W_y) = kG
- *|   F  5. Compute r = H(FE2OS(W_x)).
- *|   F  6. If |H| > bitlen(q), set r to beta' rightmost bits of
- *|         bitstring r (w/ beta' = 8 * ceil(bitlen(q) / 8)), i.e.
- *|         set r to I2BS(beta', BS2I(|H|, r) mod 2^beta')
- *|   F  7. Compute e = OS2I(r XOR h) mod q
- *|   F  8. Compute s = x(k - e) mod q
- *|   F  9. if s == 0, restart at step 3.
- *|   F 10. return (r,s)
+ *|  UF 1. Compute h = H(m). If |h| > bitlen(q), set h to bitlen(q)
+ *|	   leftmost (most significant) bits of h
+ *|   F 2. Compute e = - OS2I(h) mod q
+ *|   F 3. Get a random value k in [0,q]
+ *|   F 4. Compute W = (W_x,W_y) = kG
+ *|   F 5. Compute r = W_x mod q
+ *|   F 6. If r is 0, restart the process at step 4.
+ *|   F 7. Compute s = x(kr + e) mod q
+ *|   F 8. If s is 0, restart the process at step 4.
+ *|   F 9. Return (r,s)
  *
  */
-func SignToRS(random io.Reader, priv *PrivateKey, h Hasher, msg []byte) (r, s *big.Int, err error) {
-    var k *big.Int
-
-    for {
-        k, err = randFieldElement(random, priv.Curve)
-        if err != nil {
-            return
-        }
-
-        r, s, err = SignUsingK(k, priv, h, msg)
-        if err == ErrInvalidK {
-            continue
-        }
-
-        return
-    }
-}
-
-// sign with k
-func SignUsingK(k *big.Int, priv *PrivateKey, hashFunc Hasher, msg []byte) (r, s *big.Int, err error) {
+func SignToRS(rand io.Reader, priv *PrivateKey, hashFunc Hasher, msg []byte) (r, s *big.Int, err error) {
     if priv == nil || priv.Curve == nil ||
         priv.X == nil || priv.Y == nil ||
         priv.D == nil || !priv.Curve.IsOnCurve(priv.X, priv.Y) {
@@ -318,88 +279,71 @@ func SignUsingK(k *big.Int, priv *PrivateKey, hashFunc Hasher, msg []byte) (r, s
     n := curveParams.N
 
     w := (n.BitLen() + 7) / 8
-    K := (curveParams.BitSize + 7) / 8 // curve size
-    Lh := h.Size()
-    L := h.BlockSize()
+    hsize := h.Size()
     d := priv.D
-    xQ := priv.X
-    yQ := priv.Y
 
-    var two_8w *big.Int
-    if Lh > w {
-        two_8w = big.NewInt(256)
-        two_8w.Exp(two_8w, big.NewInt(int64(w)), nil)
-    }
-
-    // 2: kG = (x1, y1)
-    x1, _ := curve.ScalarBaseMult(k.Bytes())
-    x1Bytes := padLeft(x1.Bytes(), K)
-
-    // 3: r ← Hash(x1)
-    h.Reset()
-    h.Write(x1Bytes)
-    rBytes := h.Sum(nil)
-
-    r = new(big.Int).SetBytes(rBytes)
-    if Lh > w {
-        r = r.Mod(r, two_8w)
-    }
-
-    // 4: cQ ← MSB(xQ ‖ yQ, L)
-    cQ := append(
-        padLeft(xQ.Bytes(), K),
-        padLeft(yQ.Bytes(), K)...,
-    )
-    cQ = padRight(cQ, L)
-
-    // 5: v ← Hash(cQ ‖ M)
-    h.Reset()
-    h.Write(cQ)
+    /* 1. Compute h = H(m) */
     h.Write(msg)
-    vBytes := h.Sum(nil)
+    eBuf := h.Sum(nil)
 
-    v := new(big.Int).SetBytes(vBytes)
-    if Lh > w {
-        v = v.Mod(v, two_8w)
+    rshift := 0
+    if hsize > w {
+        rshift = (hsize - w) * 8
     }
 
-    // 6: e ← (r ⊕ v) mod n
-    e := new(big.Int).Xor(r, v)
-    e.Mod(e, n)
-
-    // 7: t ← x(k - e) mod n
-    t := new(big.Int)
-    t.Mod(t.Sub(k, e), n)
-    t.Mod(t.Mul(d, t), n)
-
-    if t.Sign() <= 0 {
-        return nil, nil, ErrInvalidK
+    e := new(big.Int).SetBytes(eBuf)
+    if rshift > 0 {
+        e.Rsh(e, uint(rshift))
     }
 
-    s = t
+    // 2: e = q - (h mod q) (except when h is 0).
+    e = e.Mod(e, n)
+    e.Mod(e.Neg(e), n)
+
+Retry:
+    k, err := randFieldElement(rand, priv.Curve)
+    if err != nil {
+        return
+    }
+
+    // 4: Compute W = kG = (Wx, Wy) */
+    x1, _ := curve.ScalarBaseMult(k.Bytes())
+
+    // 5. Compute r = Wx mod q */
+    r = new(big.Int)
+    r.Mod(x1, n)
+
+    if r.Cmp(zero) == 0 {
+        goto Retry
+    }
+
+    /* 7. Compute s = x(kr + e) mod q */
+    kr := new(big.Int)
+    kr.Mod(kr.Mul(k, r), n)
+
+    s = new(big.Int)
+    s.Mod(s.Add(kr, e), n)
+    s.Mod(s.Mul(d, s), n)
+
+    if r.Cmp(zero) == 0 {
+        goto Retry
+    }
 
     return r, s, nil
 }
 
-/**
- *| IUF - EC-KCDSA verification
+/*
+ *| IUF - EC-GDSA verification
  *|
- *| I   1. Check the length of r:
- *|         - if |H| > bitlen(q), r must be of length
- *|           beta' = 8 * ceil(bitlen(q) / 8)
- *|         - if |H| <= bitlen(q), r must be of length hsize
- *| I   2. Check that s is in ]0,q[
- *| IUF 3. Compute h = H(z||m)
- *|   F 4. If |H| > bitlen(q), set h to beta' rightmost bits of
- *|        bitstring h (w/ beta' = 8 * ceil(bitlen(q) / 8)), i.e.
- *|        set h to I2BS(beta', BS2I(|H|, h) mod 2^beta')
- *|   F 5. Compute e = OS2I(r XOR h) mod q
- *|   F 6. Compute W' = sY + eG, where Y is the public key
- *|   F 7. Compute r' = h(W'x)
- *|   F 8. If |H| > bitlen(q), set r' to beta' rightmost bits of
- *|        bitstring r' (w/ beta' = 8 * ceil(bitlen(q) / 8)), i.e.
- *|        set r' to I2BS(beta', BS2I(|H|, r') mod 2^beta')
- *|   F 9. Check if r == r'
+ *| I   1. Reject the signature if r or s is 0.
+ *|  UF 2. Compute h = H(m). If |h| > bitlen(q), set h to bitlen(q)
+ *|	   leftmost (most significant) bits of h
+ *|   F 3. Compute e = OS2I(h) mod q
+ *|   F 4. Compute u = ((r^-1)e mod q)
+ *|   F 5. Compute v = ((r^-1)s mod q)
+ *|   F 6. Compute W' = uG + vY
+ *|   F 7. Compute r' = W'_x mod q
+ *|   F 8. Accept the signature if and only if r equals r'
  *
  */
 func VerifyWithRS(pub *PublicKey, hashFunc Hasher, data []byte, r, s *big.Int) bool {
@@ -408,6 +352,7 @@ func VerifyWithRS(pub *PublicKey, hashFunc Hasher, data []byte, r, s *big.Int) b
         !pub.Curve.IsOnCurve(pub.X, pub.Y) {
         return false
     }
+
     if r.Sign() <= 0 || s.Sign() <= 0 {
         return false
     }
@@ -419,94 +364,48 @@ func VerifyWithRS(pub *PublicKey, hashFunc Hasher, data []byte, r, s *big.Int) b
     n := curveParams.N
 
     w := (n.BitLen() + 7) / 8
-    K := (curveParams.BitSize + 7) / 8 // curve size
-    Lh := h.Size()
-    L := h.BlockSize()
-    xQ := pub.X
-    yQ := pub.Y
+    hsize := h.Size()
 
-    t := s
-
-    if Lh > w {
-        if (r.BitLen()+7)/8 > w {
-            return false
-        }
-    } else {
-        if (r.BitLen()+7)/8 > Lh {
-            return false
-        }
-    }
-    if t.Cmp(n) >= 0 {
-        return false
-    }
-
-    var two_8w *big.Int
-    if Lh > w {
-        two_8w = big.NewInt(256)
-        two_8w.Exp(two_8w, big.NewInt(int64(w)), nil)
-    }
-
-    // 2: cQ ← MSB(xQ ‖ yQ, L)
-    cQ := append(
-        padLeft(xQ.Bytes(), K),
-        padLeft(yQ.Bytes(), K)...,
-    )
-    cQ = padRight(cQ, L)
-
-    // 3: v′ ← Hash(cQ ‖ M′)
-    h.Reset()
-    h.Write(cQ)
+    /* 1. Compute h = H(m) */
     h.Write(data)
-    vBytes := h.Sum(nil)
+    eBuf := h.Sum(nil)
 
-    v := new(big.Int).SetBytes(vBytes)
-    if Lh > w {
-        v.Mod(v, two_8w)
+    rshift := 0
+    if hsize > w {
+        rshift = (hsize - w) * 8
     }
 
-    // 4: e′ ← (r′ ⊕ v′) mod n
-    e := new(big.Int).Xor(r, v)
-    e.Mod(e, n)
+    e := new(big.Int).SetBytes(eBuf)
+    if rshift > 0 {
+        e.Rsh(e, uint(rshift))
+    }
 
-    // 5: (x2, y2) ← t′Q + e′G
-    x21, y21 := curve.ScalarMult(pub.X, pub.Y, t.Bytes())
-    x22, y22 := curve.ScalarBaseMult(e.Bytes())
+    /* 3. Compute e by converting h to an integer and reducing it mod q */
+    e = e.Mod(e, n)
+
+    /* 4. Compute u = (r^-1)e mod q */
+    rinv := new(big.Int).ModInverse(r, n)
+    u := new(big.Int).Mul(rinv, e)
+    u.Mod(u, n)
+
+    /* 5. Compute v = (r^-1)s mod q */
+    v := new(big.Int).Mul(rinv, s)
+    v.Mod(v, n)
+
+    /* 6. Compute W' = uG + vY */
+    x21, y21 := curve.ScalarMult(pub.X, pub.Y, v.Bytes())
+    x22, y22 := curve.ScalarBaseMult(u.Bytes())
     x2, _ := curve.Add(x21, y21, x22, y22)
-    x2Bytes := padLeft(x2.Bytes(), K)
 
-    // 6: Hash(x2′) = r′
-    h.Reset()
-    h.Write(x2Bytes)
-    rBytes := h.Sum(nil)
+    /* 7. Compute r' = W'_x mod q */
+    rPrime := x2.Mod(x2, n)
 
-    r2 := new(big.Int).SetBytes(rBytes)
-    if Lh > w {
-        r2.Mod(r2, two_8w)
-    }
-
-    return r.Cmp(r2) == 0
+    return r.Cmp(rPrime) == 0
 }
 
-func padLeft(arr []byte, l int) []byte {
-    if len(arr) >= l {
-        return arr[:l]
-    }
-
-    n := make([]byte, l)
-    copy(n[l-len(arr):], arr)
-
-    return n
-}
-
-func padRight(arr []byte, l int) []byte {
-    if len(arr) >= l {
-        return arr[:l]
-    }
-
-    n := make([]byte, l)
-    copy(n, arr)
-
-    return n
+func XY(D *big.Int, c elliptic.Curve) (X, Y *big.Int) {
+    dInv := fermatInverse(D, c.Params().N)
+    return c.ScalarBaseMult(dInv.Bytes())
 }
 
 // randFieldElement returns a random element of the order of the given
@@ -530,11 +429,6 @@ func randFieldElement(rand io.Reader, c elliptic.Curve) (k *big.Int, err error) 
     }
 }
 
-func XY(D *big.Int, c elliptic.Curve) (X, Y *big.Int) {
-    dInv := fermatInverse(D, c.Params().N)
-    return c.ScalarBaseMult(dInv.Bytes())
-}
-
 func fermatInverse(a, N *big.Int) *big.Int {
     two := big.NewInt(2)
     nMinus2 := new(big.Int).Sub(N, two)
@@ -545,28 +439,4 @@ func fermatInverse(a, N *big.Int) *big.Int {
 // through timing side-channels.
 func bigIntEqual(a, b *big.Int) bool {
     return subtle.ConstantTimeCompare(a.Bytes(), b.Bytes()) == 1
-}
-
-func sigRLen(hsize, n int) int {
-    return mathMin(hsize, byteceil(n))
-}
-
-func sigLLen(n int) int {
-    return byteceil(n)
-}
-
-func sigLen(hsize, n int) int {
-    return sigRLen(hsize, n) + sigLLen(n)
-}
-
-func mathMin(a, b int) int {
-    if a < b {
-        return a
-    }
-
-    return b
-}
-
-func byteceil(size int) int {
-    return (size + 7) / 8
 }

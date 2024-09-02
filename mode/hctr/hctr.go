@@ -16,34 +16,6 @@ type concurrentBlocks interface {
     DecryptBlocks(dst, src []byte)
 }
 
-type hctrFieldElement struct {
-    low, high uint64
-}
-
-func reverseBits(i int) int {
-    i = ((i << 2) & 0xc) | ((i >> 2) & 0x3)
-    i = ((i << 1) & 0xa) | ((i >> 1) & 0x5)
-    return i
-}
-
-func hctrAdd(x, y hctrFieldElement) hctrFieldElement {
-    return hctrFieldElement{x.low ^ y.low, x.high ^ y.high}
-}
-
-func hctrDouble(x hctrFieldElement) (double hctrFieldElement) {
-    msbSet := (x.high&1 == 1)
-
-    double.high = x.high >> 1
-    double.high |= x.low << 63
-    double.low = x.low >> 1
-
-    if msbSet {
-        double.low ^= 0xe100000000000000
-    }
-
-    return
-}
-
 var hctrReductionTable = []uint16{
     0x0000, 0x1c20, 0x3840, 0x2460,
     0x7080, 0x6ca0, 0x48c0, 0x54e0,
@@ -253,4 +225,32 @@ func (h *hctr) ctr(dst, src []byte, baseCtr []byte) {
 
         i++
     }
+}
+
+type hctrFieldElement struct {
+    low, high uint64
+}
+
+func reverseBits(i int) int {
+    i = ((i << 2) & 0xc) | ((i >> 2) & 0x3)
+    i = ((i << 1) & 0xa) | ((i >> 1) & 0x5)
+    return i
+}
+
+func hctrAdd(x, y hctrFieldElement) hctrFieldElement {
+    return hctrFieldElement{x.low ^ y.low, x.high ^ y.high}
+}
+
+func hctrDouble(x hctrFieldElement) (double hctrFieldElement) {
+    msbSet := (x.high&1 == 1)
+
+    double.high = x.high >> 1
+    double.high |= x.low << 63
+    double.low = x.low >> 1
+
+    if msbSet {
+        double.low ^= 0xe100000000000000
+    }
+
+    return
 }

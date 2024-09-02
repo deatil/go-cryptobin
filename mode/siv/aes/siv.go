@@ -5,7 +5,7 @@ import (
     "crypto/aes"
     "crypto/cipher"
 
-    "github.com/deatil/go-cryptobin/cipher/siv"
+    "github.com/deatil/go-cryptobin/mode/siv"
 )
 
 var KeySizeErr = errors.New("siv: bad key size")

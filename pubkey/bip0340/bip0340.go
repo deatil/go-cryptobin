@@ -356,7 +356,7 @@ Retry:
     /* Export our r in the signature */
     r = new(big.Int).Set(kGx)
 
-    e.Mod(e.Mul(e, priv.D), n)
+    e.Mod(e.Mul(e, d), n)
     e.Mod(e.Add(k, e), n)
 
     /* Export our s in the signature */
@@ -411,8 +411,14 @@ func VerifyWithRS(pub *PublicKey, hashFunc Hasher, data []byte, r, s *big.Int) b
     /* compute -e = (q - e) mod q */
     e.Mod(e.Neg(e), n)
 
+    YY := new(big.Int).Set(pub.Y)
+
+    if bigintIsodd(YY) {
+        YY.Mod(YY.Neg(YY), p)
+    }
+
     /* Compute s G - e Y */
-    x21, y21 := curve.ScalarMult(pub.X, pub.Y, e.Bytes())
+    x21, y21 := curve.ScalarMult(pub.X, YY, e.Bytes())
     x22, y22 := curve.ScalarBaseMult(s.Bytes())
     x2, y2 := curve.Add(x21, y21, x22, y22)
 

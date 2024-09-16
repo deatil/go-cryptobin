@@ -10,7 +10,6 @@ import (
 type CurveParams struct {
     P       *big.Int // the order of the underlying field
     N       *big.Int // the order of the base point
-    B       *big.Int // the constant of the curve equation
     Gx, Gy  *big.Int // (x,y) of the base point
     BitSize int      // the size of the underlying field
     Name    string   // the canonical name of the curve
@@ -20,7 +19,6 @@ func (curve *CurveParams) Params() *elliptic.CurveParams {
     return &elliptic.CurveParams{
         P: curve.P,
         N: curve.N,
-        B: curve.B,
         Gx: curve.Gx,
         Gy: curve.Gy,
         BitSize: curve.BitSize,

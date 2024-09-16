@@ -302,19 +302,47 @@ func Test_Vec_Check(t *testing.T) {
 
 }
 
-func Test_Add(t *testing.T) {
-    a1 := new(big.Int).SetBytes(fromHex("1b"))
-    b1 := new(big.Int).SetBytes(fromHex("1a"))
-    a2 := new(big.Int).SetBytes(fromHex("2b"))
-    b2 := new(big.Int).SetBytes(fromHex("2a"))
+func Test_P256_Curve_Add(t *testing.T) {
+    {
+        a1 := new(big.Int).SetBytes(fromHex("1b"))
+        b1 := new(big.Int).SetBytes(fromHex("1a"))
+        a2 := new(big.Int).SetBytes(fromHex("2b"))
+        b2 := new(big.Int).SetBytes(fromHex("2a"))
 
-    xx, yy := P256().Add(a1, b1, a2, b2)
+        xx, yy := P256().Add(a1, b1, a2, b2)
 
-    if fmt.Sprintf("%x", xx.Bytes()) != "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffbea" {
-        t.Error("xx fail")
+        xx2 := fmt.Sprintf("%x", xx.Bytes())
+        yy2 := fmt.Sprintf("%x", yy.Bytes())
+
+        xxcheck := "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffbea"
+        yycheck := "46"
+
+        if xx2 != xxcheck {
+            t.Errorf("xx fail, got %s, want %s", xx2, xxcheck)
+        }
+        if yy2 != yycheck {
+            t.Errorf("yy fail, got %s, want %s", yy2, yycheck)
+        }
     }
-    if fmt.Sprintf("%x", yy.Bytes()) != "46" {
-        t.Error("yy fail")
+
+    {
+        a1 := new(big.Int).SetBytes(fromHex("1b"))
+        b1 := new(big.Int).SetBytes(fromHex("1a"))
+
+        xx, yy := P256().Add(a1, b1, a1, b1)
+
+        xx2 := fmt.Sprintf("%x", xx.Bytes())
+        yy2 := fmt.Sprintf("%x", yy.Bytes())
+
+        xxcheck := "d7f3e1b442a6a0916b8ce030792ef5657dba51cc7f3e1b442a6a0915e0da24ce"
+        yycheck := "0a73d2ca0cd14643599b176bc88907ce982dad44dd648f16f476da5cf1b2b5c8"
+
+        if xx2 != xxcheck {
+            t.Errorf("xx fail, got %s, want %s", xx2, xxcheck)
+        }
+        if yy2 != yycheck {
+            t.Errorf("yy fail, got %s, want %s", yy2, yycheck)
+        }
     }
 }
 

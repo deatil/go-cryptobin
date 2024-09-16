@@ -237,6 +237,70 @@ func Test_bigintIsodd(t *testing.T) {
     }
 }
 
+func Test_P256_Curve_Add(t *testing.T) {
+    {
+        a1 := toBigint("dff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659")
+        b1 := toBigint("2ce19b946c4ee58546f5251d441a065ea50735606985e5b228788bec4e582898")
+        a2 := toBigint("dd308afec5777e13121fa72b9cc1b7cc0139715309b086c960e18fd969774eb8")
+        b2 := toBigint("f594bb5f72b37faae396a4259ea64ed5e6fdeb2a51c6467582b275925fab1394")
+
+        xx, yy := P256().Add(a1, b1, a2, b2)
+
+        xx2 := fmt.Sprintf("%x", xx.Bytes())
+        yy2 := fmt.Sprintf("%x", yy.Bytes())
+
+        xxcheck := "0b4b8b19e1666914c37647bf3eac2acc4348b02ef8b1f2940c8bf10a381df22c"
+        yycheck := "1fbbb6a4be23f0019261e05f4d26114059b001649b998160020c0c4c31000ce5"
+
+        if xx2 != xxcheck {
+            t.Errorf("xx fail, got %s, want %s", xx2, xxcheck)
+        }
+        if yy2 != yycheck {
+            t.Errorf("yy fail, got %s, want %s", yy2, yycheck)
+        }
+    }
+
+    {
+        a1 := toBigint("dff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659")
+        b1 := toBigint("2ce19b946c4ee58546f5251d441a065ea50735606985e5b228788bec4e582898")
+
+        xx, yy := P256().Add(a1, b1, a1, b1)
+
+        xx2 := fmt.Sprintf("%x", xx.Bytes())
+        yy2 := fmt.Sprintf("%x", yy.Bytes())
+
+        xxcheck := "768c61d8c3acc2bbbf37dec4e62b9c481802fd817a4dbc7d5542f02375412945"
+        yycheck := "e227f7076346296e92364b75508102d997f66170764bcffb2bce80ff0e77be0a"
+
+        if xx2 != xxcheck {
+            t.Errorf("xx fail, got %s, want %s", xx2, xxcheck)
+        }
+        if yy2 != yycheck {
+            t.Errorf("yy fail, got %s, want %s", yy2, yycheck)
+        }
+    }
+
+    {
+        a1 := toBigint("dff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659")
+        b1 := toBigint("2ce19b946c4ee58546f5251d441a065ea50735606985e5b228788bec4e582898")
+
+        xx, yy := P256().Double(a1, b1)
+
+        xx2 := fmt.Sprintf("%x", xx.Bytes())
+        yy2 := fmt.Sprintf("%x", yy.Bytes())
+
+        xxcheck := "768c61d8c3acc2bbbf37dec4e62b9c481802fd817a4dbc7d5542f02375412945"
+        yycheck := "e227f7076346296e92364b75508102d997f66170764bcffb2bce80ff0e77be0a"
+
+        if xx2 != xxcheck {
+            t.Errorf("xx fail, got %s, want %s", xx2, xxcheck)
+        }
+        if yy2 != yycheck {
+            t.Errorf("yy fail, got %s, want %s", yy2, yycheck)
+        }
+    }
+}
+
 func Test_Vec_Check(t *testing.T) {
     for i, td := range testSigVec {
         t.Run(fmt.Sprintf("index %d", i), func(t *testing.T) {
@@ -250,6 +314,7 @@ func Test_Vec_Check(t *testing.T) {
 
                 pubBytes := pub.X.Bytes()
 
+                // check publicKey
                 if !bytes.Equal(pubBytes, td.publicKey) {
                     t.Errorf("PublicKey got: %x, want: %x", pubBytes, td.publicKey)
                 }
@@ -262,6 +327,7 @@ func Test_Vec_Check(t *testing.T) {
                     t.Error("SignUsingKToRS fail")
                 }
 
+                // check sig
                 curveParams := P256().Params()
                 p := curveParams.P
 
@@ -300,70 +366,6 @@ func Test_Vec_Check(t *testing.T) {
         })
     }
 
-}
-
-func Test_P256_Curve_Add(t *testing.T) {
-    {
-        a1 := new(big.Int).SetBytes(fromHex("1b"))
-        b1 := new(big.Int).SetBytes(fromHex("1a"))
-        a2 := new(big.Int).SetBytes(fromHex("2b"))
-        b2 := new(big.Int).SetBytes(fromHex("2a"))
-
-        xx, yy := P256().Add(a1, b1, a2, b2)
-
-        xx2 := fmt.Sprintf("%x", xx.Bytes())
-        yy2 := fmt.Sprintf("%x", yy.Bytes())
-
-        xxcheck := "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffbea"
-        yycheck := "46"
-
-        if xx2 != xxcheck {
-            t.Errorf("xx fail, got %s, want %s", xx2, xxcheck)
-        }
-        if yy2 != yycheck {
-            t.Errorf("yy fail, got %s, want %s", yy2, yycheck)
-        }
-    }
-
-    {
-        a1 := new(big.Int).SetBytes(fromHex("1b"))
-        b1 := new(big.Int).SetBytes(fromHex("1a"))
-
-        xx, yy := P256().Add(a1, b1, a1, b1)
-
-        xx2 := fmt.Sprintf("%x", xx.Bytes())
-        yy2 := fmt.Sprintf("%x", yy.Bytes())
-
-        xxcheck := "d7f3e1b442a6a0916b8ce030792ef5657dba51cc7f3e1b442a6a0915e0da24ce"
-        yycheck := "0a73d2ca0cd14643599b176bc88907ce982dad44dd648f16f476da5cf1b2b5c8"
-
-        if xx2 != xxcheck {
-            t.Errorf("xx fail, got %s, want %s", xx2, xxcheck)
-        }
-        if yy2 != yycheck {
-            t.Errorf("yy fail, got %s, want %s", yy2, yycheck)
-        }
-    }
-
-    {
-        a1 := new(big.Int).SetBytes(fromHex("1b"))
-        b1 := new(big.Int).SetBytes(fromHex("1a"))
-
-        xx, yy := P256().Double(a1, b1)
-
-        xx2 := fmt.Sprintf("%x", xx.Bytes())
-        yy2 := fmt.Sprintf("%x", yy.Bytes())
-
-        xxcheck := "d7f3e1b442a6a0916b8ce030792ef5657dba51cc7f3e1b442a6a0915e0da24ce"
-        yycheck := "0a73d2ca0cd14643599b176bc88907ce982dad44dd648f16f476da5cf1b2b5c8"
-
-        if xx2 != xxcheck {
-            t.Errorf("xx fail, got %s, want %s", xx2, xxcheck)
-        }
-        if yy2 != yycheck {
-            t.Errorf("yy fail, got %s, want %s", yy2, yycheck)
-        }
-    }
 }
 
 // sha256, p256

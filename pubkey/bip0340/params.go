@@ -117,8 +117,6 @@ func (curve *CurveParams) Add(x1, y1, x2, y2 *big.Int) (*big.Int, *big.Int) {
 
 // Double implements Curve.Double.
 func (curve *CurveParams) Double(x1, y1 *big.Int) (*big.Int, *big.Int) {
-    panicIfNotOnCurve(curve, x1, y1)
-
     x2 := new(big.Int).Set(x1)
     y2 := new(big.Int).Set(y1)
 

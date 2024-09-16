@@ -344,6 +344,26 @@ func Test_P256_Curve_Add(t *testing.T) {
             t.Errorf("yy fail, got %s, want %s", yy2, yycheck)
         }
     }
+
+    {
+        a1 := new(big.Int).SetBytes(fromHex("1b"))
+        b1 := new(big.Int).SetBytes(fromHex("1a"))
+
+        xx, yy := P256().Double(a1, b1)
+
+        xx2 := fmt.Sprintf("%x", xx.Bytes())
+        yy2 := fmt.Sprintf("%x", yy.Bytes())
+
+        xxcheck := "d7f3e1b442a6a0916b8ce030792ef5657dba51cc7f3e1b442a6a0915e0da24ce"
+        yycheck := "0a73d2ca0cd14643599b176bc88907ce982dad44dd648f16f476da5cf1b2b5c8"
+
+        if xx2 != xxcheck {
+            t.Errorf("xx fail, got %s, want %s", xx2, xxcheck)
+        }
+        if yy2 != yycheck {
+            t.Errorf("yy fail, got %s, want %s", yy2, yycheck)
+        }
+    }
 }
 
 // sha256, p256

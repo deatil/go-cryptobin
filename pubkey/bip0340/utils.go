@@ -4,6 +4,7 @@ import (
     "hash"
     "math/big"
     "math/bits"
+    "crypto/subtle"
     "encoding/binary"
 )
 
@@ -27,6 +28,20 @@ func putu32(ptr []byte, a uint32) {
 
 func rotl(x, n uint32) uint32 {
     return bits.RotateLeft32(x, int(n))
+}
+
+func bigFromHex(s string) *big.Int {
+    b, ok := new(big.Int).SetString(s, 16)
+    if !ok {
+        panic("crypto/elliptic: internal error: invalid encoding")
+    }
+    return b
+}
+
+// bigIntEqual reports whether a and b are equal leaking only their bit length
+// through timing side-channels.
+func bigIntEqual(a, b *big.Int) bool {
+    return subtle.ConstantTimeCompare(a.Bytes(), b.Bytes()) == 1
 }
 
 func bigintIsodd(a *big.Int) bool {

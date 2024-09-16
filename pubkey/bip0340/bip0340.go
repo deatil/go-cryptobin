@@ -7,7 +7,6 @@ import (
     "math/big"
     "crypto"
     "crypto/rand"
-    "crypto/subtle"
     "crypto/elliptic"
 
     "golang.org/x/crypto/cryptobyte"
@@ -38,7 +37,7 @@ func (opts *SignerOpts) GetHash() Hasher {
     return opts.Hash
 }
 
-// ec-gdsa PublicKey
+// bip0340 PublicKey
 type PublicKey struct {
     elliptic.Curve
 
@@ -67,7 +66,7 @@ func (pub *PublicKey) Verify(msg, sign []byte, opts crypto.SignerOpts) (bool, er
     return Verify(pub, opt.GetHash(), msg, sign), nil
 }
 
-// ec-gdsa PrivateKey
+// bip0340 PrivateKey
 type PrivateKey struct {
     PublicKey
 
@@ -257,6 +256,23 @@ func VerifyBytes(pub *PublicKey, h Hasher, data, sig []byte) bool {
  * Hence the following all-in-one signature function.
  */
 func SignToRS(random io.Reader, priv *PrivateKey, hashFunc Hasher, msg []byte) (r, s *big.Int, err error) {
+    curveParams := priv.Curve.Params()
+
+    qlen := (curveParams.BitSize + 7) / 8
+
+    e := new(big.Int).Set(one)
+    e.Lsh(e, 8 * uint(qlen))
+
+    k, err := rand.Int(random, e)
+    if err != nil {
+        return
+    }
+
+    return SignUsingKToRS(k, priv, hashFunc, msg)
+}
+
+// sign with k
+func SignUsingKToRS(k *big.Int, priv *PrivateKey, hashFunc Hasher, msg []byte) (r, s *big.Int, err error) {
     if priv == nil || priv.Curve == nil ||
         priv.X == nil || priv.Y == nil ||
         priv.D == nil || !priv.Curve.IsOnCurve(priv.X, priv.Y) {
@@ -286,15 +302,7 @@ func SignToRS(random io.Reader, priv *PrivateKey, hashFunc Hasher, msg []byte) (
     /* Adjust d depending on public key y */
     bip0340SetScalar(d, n, py)
 
-    e := new(big.Int).Set(one)
-    e.Lsh(e, 8 * uint(qlen))
-
 Retry:
-    k, err := rand.Int(random, e)
-    if err != nil {
-        return
-    }
-
     sig := make([]byte, qlen)
     k.FillBytes(sig)
 
@@ -350,7 +358,7 @@ Retry:
     h.Write(msg)
     buff = h.Sum(nil)
 
-    e = new(big.Int).SetBytes(buff)
+    e := new(big.Int).SetBytes(buff)
     e.Mod(e, n)
 
     /* Export our r in the signature */
@@ -455,10 +463,3 @@ func randFieldElement(rand io.Reader, c elliptic.Curve) (k *big.Int, err error) 
         }
     }
 }
-
-// bigIntEqual reports whether a and b are equal leaking only their bit length
-// through timing side-channels.
-func bigIntEqual(a, b *big.Int) bool {
-    return subtle.ConstantTimeCompare(a.Bytes(), b.Bytes()) == 1
-}
-

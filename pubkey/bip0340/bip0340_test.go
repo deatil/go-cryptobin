@@ -301,6 +301,26 @@ func Test_S256_Curve_Add(t *testing.T) {
             t.Errorf("yy fail, got %s, want %s", yy2, yycheck)
         }
     }
+
+    {
+        a1 := toBigint("dff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659")
+        b1 := toBigint("2ce19b946c4ee58546f5251d441a065ea50735606985e5b228788bec4e582898")
+
+        xx, yy := secp256k1.S256().Double(a1, b1)
+
+        xx2 := fmt.Sprintf("%x", xx.Bytes())
+        yy2 := fmt.Sprintf("%x", yy.Bytes())
+
+        xxcheck := "768c61d8c3acc2bbbf37dec4e62b9c481802fd817a4dbc7d5542f02375412945"
+        yycheck := "e227f7076346296e92364b75508102d997f66170764bcffb2bce80ff0e77be0a"
+
+        if xx2 != xxcheck {
+            t.Errorf("xx fail, got %s, want %s", xx2, xxcheck)
+        }
+        if yy2 != yycheck {
+            t.Errorf("yy fail, got %s, want %s", yy2, yycheck)
+        }
+    }
 }
 
 func Test_Vec_Check(t *testing.T) {

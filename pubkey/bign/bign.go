@@ -326,9 +326,19 @@ func SignToRS(random io.Reader, priv *PrivateKey, hashFunc Hasher, msg []byte, a
     hashBuf := newHash.Sum(nil)
 
     /* 2. get a random value k in ]0,q[ */
-    k, err := rand.Int(random, n)
-    if err != nil {
-        return
+    var k *big.Int
+
+    if random != nil {
+        k, err = rand.Int(random, n)
+        if err != nil {
+            return
+        }
+    } else {
+        k = new(big.Int)
+        err = determiniticNonce(k, n, curveParams.BitSize, priv.D, adata, hashBuf)
+        if err != nil {
+            return
+        }
     }
 
     /* 3. Compute W = (W_x,W_y) = kG */
@@ -406,7 +416,7 @@ func VerifyWithRS(pub *PublicKey, hashFunc Hasher, data []byte, adata []byte, r,
         return false
     }
 
-    if r.Sign() <= 0 || s.Sign() <= 0 {
+    if s.Sign() <= 0 {
         return false
     }
 

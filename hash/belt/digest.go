@@ -82,11 +82,11 @@ func (d *digest) Sum(in []byte) []byte {
 func (d *digest) checkSum() []byte {
     if d.nx != 0 {
         /* Pad our last block with zeroes */
-        zeros := make([]byte, 128)
+        zeros := make([]byte, 32)
         copy(d.x[d.nx:], zeros)
 
         /* Update the counter with the remaining data */
-        d.updateCtr(BlockSize - d.nx)
+        d.updateCtr(d.nx)
 
         /* Process the last block */
         d.hashProcess(d.x)
@@ -109,6 +109,7 @@ func (d *digest) processBlock(data [BELT_HASH_BLOCK_SIZE]byte) {
 
 func (d *digest) hashProcess(data [BELT_HASH_BLOCK_SIZE]byte) {
     s := [BELT_BLOCK_LEN]byte{}
+    copy(s[:], d.s[BELT_BLOCK_LEN:])
 
     hashProcess(data, &d.h, &s)
 

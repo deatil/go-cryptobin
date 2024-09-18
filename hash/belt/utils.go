@@ -12,39 +12,20 @@ const BELT_HASH_DIGEST_SIZE_BITS = 256
 const BELT_BLOCK_LEN     = 16 /* The BELT encryption block length */
 const BELT_KEY_SCHED_LEN = 32 /* The BELT key schedul length */
 
-// Endianness option
-const littleEndian bool = true
-
 func getu32(ptr []byte) uint32 {
-    if littleEndian {
-        return binary.LittleEndian.Uint32(ptr)
-    } else {
-        return binary.BigEndian.Uint32(ptr)
-    }
+    return binary.LittleEndian.Uint32(ptr)
 }
 
 func putu32(ptr []byte, a uint32) {
-    if littleEndian {
-        binary.LittleEndian.PutUint32(ptr, a)
-    } else {
-        binary.BigEndian.PutUint32(ptr, a)
-    }
+    binary.LittleEndian.PutUint32(ptr, a)
 }
 
 func getu64(ptr []byte) uint64 {
-    if littleEndian {
-        return binary.LittleEndian.Uint64(ptr)
-    } else {
-        return binary.BigEndian.Uint64(ptr)
-    }
+    return binary.LittleEndian.Uint64(ptr)
 }
 
 func putu64(ptr []byte, a uint64) {
-    if littleEndian {
-        binary.LittleEndian.PutUint64(ptr, a)
-    } else {
-        binary.BigEndian.PutUint64(ptr, a)
-    }
+    binary.LittleEndian.PutUint64(ptr, a)
 }
 
 func uint64sToBytes(w []uint64) []byte {
@@ -54,11 +35,7 @@ func uint64sToBytes(w []uint64) []byte {
     for i := 0; i < len(w); i++ {
         j := i * 8
 
-        if littleEndian {
-            binary.LittleEndian.PutUint64(dst[j:], w[i])
-        } else {
-            binary.BigEndian.PutUint64(dst[j:], w[i])
-        }
+        binary.LittleEndian.PutUint64(dst[j:], w[i])
     }
 
     return dst
@@ -68,24 +45,20 @@ func rotatel32(x uint32, n int) uint32 {
     return bits.RotateLeft32(x, n)
 }
 
-func rotater32(x uint32, n int) uint32 {
-    return rotatel32(x, 32 - n)
-}
-
 func ROTL_BELT(x uint32, n int) uint32 {
-    return rotater32(x, n)
+    return rotatel32(x, n)
 }
 
 func GET_BYTE(x uint32, a int) byte {
     return byte(x >> a) & 0xff
 }
 
-func PUT_BYTE(x uint32, a int) uint32 {
-    return x << a
+func PUT_BYTE(x byte, a int) uint32 {
+    return uint32(x) << a
 }
 
 func SB(x uint32, a int) uint32 {
-    return PUT_BYTE(uint32(S[GET_BYTE(x, a)]), a)
+    return PUT_BYTE(S[GET_BYTE(x, a)], a)
 }
 
 func G(x uint32, r int) uint32 {
@@ -259,7 +232,7 @@ func sigma2(x [2 * BELT_BLOCK_LEN]byte, h [2 * BELT_BLOCK_LEN]byte, result *[2 *
     var tmpTeta [BELT_BLOCK_LEN]byte
     sigma1Xor(x, h, &tmpTeta, false)
 
-    copy(tmp[:], tmpTeta[:])
+    copy(teta[:], tmpTeta[:])
     copy(teta[BELT_BLOCK_LEN:], h[BELT_BLOCK_LEN:])
 
     var tmpX [BELT_BLOCK_LEN]byte
@@ -275,6 +248,9 @@ func sigma2(x [2 * BELT_BLOCK_LEN]byte, h [2 * BELT_BLOCK_LEN]byte, result *[2 *
         teta[i]    ^= 0xff
         teta[i + BELT_BLOCK_LEN] = tmp[i]
     }
+
+    tmpX = [BELT_BLOCK_LEN]byte{}
+    tmpResult = [BELT_BLOCK_LEN]byte{}
 
     copy(tmpX[:], x[BELT_BLOCK_LEN:])
     copy(tmpResult[:], result[BELT_BLOCK_LEN:])

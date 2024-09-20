@@ -151,8 +151,37 @@ var testOpt = Opts{
     },
 }
 
+func newTestOpt(h Hash) Opts {
+    opt := Opts{
+        KeyCipher: GetPbes1CipherFromName("SHA1AndRC2_40"),
+        CertCipher: CipherSHA1AndRC2_40,
+        MacKDFOpts: MacOpts{
+            SaltSize: 8,
+            IterationCount: 1,
+            HMACHash: h,
+        },
+    }
+
+    return opt
+}
+
 func Test_Encode(t *testing.T) {
     test_Encode(t, testOpt, "password-testkjjj", "testOpt")
+
+    // test use hashs
+    test_Encode(t, newTestOpt(MD2), "password-testkjjj", "testOpt MD2")
+    test_Encode(t, newTestOpt(MD4), "password-testkjjj", "testOpt MD4")
+    test_Encode(t, newTestOpt(MD5), "password-testkjjj", "testOpt MD5")
+    test_Encode(t, newTestOpt(SHA1), "password-testkjjj", "testOpt SHA1")
+    test_Encode(t, newTestOpt(SHA224), "password-testkjjj", "testOpt SHA224")
+    test_Encode(t, newTestOpt(SHA256), "password-testkjjj", "testOpt SHA256")
+    test_Encode(t, newTestOpt(SHA384), "password-testkjjj", "testOpt SHA384")
+    test_Encode(t, newTestOpt(SHA512), "password-testkjjj", "testOpt SHA512")
+    test_Encode(t, newTestOpt(SHA512_224), "password-testkjjj", "testOpt SHA512_224")
+    test_Encode(t, newTestOpt(SHA512_256), "password-testkjjj", "testOpt SHA512_256")
+    test_Encode(t, newTestOpt(SM3), "password-testkjjj", "testOpt SM3")
+    test_Encode(t, newTestOpt(GOST34112012256), "password-testkjjj", "testOpt GOST34112012256")
+    test_Encode(t, newTestOpt(GOST34112012512), "password-testkjjj", "testOpt GOST34112012512")
 
     test_Encode(t, LegacyRC2Opts, "password-testkjjj", "LegacyRC2Opts")
     test_Encode(t, LegacyDESOpts, "password-testkjjj", "LegacyDESOpts")
@@ -1364,4 +1393,97 @@ func Test_PBMAC1Pfx_Check(t *testing.T) {
         assertNotEmpty(certificate, "Test_PBMAC1Pfx_Check-pfxData")
         assertError(err, "Test_PBMAC1Pfx_Check-pfxData")
     })
+}
+
+var testSHA512Pfx_Encode = `
+-----BEGIN Data-----
+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
+-----END Data-----
+`
+
+func Test_NewPfx_Check(t *testing.T) {
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    t.Run("NewPfx 1", func(t *testing.T) {
+        pfxData := decodePEM(testSHA512Pfx_Encode)
+
+        password := "abc"
+
+        privateKey, certificate, err := Decode(pfxData, password)
+        assertNotEmpty(privateKey, "Test_NewPfx_Check-pfxData")
+        assertNotEmpty(certificate, "Test_NewPfx_Check-pfxData")
+        assertError(err, "Test_NewPfx_Check-pfxData")
+    })
+
 }

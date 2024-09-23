@@ -68,14 +68,14 @@ var (
 // the message input to the compression function of H is v bits).  The
 // values for u and v are as follows:
 //            HASH FUNCTION     VALUE u        VALUE v
-//            MD2, MD5          128            512
-//              SHA-1           160            512
-//             SHA-224          224            512
-//             SHA-256          256            512
-//             SHA-384          384            1024
-//             SHA-512          512            1024
-//           SHA-512/224        224            1024
-//           SHA-512/256        256            1024
+//              MD2, MD5          128            512
+//                SHA-1           160            512
+//               SHA-224          224            512
+//               SHA-256          256            512
+//               SHA-384          384            1024
+//               SHA-512          512            1024
+//             SHA-512/224        224            1024
+//             SHA-512/256        256            1024
 
 // 返回使用的 Hash
 // return hash from oid

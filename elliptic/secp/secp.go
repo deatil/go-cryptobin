@@ -46,7 +46,7 @@ func initP192() {
     secp192r1.B = bigFromHex("64210519E59C80E70FA7E9AB72243049FEB8DEECC146B9B1")
     secp192r1.Gx = bigFromHex("188DA80EB03090F67CBF20EB43A18800F4FF0AFD82FF1012")
     secp192r1.Gy = bigFromHex("07192B95FFC8DA78631011ED6B24CDD573F977A11E794811")
-    secp192r1.BitSize = 256
+    secp192r1.BitSize = 192
     secp192r1.Name = "secp192r1"
 }
 
@@ -123,6 +123,11 @@ func initSecp160r2() {
 }
 
 func P192() elliptic.Curve {
+    once.Do(initAll)
+    return secp192r1
+}
+
+func P192r1() elliptic.Curve {
     once.Do(initAll)
     return secp192r1
 }

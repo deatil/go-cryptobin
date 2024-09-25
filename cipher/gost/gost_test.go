@@ -1,0 +1,260 @@
+package gost
+
+import (
+    "fmt"
+    "bytes"
+    "testing"
+    "math/rand"
+    "crypto/cipher"
+    "encoding/hex"
+)
+
+func Test_Gosts(t *testing.T) {
+    test_Gost(t, SboxDESDerivedParamSet, "SboxDESDerivedParamSet")
+    test_Gost(t, SboxRFC4357TestParamSet, "SboxRFC4357TestParamSet")
+    test_Gost(t, SboxGost2814789TestParamSet, "SboxGost2814789TestParamSet")
+    test_Gost(t, SboxCentralBankTestParamSet, "SboxCentralBankTestParamSet")
+    test_Gost(t, SboxTC26gost28147paramZ, "SboxTC26gost28147paramZ")
+
+    test_Gost(t, SboxGostR341194CryptoProParamSet, "SboxGostR341194CryptoProParamSet")
+    test_Gost(t, SboxGost2814789CryptoProAParamSet, "SboxGost2814789CryptoProAParamSet")
+    test_Gost(t, SboxGost2814789CryptoProBParamSet, "SboxGost2814789CryptoProBParamSet")
+    test_Gost(t, SboxGost2814789CryptoProCParamSet, "SboxGost2814789CryptoProCParamSet")
+    test_Gost(t, SboxGost2814789CryptoProDParamSet, "SboxGost2814789CryptoProDParamSet")
+
+    test_Gost(t, SboxEACParamSet, "SboxEACParamSet")
+}
+
+func test_Gost(t *testing.T, sbox [][]byte, name string) {
+    t.Run(name, func(t *testing.T) {
+        random := rand.New(rand.NewSource(99))
+        max := 5000
+
+        var encrypted [8]byte
+        var decrypted [8]byte
+
+        for i := 0; i < max; i++ {
+            key := make([]byte, 32)
+            random.Read(key)
+            value := make([]byte, 8)
+            random.Read(value)
+
+            cipher1, err := NewCipher(key, sbox)
+            if err != nil {
+                t.Fatal(err.Error())
+            }
+
+            cipher1.Encrypt(encrypted[:], value)
+
+            cipher2, err := NewCipher(key, sbox)
+            if err != nil {
+                t.Fatal(err.Error())
+            }
+
+            cipher2.Decrypt(decrypted[:], encrypted[:])
+
+            if !bytes.Equal(decrypted[:], value[:]) {
+                t.Errorf("encryption/decryption failed: % 02x != % 02x\n", decrypted, value)
+            }
+        }
+    })
+}
+
+func Test_Check(t *testing.T) {
+    var key [32]byte
+    for i := 0; i < 32; i++ {
+        key[i] = byte((i * 2 + 10) % 256)
+    }
+
+    ciphertext := "603f5347df09c97b"
+    plaintext := "0001020304050607"
+
+    cipherBytes, _ := hex.DecodeString(ciphertext)
+    plainBytes, _ := hex.DecodeString(plaintext)
+
+    cipher, err := NewCipher(key[:], SboxCentralBankTestParamSet)
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+
+    var encrypted []byte = make([]byte, len(plainBytes))
+    cipher.Encrypt(encrypted, plainBytes)
+
+    if ciphertext != fmt.Sprintf("%x", encrypted) {
+        t.Errorf("Encrypt error: act=%x, old=%s\n", encrypted, ciphertext)
+    }
+
+    // ==========
+
+    cipher2, err := NewCipher(key[:], SboxCentralBankTestParamSet)
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+
+    var decrypted []byte = make([]byte, len(cipherBytes))
+    cipher2.Decrypt(decrypted, cipherBytes)
+
+    if plaintext != fmt.Sprintf("%x", decrypted) {
+        t.Errorf("Decrypt error: act=%x, old=%s\n", decrypted, plaintext)
+    }
+}
+
+// http://cryptomanager.com/tv.html test vectors.
+func Test_Cryptomanager(t *testing.T) {
+    key := []byte{
+        0x75, 0x71, 0x31, 0x34, 0xB6, 0x0F, 0xEC, 0x45,
+        0xA6, 0x07, 0xBB, 0x83, 0xAA, 0x37, 0x46, 0xAF,
+        0x4F, 0xF9, 0x9D, 0xA6, 0xD1, 0xB5, 0x3B, 0x5B,
+        0x1B, 0x40, 0x2A, 0x1B, 0xAA, 0x03, 0x0D, 0x1B,
+    }
+
+    c, err := NewCipher(key, SboxRFC4357TestParamSet)
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+
+    tmp := make([]byte, BlockSize)
+    c.Encrypt(tmp, []byte{0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88})
+
+    if !bytes.Equal(tmp, []byte{0x03, 0x25, 0x1E, 0x14, 0xF9, 0xD2, 0x8A, 0xCB}) {
+        t.Error("Cryptomanager error")
+    }
+}
+
+// Crypto++ 5.6.2 test vectors
+func Test_CryptoPPVectors(t *testing.T) {
+    sbox := SboxAppliedCryptographyParamSet
+    tmp := make([]byte, BlockSize)
+    var key []byte
+    var pt []byte
+    var ct []byte
+    var c cipher.Block
+
+    t.Run("1", func(t *testing.T) {
+        key = []byte{
+            0xBE, 0x5E, 0xC2, 0x00, 0x6C, 0xFF, 0x9D, 0xCF,
+            0x52, 0x35, 0x49, 0x59, 0xF1, 0xFF, 0x0C, 0xBF,
+            0xE9, 0x50, 0x61, 0xB5, 0xA6, 0x48, 0xC1, 0x03,
+            0x87, 0x06, 0x9C, 0x25, 0x99, 0x7C, 0x06, 0x72,
+        }
+        pt = []byte{0x0D, 0xF8, 0x28, 0x02, 0xB7, 0x41, 0xA2, 0x92}
+        ct = []byte{0x07, 0xF9, 0x02, 0x7D, 0xF7, 0xF7, 0xDF, 0x89}
+        c, _ = NewCipher(key, sbox)
+        c.Encrypt(tmp, pt)
+        if !bytes.Equal(tmp, ct) {
+            t.FailNow()
+        }
+    })
+
+    t.Run("2", func(t *testing.T) {
+        key = []byte{
+            0xB3, 0x85, 0x27, 0x2A, 0xC8, 0xD7, 0x2A, 0x5A,
+            0x8B, 0x34, 0x4B, 0xC8, 0x03, 0x63, 0xAC, 0x4D,
+            0x09, 0xBF, 0x58, 0xF4, 0x1F, 0x54, 0x06, 0x24,
+            0xCB, 0xCB, 0x8F, 0xDC, 0xF5, 0x53, 0x07, 0xD7,
+        }
+        pt = []byte{0x13, 0x54, 0xEE, 0x9C, 0x0A, 0x11, 0xCD, 0x4C}
+        ct = []byte{0x4F, 0xB5, 0x05, 0x36, 0xF9, 0x60, 0xA7, 0xB1}
+        c, _ = NewCipher(key, sbox)
+        c.Encrypt(tmp, pt)
+        if !bytes.Equal(tmp, ct) {
+            t.FailNow()
+        }
+    })
+
+    t.Run("3", func(t *testing.T) {
+        key = []byte{
+            0xAE, 0xE0, 0x2F, 0x60, 0x9A, 0x35, 0x66, 0x0E,
+            0x40, 0x97, 0xE5, 0x46, 0xFD, 0x30, 0x26, 0xB0,
+            0x32, 0xCD, 0x10, 0x7C, 0x7D, 0x45, 0x99, 0x77,
+            0xAD, 0xF4, 0x89, 0xBE, 0xF2, 0x65, 0x22, 0x62,
+        }
+        pt = []byte{0x66, 0x93, 0xD4, 0x92, 0xC4, 0xB0, 0xCC, 0x39}
+        ct = []byte{0x67, 0x00, 0x34, 0xAC, 0x0F, 0xA8, 0x11, 0xB5}
+        c, _ = NewCipher(key, sbox)
+        c.Encrypt(tmp, pt)
+        if !bytes.Equal(tmp, ct) {
+            t.FailNow()
+        }
+    })
+
+    t.Run("4", func(t *testing.T) {
+        key = []byte{
+            0x32, 0x0E, 0x9D, 0x84, 0x22, 0x16, 0x5D, 0x58,
+            0x91, 0x1D, 0xFC, 0x7D, 0x8B, 0xBB, 0x1F, 0x81,
+            0xB0, 0xEC, 0xD9, 0x24, 0x02, 0x3B, 0xF9, 0x4D,
+            0x9D, 0xF7, 0xDC, 0xF7, 0x80, 0x12, 0x40, 0xE0,
+        }
+        pt = []byte{0x99, 0xE2, 0xD1, 0x30, 0x80, 0x92, 0x8D, 0x79}
+        ct = []byte{0x81, 0x18, 0xFF, 0x9D, 0x3B, 0x3C, 0xFE, 0x7D}
+        c, _ = NewCipher(key, sbox)
+        c.Encrypt(tmp, pt)
+        if !bytes.Equal(tmp, ct) {
+            t.FailNow()
+        }
+    })
+
+    t.Run("5", func(t *testing.T) {
+        key = []byte{
+            0xC9, 0xF7, 0x03, 0xBB, 0xBF, 0xC6, 0x36, 0x91,
+            0xBF, 0xA3, 0xB7, 0xB8, 0x7E, 0xA8, 0xFD, 0x5E,
+            0x8E, 0x8E, 0xF3, 0x84, 0xEF, 0x73, 0x3F, 0x1A,
+            0x61, 0xAE, 0xF6, 0x8C, 0x8F, 0xFA, 0x26, 0x5F,
+        }
+        pt = []byte{0xD1, 0xE7, 0x87, 0x74, 0x9C, 0x72, 0x81, 0x4C}
+        ct = []byte{0xA0, 0x83, 0x82, 0x6A, 0x79, 0x0D, 0x3E, 0x0C}
+        c, _ = NewCipher(key, sbox)
+        c.Encrypt(tmp, pt)
+        if !bytes.Equal(tmp, ct) {
+            t.FailNow()
+        }
+    })
+
+    t.Run("6", func(t *testing.T) {
+        key = []byte{
+            0x72, 0x8F, 0xEE, 0x32, 0xF0, 0x4B, 0x4C, 0x65,
+            0x4A, 0xD7, 0xF6, 0x07, 0xD7, 0x1C, 0x66, 0x0C,
+            0x2C, 0x26, 0x70, 0xD7, 0xC9, 0x99, 0x71, 0x32,
+            0x33, 0x14, 0x9A, 0x1C, 0x0C, 0x17, 0xA1, 0xF0,
+        }
+        pt = []byte{0xD4, 0xC0, 0x53, 0x23, 0xA4, 0xF7, 0xA7, 0xB5}
+        ct = []byte{0x4D, 0x1F, 0x2E, 0x6B, 0x0D, 0x9D, 0xE2, 0xCE}
+        c, _ = NewCipher(key, sbox)
+        c.Encrypt(tmp, pt)
+        if !bytes.Equal(tmp, ct) {
+            t.FailNow()
+        }
+    })
+
+    t.Run("7", func(t *testing.T) {
+        key = []byte{
+            0x35, 0xFC, 0x96, 0x40, 0x22, 0x09, 0x50, 0x0F,
+            0xCF, 0xDE, 0xF5, 0x35, 0x2D, 0x1A, 0xBB, 0x03,
+            0x8F, 0xE3, 0x3F, 0xC0, 0xD9, 0xD5, 0x85, 0x12,
+            0xE5, 0x63, 0x70, 0xB2, 0x2B, 0xAA, 0x13, 0x3B,
+        }
+        pt = []byte{0x87, 0x42, 0xD9, 0xA0, 0x5F, 0x6A, 0x3A, 0xF6}
+        ct = []byte{0x2F, 0x3B, 0xB8, 0x48, 0x79, 0xD1, 0x1E, 0x52}
+        c, _ = NewCipher(key, sbox)
+        c.Encrypt(tmp, pt)
+        if !bytes.Equal(tmp, ct) {
+            t.FailNow()
+        }
+    })
+
+    t.Run("8", func(t *testing.T) {
+        key = []byte{
+            0xD4, 0x16, 0xF6, 0x30, 0xBE, 0x65, 0xB7, 0xFE,
+            0x15, 0x06, 0x56, 0x18, 0x33, 0x70, 0xE0, 0x70,
+            0x18, 0x23, 0x4E, 0xE5, 0xDA, 0x3D, 0x89, 0xC4,
+            0xCE, 0x91, 0x52, 0xA0, 0x3E, 0x5B, 0xFB, 0x77,
+        }
+        pt = []byte{0xF8, 0x65, 0x06, 0xDA, 0x04, 0xE4, 0x1C, 0xB8}
+        ct = []byte{0x96, 0xF0, 0xA5, 0xC7, 0x7A, 0x04, 0xF5, 0xCE}
+        c, _ = NewCipher(key, sbox)
+        c.Encrypt(tmp, pt)
+        if !bytes.Equal(tmp, ct) {
+            t.FailNow()
+        }
+    })
+}

@@ -1,9 +1,9 @@
-### ECDSA 使用文档
+### EC-GDSA 使用文档
 
 #### 包引入
 ~~~go
 import (
-    "github.com/deatil/go-cryptobin/cryptobin/ecdsa"
+    "github.com/deatil/go-cryptobin/cryptobin/ecgdsa"
 )
 ~~~
 
@@ -37,7 +37,7 @@ func main() {
 
     // 生成证书
     // 可选参数 [P521 | P384 | P256 | P224]
-    ec := ecdsa.GenerateKey("P521")
+    ec := ecgdsa.GenerateKey("P521")
 
     // 生成私钥 PEM 证书
     privateKeyString := ec.
@@ -79,7 +79,7 @@ func main() {
 
     // 私钥签名
     var pri []byte = []byte("...")
-    var base64signedString string = ecdsa.
+    var base64signedString string = ecgdsa.
         FromString("test-pass").
         FromPrivateKey(pri).
         // FromPrivateKeyWithPassword(pri, psssword).
@@ -93,7 +93,7 @@ func main() {
     // 公钥验证
     var pub []byte = []byte("...")
     var base64signedString string = "..."
-    var verify bool = ecdsa.
+    var verify bool = ecgdsa.
         FromBase64String(base64signedString).
         FromPublicKey(pub).
         Verify([]byte("test-pass")).
@@ -101,45 +101,6 @@ func main() {
 }
 ~~~
 
-#### 加密解密
-
-ECDSA 加密使用自身的 ECDH 生成的密钥，使用 AES 对称加密解密数据
-
-~~~go
-func main() {
-    // 私钥
-    prikey = `
------BEGIN EC PRIVATE KEY-----
-MHcCAQEEIGfqpFWW2kecvy/V0mxus+ZMuODGcqfyZVJMgBbWRhYJoAoGCCqGSM49
-AwEHoUQDQgAEqktVUz5Og3mBcnhpnfWWSOhrZqO+Vu0zCh5hkl/0r9vPzPeqGpHJ
-v3eJw/zF+gZWxn2LvLcKkQTcGutSwVdVRQ==
------END EC PRIVATE KEY-----
-    `
-
-    // 公钥
-    pubkey = `
------BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEqktVUz5Og3mBcnhpnfWWSOhrZqO+
-Vu0zCh5hkl/0r9vPzPeqGpHJv3eJw/zF+gZWxn2LvLcKkQTcGutSwVdVRQ==
------END PUBLIC KEY-----
-    `
-
-    // 加密
-    var encBase64Data string = ecdsa.
-        FromString("test-pass").
-        FromPublicKey([]byte(pubkey)).
-        Encrypt().
-        ToBase64String()
-
-    // 解密
-    var encBase64Data string = ""
-    var deData string = ecdsa.
-        FromBase64String(encBase64Data).
-        FromPrivateKey([]byte(prikey)).
-        Decrypt().
-        ToString()
-}
-~~~
 
 #### 检测私钥公钥是否匹配
 ~~~go
@@ -151,7 +112,7 @@ func main() {
     var prikeyPem []byte = []byte("...")
     var pubkeyPem []byte = []byte("...")
 
-    var res bool = ecdsa.New().
+    var res bool = ecgdsa.New().
         FromPrivateKey(pri).
         // FromPrivateKeyWithPassword(pri, psssword).
         // FromPKCS1PrivateKey(pri).

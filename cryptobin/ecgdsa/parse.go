@@ -1,23 +1,23 @@
-package ecdsa
+package ecgdsa
 
 import (
     "errors"
     "crypto/x509"
-    "crypto/ecdsa"
     "encoding/pem"
 
     "github.com/deatil/go-cryptobin/pkcs1"
     "github.com/deatil/go-cryptobin/pkcs8"
+    "github.com/deatil/go-cryptobin/pubkey/ecgdsa"
 )
 
 var (
     ErrKeyMustBePEMEncoded = errors.New("invalid key: Key must be a PEM encoded PKCS1 or PKCS8 key")
-    ErrNotECPublicKey      = errors.New("key is not a valid ECDSA public key")
-    ErrNotECPrivateKey     = errors.New("key is not a valid ECDSA private key")
+    ErrNotECPublicKey      = errors.New("key is not a valid ECGDSA public key")
+    ErrNotECPrivateKey     = errors.New("key is not a valid ECGDSA private key")
 )
 
 // 解析私钥
-func (this ECDSA) ParsePKCS1PrivateKeyFromPEM(key []byte) (*ecdsa.PrivateKey, error) {
+func (this ECGDSA) ParsePKCS1PrivateKeyFromPEM(key []byte) (*ecgdsa.PrivateKey, error) {
     var err error
 
     // Parse PEM block
@@ -28,14 +28,14 @@ func (this ECDSA) ParsePKCS1PrivateKeyFromPEM(key []byte) (*ecdsa.PrivateKey, er
 
     // Parse the key
     var parsedKey any
-    if parsedKey, err = x509.ParseECPrivateKey(block.Bytes); err != nil {
+    if parsedKey, err = ecgdsa.ParseECPrivateKey(block.Bytes); err != nil {
         return nil, err
     }
 
-    var pkey *ecdsa.PrivateKey
+    var pkey *ecgdsa.PrivateKey
     var ok bool
 
-    if pkey, ok = parsedKey.(*ecdsa.PrivateKey); !ok {
+    if pkey, ok = parsedKey.(*ecgdsa.PrivateKey); !ok {
         return nil, ErrNotECPrivateKey
     }
 
@@ -43,7 +43,7 @@ func (this ECDSA) ParsePKCS1PrivateKeyFromPEM(key []byte) (*ecdsa.PrivateKey, er
 }
 
 // 解析私钥带密码
-func (this ECDSA) ParsePKCS1PrivateKeyFromPEMWithPassword(key []byte, password string) (*ecdsa.PrivateKey, error) {
+func (this ECGDSA) ParsePKCS1PrivateKeyFromPEMWithPassword(key []byte, password string) (*ecgdsa.PrivateKey, error) {
     var err error
 
     // Parse PEM block
@@ -59,14 +59,14 @@ func (this ECDSA) ParsePKCS1PrivateKeyFromPEMWithPassword(key []byte, password s
 
     // Parse the key
     var parsedKey any
-    if parsedKey, err = x509.ParseECPrivateKey(blockDecrypted); err != nil {
+    if parsedKey, err = ecgdsa.ParseECPrivateKey(blockDecrypted); err != nil {
         return nil, err
     }
 
-    var pkey *ecdsa.PrivateKey
+    var pkey *ecgdsa.PrivateKey
     var ok bool
 
-    if pkey, ok = parsedKey.(*ecdsa.PrivateKey); !ok {
+    if pkey, ok = parsedKey.(*ecgdsa.PrivateKey); !ok {
         return nil, ErrNotECPrivateKey
     }
 
@@ -76,7 +76,7 @@ func (this ECDSA) ParsePKCS1PrivateKeyFromPEMWithPassword(key []byte, password s
 // ==========
 
 // 解析私钥
-func (this ECDSA) ParsePKCS8PrivateKeyFromPEM(key []byte) (*ecdsa.PrivateKey, error) {
+func (this ECGDSA) ParsePKCS8PrivateKeyFromPEM(key []byte) (*ecgdsa.PrivateKey, error) {
     var err error
 
     // Parse PEM block
@@ -87,14 +87,14 @@ func (this ECDSA) ParsePKCS8PrivateKeyFromPEM(key []byte) (*ecdsa.PrivateKey, er
 
     // Parse the key
     var parsedKey any
-    if parsedKey, err = x509.ParsePKCS8PrivateKey(block.Bytes); err != nil {
+    if parsedKey, err = ecgdsa.ParsePrivateKey(block.Bytes); err != nil {
         return nil, err
     }
 
-    var pkey *ecdsa.PrivateKey
+    var pkey *ecgdsa.PrivateKey
     var ok bool
 
-    if pkey, ok = parsedKey.(*ecdsa.PrivateKey); !ok {
+    if pkey, ok = parsedKey.(*ecgdsa.PrivateKey); !ok {
         return nil, ErrNotECPrivateKey
     }
 
@@ -102,7 +102,7 @@ func (this ECDSA) ParsePKCS8PrivateKeyFromPEM(key []byte) (*ecdsa.PrivateKey, er
 }
 
 // 解析 PKCS8 带密码的私钥
-func (this ECDSA) ParsePKCS8PrivateKeyFromPEMWithPassword(key []byte, password string) (*ecdsa.PrivateKey, error) {
+func (this ECGDSA) ParsePKCS8PrivateKeyFromPEMWithPassword(key []byte, password string) (*ecgdsa.PrivateKey, error) {
     var err error
 
     // Parse PEM block
@@ -117,14 +117,14 @@ func (this ECDSA) ParsePKCS8PrivateKeyFromPEMWithPassword(key []byte, password s
     }
 
     var parsedKey any
-    if parsedKey, err = x509.ParsePKCS8PrivateKey(blockDecrypted); err != nil {
+    if parsedKey, err = ecgdsa.ParsePrivateKey(blockDecrypted); err != nil {
         return nil, err
     }
 
-    var pkey *ecdsa.PrivateKey
+    var pkey *ecgdsa.PrivateKey
     var ok bool
 
-    if pkey, ok = parsedKey.(*ecdsa.PrivateKey); !ok {
+    if pkey, ok = parsedKey.(*ecgdsa.PrivateKey); !ok {
         return nil, ErrNotECPrivateKey
     }
 
@@ -134,7 +134,7 @@ func (this ECDSA) ParsePKCS8PrivateKeyFromPEMWithPassword(key []byte, password s
 // ==========
 
 // 解析公钥
-func (this ECDSA) ParsePublicKeyFromPEM(key []byte) (*ecdsa.PublicKey, error) {
+func (this ECGDSA) ParsePublicKeyFromPEM(key []byte) (*ecgdsa.PublicKey, error) {
     var err error
 
     // Parse PEM block
@@ -145,7 +145,7 @@ func (this ECDSA) ParsePublicKeyFromPEM(key []byte) (*ecdsa.PublicKey, error) {
 
     // Parse the key
     var parsedKey any
-    if parsedKey, err = x509.ParsePKIXPublicKey(block.Bytes); err != nil {
+    if parsedKey, err = ecgdsa.ParsePublicKey(block.Bytes); err != nil {
         if cert, err := x509.ParseCertificate(block.Bytes); err == nil {
             parsedKey = cert.PublicKey
         } else {
@@ -153,10 +153,10 @@ func (this ECDSA) ParsePublicKeyFromPEM(key []byte) (*ecdsa.PublicKey, error) {
         }
     }
 
-    var pkey *ecdsa.PublicKey
+    var pkey *ecgdsa.PublicKey
     var ok bool
 
-    if pkey, ok = parsedKey.(*ecdsa.PublicKey); !ok {
+    if pkey, ok = parsedKey.(*ecgdsa.PublicKey); !ok {
         return nil, ErrNotECPublicKey
     }
 

@@ -7,23 +7,27 @@ import (
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
-func Test_OFBNLF(t *testing.T) {
+func Test_OFB8(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     key := []byte("kkinjkijeel22plo")
     iv := []byte("11injkijkol22plo")
     plaintext := []byte("kjinjkijkolkdplo")
 
-    mode := NewOFBNLFEncrypter(aes.NewCipher, key, iv)
+    c, err := aes.NewCipher(key)
+    assertError(err, "Test_OFB8")
+
+    mode := NewOFB8(c, iv)
     ciphertext := make([]byte, len(plaintext))
-    mode.CryptBlocks(ciphertext, plaintext)
+    mode.XORKeyStream(ciphertext, plaintext)
 
-    mode2 := NewOFBNLFDecrypter(aes.NewCipher, key, iv)
+    mode2 := NewOFB8(c, iv)
     plaintext2 := make([]byte, len(ciphertext))
-    mode2.CryptBlocks(plaintext2, ciphertext)
+    mode2.XORKeyStream(plaintext2, ciphertext)
 
-    assertNotEmpty(plaintext2, "Test_OFBNLF")
+    assertNotEmpty(plaintext2, "Test_OFB8")
 
-    assertEqual(plaintext2, plaintext, "Test_OFBNLF-Equal")
+    assertEqual(plaintext2, plaintext, "Test_OFB8-Equal")
 }

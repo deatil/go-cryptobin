@@ -47,13 +47,18 @@ func Test_All(t *testing.T) {
     t.Run("P112r2", func(t *testing.T) {
         testCurve(t, P112r2())
     })
+    */
+
     t.Run("P128r1", func(t *testing.T) {
         testCurve(t, P128r1())
     })
+
+    /*
     t.Run("P128r2", func(t *testing.T) {
         testCurve(t, P128r2())
     })
     */
+
     t.Run("P160r1", func(t *testing.T) {
         testCurve(t, P160r1())
     })

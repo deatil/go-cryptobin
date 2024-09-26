@@ -38,18 +38,6 @@ func initAll() {
     initSecp160r2()
 }
 
-func initP192() {
-    // p = 2^192 - 2^64 - 1
-    secp192r1 = new(elliptic.CurveParams)
-    secp192r1.P = bigFromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFF")
-    secp192r1.N = bigFromHex("FFFFFFFFFFFFFFFFFFFFFFFF99DEF836146BC9B1B4D22831")
-    secp192r1.B = bigFromHex("64210519E59C80E70FA7E9AB72243049FEB8DEECC146B9B1")
-    secp192r1.Gx = bigFromHex("188DA80EB03090F67CBF20EB43A18800F4FF0AFD82FF1012")
-    secp192r1.Gy = bigFromHex("07192B95FFC8DA78631011ED6B24CDD573F977A11E794811")
-    secp192r1.BitSize = 192
-    secp192r1.Name = "secp192r1"
-}
-
 func initSecp112r1() {
     // p = (2^128 - 3) / 76439
     secp112r1 = new(elliptic.CurveParams)
@@ -122,14 +110,16 @@ func initSecp160r2() {
     secp160r2.Name = "secp160r2"
 }
 
-func P192() elliptic.Curve {
-    once.Do(initAll)
-    return secp192r1
-}
-
-func P192r1() elliptic.Curve {
-    once.Do(initAll)
-    return secp192r1
+func initP192() {
+    // p = 2^192 - 2^64 - 1
+    secp192r1 = new(elliptic.CurveParams)
+    secp192r1.P = bigFromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFF")
+    secp192r1.N = bigFromHex("FFFFFFFFFFFFFFFFFFFFFFFF99DEF836146BC9B1B4D22831")
+    secp192r1.B = bigFromHex("64210519E59C80E70FA7E9AB72243049FEB8DEECC146B9B1")
+    secp192r1.Gx = bigFromHex("188DA80EB03090F67CBF20EB43A18800F4FF0AFD82FF1012")
+    secp192r1.Gy = bigFromHex("07192B95FFC8DA78631011ED6B24CDD573F977A11E794811")
+    secp192r1.BitSize = 192
+    secp192r1.Name = "secp192r1"
 }
 
 func P112r1() elliptic.Curve {
@@ -160,6 +150,16 @@ func P160r1() elliptic.Curve {
 func P160r2() elliptic.Curve {
     once.Do(initAll)
     return secp160r2
+}
+
+func P192() elliptic.Curve {
+    once.Do(initAll)
+    return secp192r1
+}
+
+func P192r1() elliptic.Curve {
+    once.Do(initAll)
+    return secp192r1
 }
 
 func bigFromHex(s string) *big.Int {

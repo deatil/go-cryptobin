@@ -127,9 +127,7 @@ func (curve *CurveParams) Double(x1, y1 *big.Int) (*big.Int, *big.Int) {
     x2 := new(big.Int).Set(x1)
     y2 := new(big.Int).Set(y1)
 
-    x2, y2 = curve.Add(x2, y2, x2, y2)
-
-    return x2, y2
+    return curve.Add(x2, y2, x2, y2)
 }
 
 // ScalarMult implements Curve.ScalarMult.

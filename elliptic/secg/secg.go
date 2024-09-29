@@ -16,6 +16,7 @@ var (
     OIDNamedCurveSect163r2 = asn1.ObjectIdentifier{1, 3, 132, 0, 15}
     OIDNamedCurveSect193r1 = asn1.ObjectIdentifier{1, 3, 132, 0, 24}
     OIDNamedCurveSect193r2 = asn1.ObjectIdentifier{1, 3, 132, 0, 25}
+
     OIDNamedCurveSect233k1 = asn1.ObjectIdentifier{1, 3, 132, 0, 26}
     OIDNamedCurveSect233r1 = asn1.ObjectIdentifier{1, 3, 132, 0, 27}
     OIDNamedCurveSect239k1 = asn1.ObjectIdentifier{1, 3, 132, 0, 3}

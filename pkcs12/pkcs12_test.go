@@ -194,6 +194,7 @@ func Test_Encode(t *testing.T) {
     test_Encode(t, newTestOpt(SHA512_224), "password-testkjjj", "testOpt SHA512_224")
     test_Encode(t, newTestOpt(SHA512_256), "password-testkjjj", "testOpt SHA512_256")
     test_Encode(t, newTestOpt(SM3), "password-testkjjj", "testOpt SM3")
+    test_Encode(t, newTestOpt(GOST341194), "password-testkjjj", "testOpt GOST341194")
     test_Encode(t, newTestOpt(GOST34112012256), "password-testkjjj", "testOpt GOST34112012256")
     test_Encode(t, newTestOpt(GOST34112012512), "password-testkjjj", "testOpt GOST34112012512")
 

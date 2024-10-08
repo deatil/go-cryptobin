@@ -28,9 +28,9 @@ var curves = []struct {
     BuildTags string
 }{
     {
-        P:         "P256",
-        Element:   "fiat.P256Element",
-        Params:    &elliptic.CurveParams{
+        P:       "P256",
+        Element: "fiat.P256Element",
+        Params:  &elliptic.CurveParams{
             Name:    "BIGN256V1",
             BitSize: 256,
             P:       bigFromHex("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff43"),

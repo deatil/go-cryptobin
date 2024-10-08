@@ -38,29 +38,29 @@ func Key(h func() hash.Hash, password, salt []byte, iterations, keylen int) []by
     var generated int = 0
 
     for generated < keylen {
-        output_this_pass := mathMin(newHash.Size(), keylen - generated)
+        outputThisPass := mathMin(newHash.Size(), keylen - generated)
 
         newHash.Reset()
 
         // Preload some number of zero bytes (empty first iteration)
-        zero_padding := bytes.Repeat([]byte{0}, pass)
-        newHash.Write(zero_padding)
+        zeroPadding := bytes.Repeat([]byte{0}, pass)
+        newHash.Write(zeroPadding)
 
         // The input is always fully processed even if iterations is very small
         if len(inputBuf) > 0 {
             left := mathMax(iterations, len(inputBuf))
             for left > 0 {
-                input_to_take := mathMin(left, len(inputBuf))
-                newHash.Write(inputBuf[:input_to_take])
-                left -= input_to_take
+                input2Take := mathMin(left, len(inputBuf))
+                newHash.Write(inputBuf[:input2Take])
+                left -= input2Take
             }
         }
 
         hashBuf = newHash.Sum(nil)
 
-        outputBuf = append(outputBuf, hashBuf[:output_this_pass]...)
+        outputBuf = append(outputBuf, hashBuf[:outputThisPass]...)
 
-        generated += output_this_pass
+        generated += outputThisPass
         pass++
     }
 

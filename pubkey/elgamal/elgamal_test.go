@@ -7,9 +7,30 @@ import (
     "crypto"
     "crypto/rand"
     "crypto/sha256"
+    "encoding/pem"
 
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
+
+func decodePEM(pubPEM string) []byte {
+    block, _ := pem.Decode([]byte(pubPEM))
+    if block == nil {
+        panic("failed to parse PEM block containing the key")
+    }
+
+    return block.Bytes
+}
+
+func encodePEM(src []byte, typ string) string {
+    keyBlock := &pem.Block{
+        Type:  typ,
+        Bytes: src,
+    }
+
+    keyData := pem.EncodeToMemory(keyBlock)
+
+    return string(keyData)
+}
 
 var testBitsize = 256
 var testProbability = 64
@@ -115,6 +136,28 @@ func Test_EncryptAsn1(t *testing.T) {
     assertEqual(string(de), data, "Encrypt-Dedata")
 }
 
+func Test_EncryptBytes(t *testing.T) {
+    assertEqual := cryptobin_test.AssertEqualT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
+    pub := &pri.PublicKey
+
+    assertError(err, "EncryptBytes-Error")
+    assertNotEmpty(pri, "EncryptBytes")
+
+    data := "123tesfd!df"
+
+    c, err := EncryptBytes(rand.Reader, pub, []byte(data))
+    assertError(err, "EncryptBytes-Encrypt-Error")
+
+    de, err := DecryptBytes(pri, c)
+    assertError(err, "EncryptBytes-Decrypt-Error")
+
+    assertEqual(string(de), data, "EncryptBytes-Dedata")
+}
+
 func Test_Sign(t *testing.T) {
     assertBool := cryptobin_test.AssertBoolT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
@@ -155,6 +198,27 @@ func Test_SignASN1(t *testing.T) {
 
     veri, _ := VerifyASN1(pub, hash[:], sig)
     assertBool(veri, "Sign-veri")
+}
+
+func Test_SignBytes(t *testing.T) {
+    assertBool := cryptobin_test.AssertBoolT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+
+    pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
+    pub := &pri.PublicKey
+
+    assertError(err, "SignBytes-Error")
+    assertNotEmpty(pri, "SignBytes")
+
+    data := "123tesfd!dfsign"
+    hash := sha256.Sum256([]byte(data))
+
+    sig, err := SignBytes(rand.Reader, pri, hash[:])
+    assertError(err, "SignBytes-sig-Error")
+
+    veri, _ := VerifyBytes(pub, hash[:], sig)
+    assertBool(veri, "SignBytes-veri")
 }
 
 func Test_MarshalPKCS1(t *testing.T) {
@@ -354,4 +418,58 @@ func Test_Decrypt_Check(t *testing.T) {
     if !bytes.Equal(message2, message) {
         t.Errorf("decryption failed, got: %x, want: %x", message2, message)
     }
+}
+
+var privPKCS8PEM = `-----BEGIN PRIVATE KEY-----
+MHwCAQAwUwYKKwYBBAGXVQECATBFAiBGJeOpNv4KpTxMOAQTWKNmo6cDuFDKvXmQ
+BZJyLEnCLAIhAMgroUphCNEvuSUN1fv9G+DWtfV5TilpIvSJfNkj6AsbBCICIFpk
+tLGtKad7wpKVuQ6mUrwj8/u+NQUZu8fxXPHenr/a
+-----END PRIVATE KEY-----
+`
+
+var pubPKCS8PEM = `-----BEGIN PUBLIC KEY-----
+MHowUwYKKwYBBAGXVQECATBFAiBGJeOpNv4KpTxMOAQTWKNmo6cDuFDKvXmQBZJy
+LEnCLAIhAMgroUphCNEvuSUN1fv9G+DWtfV5TilpIvSJfNkj6AsbAyMAAiBp7f1+
+thvYiV0bBim+YNTz1GjkKm3vohcoBINR6HfLrg==
+-----END PUBLIC KEY-----
+`
+
+func Test_MarshalPKCS8_Check(t *testing.T) {
+    test_MarshalPKCS8_Check(t, privPKCS8PEM, pubPKCS8PEM)
+}
+
+func test_MarshalPKCS8_Check(t *testing.T, priv, pub string) {
+    assertEqual := cryptobin_test.AssertEqualT(t)
+
+    parsedPub, err := ParsePKCS8PublicKey(decodePEM(pub))
+    if err != nil {
+        t.Errorf("ParsePKCS8PublicKey error: %s", err)
+        return
+    }
+
+    pubkey, err := MarshalPKCS8PublicKey(parsedPub)
+    if err != nil {
+        t.Errorf("MarshalPKCS8PublicKey error: %s", err)
+        return
+    }
+
+    pubPemCheck := encodePEM(pubkey, "PUBLIC KEY")
+    assertEqual(pubPemCheck, pub, "test_Marshal_Check pubkey")
+
+    // ===========
+
+    parsedPriv, err := ParsePKCS8PrivateKey(decodePEM(priv))
+    if err != nil {
+        t.Errorf("ParsePKCS8PrivateKey error: %s", err)
+        return
+    }
+
+    privkey, err := MarshalPKCS8PrivateKey(parsedPriv)
+    if err != nil {
+        t.Errorf("MarshalPKCS8PrivateKey error: %s", err)
+        return
+    }
+
+    privPemCheck := encodePEM(privkey, "PRIVATE KEY")
+    assertEqual(privPemCheck, priv, "test_Marshal_Check privkey")
 }

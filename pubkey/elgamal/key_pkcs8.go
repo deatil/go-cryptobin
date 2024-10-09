@@ -12,10 +12,15 @@ import (
 )
 
 var (
-    // elgamal 公钥 oid
-    oidPublicKeyEIGamal = asn1.ObjectIdentifier{1, 3, 14, 7, 2, 1, 1}
-    // for EC-EIGamal
-    // oidPublicKeyEIGamal = asn1.ObjectIdentifier{1, 3, 6, 1, 4, 1, 3029, 1, 2, 1}
+    // Unsure about this OID
+    // oidPublicKeyEIGamal = asn1.ObjectIdentifier{1, 3, 14, 7, 2, 1, 1}
+    // oidMD2WithRSA       = asn1.ObjectIdentifier{1, 3, 14, 7, 2, 3, 1}
+    // oidMD2WithElGamal   = asn1.ObjectIdentifier{1, 3, 14, 7, 2, 3, 2}
+
+    // cryptlib public-key algorithm
+    oidPublicKeyEIGamal     = asn1.ObjectIdentifier{1, 3, 6, 1, 4, 1, 3029, 1, 2, 1}
+    oidEIGamalWithSHA1      = asn1.ObjectIdentifier{1, 3, 6, 1, 4, 1, 3029, 1, 2, 1, 1}
+    oidEIGamalWithRIPEMD160 = asn1.ObjectIdentifier{1, 3, 6, 1, 4, 1, 3029, 1, 2, 1, 2}
 )
 
 // elgamal Parameters

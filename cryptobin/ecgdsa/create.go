@@ -56,7 +56,7 @@ func (this ECGDSA) CreatePKCS1PrivateKey() ECGDSA {
     }
 
     privateBlock := &pem.Block{
-        Type:  "EC PRIVATE KEY",
+        Type:  "ECGDSA PRIVATE KEY",
         Bytes: publicKeyBytes,
     }
 
@@ -93,7 +93,7 @@ func (this ECGDSA) CreatePKCS1PrivateKeyWithPassword(password string, opts ...st
     // 生成加密数据
     privateBlock, err := pkcs1.EncryptPEMBlock(
         rand.Reader,
-        "EC PRIVATE KEY",
+        "ECGDSA PRIVATE KEY",
         publicKeyBytes,
         []byte(password),
         cipher,

@@ -53,6 +53,23 @@ func (this ElGamal) WithParsedData(data []byte) ElGamal {
     return this
 }
 
+// 设置编码方式
+func (this ElGamal) WithEncoding(encoding EncodingType) ElGamal {
+    this.encoding = encoding
+
+    return this
+}
+
+// 设置 ASN1 编码方式
+func (this ElGamal) WithEncodingASN1() ElGamal {
+    return this.WithEncoding(EncodingASN1)
+}
+
+// 设置明文编码方式
+func (this ElGamal) WithEncodingBytes() ElGamal {
+    return this.WithEncoding(EncodingBytes)
+}
+
 // 设置 verify
 func (this ElGamal) WithVerify(data bool) ElGamal {
     this.verify = data

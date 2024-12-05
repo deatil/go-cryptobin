@@ -318,7 +318,7 @@ func TestMustPanic(t *testing.T) {
     t.Run("invalid size", func(t *testing.T) {
         key := make([]byte, 16)
         block, _ := sm4.NewCipher(key)
-        cryptobin_test.MustPanic(t, "cbcmac: invalid size", func() {
+        cryptobin_test.MustPanic(t, "go-cryptobin/mac: invalid size", func() {
             NewCBCMAC(block, 0)
             NewCBCMAC(block, 17)
             NewEMAC(sm4.NewCipher, key, key, 0)
@@ -340,7 +340,7 @@ func TestMustPanic(t *testing.T) {
 
     t.Run("invalid key size", func(t *testing.T) {
         key := make([]byte, 16)
-        cryptobin_test.MustPanic(t, "cbcmac: invalid size", func() {
+        cryptobin_test.MustPanic(t, "go-cryptobin/mac: invalid size", func() {
             NewEMAC(sm4.NewCipher, key[:15], key, 8)
             NewEMAC(sm4.NewCipher, key, key[:15], 8)
             NewANSIRetailMAC(sm4.NewCipher, key[:15], key, 8)

@@ -17,7 +17,7 @@ type cmac struct {
 // Reference: https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38B.pdf
 func NewCMAC(b cipher.Block, size int) BlockCipherMAC {
     if size <= 0 || size > b.BlockSize() {
-        panic("cbcmac: invalid size")
+        panic("go-cryptobin/mac: invalid size")
     }
 
     blockSize := b.BlockSize()

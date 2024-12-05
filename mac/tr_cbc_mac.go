@@ -19,7 +19,7 @@ type trCBCMAC struct {
 // Reference: TrCBC: Another look at CBC-MAC.
 func NewTRCBCMAC(b cipher.Block, size int) BlockCipherMAC {
     if size <= 0 || size > b.BlockSize() {
-        panic("cbcmac: invalid size")
+        panic("go-cryptobin/mac: invalid size")
     }
 
     return &trCBCMAC{

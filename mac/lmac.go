@@ -24,7 +24,7 @@ func NewLMAC(creator BlockCipherFunc, key []byte, size int) BlockCipherMAC {
     }
 
     if size <= 0 || size > b.BlockSize() {
-        panic("cbcmac: invalid size")
+        panic("go-cryptobin/mac: invalid size")
     }
 
     blockSize := b.BlockSize()

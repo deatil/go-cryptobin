@@ -19,7 +19,7 @@ type cbcrMAC struct {
 // Reference: CBCR: CBC MAC with rotating transformations.
 func NewCBCRMAC(b cipher.Block, size int) BlockCipherMAC {
     if size <= 0 || size > b.BlockSize() {
-        panic("cbcmac: invalid size")
+        panic("go-cryptobin/mac: invalid size")
     }
 
     return &cbcrMAC{

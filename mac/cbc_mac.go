@@ -19,7 +19,7 @@ type cbcmac struct {
 // GB/T 15821.1-2020 MAC scheme 1
 func NewCBCMAC(b cipher.Block, size int) BlockCipherMAC {
     if size <= 0 || size > b.BlockSize() {
-        panic("cbcmac: invalid size")
+        panic("go-cryptobin/mac: invalid size")
     }
 
     return &cbcmac{

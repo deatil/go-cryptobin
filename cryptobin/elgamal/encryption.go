@@ -16,7 +16,7 @@ func (this ElGamal) Encrypt() ElGamal {
             return this.EncryptBytes()
     }
 
-    return this.EncryptBytes()
+    return this.EncryptASN1()
 }
 
 // 私钥解密
@@ -28,7 +28,7 @@ func (this ElGamal) Decrypt() ElGamal {
             return this.DecryptBytes()
     }
 
-    return this.DecryptBytes()
+    return this.EncryptASN1()
 }
 
 // ====================

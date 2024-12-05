@@ -28,7 +28,7 @@ func (this ElGamal) Decrypt() ElGamal {
             return this.DecryptBytes()
     }
 
-    return this.EncryptASN1()
+    return this.DecryptASN1()
 }
 
 // ====================

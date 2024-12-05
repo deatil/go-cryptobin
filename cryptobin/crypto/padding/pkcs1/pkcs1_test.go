@@ -1,4 +1,4 @@
-package pkcs1padding
+package pkcs1
 
 import (
     "testing"

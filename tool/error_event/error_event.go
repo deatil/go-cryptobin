@@ -1,4 +1,4 @@
-package tool
+package error_event
 
 type (
     // 错误方法
@@ -17,7 +17,7 @@ type ErrorEvent struct {
 }
 
 // 构造函数
-func NewErrorEvent() ErrorEvent {
+func New() ErrorEvent {
     e := ErrorEvent{
         errorFuncs: make([]ErrorFunc, 0),
     }

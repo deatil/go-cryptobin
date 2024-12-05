@@ -62,8 +62,8 @@ type Cipher struct {
 }
 
 // 构造函数
-func NewCipher() Cipher {
-    cipher := Cipher{
+func NewCipher() *Cipher {
+    cipher := &Cipher{
         funcs: defaultCipherFuncs,
     }
 
@@ -71,21 +71,21 @@ func NewCipher() Cipher {
 }
 
 // 覆盖
-func (this Cipher) WithFunc(funcs CipherFuncMap) Cipher {
+func (this *Cipher) WithFunc(funcs CipherFuncMap) *Cipher {
     this.funcs = funcs
 
     return this
 }
 
 // 添加
-func (this Cipher) AddFunc(name string, block CipherFunc) Cipher {
+func (this *Cipher) AddFunc(name string, block CipherFunc) *Cipher {
     this.funcs[name] = block
 
     return this
 }
 
 // 类型
-func (this Cipher) GetFunc(name string) CipherFunc {
+func (this *Cipher) GetFunc(name string) CipherFunc {
     if fn, ok := this.funcs[name]; ok {
         return fn
     }

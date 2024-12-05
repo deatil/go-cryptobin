@@ -1,4 +1,4 @@
-package tool
+package config
 
 import (
     "time"
@@ -20,7 +20,7 @@ type Config struct {
     data map[string]any
 }
 
-func NewConfig() *Config {
+func New() *Config {
     return &Config{
         data: make(map[string]any),
     }

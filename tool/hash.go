@@ -89,15 +89,16 @@ var funcHashes = map[string]HashFunc{
     "BLAKE2b_384": newBlake2b_384,
     "BLAKE2b_512": newBlake2b_512,
     "SM3":         sm3.New,
+
     "GOST34112012256": gost34112012256.New,
     "GOST34112012512": gost34112012512.New,
 }
 
 // 类型
 func GetCryptoHash(typ string) (crypto.Hash, error) {
-    sha, ok := cryptoHashes[typ]
+    h, ok := cryptoHashes[typ]
     if ok {
-        return sha, nil
+        return h, nil
     }
 
     return 0, errors.New("hash type is not support")
@@ -105,12 +106,12 @@ func GetCryptoHash(typ string) (crypto.Hash, error) {
 
 // 签名后数据
 func CryptoHashSum(typ string, slices ...[]byte) ([]byte, error) {
-    sha, err := GetCryptoHash(typ)
+    hasher, err := GetCryptoHash(typ)
     if err != nil {
         return nil, err
     }
 
-    h := sha.New()
+    h := hasher.New()
     for _, slice := range slices {
         h.Write(slice)
     }

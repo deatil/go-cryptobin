@@ -1,7 +1,7 @@
-package pkcs1padding
+package pkcs1
 
 import (
-    "github.com/deatil/go-cryptobin/tool"
+    "github.com/deatil/go-cryptobin/padding"
     "github.com/deatil/go-cryptobin/cryptobin/crypto"
 )
 
@@ -14,12 +14,17 @@ func (this PKCS1Paddinger) Padding(plainText []byte, blockSize int, opt crypto.I
         bt = opt.Config().GetString("pkcs1_padding_bt")
     }
 
-    return tool.NewPadding().PKCS1Padding(plainText, blockSize, bt)
+    return padding.NewPKCS1(bt).Padding(plainText, blockSize)
 }
 
 // UnPadding 补码模式 / unpadding type
 func (this PKCS1Paddinger) UnPadding(cipherText []byte, opt crypto.IOption) ([]byte, error) {
-    return tool.NewPadding().PKCS1UnPadding(cipherText)
+    bt := "02"
+    if !opt.Config().Has("pkcs1_padding_bt") {
+        bt = opt.Config().GetString("pkcs1_padding_bt")
+    }
+
+    return padding.NewPKCS1(bt).UnPadding(cipherText)
 }
 
 // PKCS1 补码

@@ -3,7 +3,7 @@ package ecgdsa
 import (
     "crypto/elliptic"
 
-    "github.com/deatil/go-cryptobin/tool"
+    "github.com/deatil/go-cryptobin/tool/hash"
     "github.com/deatil/go-cryptobin/pubkey/ecgdsa"
 )
 
@@ -54,7 +54,7 @@ func (this ECGDSA) WithSignHash(hash HashFunc) ECGDSA {
 
 // 设置 hash 类型
 func (this ECGDSA) SetSignHash(hash string) ECGDSA {
-    h, err := tool.GetHash(hash)
+    h, err := hash.GetHash(hash)
     if err != nil {
         return this.AppendError(err)
     }

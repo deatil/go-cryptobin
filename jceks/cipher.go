@@ -1,8 +1,8 @@
 package jceks
 
 import(
-    "github.com/deatil/go-cryptobin/tool"
     "github.com/deatil/go-cryptobin/padding"
+    "github.com/deatil/go-cryptobin/tool/utils"
 )
 
 var newPadding = padding.NewPKCS7()
@@ -19,5 +19,5 @@ func pkcs7UnPadding(src []byte) ([]byte, error) {
 
 // 随机生成字符
 func genRandom(num int) ([]byte, error) {
-    return tool.GenRandom(num)
+    return utils.GenRandom(num)
 }

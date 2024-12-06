@@ -1,4 +1,4 @@
-package tool
+package cipher
 
 import (
     "crypto/aes"
@@ -50,6 +50,13 @@ var defaultCipherFuncs = CipherFuncMap{
     "SM4":       sm4.NewCipher,
 }
 
+var defaultCipher = New()
+
+// return default cipher
+func Default() *Cipher {
+    return defaultCipher
+}
+
 /**
  * 加密方式
  *
@@ -62,7 +69,7 @@ type Cipher struct {
 }
 
 // 构造函数
-func NewCipher() *Cipher {
+func New() *Cipher {
     cipher := &Cipher{
         funcs: defaultCipherFuncs,
     }
@@ -77,11 +84,19 @@ func (this *Cipher) WithFunc(funcs CipherFuncMap) *Cipher {
     return this
 }
 
+func WithFunc(funcs CipherFuncMap) *Cipher {
+    return defaultCipher.WithFunc(funcs)
+}
+
 // 添加
 func (this *Cipher) AddFunc(name string, block CipherFunc) *Cipher {
     this.funcs[name] = block
 
     return this
+}
+
+func AddFunc(name string, block CipherFunc) *Cipher {
+    return defaultCipher.AddFunc(name, block)
 }
 
 // 类型
@@ -91,4 +106,8 @@ func (this *Cipher) GetFunc(name string) CipherFunc {
     }
 
     return this.funcs["Aes"]
+}
+
+func GetFunc(name string) CipherFunc {
+    return defaultCipher.GetFunc(name)
 }

@@ -8,6 +8,7 @@ import (
     _ "crypto/sha256"
     _ "crypto/sha512"
 
+    _ "golang.org/x/crypto/md4"
     _ "golang.org/x/crypto/sha3"
     _ "golang.org/x/crypto/blake2s"
     _ "golang.org/x/crypto/blake2b"

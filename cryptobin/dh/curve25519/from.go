@@ -150,7 +150,7 @@ func FromPublicKeyYString(yString string) Curve25519 {
 
 // DER 私钥
 func (this Curve25519) FromPrivateKeyDer(der []byte) Curve25519 {
-    key := pem.EncodeDerToPem(der, "PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
     parsedKey, err := this.ParsePrivateKeyFromPEM(key)
     if err != nil {
@@ -164,7 +164,7 @@ func (this Curve25519) FromPrivateKeyDer(der []byte) Curve25519 {
 
 // DER 公钥
 func (this Curve25519) FromPublicKeyDer(der []byte) Curve25519 {
-    key := pem.EncodeDerToPem(der, "PUBLIC KEY")
+    key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
     parsedKey, err := this.ParsePublicKeyFromPEM(key)
     if err != nil {

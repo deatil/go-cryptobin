@@ -288,7 +288,7 @@ func FromPKCS8PublicKey(key []byte) RSA {
 
 // Pkcs1 DER
 func (this RSA) FromPKCS1PrivateKeyDer(der []byte) RSA {
-    key := pem.EncodeDerToPem(der, "RSA PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "RSA PRIVATE KEY")
 
     privateKey, err := this.ParsePKCS1PrivateKeyFromPEM(key)
     if err != nil {
@@ -302,7 +302,7 @@ func (this RSA) FromPKCS1PrivateKeyDer(der []byte) RSA {
 
 // PKCS1 DER 公钥
 func (this RSA) FromPKCS1PublicKeyDer(der []byte) RSA {
-    key := pem.EncodeDerToPem(der, "RSA PUBLIC KEY")
+    key := pem.EncodeToPEM(der, "RSA PUBLIC KEY")
 
     publicKey, err := this.ParsePKCS1PublicKeyFromPEM(key)
     if err != nil {
@@ -318,7 +318,7 @@ func (this RSA) FromPKCS1PublicKeyDer(der []byte) RSA {
 
 // Pkcs8 DER
 func (this RSA) FromPKCS8PrivateKeyDer(der []byte) RSA {
-    key := pem.EncodeDerToPem(der, "PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
     privateKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
     if err != nil {
@@ -332,7 +332,7 @@ func (this RSA) FromPKCS8PrivateKeyDer(der []byte) RSA {
 
 // PKCS8 DER 公钥
 func (this RSA) FromPKCS8PublicKeyDer(der []byte) RSA {
-    key := pem.EncodeDerToPem(der, "PUBLIC KEY")
+    key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
     publicKey, err := this.ParsePKCS8PublicKeyFromPEM(key)
     if err != nil {

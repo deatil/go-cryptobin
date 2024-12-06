@@ -221,7 +221,7 @@ func FromPKCS8PublicKey(key []byte) ElGamal {
 
 // Pkcs1 DER 私钥
 func (this ElGamal) FromPKCS1PrivateKeyDer(der []byte) ElGamal {
-    key := pem.EncodeDerToPem(der, "ElGamal PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "ElGamal PRIVATE KEY")
 
     parsedKey, err := this.ParsePKCS1PrivateKeyFromPEM(key)
     if err != nil {
@@ -235,7 +235,7 @@ func (this ElGamal) FromPKCS1PrivateKeyDer(der []byte) ElGamal {
 
 // PKCS1 DER 公钥
 func (this ElGamal) FromPKCS1PublicKeyDer(der []byte) ElGamal {
-    key := pem.EncodeDerToPem(der, "ElGamal PUBLIC KEY")
+    key := pem.EncodeToPEM(der, "ElGamal PUBLIC KEY")
 
     parsedKey, err := this.ParsePKCS1PublicKeyFromPEM(key)
     if err != nil {
@@ -251,7 +251,7 @@ func (this ElGamal) FromPKCS1PublicKeyDer(der []byte) ElGamal {
 
 // Pkcs8 DER 私钥
 func (this ElGamal) FromPKCS8PrivateKeyDer(der []byte) ElGamal {
-    key := pem.EncodeDerToPem(der, "PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
     parsedKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
     if err != nil {
@@ -265,7 +265,7 @@ func (this ElGamal) FromPKCS8PrivateKeyDer(der []byte) ElGamal {
 
 // PKCS8 DER 公钥
 func (this ElGamal) FromPKCS8PublicKeyDer(der []byte) ElGamal {
-    key := pem.EncodeDerToPem(der, "PUBLIC KEY")
+    key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
     parsedKey, err := this.ParsePKCS8PublicKeyFromPEM(key)
     if err != nil {

@@ -187,7 +187,7 @@ func FromPublicKey(key []byte) Bign {
 
 // DER 私钥
 func (this Bign) FromPKCS1PrivateKeyDer(der []byte) Bign {
-    key := pem.EncodeDerToPem(der, "Bign PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "Bign PRIVATE KEY")
 
     privateKey, err := this.ParsePKCS1PrivateKeyFromPEM(key)
     if err != nil {
@@ -201,7 +201,7 @@ func (this Bign) FromPKCS1PrivateKeyDer(der []byte) Bign {
 
 // DER 私钥
 func (this Bign) FromPKCS8PrivateKeyDer(der []byte) Bign {
-    key := pem.EncodeDerToPem(der, "PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
     privateKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
     if err != nil {
@@ -215,7 +215,7 @@ func (this Bign) FromPKCS8PrivateKeyDer(der []byte) Bign {
 
 // DER 公钥
 func (this Bign) FromPublicKeyDer(der []byte) Bign {
-    key := pem.EncodeDerToPem(der, "PUBLIC KEY")
+    key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
     publicKey, err := this.ParsePublicKeyFromPEM(key)
     if err != nil {

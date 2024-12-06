@@ -35,8 +35,8 @@ var PemBlockTypeMap = map[string]string{
     "rsa_pri_key": "RSA PRIVATE KEY",
 }
 
-// 获取 BlockType 类型
-func GetBlockTypeFromName(name string) string {
+// 获取 PEM 类型
+func GetPEMType(name string) string {
     if data, ok := PemBlockTypeMap[name]; ok {
         return data
     }
@@ -44,8 +44,8 @@ func GetBlockTypeFromName(name string) string {
     return ""
 }
 
-// der 证书编码为 pem 证书
-func EncodeDerToPem(data []byte, blockType string) []byte {
+// 编码字节数据为 PEM 证书
+func EncodeToPEM(data []byte, blockType string) []byte {
     block := &pem.Block{
         Type:  blockType,
         Bytes: data,
@@ -54,14 +54,12 @@ func EncodeDerToPem(data []byte, blockType string) []byte {
     return pem.EncodeToMemory(block)
 }
 
-// 解析 pem 证书为 der 证书
-func ParsePemToDer(data []byte) ([]byte, error) {
+// 解析 PEM 证书
+func ParsePEM(data []byte) ([]byte, error) {
     var block *pem.Block
     if block, _ = pem.Decode(data); block == nil {
         return nil, errors.New("pem: data is not pem")
     }
 
-    keyData := block.Bytes
-
-    return keyData, nil
+    return block.Bytes, nil
 }

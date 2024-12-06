@@ -187,7 +187,7 @@ func FromPublicKey(key []byte) ECDSA {
 
 // DER 私钥
 func (this ECDSA) FromPKCS1PrivateKeyDer(der []byte) ECDSA {
-    key := pem.EncodeDerToPem(der, "EC PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "EC PRIVATE KEY")
 
     privateKey, err := this.ParsePKCS1PrivateKeyFromPEM(key)
     if err != nil {
@@ -201,7 +201,7 @@ func (this ECDSA) FromPKCS1PrivateKeyDer(der []byte) ECDSA {
 
 // DER 私钥
 func (this ECDSA) FromPKCS8PrivateKeyDer(der []byte) ECDSA {
-    key := pem.EncodeDerToPem(der, "PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
     privateKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
     if err != nil {
@@ -215,7 +215,7 @@ func (this ECDSA) FromPKCS8PrivateKeyDer(der []byte) ECDSA {
 
 // DER 公钥
 func (this ECDSA) FromPublicKeyDer(der []byte) ECDSA {
-    key := pem.EncodeDerToPem(der, "PUBLIC KEY")
+    key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
     publicKey, err := this.ParsePublicKeyFromPEM(key)
     if err != nil {

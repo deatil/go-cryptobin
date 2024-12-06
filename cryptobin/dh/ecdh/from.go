@@ -155,7 +155,7 @@ func FromPublicKeyYString(yString string) ECDH {
 
 // DER 私钥
 func (this ECDH) FromPrivateKeyDer(der []byte) ECDH {
-    key := pem.EncodeDerToPem(der, "PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
     parsedKey, err := this.ParsePrivateKeyFromPEM(key)
     if err != nil {
@@ -169,7 +169,7 @@ func (this ECDH) FromPrivateKeyDer(der []byte) ECDH {
 
 // DER 公钥
 func (this ECDH) FromPublicKeyDer(der []byte) ECDH {
-    key := pem.EncodeDerToPem(der, "PUBLIC KEY")
+    key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
     parsedKey, err := this.ParsePublicKeyFromPEM(key)
     if err != nil {

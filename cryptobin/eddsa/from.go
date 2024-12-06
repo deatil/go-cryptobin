@@ -94,7 +94,7 @@ func FromPublicKey(key []byte) EdDSA {
 
 // DER 私钥
 func (this EdDSA) FromPrivateKeyDer(der []byte) EdDSA {
-    key := pem.EncodeDerToPem(der, "PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
     parsedKey, err := this.ParsePrivateKeyFromPEM(key)
     if err != nil {
@@ -108,7 +108,7 @@ func (this EdDSA) FromPrivateKeyDer(der []byte) EdDSA {
 
 // DER 公钥
 func (this EdDSA) FromPublicKeyDer(der []byte) EdDSA {
-    key := pem.EncodeDerToPem(der, "PUBLIC KEY")
+    key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
     parsedKey, err := this.ParsePublicKeyFromPEM(key)
     if err != nil {

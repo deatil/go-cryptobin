@@ -196,7 +196,7 @@ func FromPublicKey(key []byte) SM2 {
 
 // PKCS1 编码 DER 私钥
 func (this SM2) FromPKCS1PrivateKeyDer(der []byte) SM2 {
-    key := pem.EncodeDerToPem(der, "SM2 PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "SM2 PRIVATE KEY")
 
     privateKey, err := this.ParsePKCS1PrivateKeyFromPEM(key)
     if err != nil {
@@ -210,7 +210,7 @@ func (this SM2) FromPKCS1PrivateKeyDer(der []byte) SM2 {
 
 // PKCS8 编码 DER 私钥
 func (this SM2) FromPKCS8PrivateKeyDer(der []byte) SM2 {
-    key := pem.EncodeDerToPem(der, "PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
     privateKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
     if err != nil {
@@ -224,7 +224,7 @@ func (this SM2) FromPKCS8PrivateKeyDer(der []byte) SM2 {
 
 // DER 公钥
 func (this SM2) FromPublicKeyDer(der []byte) SM2 {
-    key := pem.EncodeDerToPem(der, "PUBLIC KEY")
+    key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
     publicKey, err := this.ParsePublicKeyFromPEM(key)
     if err != nil {

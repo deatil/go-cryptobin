@@ -126,7 +126,7 @@ func FromPKCS8PublicKey(key []byte) Gost {
 
 // Pkcs8 DER 私钥
 func (this Gost) FromPKCS8PrivateKeyDer(der []byte) Gost {
-    key := pem.EncodeDerToPem(der, "PRIVATE KEY")
+    key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
     parsedKey, err := this.ParsePrivateKeyFromPEM(key)
     if err != nil {
@@ -140,7 +140,7 @@ func (this Gost) FromPKCS8PrivateKeyDer(der []byte) Gost {
 
 // PKCS8 DER 公钥
 func (this Gost) FromPKCS8PublicKeyDer(der []byte) Gost {
-    key := pem.EncodeDerToPem(der, "PUBLIC KEY")
+    key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
     parsedKey, err := this.ParsePublicKeyFromPEM(key)
     if err != nil {

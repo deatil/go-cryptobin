@@ -25,7 +25,7 @@ var (
 )
 
 // BlockType 列表
-var PemBlockTypeMap = map[string]string{
+var PEMTypeMap = map[string]string{
     "pri_key":    "PRIVATE KEY",
     "en_pri_key": "ENCRYPTED PRIVATE KEY",
     "pub_key":    "PUBLIC KEY",
@@ -37,7 +37,7 @@ var PemBlockTypeMap = map[string]string{
 
 // 获取 PEM 类型
 func GetPEMType(name string) string {
-    if data, ok := PemBlockTypeMap[name]; ok {
+    if data, ok := PEMTypeMap[name]; ok {
         return data
     }
 

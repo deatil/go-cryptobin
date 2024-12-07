@@ -8,7 +8,7 @@ import (
 )
 
 var (
-    defaultEncoding = NewEncoding()
+    defaultEncoding = New()
 )
 
 /**
@@ -20,7 +20,7 @@ var (
 type Encoding struct{}
 
 // 构造函数
-func NewEncoding() *Encoding {
+func New() *Encoding {
     return &Encoding{}
 }
 

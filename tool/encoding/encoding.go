@@ -96,7 +96,7 @@ func (this *Encoding) BytesPadding(text []byte, size int) []byte {
     }
 
     if n < size {
-        r := bytes.Repeat([]byte("0"), size - n)
+        r := bytes.Repeat([]byte{0x00}, size - n)
         return append(r, text...)
     }
 

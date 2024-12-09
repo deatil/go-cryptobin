@@ -8,7 +8,7 @@ import (
 
 // TTAK.KO-12.0272, TTAK.KO-12.0333, NIST SP 800-108.
 const (
-    errInvalidCounterSize = "kbkdf: invalid counterSize"
+    errInvalidCounterSize = "go-cryptobin/kbkdf: invalid counterSize"
 )
 
 // implements of Pseudo-Random Functions

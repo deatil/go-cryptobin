@@ -1,4 +1,9 @@
-package byteutil
+package bytes
+
+import (
+    "unsafe"
+    "crypto/subtle"
+)
 
 // GfnDouble computes 2 * input in the field of 2^n elements.
 // The irreducible polynomial in the finite field for n=128 is
@@ -28,8 +33,8 @@ func ShiftBytesLeft(x []byte) []byte {
     return dst
 }
 
-// ShiftNBytesLeft puts in dst the byte array corresponding to x << n in binary.
-func ShiftNBytesLeft(dst, x []byte, n int) {
+// ShiftBytesLeftN puts in dst the byte array corresponding to x << n in binary.
+func ShiftBytesLeftN(dst, x []byte, n int) {
     // Erase first n / 8 bytes
     copy(dst, x[n/8:])
 
@@ -47,16 +52,12 @@ func ShiftNBytesLeft(dst, x []byte, n int) {
 
 // XorBytesMut assumes equal input length, replaces X with X XOR Y
 func XorBytesMut(X, Y []byte) {
-    for i := 0; i < len(X); i++ {
-        X[i] ^= Y[i]
-    }
+    subtle.XORBytes(X, X, Y)
 }
 
 // XorBytes assumes equal input length, puts X XOR Y into Z
 func XorBytes(Z, X, Y []byte) {
-    for i := 0; i < len(X); i++ {
-        Z[i] = X[i] ^ Y[i]
-    }
+    subtle.XORBytes(Z, X, Y)
 }
 
 // RightXor XORs smaller input (assumed Y) at the right of the larger input (assumed X)
@@ -66,25 +67,40 @@ func RightXor(X, Y []byte) []byte {
 
     copy(xored, X)
 
-    for i := 0; i < len(Y); i++ {
-        xored[offset+i] ^= Y[i]
-    }
+    subtle.XORBytes(xored[offset:], xored[offset:], Y)
 
     return xored
 }
 
-// SliceForAppend takes a slice and a requested number of bytes. It returns a
-// slice with the contents of the given slice followed by that many bytes and a
-// second slice that aliases into it and contains only the extra bytes. If the
-// original slice has sufficient capacity then no allocation is performed.
-func SliceForAppend(in []byte, n int) (head, tail []byte) {
-    if total := len(in) + n; cap(in) >= total {
-        head = in[:total]
-    } else {
-        head = make([]byte, total)
-        copy(head, in)
+// 根据指定长度分割字节
+func BytesSplit(buf []byte, size int) [][]byte {
+    var chunk []byte
+
+    chunks := make([][]byte, 0, len(buf)/size+1)
+
+    for len(buf) >= size {
+        chunk, buf = buf[:size], buf[size:]
+        chunks = append(chunks, chunk)
     }
 
-    tail = head[len(in):]
-    return
+    if len(buf) > 0 {
+        chunks = append(chunks, buf[:])
+    }
+
+    return chunks
+}
+
+// 字符串转换为字节
+func StringToBytes(str string) []byte {
+    return *(*[]byte)(unsafe.Pointer(
+        &struct {
+            string
+            Cap int
+        }{str, len(str)},
+    ))
+}
+
+// 字节转换为字符串
+func BytesToString(buf []byte) string {
+    return *(*string)(unsafe.Pointer(&buf))
 }

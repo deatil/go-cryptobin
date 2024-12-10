@@ -7,7 +7,8 @@ import (
     "crypto/cipher"
     "crypto/subtle"
 
-    "github.com/deatil/go-cryptobin/tool/byteutil"
+    "github.com/deatil/go-cryptobin/tool/alias"
+    byteutil "github.com/deatil/go-cryptobin/tool/bytes"
 )
 
 type mask struct {
@@ -102,7 +103,7 @@ func (o *ocb) Seal(dst, nonce, plaintext, adata []byte) []byte {
         panic("crypto/ocb: Incorrect nonce length given to OCB")
     }
 
-    ret, out := byteutil.SliceForAppend(dst, len(plaintext)+o.tagSize)
+    ret, out := alias.SliceForAppend(dst, len(plaintext)+o.tagSize)
     o.crypt(enc, out, nonce, adata, plaintext)
 
     return ret
@@ -117,7 +118,7 @@ func (o *ocb) Open(dst, nonce, ciphertext, adata []byte) ([]byte, error) {
     }
 
     sep := len(ciphertext) - o.tagSize
-    ret, out := byteutil.SliceForAppend(dst, len(ciphertext))
+    ret, out := alias.SliceForAppend(dst, len(ciphertext))
 
     ciphertextData := ciphertext[:sep]
     tag := ciphertext[sep:]
@@ -185,7 +186,7 @@ func (o *ocb) crypt(instruction int, Y, nonce, adata, X []byte) []byte {
     bottom := int(nonce[len(nonce)-1] & 63)
     offset := make([]byte, len(stretch))
 
-    byteutil.ShiftNBytesLeft(offset, stretch, bottom)
+    byteutil.ShiftBytesLeftN(offset, stretch, bottom)
     offset = offset[:blockSize]
 
     //

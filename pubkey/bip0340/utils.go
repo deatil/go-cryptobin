@@ -4,7 +4,9 @@ import (
     "hash"
     "math/big"
     "math/bits"
+    "crypto/sha256"
     "crypto/subtle"
+    "crypto/elliptic"
     "encoding/binary"
 )
 
@@ -28,6 +30,37 @@ func putu32(ptr []byte, a uint32) {
 
 func rotl(x, n uint32) uint32 {
     return bits.RotateLeft32(x, int(n))
+}
+
+func pad(x []byte, n int) []byte {
+    pad := make([]byte, n - len(x))
+    return append(pad, x...)
+}
+
+func bytes32(x *big.Int) []byte {
+    return pad(x.Bytes(), 32)
+}
+
+func bytes64(x *big.Int) []byte {
+    return pad(x.Bytes(), 64)
+}
+
+func lift_x_even_y(curve elliptic.Curve, Px, Py *big.Int) (*big.Int, *big.Int, error) {
+    if new(big.Int).Mod(Py, big.NewInt(2)).Cmp(big.NewInt(0)) == 0 {
+        return Px, Py, nil
+    } else {
+        Py.Sub(curve.Params().P, Py)
+        return Px, Py, nil
+    }
+}
+
+func hashTag(tag string, x []byte) []byte {
+    tagHash := sha256.Sum256([]byte(tag))
+    toHash := tagHash[:]
+    toHash = append(toHash, tagHash[:]...)
+    toHash = append(toHash, x...)
+    hashed := sha256.Sum256(toHash)
+    return pad(hashed[:], 32)
 }
 
 func bitsToBytes(bits int) int {

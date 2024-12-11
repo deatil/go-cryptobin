@@ -10,6 +10,8 @@ import (
 
     "golang.org/x/crypto/cryptobyte"
 
+    "github.com/deatil/go-cryptobin/elliptic/frp256v1"
+    "github.com/deatil/go-cryptobin/elliptic/secp256k1"
     "github.com/deatil/go-cryptobin/elliptic/brainpool"
 )
 
@@ -29,6 +31,9 @@ func init() {
     AddNamedCurve(elliptic.P256(), oidNamedCurveP256)
     AddNamedCurve(elliptic.P384(), oidNamedCurveP384)
     AddNamedCurve(elliptic.P521(), oidNamedCurveP521)
+
+    AddNamedCurve(frp256v1.FRP256v1(), frp256v1.OIDNamedCurveFRP256v1)
+    AddNamedCurve(secp256k1.S256(), secp256k1.OIDNamedCurveSecp256k1)
 
     AddNamedCurve(brainpool.P256r1(), brainpool.OIDBrainpoolP256r1)
     AddNamedCurve(brainpool.P256t1(), brainpool.OIDBrainpoolP256t1)

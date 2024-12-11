@@ -98,10 +98,7 @@ func ParsePublicKey(derBytes []byte) (pub *PublicKey, err error) {
         return
     }
 
-    // 解析
-    keyData := &pki
-
-    der := cryptobyte.String(keyData.PublicKey.RightAlign())
+    der := cryptobyte.String(pki.PublicKey.RightAlign())
 
     y := new(big.Int)
     if !der.ReadASN1Integer(y) {
@@ -117,7 +114,7 @@ func ParsePublicKey(derBytes []byte) (pub *PublicKey, err error) {
         },
     }
 
-    paramsDer := cryptobyte.String(keyData.Algorithm.Parameters.FullBytes)
+    paramsDer := cryptobyte.String(pki.Algorithm.Parameters.FullBytes)
     if !paramsDer.ReadASN1(&paramsDer, cryptobyte_asn1.SEQUENCE) ||
         !paramsDer.ReadASN1Integer(pub.P) ||
         !paramsDer.ReadASN1Integer(pub.G) {

@@ -75,10 +75,7 @@ func ParsePublicKey(derBytes []byte) (*PublicKey, error) {
         return nil, err
     }
 
-    // 解析
-    keyData := &pki
-
-    y := []byte(keyData.PublicKey.RightAlign())
+    y := []byte(pki.PublicKey.RightAlign())
 
     pub := &PublicKey{}
     pub.Y = y

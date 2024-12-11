@@ -113,11 +113,9 @@ func ParsePublicKey(derBytes []byte) (pub *ecdsa.PublicKey, err error) {
         return
     }
 
-    keyData := &pki
-
-    oid := keyData.Algorithm.Algorithm
-    params := keyData.Algorithm.Parameters
-    der := cryptobyte.String(keyData.PublicKey.RightAlign())
+    oid := pki.Algorithm.Algorithm
+    params := pki.Algorithm.Parameters
+    der := cryptobyte.String(pki.PublicKey.RightAlign())
 
     algoEq := oid.Equal(oidPublicKeyECDSA)
     if !algoEq {

@@ -121,10 +121,7 @@ func (this PKCS8Key) ParsePublicKey(der []byte) (*dsa.PublicKey, error) {
         return nil, errors.New("dsa: unknown public key algorithm")
     }
 
-    // 解析
-    keyData := &pki
-
-    yDer := cryptobyte.String(keyData.PublicKey.RightAlign())
+    yDer := cryptobyte.String(pki.PublicKey.RightAlign())
 
     y := new(big.Int)
     if !yDer.ReadASN1Integer(y) {
@@ -140,7 +137,7 @@ func (this PKCS8Key) ParsePublicKey(der []byte) (*dsa.PublicKey, error) {
         },
     }
 
-    paramsDer := cryptobyte.String(keyData.Algorithm.Parameters.FullBytes)
+    paramsDer := cryptobyte.String(pki.Algorithm.Parameters.FullBytes)
     if !paramsDer.ReadASN1(&paramsDer, cryptobyte_asn1.SEQUENCE) ||
         !paramsDer.ReadASN1Integer(pub.P) ||
         !paramsDer.ReadASN1Integer(pub.Q) ||

@@ -123,12 +123,9 @@ func ParsePublicKey(derBytes []byte) (pub *PublicKey, err error) {
         return
     }
 
-    // pki data
-    keyData := &pki
-
-    oid := keyData.Algorithm.Algorithm
-    params := keyData.Algorithm.Parameters
-    der := cryptobyte.String(keyData.PublicKey.RightAlign())
+    oid := pki.Algorithm.Algorithm
+    params := pki.Algorithm.Parameters
+    der := cryptobyte.String(pki.PublicKey.RightAlign())
 
     if !oid.Equal(oidPublicKeyBIP0340) {
         err = errors.New("go-cryptobin/bip0340: unknown public key algorithm")

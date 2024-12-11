@@ -135,9 +135,7 @@ func (this PKCS8Key) ParsePublicKey(der []byte) (*PublicKey, error) {
         return nil, errors.New("cryptobin/elgamal: unknown public key algorithm")
     }
 
-    keyData := &pki
-
-    yDer := cryptobyte.String(keyData.PublicKey.RightAlign())
+    yDer := cryptobyte.String(pki.PublicKey.RightAlign())
 
     y := new(big.Int)
     if !yDer.ReadASN1Integer(y) {
@@ -150,7 +148,7 @@ func (this PKCS8Key) ParsePublicKey(der []byte) (*PublicKey, error) {
         Y: y,
     }
 
-    paramsDer := cryptobyte.String(keyData.Algorithm.Parameters.FullBytes)
+    paramsDer := cryptobyte.String(pki.Algorithm.Parameters.FullBytes)
     if !paramsDer.ReadASN1(&paramsDer, cryptobyte_asn1.SEQUENCE) ||
         !paramsDer.ReadASN1Integer(pub.P) ||
         !paramsDer.ReadASN1Integer(pub.G) {

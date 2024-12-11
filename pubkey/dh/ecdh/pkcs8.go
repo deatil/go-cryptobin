@@ -94,10 +94,7 @@ func ParsePublicKey(derBytes []byte) (pub *PublicKey, err error) {
         return
     }
 
-    // 解析
-    keyData := &pki
-
-    paramsDer := cryptobyte.String(keyData.Algorithm.Parameters.FullBytes)
+    paramsDer := cryptobyte.String(pki.Algorithm.Parameters.FullBytes)
     namedCurveOID := new(asn1.ObjectIdentifier)
     if !paramsDer.ReadASN1ObjectIdentifier(namedCurveOID) {
         err = errors.New("ecdh: invalid ECDSA parameters")
@@ -110,7 +107,7 @@ func ParsePublicKey(derBytes []byte) (pub *PublicKey, err error) {
         return
     }
 
-    y := []byte(keyData.PublicKey.RightAlign())
+    y := []byte(pki.PublicKey.RightAlign())
 
     pub = &PublicKey{}
     pub.Y = y

@@ -72,7 +72,7 @@ func RightXor(X, Y []byte) []byte {
     return xored
 }
 
-// 根据指定长度分割字节
+// split bytes with n length
 func BytesSplit(buf []byte, size int) [][]byte {
     var chunk []byte
 
@@ -90,7 +90,7 @@ func BytesSplit(buf []byte, size int) [][]byte {
     return chunks
 }
 
-// 字符串转换为字节
+// string to bytes
 func StringToBytes(str string) []byte {
     return *(*[]byte)(unsafe.Pointer(
         &struct {
@@ -100,7 +100,7 @@ func StringToBytes(str string) []byte {
     ))
 }
 
-// 字节转换为字符串
+// bytes to string
 func BytesToString(buf []byte) string {
     return *(*string)(unsafe.Pointer(&buf))
 }

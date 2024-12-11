@@ -293,7 +293,3 @@ func parseECPrivateKey(namedCurveOID *asn1.ObjectIdentifier, der []byte) (key *P
 
     return priv, nil
 }
-
-func bitsToBytes(bits int) int {
-    return (bits + 7) / 8
-}

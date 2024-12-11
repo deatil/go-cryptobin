@@ -30,6 +30,10 @@ func rotl(x, n uint32) uint32 {
     return bits.RotateLeft32(x, int(n))
 }
 
+func bitsToBytes(bits int) int {
+    return (bits + 7) / 8
+}
+
 func bigFromHex(s string) *big.Int {
     b, ok := new(big.Int).SetString(s, 16)
     if !ok {

@@ -5,15 +5,12 @@ import (
     "math/big"
     "math/bits"
     "crypto/subtle"
-    "crypto/elliptic"
     "encoding/binary"
 )
 
 const BIP0340_AUX       = "BIP0340/aux"
 const BIP0340_NONCE	    = "BIP0340/nonce"
 const BIP0340_CHALLENGE = "BIP0340/challenge"
-
-const CHACHA20_MAX_ASKED_LEN = 64
 
 var (
     zero = big.NewInt(0)
@@ -31,31 +28,6 @@ func putu32(ptr []byte, a uint32) {
 
 func rotl(x, n uint32) uint32 {
     return bits.RotateLeft32(x, int(n))
-}
-
-func pad(x []byte, n int) []byte {
-    pad := make([]byte, n - len(x))
-    return append(pad, x...)
-}
-
-func bytes32(x *big.Int) []byte {
-    return pad(x.Bytes(), 32)
-}
-
-func bytes64(x *big.Int) []byte {
-    return pad(x.Bytes(), 64)
-}
-
-func liftXEvenY(curve elliptic.Curve, x, y *big.Int) (*big.Int, *big.Int, error) {
-    Px := new(big.Int).Set(x)
-    Py := new(big.Int).Set(y)
-
-    if new(big.Int).Mod(Py, big.NewInt(2)).Cmp(big.NewInt(0)) == 0 {
-        return Px, Py, nil
-    } else {
-        Py.Sub(curve.Params().P, Py)
-        return Px, Py, nil
-    }
 }
 
 func bitsToBytes(bits int) int {

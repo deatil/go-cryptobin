@@ -7,10 +7,8 @@ import (
     "math/big"
     "crypto"
     "crypto/rand"
-    "crypto/sha256"
     "crypto/elliptic"
 
-    "golang.org/x/crypto/chacha20"
     "golang.org/x/crypto/cryptobyte"
     "golang.org/x/crypto/cryptobyte/asn1"
 )
@@ -444,133 +442,6 @@ func VerifyWithRS(pub *PublicKey, hashFunc Hasher, data []byte, r, s *big.Int) b
     }
 
     return r.Cmp(x2) == 0
-}
-
-/*
- * BIP0340 batch verification functions.
- */
-func BatchVerify(pub []*PublicKey, m, sig [][]byte) bool {
-    u := len(pub)
-
-    if len(m) < u || len(sig) < u {
-        return false
-    }
-
-    a := make([]*big.Int, u)
-    Px := make([]*big.Int, u)
-    Py := make([]*big.Int, u)
-    r := make([]*big.Int, u)
-    s := make([]*big.Int, u)
-    e := make([]*big.Int, u)
-    Rx := make([]*big.Int, u)
-    Ry := make([]*big.Int, u)
-
-    a[0] = big.NewInt(1)
-
-    var seed []byte
-    for i := 0; i < u; i++ {
-        pk := elliptic.MarshalCompressed(pub[i].Curve, pub[i].X, pub[i].Y)
-
-        seed = append(seed, pk[1:]...)
-        seed = append(seed, m[i]...)
-        seed = append(seed, sig[i]...)
-    }
-
-    seedFixed := sha256.Sum256(seed)
-    seed = seedFixed[:]
-
-    for i := 1; i < u; i++ {
-        // a[i] = big.NewInt(int64(i + 1))
-        bytes, _ := chacha20.HChaCha20(seed, pad(big.NewInt(0).Bytes(), 16))
-        a[i] = new(big.Int).SetBytes(bytes)
-
-        curve := pub[i].Curve.Params()
-
-        if a[i].Cmp(big.NewInt(0)) <= 0 || a[i].Cmp(curve.N) >= 0 {
-            i--
-        }
-    }
-
-    for i := 0; i < u; i++ {
-        curve := pub[i].Curve
-        curveParams := curve.Params()
-
-        var err error
-        Px[i], Py[i], err = lift_x_even_y(curve, pub[i].X, pub[i].Y)
-        if err != nil {
-            return false
-        }
-
-        r[i] = new(big.Int).SetBytes(sig[i][:32])
-        if r[i].Cmp(curveParams.P) >= 0 {
-            return false
-        }
-
-        s[i] = new(big.Int).SetBytes(sig[i][32:])
-        if s[i].Cmp(curveParams.N) >= 0 {
-            return false
-        }
-
-        toHash := bytes32(r[i])
-        toHash = append(toHash, bytes32(Px[i])...)
-        toHash = append(toHash, m[i]...)
-
-        e[i] = new(big.Int).SetBytes(hashTag("BIP340/challenge", toHash))
-        e[i].Mod(e[i], curveParams.N)
-
-        rBytes := append([]byte{byte(3)}, pad(r[i].Bytes(), 32)...)
-        Rx[i], Ry[i] = elliptic.UnmarshalCompressed(curve, rBytes)
-
-        if Rx[i] == nil || Ry[i] == nil {
-            rBytes = append([]byte{byte(2)}, pad(r[i].Bytes(), 32)...)
-            Rx[i], Ry[i] = elliptic.UnmarshalCompressed(curve, rBytes)
-
-            if Rx[i] == nil || Ry[i] == nil {
-                return false
-            }
-        }
-    }
-
-    var temp1, temp2x, temp2y, res1x, res1y, res2x, res2y *big.Int
-    temp1 = big.NewInt(0)
-    for i := 0; i < u; i++ {
-        curve := pub[i].Curve
-
-        x := new(big.Int).Mul(a[i], s[i])
-
-        temp1.Add(temp1, x)
-        temp1.Mod(temp1, curve.Params().N)
-
-        res1x, res1y = curve.ScalarBaseMult(temp1.Bytes())
-    }
-
-    temp2x = Rx[0]
-    temp2y = Ry[0]
-
-    for i := 1; i < u; i++ {
-        curve := pub[i].Curve
-
-        x, y := curve.ScalarMult(Rx[i], Ry[i], a[i].Bytes())
-        temp2x, temp2y = curve.Add(temp2x, temp2y, x, y)
-    }
-
-    for i := 0; i < u; i++ {
-        curve := pub[i].Curve
-
-        s := new(big.Int).Mul(a[i], e[i])
-        s.Mod(s, curve.Params().N)
-        x, y := curve.ScalarMult(Px[i], Py[i], s.Bytes())
-        temp2x, temp2y = curve.Add(temp2x, temp2y, x, y)
-    }
-
-    res2x = temp2x
-    res2y = temp2y
-
-    if res2x.Cmp(res1x) != 0 || res2y.Cmp(res1y) != 0 {
-        return false
-    }
-
-    return true
 }
 
 // randFieldElement returns a random element of the order of the given

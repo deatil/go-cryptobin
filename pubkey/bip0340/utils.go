@@ -4,7 +4,6 @@ import (
     "hash"
     "math/big"
     "math/bits"
-    "crypto/sha256"
     "crypto/subtle"
     "crypto/elliptic"
     "encoding/binary"
@@ -13,6 +12,8 @@ import (
 const BIP0340_AUX       = "BIP0340/aux"
 const BIP0340_NONCE	    = "BIP0340/nonce"
 const BIP0340_CHALLENGE = "BIP0340/challenge"
+
+const CHACHA20_MAX_ASKED_LEN = 64
 
 var (
     zero = big.NewInt(0)
@@ -45,22 +46,16 @@ func bytes64(x *big.Int) []byte {
     return pad(x.Bytes(), 64)
 }
 
-func lift_x_even_y(curve elliptic.Curve, Px, Py *big.Int) (*big.Int, *big.Int, error) {
+func liftXEvenY(curve elliptic.Curve, x, y *big.Int) (*big.Int, *big.Int, error) {
+    Px := new(big.Int).Set(x)
+    Py := new(big.Int).Set(y)
+
     if new(big.Int).Mod(Py, big.NewInt(2)).Cmp(big.NewInt(0)) == 0 {
         return Px, Py, nil
     } else {
         Py.Sub(curve.Params().P, Py)
         return Px, Py, nil
     }
-}
-
-func hashTag(tag string, x []byte) []byte {
-    tagHash := sha256.Sum256([]byte(tag))
-    toHash := tagHash[:]
-    toHash = append(toHash, tagHash[:]...)
-    toHash = append(toHash, x...)
-    hashed := sha256.Sum256(toHash)
-    return pad(hashed[:], 32)
 }
 
 func bitsToBytes(bits int) int {

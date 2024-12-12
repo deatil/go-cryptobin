@@ -1,23 +1,17 @@
 package bip0340
 
 import (
-    "io"
-    "os"
-    "log"
     "fmt"
-    "bufio"
     "bytes"
     "crypto"
     "strings"
     "testing"
-    "strconv"
     "math/big"
     "crypto/rand"
     "crypto/sha256"
     "crypto/sha512"
     "crypto/elliptic"
     "encoding/hex"
-    "encoding/csv"
     "encoding/pem"
     "encoding/base64"
 
@@ -229,67 +223,6 @@ func test_SignBytes(t *testing.T, c elliptic.Curve, h Hasher) {
         t.Error("Verify fail")
     }
 
-}
-
-func Test_Batch(t *testing.T) {
-    u := 0
-
-    var pks []*PublicKey
-    var ms, sigs [][]byte
-    f, _ := os.Open("testdata/test-vectors-multi.csv")
-
-    reader := csv.NewReader(bufio.NewReader(f))
-    for {
-        record, err := reader.Read()
-        if err == io.EOF {
-            break
-        } else if err != nil {
-            log.Fatal(err)
-        }
-
-        _, err = strconv.ParseInt(record[0], 0, 0)
-        if err != nil {
-            continue
-        }
-
-        pkint, _ := new(big.Int).SetString(record[2], 16)
-        pk := pad(pkint.Bytes(), 32)
-
-        mint, _ := new(big.Int).SetString(record[4], 16)
-        m := pad(mint.Bytes(), 32)
-
-        sigint, _ := new(big.Int).SetString(record[5], 16)
-        sig := bytes64(sigint)
-
-        expected, _ := strconv.ParseBool(record[6])
-        if !expected {
-            continue
-        }
-
-        u += 1
-
-        pubBytes := append([]byte{byte(3)}, pk...)
-
-        x, y := elliptic.UnmarshalCompressed(secp256k1.S256(), pubBytes)
-        if x == nil || y == nil {
-            t.Fatal("publicKey error")
-        }
-
-        pubkey := &PublicKey{
-            Curve: secp256k1.S256(),
-            X: x,
-            Y: y,
-        }
-
-        pks = append(pks, pubkey)
-        ms = append(ms, m)
-        sigs = append(sigs, sig)
-    }
-
-    res := BatchVerify(pks, ms, sigs)
-    if !res {
-        t.Errorf("Batch verify failed")
-    }
 }
 
 func Test_bigintIsodd(t *testing.T) {

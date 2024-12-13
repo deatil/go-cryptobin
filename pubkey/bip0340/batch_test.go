@@ -43,7 +43,7 @@ func Test_Batch(t *testing.T) {
         m := pad(mint.Bytes(), 32)
 
         sigint, _ := new(big.Int).SetString(record[5], 16)
-        sig := bytes64(sigint)
+        sig := pad(sigint.Bytes(), 64)
 
         expected, _ := strconv.ParseBool(record[6])
         if !expected {

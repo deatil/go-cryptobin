@@ -18,12 +18,12 @@ func BatchVerify(pub []*PublicKey, m, sig [][]byte, hashFunc Hasher) bool {
         return false
     }
 
-    a := make([]*big.Int, u)
+    a  := make([]*big.Int, u)
     Px := make([]*big.Int, u)
     Py := make([]*big.Int, u)
-    r := make([]*big.Int, u)
-    s := make([]*big.Int, u)
-    e := make([]*big.Int, u)
+    r  := make([]*big.Int, u)
+    s  := make([]*big.Int, u)
+    e  := make([]*big.Int, u)
     Rx := make([]*big.Int, u)
     Ry := make([]*big.Int, u)
 
@@ -36,27 +36,23 @@ func BatchVerify(pub []*PublicKey, m, sig [][]byte, hashFunc Hasher) bool {
     p := curveParams.P
     plen := (p.BitLen() + 7) / 8
 
-    var seed []byte
     for i := 0; i < u; i++ {
         if pub[i].Curve != pub0.Curve {
             return false
         }
-
-        pubx := make([]byte, plen)
-        pub[i].X.FillBytes(pubx)
-
-        seed = append(seed, pubx...)
-        seed = append(seed, m[i]...)
-        seed = append(seed, sig[i]...)
     }
 
-    seedFixed := sha256.Sum256(seed)
-    seed = seedFixed[:]
+    seed := computeBatchCsprngSeed(sig, pub, m, u)
 
+    /* Get a pseudo-random scalar a for randomizing the linear combination */
     a[0] = big.NewInt(1)
     for i := 1; i < u; i++ {
-        bytes, _ := chacha20.HChaCha20(seed, pad([]byte{}, 16))
-        a[i] = new(big.Int).SetBytes(bytes)
+        chacha20Hashed, _ := chacha20.HChaCha20(seed, pad([]byte{}, 16))
+        a[i] = new(big.Int).SetBytes(chacha20Hashed)
+
+        if (curveParams.BitSize % 8) != 0 {
+            chacha20Hashed[0] &= byte((0x1 << (curveParams.BitSize % 8)) - 1)
+        }
 
         if a[i].Cmp(big.NewInt(0)) <= 0 || a[i].Cmp(curveParams.N) >= 0 {
             i--
@@ -64,11 +60,7 @@ func BatchVerify(pub []*PublicKey, m, sig [][]byte, hashFunc Hasher) bool {
     }
 
     for i := 0; i < u; i++ {
-        var err error
-        Px[i], Py[i], err = liftXEvenY(curve, pub[i].X, pub[i].Y)
-        if err != nil {
-            return false
-        }
+        Px[i], Py[i] = liftXEvenY(curve, pub[i].X, pub[i].Y)
 
         /* Extract r and s */
         r[i] = new(big.Int).SetBytes(sig[i][:plen])
@@ -82,11 +74,17 @@ func BatchVerify(pub []*PublicKey, m, sig [][]byte, hashFunc Hasher) bool {
         }
 
         /* Compute e */
-        toHash := bytes32(r[i])
-        toHash = append(toHash, bytes32(Px[i])...)
-        toHash = append(toHash, m[i]...)
+        sig := make([]byte, plen)
+        r[i].FillBytes(sig)
 
-        bip0340Hash([]byte("BIP340/challenge"), toHash, h)
+        bip0340Hash([]byte("BIP340/challenge"), sig, h)
+
+        Pubx := make([]byte, plen)
+        Px[i].FillBytes(Pubx)
+
+        h.Write(Pubx)
+        h.Write(m[i])
+
         toHashed := h.Sum(nil)
 
         e[i] = new(big.Int).SetBytes(toHashed)
@@ -114,28 +112,36 @@ func BatchVerify(pub []*PublicKey, m, sig [][]byte, hashFunc Hasher) bool {
     for i := 0; i < u; i++ {
         x := new(big.Int).Mul(a[i], s[i])
 
+        /* Add S to the sum */
+        // S_sum
         temp1.Add(temp1, x)
         temp1.Mod(temp1, curve.Params().N)
     }
 
-    /* Add S to the sum */
     res1x, res1y = pub0.Curve.ScalarBaseMult(temp1.Bytes())
 
+    /* Now multiply R by a */
     temp2x = Rx[0]
     temp2y = Ry[0]
 
-    /* Now multiply R by a */
     for i := 1; i < u; i++ {
+        // aR
         x, y := curve.ScalarMult(Rx[i], Ry[i], a[i].Bytes())
+
+        // R_sum
         temp2x, temp2y = curve.Add(temp2x, temp2y, x, y)
     }
 
     /* Multiply e by 'a' */
     for i := 0; i < u; i++ {
+        // eY
         s := new(big.Int).Mul(a[i], e[i])
         s.Mod(s, curve.Params().N)
 
         x, y := curve.ScalarMult(Px[i], Py[i], s.Bytes())
+
+        // P_sum
+        /* Compute P and add it to P_sum */
         temp2x, temp2y = curve.Add(temp2x, temp2y, x, y)
     }
 
@@ -154,24 +160,15 @@ func pad(x []byte, n int) []byte {
     return append(pad, x...)
 }
 
-func bytes32(x *big.Int) []byte {
-    return pad(x.Bytes(), 32)
-}
-
-func bytes64(x *big.Int) []byte {
-    return pad(x.Bytes(), 64)
-}
-
-func liftXEvenY(curve elliptic.Curve, x, y *big.Int) (*big.Int, *big.Int, error) {
+func liftXEvenY(curve elliptic.Curve, x, y *big.Int) (*big.Int, *big.Int) {
     Px := new(big.Int).Set(x)
     Py := new(big.Int).Set(y)
 
-    if new(big.Int).Mod(Py, big.NewInt(2)).Cmp(big.NewInt(0)) == 0 {
-        return Px, Py, nil
-    } else {
-        Py.Sub(curve.Params().P, Py)
-        return Px, Py, nil
+    if bigintIsodd(Py) {
+        Py.Mod(Py.Neg(Py), curve.Params().P)
     }
+
+    return Px, Py
 }
 
 func affYFromX(curve elliptic.Curve, x *big.Int) (*big.Int, *big.Int) {
@@ -196,4 +193,28 @@ func affYFromX(curve elliptic.Curve, x *big.Int) (*big.Int, *big.Int) {
     y1.Sqrt(y2)
 
     return y1, y2
+}
+
+func computeBatchCsprngSeed(s [][]byte, pubKeys []*PublicKey, m [][]byte, num int) []byte {
+    seedH := sha256.New()
+
+    for i := 0; i < num; i++ {
+        p := pubKeys[i].Curve.Params().P
+        plen := (p.BitLen() + 7) / 8
+
+        Pubx := make([]byte, plen)
+        pubKeys[i].X.FillBytes(Pubx)
+
+        seedH.Write(Pubx)
+    }
+
+    for i := 0; i < num; i++ {
+        seedH.Write(m[i])
+    }
+
+    for i := 0; i < num; i++ {
+        seedH.Write(s[i])
+    }
+
+    return seedH.Sum(nil)
 }

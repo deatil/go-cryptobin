@@ -48,11 +48,12 @@ func BatchVerify(pub []*PublicKey, m, sig [][]byte, hashFunc Hasher) bool {
     a[0] = big.NewInt(1)
     for i := 1; i < u; i++ {
         chacha20Hashed, _ := chacha20.HChaCha20(seed, pad([]byte{}, 16))
-        a[i] = new(big.Int).SetBytes(chacha20Hashed)
 
         if (curveParams.BitSize % 8) != 0 {
             chacha20Hashed[0] &= byte((0x1 << (curveParams.BitSize % 8)) - 1)
         }
+
+        a[i] = new(big.Int).SetBytes(chacha20Hashed)
 
         if a[i].Cmp(big.NewInt(0)) <= 0 || a[i].Cmp(curveParams.N) >= 0 {
             i--
@@ -60,6 +61,7 @@ func BatchVerify(pub []*PublicKey, m, sig [][]byte, hashFunc Hasher) bool {
     }
 
     for i := 0; i < u; i++ {
+        /* Compute P */
         Px[i], Py[i] = liftXEvenY(curve, pub[i].X, pub[i].Y)
 
         /* Extract r and s */
@@ -90,6 +92,7 @@ func BatchVerify(pub []*PublicKey, m, sig [][]byte, hashFunc Hasher) bool {
         e[i] = new(big.Int).SetBytes(toHashed)
         e[i].Mod(e[i], curveParams.N)
 
+        /* Compute R */
         rBytes := append([]byte{byte(3)}, pad(r[i].Bytes(), 32)...)
         Rx[i], Ry[i] = elliptic.UnmarshalCompressed(curve, rBytes)
 
@@ -118,7 +121,7 @@ func BatchVerify(pub []*PublicKey, m, sig [][]byte, hashFunc Hasher) bool {
         temp1.Mod(temp1, curve.Params().N)
     }
 
-    res1x, res1y = pub0.Curve.ScalarBaseMult(temp1.Bytes())
+    res1x, res1y = curve.ScalarBaseMult(temp1.Bytes())
 
     /* Now multiply R by a */
     temp2x = Rx[0]
@@ -134,10 +137,10 @@ func BatchVerify(pub []*PublicKey, m, sig [][]byte, hashFunc Hasher) bool {
 
     /* Multiply e by 'a' */
     for i := 0; i < u; i++ {
-        // eY
         s := new(big.Int).Mul(a[i], e[i])
         s.Mod(s, curve.Params().N)
 
+        // eY
         x, y := curve.ScalarMult(Px[i], Py[i], s.Bytes())
 
         // P_sum
@@ -190,7 +193,7 @@ func affYFromX(curve elliptic.Curve, x *big.Int) (*big.Int, *big.Int) {
     /* Now compute the two possible square roots
      * realizing y^2 = x^3 + ax + b
      */
-    y1.Sqrt(y2)
+    y1.ModSqrt(y2, y1)
 
     return y1, y2
 }

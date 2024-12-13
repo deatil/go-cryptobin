@@ -5,6 +5,16 @@ import (
     "crypto/subtle"
 )
 
+// Clone returns a copy of b[:len(b)].
+// The result may have additional unused capacity.
+func Clone(b []byte) []byte {
+    if b == nil {
+        return nil
+    }
+
+    return append([]byte{}, b...)
+}
+
 // GfnDouble computes 2 * input in the field of 2^n elements.
 // The irreducible polynomial in the finite field for n=128 is
 // x^128 + x^7 + x^2 + x + 1 (equals 0x87)

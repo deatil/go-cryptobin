@@ -8,10 +8,6 @@ import (
     "encoding/binary"
 )
 
-const BIP0340_AUX       = "BIP0340/aux"
-const BIP0340_NONCE	    = "BIP0340/nonce"
-const BIP0340_CHALLENGE = "BIP0340/challenge"
-
 var (
     zero = big.NewInt(0)
     one  = big.NewInt(1)

@@ -3,7 +3,7 @@ package kbkdf
 import (
     "encoding/binary"
 
-    "github.com/deatil/go-cryptobin/tool/alias"
+    "github.com/deatil/go-cryptobin/tool/bytes"
 )
 
 // TTAK.KO-12.0272, TTAK.KO-12.0333, NIST SP 800-108.
@@ -54,7 +54,7 @@ func FeedbackModeKey(prf PRF, key, label, context, iv []byte, counterSize, lengt
     L := fillL(Lr[:], uint64(length*8))
     I := make([]byte, counterSize)
 
-    K := alias.BytesClone(iv)
+    K := bytes.Clone(iv)
 
     for off := 0; off < length; {
         incCtr(I)

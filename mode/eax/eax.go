@@ -164,12 +164,12 @@ func (e *eax) pad(plaintext, B, P []byte) []byte {
     // if |M| in {n, 2n, 3n, ...}
     blockSize := e.block.BlockSize()
     if len(plaintext) != 0 && len(plaintext)%blockSize == 0 {
-        return bytes.RightXor(plaintext, B)
+        return bytes.RightXOR(plaintext, B)
     }
 
     // else return (M || 1 || 0^(n−1−(|M| % n))) xor→ P
     ending := make([]byte, blockSize-len(plaintext)%blockSize)
     ending[0] = 0x80
     padded := append(plaintext, ending...)
-    return bytes.RightXor(padded, P)
+    return bytes.RightXOR(padded, P)
 }

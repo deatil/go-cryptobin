@@ -26,13 +26,13 @@ func GfnDouble(input []byte) []byte {
 
     // If the first bit is zero, return 2L = L << 1
     // Else return (L << 1) xor 0^120 10000111
-    shifted := ShiftBytesLeft(input)
+    shifted := ShiftLeft(input)
     shifted[15] ^= ((input[0] >> 7) * 0x87)
     return shifted
 }
 
-// ShiftBytesLeft outputs the byte array corresponding to x << 1 in binary.
-func ShiftBytesLeft(x []byte) []byte {
+// ShiftLeft outputs the byte array corresponding to x << 1 in binary.
+func ShiftLeft(x []byte) []byte {
     l := len(x)
     dst := make([]byte, l)
     for i := 0; i < l-1; i++ {
@@ -43,8 +43,8 @@ func ShiftBytesLeft(x []byte) []byte {
     return dst
 }
 
-// ShiftBytesLeftN puts in dst the byte array corresponding to x << n in binary.
-func ShiftBytesLeftN(dst, x []byte, n int) {
+// ShiftLeftN puts in dst the byte array corresponding to x << n in binary.
+func ShiftLeftN(dst, x []byte, n int) {
     // Erase first n / 8 bytes
     copy(dst, x[n/8:])
 
@@ -60,18 +60,18 @@ func ShiftBytesLeftN(dst, x []byte, n int) {
     dst = append(dst, make([]byte, n/8)...)
 }
 
-// XorBytesMut assumes equal input length, replaces X with X XOR Y
-func XorBytesMut(X, Y []byte) {
+// XORBytesMut assumes equal input length, replaces X with X XOR Y
+func XORBytesMut(X, Y []byte) {
     subtle.XORBytes(X, X, Y)
 }
 
-// XorBytes assumes equal input length, puts X XOR Y into Z
-func XorBytes(Z, X, Y []byte) {
+// XORBytes assumes equal input length, puts X XOR Y into Z
+func XORBytes(Z, X, Y []byte) {
     subtle.XORBytes(Z, X, Y)
 }
 
-// RightXor XORs smaller input (assumed Y) at the right of the larger input (assumed X)
-func RightXor(X, Y []byte) []byte {
+// RightXOR XORs smaller input (assumed Y) at the right of the larger input (assumed X)
+func RightXOR(X, Y []byte) []byte {
     offset := len(X) - len(Y)
     xored := make([]byte, len(X))
 
@@ -83,7 +83,7 @@ func RightXor(X, Y []byte) []byte {
 }
 
 // split bytes with n length
-func BytesSplit(buf []byte, size int) [][]byte {
+func SplitSize(buf []byte, size int) [][]byte {
     var chunk []byte
 
     chunks := make([][]byte, 0, len(buf)/size+1)
@@ -101,7 +101,7 @@ func BytesSplit(buf []byte, size int) [][]byte {
 }
 
 // string to bytes
-func StringToBytes(str string) []byte {
+func FromString(str string) []byte {
     return *(*[]byte)(unsafe.Pointer(
         &struct {
             string
@@ -111,6 +111,6 @@ func StringToBytes(str string) []byte {
 }
 
 // bytes to string
-func BytesToString(buf []byte) string {
+func ToString(buf []byte) string {
     return *(*string)(unsafe.Pointer(&buf))
 }

@@ -97,12 +97,7 @@ func BatchVerify(pub []*PublicKey, m, sig [][]byte, hashFunc Hasher) bool {
         Rx[i], Ry[i] = elliptic.UnmarshalCompressed(curve, rBytes)
 
         if Rx[i] == nil || Ry[i] == nil {
-            rBytes = append([]byte{byte(2)}, pad(r[i].Bytes(), 32)...)
-            Rx[i], Ry[i] = elliptic.UnmarshalCompressed(curve, rBytes)
-
-            if Rx[i] == nil || Ry[i] == nil {
-                return false
-            }
+            return false
         }
     }
 
@@ -193,7 +188,8 @@ func affYFromX(curve elliptic.Curve, x *big.Int) (*big.Int, *big.Int) {
     /* Now compute the two possible square roots
      * realizing y^2 = x^3 + ax + b
      */
-    y1.ModSqrt(y2, y1)
+    // y1.ModSqrt(y2, y1)
+    y1.ModSqrt(y2, params.P)
 
     return y1, y2
 }

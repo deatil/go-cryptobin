@@ -101,11 +101,11 @@ func main() {
 
     // 私钥签名
     // private key sign data
-    var priKeyPem string = ""
+    var prikeyPem []byte = []byte("...")
     sigBase64String = obj.
         FromString(data).
-        FromPrivateKey([]byte(priKeyPem)).
-        // FromPrivateKeyWithPassword([]byte(priKeyPem), psssword).
+        FromPrivateKey(prikeyPem).
+        // FromPrivateKeyWithPassword(prikeyPem, psssword).
         // SetSignHash(hashName).
         Sign().
         // SignASN1().
@@ -113,10 +113,10 @@ func main() {
 
     // 公钥验证
     // public key verify signed data
-    var pubKeyPem string = ""
+    var pubkeyPem []byte = []byte("...")
     var res bool = obj.
         FromBase64String(sigBase64String).
-        FromPublicKey([]byte(pubKeyPem)).
+        FromPublicKey(pubkeyPem).
         // SetSignHash(hashName).
         Verify([]byte(data)).
         // VerifyASN1([]byte(data)).
@@ -127,13 +127,13 @@ func main() {
 #### 检测私钥公钥是否匹配 / Check KeyPair
 ~~~go
 func main() {
-    var priKeyPem string = "..."
-    var pubKeyPem string = "..."
+    var prikeyPem []byte = []byte("...")
+    var pubkeyPem []byte = []byte("...")
 
     var res bool = gost.New().
-        FromPrivateKey([]byte(priKeyPem)).
-        // FromPrivateKeyWithPassword([]byte(priKeyPem), psssword).
-        FromPublicKey([]byte(pubKeyPem)).
+        FromPrivateKey(prikeyPem).
+        // FromPrivateKeyWithPassword(prikeyPem, psssword).
+        FromPublicKey(pubkeyPem).
         CheckKeyPair()
 }
 ~~~
@@ -141,11 +141,11 @@ func main() {
 #### 生成 VKO 密钥
 ~~~go
 func main() {
-    var prikeyPem1 string = "..."
-    var pubkeyPem1 string = "..."
+    var prikeyPem1 []byte = []byte("...")
+    var pubkeyPem1 []byte = []byte("...")
 
-    var prikeyPem2 string = "..."
-    var pubkeyPem2 string = "..."
+    var prikeyPem2 []byte = []byte("...")
+    var pubkeyPem2 []byte = []byte("...")
 
     // 私钥密码
     // privatekey password
@@ -156,9 +156,9 @@ func main() {
     var ukm []byte = []byte("...")
 
     var secret1 string = obj.
-        FromPrivateKey([]byte(prikeyPem1)).
-        // FromPrivateKeyWithPassword([]byte(prikeyPem1), psssword).
-        FromPublicKey([]byte(pubkeyPem2)).
+        FromPrivateKey(prikeyPem1).
+        // FromPrivateKeyWithPassword(prikeyPem1, psssword).
+        FromPublicKey(pubkeyPem2).
         KEK(ukm).
         // KEK2001(ukm).
         // KEK2012256(ukm).
@@ -166,9 +166,9 @@ func main() {
         ToSecretString()
 
     var secret2 string = obj.
-        FromPrivateKey([]byte(prikeyPem2)).
-        // FromPrivateKeyWithPassword([]byte(prikeyPem2), psssword).
-        FromPublicKey([]byte(pubkeyPem1)).
+        FromPrivateKey(prikeyPem2).
+        // FromPrivateKeyWithPassword(prikeyPem2, psssword).
+        FromPublicKey(pubkeyPem1).
         KEK(ukm).
         // KEK2001(ukm).
         // KEK2012256(ukm).

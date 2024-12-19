@@ -41,7 +41,7 @@ func main() {
     // create private key
     var PriKeyPem string = obj.
         CreatePrivateKey().
-        // CreatePrivateKeyWithPassword(psssword, "DESEDE3CBC").
+        // CreatePrivateKeyWithPassword(psssword, "AES256CBC").
         ToKeyString()
 
     // 自定义私钥加密类型
@@ -94,9 +94,9 @@ func main() {
         FromPrivateKey([]byte(priKeyPem)).
         // FromPrivateKeyWithPassword([]byte(priKeyPem), psssword).
         // 其他设置, 默认为 Ed25519 模式
+        // SetOptions("Ed25519").
         // SetOptions("Ed25519ph", ctx).
         // SetOptions("Ed25519ctx", ctx).
-        // SetOptions("Ed25519").
         Sign().
         ToBase64String()
 
@@ -107,9 +107,9 @@ func main() {
         FromBase64String(sigBase64String).
         FromPublicKey([]byte(pubKeyPem)).
         // 其他设置, 默认为 Ed25519 模式
+        // SetOptions("Ed25519").
         // SetOptions("Ed25519ph", ctx).
         // SetOptions("Ed25519ctx", ctx).
-        // SetOptions("Ed25519").
         Verify([]byte(data)).
         ToVerify()
 }
@@ -118,17 +118,17 @@ func main() {
 #### 检测私钥公钥是否匹配 / Check KeyPair
 ~~~go
 func main() {
-    var prikeyPem string = "..."
-    var pubkeyPem string = "..."
+    var prikeyPem []byte = []byte("...")
+    var pubkeyPem []byte = []byte("...")
 
     // 私钥密码
     // privatekey password
     var psssword string = ""
 
     var res bool = eddsa.New().
-        FromPrivateKey([]byte(prikeyPem)).
-        // FromPrivateKeyWithPassword([]byte(prikeyPem), psssword).
-        FromPublicKey([]byte(pubkeyPem)).
+        FromPrivateKey(prikeyPem).
+        // FromPrivateKeyWithPassword(prikeyPem, psssword).
+        FromPublicKey(pubkeyPem).
         CheckKeyPair()
 }
 ~~~

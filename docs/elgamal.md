@@ -41,9 +41,9 @@ func main() {
     // create private key
     var PriKeyPem string = obj.
         CreatePrivateKey().
-        // CreatePrivateKeyWithPassword(psssword, "DESEDE3CBC").
+        // CreatePrivateKeyWithPassword(psssword, "AES256CBC").
         // CreatePKCS1PrivateKey().
-        // CreatePKCS1PrivateKeyWithPassword(psssword, "DESEDE3CBC").
+        // CreatePKCS1PrivateKeyWithPassword(psssword, "AES256CBC").
         // CreatePKCS8PrivateKey().
         // CreatePKCS8PrivateKeyWithPassword(psssword, "AES256CBC").
         ToKeyString()
@@ -91,26 +91,26 @@ func main() {
 
     // 私钥签名
     // private key sign data
-    var priKeyPem string = ""
+    var priKeyPem []byte = []byte("...")
     sigBase64String = obj.
         FromString(data).
-        FromPrivateKey([]byte(priKeyPem)).
-        // FromPrivateKeyWithPassword([]byte(priKeyPem), psssword).
-        // FromPKCS1PrivateKey([]byte(priKeyPem)).
-        // FromPKCS1PrivateKeyWithPassword([]byte(priKeyPem), psssword).
-        // FromPKCS8PrivateKey([]byte(priKeyPem)).
-        // FromPKCS8PrivateKeyWithPassword([]byte(priKeyPem), psssword).
+        FromPrivateKey(priKeyPem).
+        // FromPrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPKCS1PrivateKey(priKeyPem).
+        // FromPKCS1PrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPKCS8PrivateKey(priKeyPem).
+        // FromPKCS8PrivateKeyWithPassword(priKeyPem, psssword).
         Sign().
         ToBase64String()
 
     // 公钥验证
     // public key verify signed data
-    var pubKeyPem string = ""
+    var pubKeyPem []byte = []byte("...")
     var res bool = obj.
         FromBase64String(sigBase64String).
-        FromPublicKey([]byte(pubKeyPem)).
-        // FromPKCS1PublicKey([]byte(pubKeyPem)).
-        // FromPKCS8PublicKey([]byte(pubKeyPem)).
+        FromPublicKey(pubKeyPem).
+        // FromPKCS1PublicKey(pubKeyPem).
+        // FromPKCS8PublicKey(pubKeyPem).
         Verify([]byte(data)).
         ToVerify()
 }
@@ -131,26 +131,26 @@ func main() {
 
     // 公钥加密
     // public key Encrypt data
-    var pubKeyPem string = ""
+    var pubKeyPem []byte = []byte("...")
     var enData string = obj.
         FromString(data).
-        FromPublicKey([]byte(pubKeyPem)).
-        // FromPKCS1PublicKey([]byte(pubKeyPem)).
-        // FromPKCS8PublicKey([]byte(pubKeyPem)).
+        FromPublicKey(pubKeyPem).
+        // FromPKCS1PublicKey(pubKeyPem).
+        // FromPKCS8PublicKey(pubKeyPem).
         Encrypt().
         ToBase64String()
 
     // 私钥解密
     // private key Decrypt data
-    var priKeyPem string = ""
+    var priKeyPem []byte = []byte("...")
     var deData string = obj.
         FromBase64String(enData).
-        FromPrivateKey([]byte(priKeyPem)).
-        // FromPrivateKeyWithPassword([]byte(priKeyPem), psssword).
-        // FromPKCS1PrivateKey([]byte(priKeyPem)).
-        // FromPKCS1PrivateKeyWithPassword([]byte(priKeyPem), psssword).
-        // FromPKCS8PrivateKey([]byte(priKeyPem)).
-        // FromPKCS8PrivateKeyWithPassword([]byte(priKeyPem), psssword).
+        FromPrivateKey(priKeyPem).
+        // FromPrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPKCS1PrivateKey(priKeyPem).
+        // FromPKCS1PrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPKCS8PrivateKey(priKeyPem).
+        // FromPKCS8PrivateKeyWithPassword(priKeyPem, psssword).
         Decrypt().
         ToString()
 }
@@ -159,23 +159,23 @@ func main() {
 #### 检测私钥公钥是否匹配 / Check KeyPair
 ~~~go
 func main() {
-    var prikeyPem string = "..."
-    var pubkeyPem string = "..."
+    var prikeyPem []byte = []byte("...")
+    var pubkeyPem []byte = []byte("...")
 
     // 私钥密码
     // privatekey password
     var psssword string = ""
 
     var res bool = elgamal.New().
-        // FromPrivateKey([]byte(prikeyPem)).
-        // FromPrivateKeyWithPassword([]byte(prikeyPem), psssword).
-        // FromPKCS1PrivateKey([]byte(prikeyPem)).
-        // FromPKCS1PrivateKeyWithPassword([]byte(prikeyPem), psssword).
-        FromPKCS8PrivateKey([]byte(prikeyPem)).
-        // FromPKCS8PrivateKeyWithPassword([]byte(prikeyPem), psssword).
-        // FromPublicKey([]byte(pubkeyPem)).
-        // FromPKCS1PublicKey([]byte(pubkeyPem)).
-        FromPKCS8PublicKey([]byte(pubkeyPem)).
+        // FromPrivateKey(prikeyPem).
+        // FromPrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPKCS1PrivateKey(prikeyPem).
+        // FromPKCS1PrivateKeyWithPassword(prikeyPem, psssword).
+        FromPKCS8PrivateKey(prikeyPem).
+        // FromPKCS8PrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPublicKey(pubkeyPem).
+        // FromPKCS1PublicKey(pubkeyPem).
+        FromPKCS8PublicKey(pubkeyPem).
         CheckKeyPair()
 }
 ~~~

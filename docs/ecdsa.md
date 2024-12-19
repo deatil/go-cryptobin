@@ -40,17 +40,17 @@ func main() {
     ec := ecdsa.GenerateKey("P521")
 
     // 生成私钥 PEM 证书
-    privateKeyString := ec.
+    privateKeyPEM := ec.
         CreatePrivateKey().
         // CreatePrivateKeyWithPassword(psssword, "AES256CBC").
         // CreatePKCS1PrivateKey()
-        // CreatePKCS1PrivateKeyWithPassword(password string, opts ...string)
+        // CreatePKCS1PrivateKeyWithPassword(password, "AES256CBC")
         // CreatePKCS8PrivateKey().
         // CreatePKCS8PrivateKeyWithPassword(psssword, "AES256CBC", "SHA256").
         ToKeyString()
 
     // 生成公钥 PEM 证书
-    publicKeyString := ec.
+    publicKeyPEM := ec.
         CreatePublicKey().
         ToKeyString()
 }
@@ -77,26 +77,28 @@ func main() {
     // privatekey password
     var psssword string = ""
 
+    var data string = "test-pass"
+
     // 私钥签名
-    var pri []byte = []byte("...")
+    var priPEM []byte = []byte("...")
     var base64signedString string = ecdsa.
-        FromString("test-pass").
-        FromPrivateKey(pri).
-        // FromPrivateKeyWithPassword(pri, psssword).
-        // FromPKCS1PrivateKey(pri).
-        // FromPKCS1PrivateKeyWithPassword(pri, psssword).
-        // FromPKCS8PrivateKey(pri).
-        // FromPKCS8PrivateKeyWithPassword(pri, psssword).
+        FromString(data).
+        FromPrivateKey(priPEM).
+        // FromPrivateKeyWithPassword(priPEM, psssword).
+        // FromPKCS1PrivateKey(priPEM).
+        // FromPKCS1PrivateKeyWithPassword(priPEM, psssword).
+        // FromPKCS8PrivateKey(priPEM).
+        // FromPKCS8PrivateKeyWithPassword(priPEM, psssword).
         Sign().
         ToBase64String()
 
     // 公钥验证
-    var pub []byte = []byte("...")
+    var pubEM []byte = []byte("...")
     var base64signedString string = "..."
     var verify bool = ecdsa.
         FromBase64String(base64signedString).
-        FromPublicKey(pub).
-        Verify([]byte("test-pass")).
+        FromPublicKey(pubEM).
+        Verify([]byte(data)).
         ToVerify()
 }
 ~~~
@@ -152,13 +154,13 @@ func main() {
     var pubkeyPem []byte = []byte("...")
 
     var res bool = ecdsa.New().
-        FromPrivateKey(pri).
-        // FromPrivateKeyWithPassword(pri, psssword).
-        // FromPKCS1PrivateKey(pri).
-        // FromPKCS1PrivateKeyWithPassword(pri, psssword).
-        // FromPKCS8PrivateKey(pri).
-        // FromPKCS8PrivateKeyWithPassword(pri, psssword).
-        FromPublicKey(pubkey).
+        FromPrivateKey(prikeyPem).
+        // FromPrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPKCS1PrivateKey(prikeyPem).
+        // FromPKCS1PrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPKCS8PrivateKey(prikeyPem).
+        // FromPKCS8PrivateKeyWithPassword(prikeyPem, psssword).
+        FromPublicKey(pubkeyPem).
         CheckKeyPair()
 }
 ~~~

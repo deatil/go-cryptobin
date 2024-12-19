@@ -33,7 +33,7 @@ Error()
 func main() {
     // 私钥密码
     // privatekey password
-    var psssword string = ""
+    var password string = ""
 
     // 生成证书
     // 可选参数 [P521 | P384 | P256 | P224]
@@ -42,11 +42,11 @@ func main() {
     // 生成私钥 PEM 证书
     privateKeyPEM := ec.
         CreatePrivateKey().
-        // CreatePrivateKeyWithPassword(psssword, "AES256CBC").
+        // CreatePrivateKeyWithPassword(password, "AES256CBC").
         // CreatePKCS1PrivateKey()
         // CreatePKCS1PrivateKeyWithPassword(password, "AES256CBC")
         // CreatePKCS8PrivateKey().
-        // CreatePKCS8PrivateKeyWithPassword(psssword, "AES256CBC", "SHA256").
+        // CreatePKCS8PrivateKeyWithPassword(password, "AES256CBC", "SHA256").
         ToKeyString()
 
     // 生成公钥 PEM 证书
@@ -75,7 +75,7 @@ SignBytes() / VerifyBytes(data []byte)
 func main() {
     // 私钥密码
     // privatekey password
-    var psssword string = ""
+    var password string = ""
 
     var data string = "test-pass"
 
@@ -84,11 +84,11 @@ func main() {
     var base64signedString string = ecdsa.
         FromString(data).
         FromPrivateKey(priPEM).
-        // FromPrivateKeyWithPassword(priPEM, psssword).
+        // FromPrivateKeyWithPassword(priPEM, password).
         // FromPKCS1PrivateKey(priPEM).
-        // FromPKCS1PrivateKeyWithPassword(priPEM, psssword).
+        // FromPKCS1PrivateKeyWithPassword(priPEM, password).
         // FromPKCS8PrivateKey(priPEM).
-        // FromPKCS8PrivateKeyWithPassword(priPEM, psssword).
+        // FromPKCS8PrivateKeyWithPassword(priPEM, password).
         Sign().
         ToBase64String()
 
@@ -148,18 +148,18 @@ Vu0zCh5hkl/0r9vPzPeqGpHJv3eJw/zF+gZWxn2LvLcKkQTcGutSwVdVRQ==
 func main() {
     // 私钥密码
     // privatekey password
-    var psssword string = ""
+    var password string = ""
 
     var prikeyPem []byte = []byte("...")
     var pubkeyPem []byte = []byte("...")
 
     var res bool = ecdsa.New().
         FromPrivateKey(prikeyPem).
-        // FromPrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPrivateKeyWithPassword(prikeyPem, password).
         // FromPKCS1PrivateKey(prikeyPem).
-        // FromPKCS1PrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPKCS1PrivateKeyWithPassword(prikeyPem, password).
         // FromPKCS8PrivateKey(prikeyPem).
-        // FromPKCS8PrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPKCS8PrivateKeyWithPassword(prikeyPem, password).
         FromPublicKey(pubkeyPem).
         CheckKeyPair()
 }

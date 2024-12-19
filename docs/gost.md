@@ -45,20 +45,20 @@ func main() {
 
     // 私钥密码
     // privatekey password
-    var psssword string = ""
+    var password string = ""
 
     // 生成私钥
     // create private key
     var PriKeyPem string = obj.
         CreatePrivateKey().
-        // CreatePrivateKeyWithPassword(psssword).
-        // CreatePrivateKeyWithPassword(psssword, "AES256CBC").
+        // CreatePrivateKeyWithPassword(password).
+        // CreatePrivateKeyWithPassword(password, "AES256CBC").
         ToKeyString()
 
     // 自定义私钥加密类型
     // use custom encrypt options
     var PriKeyPem string = obj.
-        CreatePrivateKeyWithPassword(psssword, gost.Opts{
+        CreatePrivateKeyWithPassword(password, gost.Opts{
             Cipher:  gost.GetCipherFromName("AES256CBC"),
             KDFOpts: gost.ScryptOpts{
                 CostParameter:            1 << 15,
@@ -90,7 +90,7 @@ func main() {
 
     // 私钥密码
     // privatekey password
-    var psssword string = ""
+    var password string = ""
 
     // 数据签名类型
     // hash name type
@@ -105,7 +105,7 @@ func main() {
     sigBase64String = obj.
         FromString(data).
         FromPrivateKey(prikeyPem).
-        // FromPrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPrivateKeyWithPassword(prikeyPem, password).
         // SetSignHash(hashName).
         Sign().
         // SignASN1().
@@ -132,7 +132,7 @@ func main() {
 
     var res bool = gost.New().
         FromPrivateKey(prikeyPem).
-        // FromPrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPrivateKeyWithPassword(prikeyPem, password).
         FromPublicKey(pubkeyPem).
         CheckKeyPair()
 }
@@ -149,7 +149,7 @@ func main() {
 
     // 私钥密码
     // privatekey password
-    var psssword string = ""
+    var password string = ""
 
     // ukm 数据
     // ukm data
@@ -157,7 +157,7 @@ func main() {
 
     var secret1 string = obj.
         FromPrivateKey(prikeyPem1).
-        // FromPrivateKeyWithPassword(prikeyPem1, psssword).
+        // FromPrivateKeyWithPassword(prikeyPem1, password).
         FromPublicKey(pubkeyPem2).
         KEK(ukm).
         // KEK2001(ukm).
@@ -167,7 +167,7 @@ func main() {
 
     var secret2 string = obj.
         FromPrivateKey(prikeyPem2).
-        // FromPrivateKeyWithPassword(prikeyPem2, psssword).
+        // FromPrivateKeyWithPassword(prikeyPem2, password).
         FromPublicKey(pubkeyPem1).
         KEK(ukm).
         // KEK2001(ukm).

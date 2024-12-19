@@ -46,7 +46,7 @@ func main() {
         // CreatePKCS1PrivateKey()
         // CreatePKCS1PrivateKeyWithPassword(password, "AES256CBC")
         // CreatePKCS8PrivateKey().
-        // CreatePKCS8PrivateKeyWithPassword(psssword, "AES256CBC", "SHA256").
+        // CreatePKCS8PrivateKeyWithPassword(password, "AES256CBC", "SHA256").
         ToKeyString()
 
     // 生成公钥 PEM 证书
@@ -75,18 +75,18 @@ SignBytes() / VerifyBytes(data []byte)
 func main() {
     // 私钥密码
     // privatekey password
-    var psssword string = ""
+    var password string = ""
 
     // 私钥签名
     var prikeyPem []byte = []byte("...")
     var base64signedString string = bign.
         FromString("test-pass").
         FromPrivateKey(prikeyPem).
-        // FromPrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPrivateKeyWithPassword(prikeyPem, password).
         // FromPKCS1PrivateKey(prikeyPem).
-        // FromPKCS1PrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPKCS1PrivateKeyWithPassword(prikeyPem, password).
         // FromPKCS8PrivateKey(prikeyPem).
-        // FromPKCS8PrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPKCS8PrivateKeyWithPassword(prikeyPem, password).
         // WithEncodingASN1().
         // WithEncodingBytes().
         WithAdata(adata). // 设置 adata 参数
@@ -116,15 +116,15 @@ func main() {
 
     // 私钥密码
     // privatekey password
-    var psssword string = ""
+    var password string = ""
 
     var res bool = bign.New().
         FromPrivateKey(prikeyPem).
-        // FromPrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPrivateKeyWithPassword(prikeyPem, password).
         // FromPKCS1PrivateKey(prikeyPem).
-        // FromPKCS1PrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPKCS1PrivateKeyWithPassword(prikeyPem, password).
         // FromPKCS8PrivateKey(prikeyPem).
-        // FromPKCS8PrivateKeyWithPassword(prikeyPem, psssword).
+        // FromPKCS8PrivateKeyWithPassword(prikeyPem, password).
         FromPublicKey(pubkeyPem).
         CheckKeyPair()
 }

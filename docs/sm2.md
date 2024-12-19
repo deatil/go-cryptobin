@@ -35,24 +35,24 @@ func main() {
 
     // 私钥密码
     // privatekey password
-    var psssword string = ""
+    var password string = ""
 
     // 生成私钥
     // create private key
     var PriKeyPem string = obj.
         CreatePrivateKey().
-        // CreatePrivateKeyWithPassword(psssword).
-        // CreatePrivateKeyWithPassword(psssword, "AES256CBC").
+        // CreatePrivateKeyWithPassword(password).
+        // CreatePrivateKeyWithPassword(password, "AES256CBC").
         // CreatePKCS1PrivateKey().
-        // CreatePKCS1PrivateKeyWithPassword(psssword, "AES256CBC").
+        // CreatePKCS1PrivateKeyWithPassword(password, "AES256CBC").
         // CreatePKCS8PrivateKey().
-        // CreatePKCS8PrivateKeyWithPassword(psssword, "AES256CBC", "SHA256").
+        // CreatePKCS8PrivateKeyWithPassword(password, "AES256CBC", "SHA256").
         ToKeyString()
 
     // 自定义私钥加密类型
     // use custom encrypt options
     var PriKeyPem string = obj.
-        CreatePKCS8PrivateKeyWithPassword(psssword, sm2.Opts{
+        CreatePKCS8PrivateKeyWithPassword(password, sm2.Opts{
             Cipher:  sm2.GetCipherFromName("AES256CBC"),
             KDFOpts: sm2.ScryptOpts{
                 CostParameter:            1 << 15,
@@ -84,7 +84,7 @@ func main() {
 
     // 私钥密码
     // privatekey password
-    var psssword string = ""
+    var password string = ""
 
     // 设置 UID 值
     // set uid data
@@ -103,11 +103,11 @@ func main() {
     sigBase64String = obj.
         FromString(data).
         FromPrivateKey(priKeyPem).
-        // FromPrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPrivateKeyWithPassword(priKeyPem, password).
         // FromPKCS1PrivateKey(priKeyPem).
-        // FromPKCS1PrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPKCS1PrivateKeyWithPassword(priKeyPem, password).
         // FromPKCS8PrivateKey(priKeyPem).
-        // FromPKCS8PrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPKCS8PrivateKeyWithPassword(priKeyPem, password).
         // WithUID(uid).
         // SetSignHash("SM3").
         // WithSignHash(md5Hash).
@@ -143,7 +143,7 @@ func main() {
 
     // 私钥密码
     // privatekey password
-    var psssword string = ""
+    var password string = ""
 
     // 公钥加密
     // public key Encrypt data
@@ -162,11 +162,11 @@ func main() {
     var deData string = obj.
         FromBase64String(enData).
         FromPrivateKey(priKeyPem).
-        // FromPrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPrivateKeyWithPassword(priKeyPem, password).
         // FromPKCS1PrivateKey(priKeyPem).
-        // FromPKCS1PrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPKCS1PrivateKeyWithPassword(priKeyPem, password).
         // FromPKCS8PrivateKey(priKeyPem).
-        // FromPKCS8PrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPKCS8PrivateKeyWithPassword(priKeyPem, password).
         // SetMode 为可选，默认为 C1C3C2
         // SetMode("C1C3C2"). // C1C3C2 | C1C2C3
         Decrypt().
@@ -233,11 +233,11 @@ func main() {
 
     var res bool = sm2.New().
         FromPrivateKey(priKeyPem).
-        // FromPrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPrivateKeyWithPassword(priKeyPem, password).
         // FromPKCS1PrivateKey(priKeyPem).
-        // FromPKCS1PrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPKCS1PrivateKeyWithPassword(priKeyPem, password).
         // FromPKCS8PrivateKey(priKeyPem).
-        // FromPKCS8PrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPKCS8PrivateKeyWithPassword(priKeyPem, password).
         FromPublicKey(pubKeyPem).
         CheckKeyPair()
 }
@@ -257,15 +257,15 @@ func main() {
 
     // 私钥密码
     // privatekey password
-    var psssword string = ""
+    var password string = ""
 
     var parsedPrivateKey *gmsm2.PrivateKey = sm2.New().
         FromPrivateKey(priKeyPem).
-        // FromPrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPrivateKeyWithPassword(priKeyPem, password).
         // FromPKCS1PrivateKey(priKeyPem).
-        // FromPKCS1PrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPKCS1PrivateKeyWithPassword(priKeyPem, password).
         // FromPKCS8PrivateKey(priKeyPem).
-        // FromPKCS8PrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPKCS8PrivateKeyWithPassword(priKeyPem, password).
         GetPrivateKey()
 
     // 公钥解析
@@ -291,21 +291,21 @@ func main() {
 
     // 私钥密码
     // privatekey password
-    var psssword string = ""
+    var password string = ""
 
     var newPrivateKey string = sm2.New().
         // FromPrivateKey(priKeyPem).
-        // FromPrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPrivateKeyWithPassword(priKeyPem, password).
         // FromPKCS1PrivateKey(priKeyPem).
-        FromPKCS1PrivateKeyWithPassword(priKeyPem, psssword). // PKCS1 有密码证书
+        FromPKCS1PrivateKeyWithPassword(priKeyPem, password). // PKCS1 有密码证书
         // FromPKCS8PrivateKey(priKeyPem).
-        // FromPKCS8PrivateKeyWithPassword(priKeyPem, psssword).
+        // FromPKCS8PrivateKeyWithPassword(priKeyPem, password).
         // CreatePrivateKey().
-        // CreatePrivateKeyWithPassword(psssword, "AES256CBC").
+        // CreatePrivateKeyWithPassword(password, "AES256CBC").
         // CreatePKCS1PrivateKey().
-        // CreatePKCS1PrivateKeyWithPassword(psssword, "AES256CBC").
+        // CreatePKCS1PrivateKeyWithPassword(password, "AES256CBC").
         CreatePKCS8PrivateKey(). // 转为 PKCS8 编码
-        // CreatePKCS8PrivateKeyWithPassword(psssword, "AES256CBC", "SHA256").
+        // CreatePKCS8PrivateKeyWithPassword(password, "AES256CBC", "SHA256").
         ToKeyString()
 }
 ~~~

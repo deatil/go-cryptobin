@@ -13,9 +13,11 @@ import (
     "golang.org/x/crypto/cryptobyte/asn1"
 )
 
-const BIP0340_AUX       = "BIP0340/aux"
-const BIP0340_NONCE     = "BIP0340/nonce"
-const BIP0340_CHALLENGE = "BIP0340/challenge"
+const (
+    BIP0340_AUX       = "BIP0340/aux"
+    BIP0340_NONCE     = "BIP0340/nonce"
+    BIP0340_CHALLENGE = "BIP0340/challenge"
+)
 
 var (
     ErrPrivateKey         = errors.New("go-cryptobin/bip0340: invalid PrivateKey")

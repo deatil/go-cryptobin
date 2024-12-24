@@ -1,11 +1,11 @@
-package ecgdsa
+package ecsdsa
 
 import (
     "hash"
     "crypto/elliptic"
     "crypto/sha256"
 
-    "github.com/deatil/go-cryptobin/pubkey/ecgdsa"
+    "github.com/deatil/go-cryptobin/pubkey/ecsdsa"
 )
 
 type (
@@ -22,17 +22,17 @@ const (
 )
 
 /**
- * EC-GDSA
+ * EC-SDSA
  *
- * @create 2024-9-26
+ * @create 2024-12-24
  * @author deatil
  */
-type ECGDSA struct {
+type ECSDSA struct {
     // 私钥
-    privateKey *ecgdsa.PrivateKey
+    privateKey *ecsdsa.PrivateKey
 
     // 公钥
-    publicKey *ecgdsa.PublicKey
+    publicKey *ecsdsa.PublicKey
 
     // 生成类型
     curve elliptic.Curve
@@ -60,8 +60,8 @@ type ECGDSA struct {
 }
 
 // 构造函数
-func NewECGDSA() ECGDSA {
-    return ECGDSA{
+func NewECSDSA() ECSDSA {
+    return ECSDSA{
         curve:    elliptic.P256(),
         signHash: sha256.New,
         verify:   false,
@@ -70,11 +70,11 @@ func NewECGDSA() ECGDSA {
 }
 
 // 构造函数
-func New() ECGDSA {
-    return NewECGDSA()
+func New() ECSDSA {
+    return NewECSDSA()
 }
 
 var (
     // 默认
-    defaultECGDSA = NewECGDSA()
+    defaultECSDSA = NewECSDSA()
 )

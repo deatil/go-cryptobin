@@ -1,11 +1,12 @@
-package ecgdsa
+package bip0340
 
 import (
     "hash"
     "crypto/elliptic"
     "crypto/sha256"
 
-    "github.com/deatil/go-cryptobin/pubkey/ecgdsa"
+    "github.com/deatil/go-cryptobin/pubkey/bip0340"
+    "github.com/deatil/go-cryptobin/elliptic/secp256k1"
 )
 
 type (
@@ -13,7 +14,8 @@ type (
     HashFunc = func() hash.Hash
 )
 
-// encoding data type
+// 数据编码方式
+// marshal data type
 type EncodingType uint
 
 const (
@@ -22,17 +24,17 @@ const (
 )
 
 /**
- * EC-GDSA
+ * BIP0340
  *
- * @create 2024-9-26
+ * @create 2024-12-24
  * @author deatil
  */
-type ECGDSA struct {
+type BIP0340 struct {
     // 私钥
-    privateKey *ecgdsa.PrivateKey
+    privateKey *bip0340.PrivateKey
 
     // 公钥
-    publicKey *ecgdsa.PublicKey
+    publicKey *bip0340.PublicKey
 
     // 生成类型
     curve elliptic.Curve
@@ -60,9 +62,9 @@ type ECGDSA struct {
 }
 
 // 构造函数
-func NewECGDSA() ECGDSA {
-    return ECGDSA{
-        curve:    elliptic.P256(),
+func NewBIP0340() BIP0340 {
+    return BIP0340{
+        curve:    secp256k1.S256(),
         signHash: sha256.New,
         verify:   false,
         Errors:   make([]error, 0),
@@ -70,11 +72,11 @@ func NewECGDSA() ECGDSA {
 }
 
 // 构造函数
-func New() ECGDSA {
-    return NewECGDSA()
+func New() BIP0340 {
+    return NewBIP0340()
 }
 
 var (
     // 默认
-    defaultECGDSA = NewECGDSA()
+    defaultBIP0340 = NewBIP0340()
 )

@@ -142,7 +142,7 @@ func unmarshalCipherASN1(curve elliptic.Curve, data []byte, mode Mode) (encrypte
 type cipherASN1New struct {
     XCoordinate *big.Int
     YCoordinate *big.Int
-    HASH        []byte
+    Hash        []byte
     CipherText  []byte
 }
 
@@ -152,7 +152,7 @@ func marshalCipherASN1New(data encryptedData) ([]byte, error) {
     return asn1.Marshal(cipherASN1New{
         XCoordinate: bytesToBigInt(data.XCoordinate),
         YCoordinate: bytesToBigInt(data.YCoordinate),
-        HASH:        data.Hash,
+        Hash:        data.Hash,
         CipherText:  data.CipherText,
     })
 }
@@ -171,7 +171,7 @@ func unmarshalCipherASN1New(curve elliptic.Curve, b []byte) (encryptedData, erro
     return encryptedData{
         XCoordinate: x, // x分量
         YCoordinate: y, // y分量
-        Hash:        data.HASH,       // hash
+        Hash:        data.Hash,       // hash
         CipherText:  data.CipherText, // cipherText
     }, nil
 }
@@ -181,7 +181,7 @@ type cipherASN1Old struct {
     XCoordinate *big.Int
     YCoordinate *big.Int
     CipherText  []byte
-    HASH        []byte
+    Hash        []byte
 }
 
 // sm2 密文转 asn.1 编码格式
@@ -191,7 +191,7 @@ func marshalCipherASN1Old(data encryptedData) ([]byte, error) {
         XCoordinate: bytesToBigInt(data.XCoordinate),
         YCoordinate: bytesToBigInt(data.YCoordinate),
         CipherText:  data.CipherText,
-        HASH:        data.Hash,
+        Hash:        data.Hash,
     })
 }
 
@@ -210,7 +210,7 @@ func unmarshalCipherASN1Old(curve elliptic.Curve, b []byte) (encryptedData, erro
         XCoordinate: x, // x分量
         YCoordinate: y, // y分量
         CipherText:  data.CipherText, // cipherText
-        Hash:        data.HASH,       // hash
+        Hash:        data.Hash,       // hash
     }, nil
 }
 

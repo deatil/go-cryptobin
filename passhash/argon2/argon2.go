@@ -134,7 +134,7 @@ func CompareHashWithPassword(hash, password string) (bool, error) {
     }
 
     passwordType := hashParts[0]
-    version := hashParts[1]
+    version, _ := strconv.Atoi(hashParts[1])
 
     memory, _ := strconv.Atoi(hashParts[2])
     time, _ := strconv.Atoi((hashParts[3]))
@@ -145,7 +145,7 @@ func CompareHashWithPassword(hash, password string) (bool, error) {
 
     keyLen := len(key)
 
-    if version != "19" {
+    if version != argon2.Version {
         return false, errors.New("go-cryptobin/argon2: Invalid Password Hash version")
     }
 

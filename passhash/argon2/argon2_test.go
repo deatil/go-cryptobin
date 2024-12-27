@@ -57,6 +57,7 @@ func Test_CompareHashWithPassword(t *testing.T) {
         {"Should Work 3", `argon2d$19$65536$1$4$kBukCPS4IEJ4xDde6M3XetbSutA4wBK1WUVEf0c+Iuo$ULQg74UC/lmnV6I6bEVW8Gtk6bqa89PE78bf+ot3LA4`, `qwerty123`, true, false},
         {"Should Work 31", `argon2id$19$65536$3$2$6pAg+fVI2vB9uenAuOTK0A$VPg50e+vxRnvQ8dIFSg1HFNYHYcxEW+Dx47O6vipImU`, `qwerty123`, true, false},
         {"Should Work 5", `argon2i$19$65536$1$4$HVZ4vlSeA9OejpkNfxDTTA+wi1DSpi23HP8QLrfmFsU$7L8JxqudLuNKzvmJmyTmgSl0mvF39aG6vOMFB+7NBX4`, `Password1`, true, false},
+        {"Should Not Work 6", `argon2i$17$65536$1$4$HVZ4vlSeA9OejpkNfxDTTA+wi1DSpi23HP8QLrfmFsU$7L8JxqudLuNKzvmJmyTmgSl0mvF39aG6vOMFB+7NBX4`, `Password1`, false, true},
     }
 
     for _, tt := range tests {

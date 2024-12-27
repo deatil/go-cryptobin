@@ -911,6 +911,11 @@ func verify(pub *PublicKey, hash []byte, r, s *big.Int) error {
     return nil
 }
 
+// Calculate Hash
+func CalculateHash(pub *PublicKey, h hashFunc, msg, uid []byte) ([]byte, error) {
+    return calculateHash(pub, h, msg, uid)
+}
+
 func calculateHash(pub *PublicKey, h hashFunc, msg, uid []byte) ([]byte, error) {
     if len(uid) == 0 {
         uid = defaultUID

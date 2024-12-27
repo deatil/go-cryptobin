@@ -27,6 +27,7 @@ func Test_GenerateSaltedHash(t *testing.T) {
                 t.Errorf("GenerateSaltedHash() = %v, want %v", err, tt.wantErr)
                 return
             }
+
             if len(hashSegments) != tt.hashSegments {
                 t.Errorf("GenerateSaltedHash() had %d segments. Want %d", len(hashSegments), tt.hashSegments)
             }
@@ -52,6 +53,7 @@ func Test_CompareHashWithPassword(t *testing.T) {
         {"Should Work 2", `argon2$4$32768$4$32$/WN2BY5NDzVlHYgw3pqahA==$oLGdDy23gAgbQXmphVVPG0Uax+XbfeUfH/TCpQbEHfc=`, `Y&jEA)_m7q@jb@J"<sXrS]HH"zU`, true, false},
         {"Should Not Work 4", `argon2$4$32768$4$32$/WN2BY5NDzVlHYgw3pqahA==$XLGdDy23gAgbQXmphVVPG0Uax+XbfeUfH/TCpQbEHfc=`, `Y&XEA)_m7q@jb@J"<sXrS]HH"zU`, false, true},
         {"Should Not Work 5", `argon2$32768$4$32$/WN2BY5NDzVlHYgw3pqahA==$XLGdDy23gAgbQXmphVVPG0Uax+XbfeUfH/TCpQbEHfc=`, `Y&XEA)_m7q@jb@J"<sXrS]HH"zU`, false, true},
+        {"Should Work 3", `argon2d$1$65536$4$32$9oPeGkhyrfkDBbrGO8Kp4QEurO7dXuJz7V02/4xzzUY=$dlWao4wXOuKsBESejJsfcCwqA+g7/jc5tKK+z7yxdBE=`, `Y&jEA)_m7q@jb@J"<sXrS]HH"zU`, true, false},
     }
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
@@ -72,18 +74,22 @@ func Test_CompareHashWithPassword(t *testing.T) {
 func Test_GenerateSaltedHashWithType(t *testing.T) {
     tests := []struct {
         name         string
-        typ          string
+        typ          Argon2Type
         password     string
         hashSegments int
         hashLength   int
         wantErr      bool
     }{
-        {"Should Work", "argon2id", "Password1", 7, 111, false},
-        {"Should Not Work", "argon2id", "", 1, 0, true},
-        {"Should Work 2", "argon2id", "gS</5Tu>3@(<FCtY", 7, 111, false},
-        {"Should Work 3", "argon2id", `Y&jEA)_m7q@jb@J"<sXrS]HH"zU`, 7, 111, false},
-        {"Should Work 31", "argon2i", `Y&jEA)_m7q@jb@J"<sXrS]HH"zU`, 7, 110, false},
-        {"Should Not Work 2", "argon2i", "", 1, 0, true},
+        {"Should Work", Argon2id, "Password1", 7, 111, false},
+        {"Should Not Work", Argon2id, "", 1, 0, true},
+        {"Should Work 2", Argon2id, "gS</5Tu>3@(<FCtY", 7, 111, false},
+        {"Should Work 3", Argon2id, `Y&jEA)_m7q@jb@J"<sXrS]HH"zU`, 7, 111, false},
+        {"Should Work 31", Argon2i, `Y&jEA)_m7q@jb@J"<sXrS]HH"zU`, 7, 110, false},
+        {"Should Not Work 2", Argon2i, "", 1, 0, true},
+        {"Should Work 5", Argon2d, `Y&jEA)_m7q@jb@J"<sXrS]HH"zU`, 7, 110, false},
+        {"Should Not Work 3", Argon2d, "", 1, 0, true},
+        {"Should Work 6", Argon2, `Y&jEA)_m7q@jb@J"<sXrS]HH"zU`, 7, 109, false},
+        {"Should Not Work 6", Argon2, "", 1, 0, true},
     }
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {

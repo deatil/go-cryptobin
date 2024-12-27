@@ -22,7 +22,7 @@ func MarshalSignatureBytes(curve elliptic.Curve, r, s *big.Int) ([]byte, error) 
 func UnmarshalSignatureBytes(curve elliptic.Curve, sign []byte) (r, s *big.Int, err error) {
     byteLen := (curve.Params().BitSize + 7) / 8
     if len(sign) != 2*byteLen {
-        err = errors.New("cryptobin/sm2: incorrect signature")
+        err = errors.New("go-cryptobin/sm2: incorrect signature")
         return
     }
 
@@ -81,14 +81,14 @@ func marshalCipherBytes(c encryptedData, mode Mode) []byte {
 func unmarshalCipherBytes(curve elliptic.Curve, data []byte, mode Mode, h hashFunc) (encryptedData, error) {
     typ := data[0]
     if typ != byte(0x04) {
-        return encryptedData{}, errors.New("cryptobin/sm2: encrypted data is error and miss prefix '4'.")
+        return encryptedData{}, errors.New("go-cryptobin/sm2: encrypted data is error and miss prefix '4'.")
     }
 
     hashSize := h().Size()
 
     byteLen := (curve.Params().BitSize + 7) / 8
     if len(data) < 2*byteLen + hashSize {
-        return encryptedData{}, errors.New("cryptobin/sm2: encrypt data is too short.")
+        return encryptedData{}, errors.New("go-cryptobin/sm2: encrypt data is too short.")
     }
 
     data = data[1:]

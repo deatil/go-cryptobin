@@ -328,7 +328,7 @@ func (priv *PrivateKey) Equal(x crypto.PrivateKey) bool {
         bigIntEqual(priv.D, xx.D)
 }
 
-// sign data and return asn.1 or bytes marshal data
+// sign data and return asn.1 or bytes marshal data, default asn.1
 func (priv *PrivateKey) Sign(random io.Reader, msg []byte, opts crypto.SignerOpts) ([]byte, error) {
     opt := DefaultSignerOpts
     if o, ok := opts.(SignerOpts); ok {
@@ -353,7 +353,7 @@ func (priv *PrivateKey) Sign(random io.Reader, msg []byte, opts crypto.SignerOpt
     return nil, errors.New("go-cryptobin/sm2: Sign fail")
 }
 
-// sign data use k and return asn.1 or bytes marshal data
+// sign data use k and return asn.1 or bytes marshal data, default asn.1
 func (priv *PrivateKey) SignUsingK(k *big.Int, msg []byte, opts crypto.SignerOpts) ([]byte, error) {
     opt := DefaultSignerOpts
     if o, ok := opts.(SignerOpts); ok {

@@ -136,7 +136,7 @@ func CompareHashWithPassword(hash, password string) (bool, error) {
     passwordType := hashParts[1]
 
     if hashParts[2] != "v=19" {
-        return false, errors.New("go-cryptobin/argon2fmt: Invalid Password Hash Prefix")
+        return false, errors.New("go-cryptobin/argon2fmt: Invalid Password Hash version")
     }
 
     params := strings.Split(hashParts[3], ",")

@@ -89,19 +89,19 @@ func GenerateSaltedHashWithTypeAndOpts(random io.Reader, password string, typ Ar
     switch typ {
         case Argon2id:
             unencodedPassword = argon2.IDKey(
-                []byte(password), []byte(salt),
+                []byte(password), salt,
                 argon2Time, argon2Memory,
                 argon2Threads, argon2KeyLen,
             )
         case Argon2i, Argon2:
             unencodedPassword = argon2.Key(
-                []byte(password), []byte(salt),
+                []byte(password), salt,
                 argon2Time, argon2Memory,
                 argon2Threads, argon2KeyLen,
             )
         case Argon2d:
             unencodedPassword = argon2.DKey(
-                []byte(password), []byte(salt),
+                []byte(password), salt,
                 argon2Time, argon2Memory,
                 argon2Threads, argon2KeyLen,
             )
@@ -109,14 +109,14 @@ func GenerateSaltedHashWithTypeAndOpts(random io.Reader, password string, typ Ar
             return "", errors.New("go-cryptobin/argon2: Invalid Hash Type")
     }
 
-    encodedPassword := base64.StdEncoding.EncodeToString(unencodedPassword)
+    encodedSalt := base64.RawStdEncoding.EncodeToString(salt)
+    encodedPassword := base64.RawStdEncoding.EncodeToString(unencodedPassword)
 
     hash := fmt.Sprintf(
         "%s$%d$%d$%d$%d$%s$%s",
-        typ, argon2Time,
-        argon2Memory, argon2Threads,
-        argon2KeyLen, salt,
-        encodedPassword,
+        typ, argon2.Version,
+        argon2Memory, argon2Time, argon2Threads,
+        encodedSalt, encodedPassword,
     )
 
     return hash, nil
@@ -134,12 +134,20 @@ func CompareHashWithPassword(hash, password string) (bool, error) {
     }
 
     passwordType := hashParts[0]
-    time, _ := strconv.Atoi((hashParts[1]))
+    version := hashParts[1]
+
     memory, _ := strconv.Atoi(hashParts[2])
-    threads, _ := strconv.Atoi(hashParts[3])
-    keyLen, _ := strconv.Atoi(hashParts[4])
-    salt := []byte(hashParts[5])
-    key, _ := base64.StdEncoding.DecodeString(hashParts[6])
+    time, _ := strconv.Atoi((hashParts[3]))
+    threads, _ := strconv.Atoi(hashParts[4])
+
+    salt, _ := base64.RawStdEncoding.DecodeString(hashParts[5])
+    key, _ := base64.RawStdEncoding.DecodeString(hashParts[6])
+
+    keyLen := len(key)
+
+    if version != "19" {
+        return false, errors.New("go-cryptobin/argon2: Invalid Password Hash version")
+    }
 
     var calculatedKey []byte
     switch passwordType {
@@ -173,13 +181,12 @@ func CompareHashWithPassword(hash, password string) (bool, error) {
 }
 
 // generate salt with length
-func generateSalt(random io.Reader, length int) (string, error) {
-    unencodedSalt := make([]byte, length)
-
-    _, err := io.ReadFull(random, unencodedSalt)
+func generateSalt(random io.Reader, length int) ([]byte, error) {
+    salt := make([]byte, length)
+    _, err := io.ReadFull(random, salt)
     if err != nil {
-        return "", err
+        return nil, err
     }
 
-    return base64.StdEncoding.EncodeToString(unencodedSalt), nil
+    return salt, nil
 }

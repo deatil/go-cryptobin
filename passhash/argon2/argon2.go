@@ -1,12 +1,12 @@
 package argon2
 
 import (
+    "io"
     "fmt"
     "errors"
     "runtime"
     "strconv"
     "strings"
-    "crypto/rand"
     "crypto/subtle"
     "encoding/base64"
 
@@ -37,19 +37,19 @@ var (
 )
 
 // 生成密钥
-func GenerateSaltedHash(password string) (string, error) {
-    return GenerateSaltedHashWithTypeAndOpt(password, defaultType, defaultOpt)
+func GenerateSaltedHash(random io.Reader, password string) (string, error) {
+    return GenerateSaltedHashWithTypeAndOpt(random, password, defaultType, defaultOpt)
 }
 
 // 生成密钥带类型
-func GenerateSaltedHashWithType(password string, typ string) (string, error) {
-    return GenerateSaltedHashWithTypeAndOpt(password, typ, defaultOpt)
+func GenerateSaltedHashWithType(random io.Reader, password string, typ string) (string, error) {
+    return GenerateSaltedHashWithTypeAndOpt(random, password, typ, defaultOpt)
 }
 
 // 生成密钥带类型和设置
-func GenerateSaltedHashWithTypeAndOpt(password string, typ string, opt Opt) (string, error) {
+func GenerateSaltedHashWithTypeAndOpt(random io.Reader, password string, typ string, opt Opt) (string, error) {
     if len(password) == 0 {
-        return "", errors.New("Password length cannot be 0")
+        return "", errors.New("go-cryptobin/argon2: Password length cannot be 0")
     }
 
     saltLen       := opt.SaltLen
@@ -58,7 +58,7 @@ func GenerateSaltedHashWithTypeAndOpt(password string, typ string, opt Opt) (str
     argon2Threads := opt.Threads
     argon2KeyLen  := opt.KeyLen
 
-    salt, _ := generateSalt(saltLen)
+    salt, _ := generateSalt(random, saltLen)
 
     var unencodedPassword []byte
     switch typ {
@@ -75,7 +75,7 @@ func GenerateSaltedHashWithTypeAndOpt(password string, typ string, opt Opt) (str
                 argon2Threads, argon2KeyLen,
             )
         default:
-            return "", errors.New("Invalid Hash Type")
+            return "", errors.New("go-cryptobin/argon2: Invalid Hash Type")
     }
 
     encodedPassword := base64.StdEncoding.EncodeToString(unencodedPassword)
@@ -94,12 +94,12 @@ func GenerateSaltedHashWithTypeAndOpt(password string, typ string, opt Opt) (str
 // 验证密钥
 func CompareHashWithPassword(hash, password string) (bool, error) {
     if len(hash) == 0 || len(password) == 0 {
-        return false, errors.New("Arguments cannot be zero length")
+        return false, errors.New("go-cryptobin/argon2: Arguments cannot be zero length")
     }
 
     hashParts := strings.Split(hash, "$")
     if len(hashParts) != 7 {
-        return false, errors.New("Invalid Data Len")
+        return false, errors.New("go-cryptobin/argon2: Invalid Data Len")
     }
 
     passwordType := hashParts[0]
@@ -125,20 +125,21 @@ func CompareHashWithPassword(hash, password string) (bool, error) {
                 uint8(threads), uint32(keyLen),
             )
         default:
-            return false, errors.New("Invalid Password Hash")
+            return false, errors.New("go-cryptobin/argon2: Invalid Password Hash")
     }
 
     if subtle.ConstantTimeCompare(key, calculatedKey) != 1 {
-        return false, errors.New("Password did not match")
+        return false, errors.New("go-cryptobin/argon2: Password did not match")
     }
 
     return true, nil
 }
 
-func generateSalt(len int) (string, error) {
-    unencodedSalt := make([]byte, len)
+func generateSalt(random io.Reader, length int) (string, error) {
+    unencodedSalt := make([]byte, length)
 
-    if _, err := rand.Read(unencodedSalt); err != nil {
+    _, err := io.ReadFull(random, unencodedSalt)
+    if err != nil {
         return "", err
     }
 

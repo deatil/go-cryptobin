@@ -3,9 +3,10 @@ package argon2
 import (
     "strings"
     "testing"
+    "crypto/rand"
 )
 
-func TestGenerateSaltedHash(t *testing.T) {
+func Test_GenerateSaltedHash(t *testing.T) {
     tests := []struct {
         name         string
         password     string
@@ -20,7 +21,7 @@ func TestGenerateSaltedHash(t *testing.T) {
     }
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
-            got, err := GenerateSaltedHash(tt.password)
+            got, err := GenerateSaltedHash(rand.Reader, tt.password)
             hashSegments := strings.Split(got, "$")
             if (err != nil) != tt.wantErr {
                 t.Errorf("GenerateSaltedHash() = %v, want %v", err, tt.wantErr)
@@ -36,7 +37,7 @@ func TestGenerateSaltedHash(t *testing.T) {
     }
 }
 
-func TestCompareHashWithPassword(t *testing.T) {
+func Test_CompareHashWithPassword(t *testing.T) {
     tests := []struct {
         name     string
         hash     string
@@ -68,7 +69,7 @@ func TestCompareHashWithPassword(t *testing.T) {
     }
 }
 
-func TestGenerateSaltedHashWithType(t *testing.T) {
+func Test_GenerateSaltedHashWithType(t *testing.T) {
     tests := []struct {
         name         string
         typ          string
@@ -86,7 +87,7 @@ func TestGenerateSaltedHashWithType(t *testing.T) {
     }
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
-            got, err := GenerateSaltedHashWithType(tt.password, tt.typ)
+            got, err := GenerateSaltedHashWithType(rand.Reader, tt.password, tt.typ)
             hashSegments := strings.Split(got, "$")
             if (err != nil) != tt.wantErr {
                 t.Errorf("GenerateSaltedHashWithType() = %v, want %v", err, tt.wantErr)

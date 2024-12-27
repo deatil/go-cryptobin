@@ -113,7 +113,7 @@ func GenerateSaltedHashWithTypeAndOpts(random io.Reader, password string, typ Ar
 
     hash := fmt.Sprintf(
         "%s$%d$%d$%d$%d$%s$%s",
-        typ.String(), argon2Time,
+        typ, argon2Time,
         argon2Memory, argon2Threads,
         argon2KeyLen, salt,
         encodedPassword,

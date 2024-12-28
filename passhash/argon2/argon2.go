@@ -27,7 +27,7 @@ func (typ Argon2Type) String() string {
         case Argon2:
             return "argon2"
         default:
-            return "unknown multiple value " + strconv.Itoa(int(typ))
+            return "unknown type " + strconv.Itoa(int(typ))
     }
 }
 

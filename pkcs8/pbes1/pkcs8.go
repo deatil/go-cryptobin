@@ -21,11 +21,11 @@ type encryptedPrivateKeyInfo struct {
 
 // 加密 PKCS8 私钥
 func EncryptPKCS8PrivateKey(
-    rand io.Reader,
+    rand      io.Reader,
     blockType string,
-    data []byte,
-    password []byte,
-    cipher Cipher,
+    data      []byte,
+    password  []byte,
+    cipher    Cipher,
 ) (*pem.Block, error) {
     if cipher == nil {
         return nil, errors.New("failed to encrypt PEM: unknown cipher")
@@ -100,11 +100,11 @@ func DecryptPKCS8PrivateKey(data, password []byte) ([]byte, error) {
 
 // 加密 PKCS8 私钥，不处理密码
 func EncryptPKCS8Privatekey(
-    rand io.Reader,
+    rand      io.Reader,
     blockType string,
-    data []byte,
-    password []byte,
-    cipher Cipher,
+    data      []byte,
+    password  []byte,
+    cipher    Cipher,
 ) (*pem.Block, error) {
     if cipher == nil {
         return nil, errors.New("failed to encrypt PEM: unknown cipher")

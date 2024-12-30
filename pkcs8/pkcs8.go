@@ -171,10 +171,10 @@ var (
     DefaultSMOpts = pbes2.DefaultSMOpts
 )
 
-// 解析设置
-// opt, err := ParseOpts("AES256CBC", "SHA256")
+// 生成设置
+// opt, err := MakeOpts("AES256CBC", "SHA256")
 // block, err := EncryptPEMBlock(rand.Reader, "ENCRYPTED PRIVATE KEY", data, password, opt)
-func ParseOpts(opts ...any) (any, error) {
+func MakeOpts(opts ...any) (any, error) {
     var opt any
     var err error
 
@@ -187,13 +187,18 @@ func ParseOpts(opts ...any) (any, error) {
     }
 
     if opt == nil {
-        opt, err = pbes2.ParseOpts(opts...)
+        opt, err = pbes2.MakeOpts(opts...)
         if err != nil {
             return nil, err
         }
     }
 
     return opt, nil
+}
+
+// 解析生成设置
+func ParseOpts(opts ...any) (any, error) {
+    return MakeOpts(opts...)
 }
 
 // 加密

@@ -24,8 +24,8 @@ func GetHashFromName(name string) Hash {
     return HashMap["SHA1"]
 }
 
-// 解析配置
-func ParseOpts(opts ...any) (Opts, error) {
+// 生成设置
+func MakeOpts(opts ...any) (Opts, error) {
     if len(opts) == 0 {
         return DefaultOpts, nil
     }
@@ -41,7 +41,17 @@ func ParseOpts(opts ...any) (Opts, error) {
                 IterationCount: 10000,
             }
 
-            // 设置
+            // hash
+            if len(opts) > 1 {
+                switch hash := opts[1].(type) {
+                    case Hash:
+                        kdfOpts.HMACHash = hash
+                    case string:
+                        kdfOpts.HMACHash = GetHashFromName(hash)
+                }
+            }
+
+            // Opts
             newOpts := Opts{
                 Cipher:  cipher,
                 KDFOpts: kdfOpts,
@@ -49,12 +59,12 @@ func ParseOpts(opts ...any) (Opts, error) {
 
             return newOpts, nil
         case string:
-            opt := "AES256CBC"
+            cipName := "AES256CBC"
             if len(opts) > 0 {
-                opt = opts[0].(string)
+                cipName = opts[0].(string)
             }
 
-            cipher := GetCipherFromName(opt)
+            cipher := GetCipherFromName(cipName)
 
             kdfOpts := PBKDF2Opts{
                 SaltSize:       16,
@@ -63,12 +73,15 @@ func ParseOpts(opts ...any) (Opts, error) {
 
             // hash
             if len(opts) > 1 {
-                hash := opts[1].(string)
-
-                kdfOpts.HMACHash = GetHashFromName(hash)
+                switch hash := opts[1].(type) {
+                    case Hash:
+                        kdfOpts.HMACHash = hash
+                    case string:
+                        kdfOpts.HMACHash = GetHashFromName(hash)
+                }
             }
 
-            // 设置
+            // Opts
             newOpts := Opts{
                 Cipher:  cipher,
                 KDFOpts: kdfOpts,
@@ -78,4 +91,9 @@ func ParseOpts(opts ...any) (Opts, error) {
     }
 
     return DefaultOpts, nil
+}
+
+// 解析生成设置
+func ParseOpts(opts ...any) (Opts, error) {
+    return MakeOpts(opts...)
 }

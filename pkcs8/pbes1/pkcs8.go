@@ -11,7 +11,7 @@ import (
     "github.com/deatil/go-cryptobin/pkcs1"
 )
 
-// 结构体数据可以查看以下文档
+// struct info see:
 // RFC5208 at https://tools.ietf.org/html/rfc5208
 // RFC5958 at https://tools.ietf.org/html/rfc5958
 type encryptedPrivateKeyInfo struct {
@@ -19,7 +19,7 @@ type encryptedPrivateKeyInfo struct {
     EncryptedData       []byte
 }
 
-// 加密 PKCS8 私钥
+// Encrypt PKCS8 Private Key
 func EncryptPKCS8PrivateKey(
     rand      io.Reader,
     blockType string,
@@ -68,7 +68,7 @@ func EncryptPKCS8PrivateKey(
     }, nil
 }
 
-// 解出 PKCS8 私钥
+// Decrypt PKCS8 Private Key
 func DecryptPKCS8PrivateKey(data, password []byte) ([]byte, error) {
     var pki encryptedPrivateKeyInfo
     if _, err := asn1.Unmarshal(data, &pki); err != nil {
@@ -98,7 +98,7 @@ func DecryptPKCS8PrivateKey(data, password []byte) ([]byte, error) {
     return decryptedKey, nil
 }
 
-// 加密 PKCS8 私钥，不处理密码
+// Encrypt PKCS8 Private Key and not format password
 func EncryptPKCS8Privatekey(
     rand      io.Reader,
     blockType string,
@@ -139,7 +139,7 @@ func EncryptPKCS8Privatekey(
     }, nil
 }
 
-// 解出 PKCS8 私钥，不处理密码
+// Decrypt PKCS8 Private Key and not format password
 func DecryptPKCS8Privatekey(data, password []byte) ([]byte, error) {
     var pki encryptedPrivateKeyInfo
     if _, err := asn1.Unmarshal(data, &pki); err != nil {
@@ -161,7 +161,7 @@ func DecryptPKCS8Privatekey(data, password []byte) ([]byte, error) {
     return decryptedKey, nil
 }
 
-// 解出 PEM 块
+// Decrypt PEM Block
 func DecryptPEMBlock(block *pem.Block, password []byte) ([]byte, error) {
     if block.Headers["Proc-Type"] == "4,ENCRYPTED" {
         return pkcs1.DecryptPEMBlock(block, password)

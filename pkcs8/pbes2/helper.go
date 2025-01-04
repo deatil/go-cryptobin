@@ -1,7 +1,7 @@
 package pbes2
 
-// hash 列表
-var HashMap = map[string]Hash{
+// hash map
+var hashMap = map[string]Hash{
     "MD5":             MD5,
     "SHA1":            SHA1,
     "SHA224":          SHA224,
@@ -15,16 +15,16 @@ var HashMap = map[string]Hash{
     "GOST34112012512": GOST34112012512,
 }
 
-// 获取 hash 类型
+// Get Hash From hash Name
 func GetHashFromName(name string) Hash {
-    if data, ok := HashMap[name]; ok {
+    if data, ok := hashMap[name]; ok {
         return data
     }
 
-    return HashMap["SHA1"]
+    return hashMap["SHA1"]
 }
 
-// 生成设置
+// make options
 func MakeOpts(opts ...any) (Opts, error) {
     if len(opts) == 0 {
         return DefaultOpts, nil
@@ -93,7 +93,7 @@ func MakeOpts(opts ...any) (Opts, error) {
     return DefaultOpts, nil
 }
 
-// 解析生成设置
+// parse and make options
 func ParseOpts(opts ...any) (Opts, error) {
     return MakeOpts(opts...)
 }

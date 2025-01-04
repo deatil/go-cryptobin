@@ -59,7 +59,7 @@ func EncryptPKCS8PrivateKey(
 
     b, err := asn1.Marshal(pki)
     if err != nil {
-        return nil, errors.New(err.Error() + " error marshaling encrypted key")
+        return nil, errors.New("error marshaling encrypted key")
     }
 
     return &pem.Block{
@@ -72,7 +72,7 @@ func EncryptPKCS8PrivateKey(
 func DecryptPKCS8PrivateKey(data, password []byte) ([]byte, error) {
     var pki encryptedPrivateKeyInfo
     if _, err := asn1.Unmarshal(data, &pki); err != nil {
-        return nil, errors.New(err.Error() + " failed to unmarshal private key")
+        return nil, errors.New("failed to unmarshal private key")
     }
 
     cipher, cipherParams, err := parseEncryptionScheme(pki.EncryptionAlgorithm)
@@ -130,7 +130,7 @@ func EncryptPKCS8Privatekey(
 
     b, err := asn1.Marshal(pki)
     if err != nil {
-        return nil, errors.New(err.Error() + " error marshaling encrypted key")
+        return nil, errors.New("error marshaling encrypted key")
     }
 
     return &pem.Block{
@@ -143,7 +143,7 @@ func EncryptPKCS8Privatekey(
 func DecryptPKCS8Privatekey(data, password []byte) ([]byte, error) {
     var pki encryptedPrivateKeyInfo
     if _, err := asn1.Unmarshal(data, &pki); err != nil {
-        return nil, errors.New(err.Error() + " failed to unmarshal private key")
+        return nil, errors.New("failed to unmarshal private key")
     }
 
     cipher, cipherParams, err := parseEncryptionScheme(pki.EncryptionAlgorithm)

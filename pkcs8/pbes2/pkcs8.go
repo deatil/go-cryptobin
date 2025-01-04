@@ -86,10 +86,9 @@ func EncryptPKCS8PrivateKey(
 
     encrypted, encryptionAlgorithm, err := PBES2Encrypt(rand, data, password, useOpts)
     if err != nil {
-        return nil, errors.New("go-cryptobin/pkcs8: " + err.Error())
+        return nil, err
     }
 
-    // 生成 ans1 数据
     pki := encryptedPrivateKeyInfo{
         EncryptionAlgorithm: encryptionAlgorithm,
         EncryptedData:       encrypted,
@@ -97,7 +96,7 @@ func EncryptPKCS8PrivateKey(
 
     b, err := asn1.Marshal(pki)
     if err != nil {
-        return nil, errors.New("go-cryptobin/pkcs8: error marshaling encrypted key: " + err.Error())
+        return nil, errors.New("error marshaling encrypted key")
     }
 
     return &pem.Block{
@@ -110,7 +109,7 @@ func EncryptPKCS8PrivateKey(
 func DecryptPKCS8PrivateKey(data, password []byte) ([]byte, error) {
     var pki encryptedPrivateKeyInfo
     if _, err := asn1.Unmarshal(data, &pki); err != nil {
-        return nil, errors.New("go-cryptobin/pkcs8: failed to unmarshal private key: " + err.Error())
+        return nil, errors.New("failed to unmarshal private key")
     }
 
     algo := pki.EncryptionAlgorithm
@@ -118,7 +117,7 @@ func DecryptPKCS8PrivateKey(data, password []byte) ([]byte, error) {
 
     decryptedKey, err := PBES2Decrypt(encryptedKey, algo, password)
     if err != nil {
-        return nil, errors.New("go-cryptobin/pkcs8: " + err.Error())
+        return nil, err
     }
 
     return decryptedKey, nil
@@ -135,7 +134,7 @@ func DecryptPEMBlock(block *pem.Block, password []byte) ([]byte, error) {
         return DecryptPKCS8PrivateKey(block.Bytes, password)
     }
 
-    return nil, errors.New("go-cryptobin/pkcs8: unsupported encrypted PEM")
+    return nil, errors.New("unsupported encrypted PEM")
 }
 
 // PBES2 Encrypt data
@@ -153,8 +152,8 @@ func PBES2Encrypt(rand io.Reader, data []byte, password []byte, opts *Opts) (enc
     }
 
     salt := make([]byte, kdfOpts.GetSaltSize())
-    if _, saltErr := io.ReadFull(rand, salt); saltErr != nil {
-        err = errors.New("failed to generate salt: " + err.Error())
+    if _, err = io.ReadFull(rand, salt); err != nil {
+        err = errors.New("failed to generate salt")
         return
     }
 

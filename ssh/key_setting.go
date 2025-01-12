@@ -2,6 +2,7 @@ package ssh
 
 import (
     "crypto/rsa"
+    "crypto/dsa"
     "crypto/ecdsa"
     "crypto/ed25519"
 
@@ -16,6 +17,13 @@ func init() {
     })
     AddKey(ssh.KeyAlgoRSA, func() Key {
         return new(KeyRSA)
+    })
+
+    AddKey(GetStructName(&dsa.PrivateKey{}), func() Key {
+        return new(KeyDSA)
+    })
+    AddKey(ssh.KeyAlgoDSA, func() Key {
+        return new(KeyDSA)
     })
 
     AddKey(GetStructName(&ecdsa.PrivateKey{}), func() Key {

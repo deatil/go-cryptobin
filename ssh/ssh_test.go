@@ -7,6 +7,7 @@ import (
     "testing"
     "encoding/pem"
     "crypto/rsa"
+    "crypto/dsa"
     "crypto/rand"
     "crypto/ecdsa"
     "crypto/ed25519"
@@ -332,4 +333,26 @@ func Test_ParseSSHKey_SM2(t *testing.T) {
     assertNotEmpty(sshComment, "Test_ParseSSHKey_SM2-sshComment")
 
     assertEqual(sshComment, "test-ssh", "Test_ParseSSHKey_SM2")
+}
+
+func Test_ParseSSHKey_DSA(t *testing.T) {
+    assertEqual := cryptobin_test.AssertEqualT(t)
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    privateKey := &dsa.PrivateKey{}
+    dsa.GenerateParameters(&privateKey.Parameters, rand.Reader, dsa.L2048N224)
+    dsa.GenerateKey(privateKey, rand.Reader)
+
+    block, err := MarshalOpenSSHPrivateKey(rand.Reader, privateKey, "test-ssh")
+    assertError(err, "Test_ParseSSHKey_DSA-Marshal")
+
+    blockkeyData := pem.EncodeToMemory(block)
+
+    sshkeyName, sshComment, err := testParseSSHKey(string(blockkeyData), "")
+    assertError(err, "Test_ParseSSHKey_DSA")
+    assertNotEmpty(sshkeyName, "Test_ParseSSHKey_DSA-sshkeyName")
+    assertNotEmpty(sshComment, "Test_ParseSSHKey_DSA-sshComment")
+
+    assertEqual(sshComment, "test-ssh", "Test_ParseSSHKey_DSA")
 }

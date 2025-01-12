@@ -46,7 +46,8 @@ func (this KeyRSA) Marshal(key crypto.PrivateKey, comment string) (string, []byt
         Comment string
     }{
         k.PublicKey.N, E,
-        k.D, k.Precomputed.Qinv, k.Primes[0], k.Primes[1],
+        k.D, k.Precomputed.Qinv,
+        k.Primes[0], k.Primes[1],
         comment,
     }
     rest := ssh.Marshal(prikey)

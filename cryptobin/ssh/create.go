@@ -35,6 +35,12 @@ var (
 type (
     // OpenSSH options
     OpenSSHOpts = ssh.Opts
+
+    // OpenSSH Bcrypt options
+    OpenSSHBcryptOpts = ssh.BcryptOpts
+
+    // OpenSSH Bcryptbin options
+    OpenSSHBcryptbinOpts = ssh.BcryptbinOpts
 )
 
 var (

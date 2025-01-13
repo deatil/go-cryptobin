@@ -5,20 +5,20 @@ import (
     "reflect"
 )
 
-type publicKeyEqual interface {
+type keyEqual interface {
     Equal(x crypto.PublicKey) bool
 }
 
-// 检测公钥私钥是否匹配
+// Check Key Pair
 func (this SSH) CheckKeyPair() bool {
-    // 私钥导出的公钥
+    // get publicKey from privateKey
     pubKeyFromPriKey := this.MakePublicKey().publicKey
 
     if pubKeyFromPriKey == nil || this.publicKey == nil {
         return false
     }
 
-    if pubkeyEqual, ok := pubKeyFromPriKey.(publicKeyEqual); ok {
+    if pubkeyEqual, ok := pubKeyFromPriKey.(keyEqual); ok {
         if pubkeyEqual.Equal(this.publicKey) {
             return true
         }

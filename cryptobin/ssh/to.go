@@ -1,4 +1,4 @@
-package ecgdsa
+package ssh
 
 import (
     "github.com/deatil/go-cryptobin/tool/encoding"

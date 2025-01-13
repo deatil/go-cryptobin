@@ -1,4 +1,4 @@
-package ecgdsa
+package ssh
 
 import (
     "io"

@@ -1,4 +1,4 @@
-package ecgdsa
+package ssh
 
 // On Error
 func (this SSH) OnError(fn func([]error)) SSH {

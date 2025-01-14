@@ -212,6 +212,15 @@ func (this SSH) CreateOpenSSHPrivateKeyWithPassword(password []byte, opts ...Ope
     }
 
     useOpts := DefaultOpenSSHOpts
+    if this.options.CipherName != "" {
+        cip, err := ssh.ParseCipher(this.options.CipherName)
+        if err != nil {
+            return this.AppendError(err)
+        }
+
+        useOpts.Cipher = cip
+    }
+
     if len(opts) > 0 {
         useOpts = opts[0]
     }

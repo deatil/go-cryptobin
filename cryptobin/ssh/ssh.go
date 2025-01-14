@@ -43,6 +43,9 @@ type Options struct {
     // public key type
     PublicKeyType PublicKeyType
 
+    // Cipher Name
+    CipherName string
+
     // comment data
     Comment string
 

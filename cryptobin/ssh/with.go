@@ -77,6 +77,20 @@ func (this SSH) SetPublicKeyType(keyType string) SSH {
     return this
 }
 
+// With CipherName
+func (this SSH) WithCipherName(cipherName string) SSH {
+    this.options.CipherName = cipherName
+
+    return this
+}
+
+// Set Cipher
+func (this SSH) SetCipher(cip cryptobin_ssh.Cipher) SSH {
+    this.options.CipherName = cip.Name()
+
+    return this
+}
+
 // With Comment
 func (this SSH) WithComment(comment string) SSH {
     this.options.Comment = comment

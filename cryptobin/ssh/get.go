@@ -75,6 +75,11 @@ func (this SSH) GetOptions() Options {
     return this.options
 }
 
+// get Options CipherName
+func (this SSH) GetCipherName() string {
+    return this.options.CipherName
+}
+
 // get Options Comment
 func (this SSH) GetComment() string {
     return this.options.Comment

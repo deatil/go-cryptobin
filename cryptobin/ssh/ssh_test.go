@@ -8,6 +8,7 @@ import (
     "crypto/rand"
     "crypto/elliptic"
 
+    cryptobin_ssh "github.com/deatil/go-cryptobin/ssh"
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
@@ -341,6 +342,7 @@ func Test_Get(t *testing.T) {
     testerr := errors.New("test-error")
     opts := Options{
         PublicKeyType:  KeyTypeRSA,
+        CipherName:     "test-CipherName",
         Comment:        "test-Comment",
         ParameterSizes: dsa.L1024N160,
         Curve:          elliptic.P256(),
@@ -373,6 +375,7 @@ func Test_Get(t *testing.T) {
     assertNotEmpty(openSSHPublicKey, "Test_Get-GetOpenSSHPublicKey")
 
     assertEqual(newSSH2.GetOptions(), opts, "Test_Get-GetOptions")
+    assertEqual(newSSH2.GetCipherName(), "test-CipherName", "Test_Get-GetCipherName")
     assertEqual(newSSH2.GetComment(), "test-Comment", "Test_Get-GetComment")
     assertEqual(newSSH2.GetParameterSizes(), dsa.L1024N160, "Test_Get-GetParameterSizes")
     assertEqual(newSSH2.GetCurve(), elliptic.P256(), "Test_Get-GetCurve")
@@ -429,6 +432,12 @@ func Test_With(t *testing.T) {
 
     tmp = newSSH.SetPublicKeyType("ECDSA")
     assertEqual(tmp.options.PublicKeyType, KeyTypeECDSA, "Test_Get-SetPublicKeyType")
+
+    tmp = newSSH.WithCipherName("test-CipherName")
+    assertEqual(tmp.options.CipherName, "test-CipherName", "Test_Get-WithCipherName")
+
+    tmp = newSSH.SetCipher(cryptobin_ssh.AES256CBC)
+    assertEqual(tmp.options.CipherName, "aes256-cbc", "Test_Get-SetCipher")
 
     tmp = newSSH.WithComment("test-Comment")
     assertEqual(tmp.options.Comment, "test-Comment", "Test_Get-WithComment")

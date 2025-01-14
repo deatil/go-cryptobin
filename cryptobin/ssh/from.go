@@ -143,13 +143,14 @@ func FromPublicKey(key []byte) SSH {
 
 // from OpenSSH PrivateKey
 func (this SSH) FromOpenSSHPrivateKey(key []byte) SSH {
-    privateKey, comment, err := this.ParseOpenSSHPrivateKeyFromPEM(key)
+    privateKey, comment, cipherName, err := this.ParseOpenSSHPrivateKeyFromPEM(key)
     if err != nil {
         return this.AppendError(err)
     }
 
     this.privateKey = privateKey
     this.options.Comment = comment
+    this.options.CipherName = cipherName
 
     return this
 }
@@ -161,13 +162,14 @@ func FromOpenSSHPrivateKey(key []byte) SSH {
 
 // from OpenSSH PrivateKey with password
 func (this SSH) FromOpenSSHPrivateKeyWithPassword(key []byte, password []byte) SSH {
-    privateKey, comment, err := this.ParseOpenSSHPrivateKeyFromPEMWithPassword(key, password)
+    privateKey, comment, cipherName, err := this.ParseOpenSSHPrivateKeyFromPEMWithPassword(key, password)
     if err != nil {
         return this.AppendError(err)
     }
 
     this.privateKey = privateKey
     this.options.Comment = comment
+    this.options.CipherName = cipherName
 
     return this
 }

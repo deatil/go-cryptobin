@@ -33,24 +33,44 @@ var (
 )
 
 // Parse OpenSSH PrivateKey From PEM
-func (this SSH) ParseOpenSSHPrivateKeyFromPEM(key []byte) (crypto.PrivateKey, string, error) {
+func (this SSH) ParseOpenSSHPrivateKeyFromPEM(key []byte) (crypto.PrivateKey, string, string, error) {
     // Parse PEM block
     var block *pem.Block
     if block, _ = pem.Decode(key); block == nil {
-        return nil, "", ErrKeyMustBePEMEncoded
+        return nil, "", "", ErrKeyMustBePEMEncoded
     }
 
-    return ssh.ParseOpenSSHPrivateKey(block.Bytes)
+    privateKey, comment, err := ssh.ParseOpenSSHPrivateKey(block.Bytes)
+    if err != nil {
+        return nil, "", "", err
+    }
+
+    info, err := ssh.ParseOpenSSHPrivateKeyToInfo(block.Bytes)
+    if err != nil {
+        return nil, "", "", err
+    }
+
+    return privateKey, comment, info.CipherName, nil
 }
 
 // Parse OpenSSH PrivateKey From PEM With Password
-func (this SSH) ParseOpenSSHPrivateKeyFromPEMWithPassword(key []byte, password []byte) (crypto.PrivateKey, string, error) {
+func (this SSH) ParseOpenSSHPrivateKeyFromPEMWithPassword(key []byte, password []byte) (crypto.PrivateKey, string, string, error) {
     var block *pem.Block
     if block, _ = pem.Decode(key); block == nil {
-        return nil, "", ErrKeyMustBePEMEncoded
+        return nil, "", "", ErrKeyMustBePEMEncoded
     }
 
-    return ssh.ParseOpenSSHPrivateKeyWithPassword(block.Bytes, password)
+    privateKey, comment, err := ssh.ParseOpenSSHPrivateKeyWithPassword(block.Bytes, password)
+    if err != nil {
+        return nil, "", "", err
+    }
+
+    info, err := ssh.ParseOpenSSHPrivateKeyToInfo(block.Bytes)
+    if err != nil {
+        return nil, "", "", err
+    }
+
+    return privateKey, comment, info.CipherName, nil
 }
 
 // Parse OpenSSH PublicKey From PEM

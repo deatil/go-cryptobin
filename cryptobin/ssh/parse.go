@@ -73,6 +73,31 @@ func (this SSH) ParseOpenSSHPrivateKeyFromPEMWithPassword(key []byte, password [
     return privateKey, comment, info.CipherName, nil
 }
 
+type openSSHPrivateKey struct {
+    CipherName   string
+    KdfName      string
+    KdfOpts      string
+    NumKeys      uint32
+    PubKey       []byte
+    PrivKeyBlock []byte
+}
+
+// Parse OpenSSH PrivateKey To Info From PEM
+func (this SSH) ParseOpenSSHPrivateKeyToInfoFromPEM(key []byte) (openSSHPrivateKey, error) {
+    // Parse PEM block
+    var block *pem.Block
+    if block, _ = pem.Decode(key); block == nil {
+        return openSSHPrivateKey{}, ErrKeyMustBePEMEncoded
+    }
+
+    info, err := ssh.ParseOpenSSHPrivateKeyToInfo(block.Bytes)
+    if err != nil {
+        return openSSHPrivateKey{}, err
+    }
+
+    return openSSHPrivateKey(info), nil
+}
+
 // Parse OpenSSH PublicKey From PEM
 func (this SSH) ParseOpenSSHPublicKeyFromPEM(key []byte) (crypto.PublicKey, string, error) {
     var err error

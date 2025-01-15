@@ -1,5 +1,9 @@
 package ca
 
+import (
+    "crypto"
+)
+
 /**
  * CA
  *
@@ -17,11 +21,11 @@ type CA struct {
 
     // 私钥
     // 可用 [*rsa.PrivateKey | *ecdsa.PrivateKey | ed25519.PrivateKey | *sm2.PrivateKey]
-    privateKey any
+    privateKey crypto.PrivateKey
 
     // 公钥
     // 可用 [*rsa.PublicKey | *ecdsa.PublicKey | ed25519.PublicKey | *sm2.PublicKey]
-    publicKey any
+    publicKey crypto.PublicKey
 
     // [私钥/公钥/cert]数据
     keyData []byte

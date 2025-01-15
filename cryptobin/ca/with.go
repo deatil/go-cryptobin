@@ -1,31 +1,35 @@
 package ca
 
+import (
+    "crypto"
+)
+
 // 设置 cert
 // 可用 [*x509.Certificate | *sm2X509.Certificate]
-func (this CA) WithCert(data any) CA {
-    this.cert = data
+func (this CA) WithCert(cert any) CA {
+    this.cert = cert
 
     return this
 }
 
 // 设置 certRequest
 // 可用 [*x509.CertificateRequest | *sm2X509.CertificateRequest]
-func (this CA) WithCertRequest(data any) CA {
-    this.certRequest = data
+func (this CA) WithCertRequest(cert any) CA {
+    this.certRequest = cert
 
     return this
 }
 
 // 设置 PrivateKey
-func (this CA) WithPrivateKey(data any) CA {
-    this.privateKey = data
+func (this CA) WithPrivateKey(key crypto.PrivateKey) CA {
+    this.privateKey = key
 
     return this
 }
 
 // 设置 publicKey
-func (this CA) WithPublicKey(data any) CA {
-    this.publicKey = data
+func (this CA) WithPublicKey(key crypto.PublicKey) CA {
+    this.publicKey = key
 
     return this
 }

@@ -1,5 +1,9 @@
 package ca
 
+import (
+    "crypto"
+)
+
 // 获取 cert
 func (this CA) GetCert() any {
     return this.cert
@@ -11,12 +15,12 @@ func (this CA) GetCertRequest() any {
 }
 
 // 获取 PrivateKey
-func (this CA) GetPrivateKey() any {
+func (this CA) GetPrivateKey() crypto.PrivateKey {
     return this.privateKey
 }
 
 // 获取 publicKey
-func (this CA) GetPublicKey() any {
+func (this CA) GetPublicKey() crypto.PublicKey {
     return this.publicKey
 }
 

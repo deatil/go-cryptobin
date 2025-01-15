@@ -168,53 +168,29 @@ func (this CA) CreatePrivateKey() CA {
         return this.AppendError(err)
     }
 
-    var privateBlock *pem.Block
+    var privateKeyBytes []byte
+    var err error
 
     switch privateKey := this.privateKey.(type) {
         case *rsa.PrivateKey:
-            privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
-
-            privateBlock = &pem.Block{
-                Type: "RSA PRIVATE KEY",
-                Bytes: privateKeyBytes,
-            }
-
+            privateKeyBytes, err = x509.MarshalPKCS8PrivateKey(privateKey)
         case *ecdsa.PrivateKey:
-            privateKeyBytes, err := x509.MarshalECPrivateKey(privateKey)
-            if err != nil {
-                return this.AppendError(err)
-            }
-
-            privateBlock = &pem.Block{
-                Type: "EC PRIVATE KEY",
-                Bytes: privateKeyBytes,
-            }
-
+            privateKeyBytes, err = x509.MarshalPKCS8PrivateKey(privateKey)
         case ed25519.PrivateKey:
-            privateKeyBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
-            if err != nil {
-                return this.AppendError(err)
-            }
-
-            privateBlock = &pem.Block{
-                Type: "PRIVATE KEY",
-                Bytes: privateKeyBytes,
-            }
-
+            privateKeyBytes, err = x509.MarshalPKCS8PrivateKey(privateKey)
         case *sm2.PrivateKey:
-            privateKeyBytes, err := sm2.MarshalPrivateKey(privateKey)
-            if err != nil {
-                return this.AppendError(err)
-            }
-
-            privateBlock = &pem.Block{
-                Type: "PRIVATE KEY",
-                Bytes: privateKeyBytes,
-            }
-
+            privateKeyBytes, err = sm2.MarshalPrivateKey(privateKey)
         default:
-            err := fmt.Errorf("unsupported private key type: %T", privateKey)
-            return this.AppendError(err)
+            err = fmt.Errorf("unsupported private key type: %T", privateKey)
+    }
+
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    privateBlock := &pem.Block{
+        Type:  "PRIVATE KEY",
+        Bytes: privateKeyBytes,
     }
 
     this.keyData = pem.EncodeToMemory(privateBlock)

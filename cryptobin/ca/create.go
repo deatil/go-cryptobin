@@ -3,6 +3,7 @@ package ca
 import (
     "fmt"
     "errors"
+    "crypto/dsa"
     "crypto/rsa"
     "crypto/ecdsa"
     "crypto/ed25519"
@@ -13,6 +14,7 @@ import (
     "github.com/deatil/go-cryptobin/pkcs12"
     "github.com/deatil/go-cryptobin/gm/sm2"
     cryptobin_x509 "github.com/deatil/go-cryptobin/x509"
+    pubkey_dsa "github.com/deatil/go-cryptobin/pubkey/dsa"
 )
 
 // CA 证书
@@ -194,6 +196,45 @@ func (this CA) CreatePrivateKey() CA {
     }
 
     this.keyData = pem.EncodeToMemory(privateBlock)
+
+    return this
+}
+
+// Create PublicKey PEM
+func (this CA) CreatePublicKey() CA {
+    if this.publicKey == nil {
+        err := errors.New("publicKey empty.")
+        return this.AppendError(err)
+    }
+
+    var publicKeyBytes []byte
+    var err error
+
+    switch pubkey := this.publicKey.(type) {
+        case *rsa.PublicKey:
+            publicKeyBytes, err = x509.MarshalPKIXPublicKey(pubkey)
+        case *dsa.PublicKey:
+            publicKeyBytes, err = pubkey_dsa.MarshalPKCS8PublicKey(pubkey)
+        case *ecdsa.PublicKey:
+            publicKeyBytes, err = x509.MarshalPKIXPublicKey(pubkey)
+        case ed25519.PublicKey:
+            publicKeyBytes, err = x509.MarshalPKIXPublicKey(pubkey)
+        case *sm2.PublicKey:
+            publicKeyBytes, err = sm2.MarshalPublicKey(pubkey)
+        default:
+            err = errors.New("privateKey error.")
+    }
+
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    publicBlock := &pem.Block{
+        Type:  "PUBLIC KEY",
+        Bytes: publicKeyBytes,
+    }
+
+    this.keyData = pem.EncodeToMemory(publicBlock)
 
     return this
 }

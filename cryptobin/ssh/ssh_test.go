@@ -434,6 +434,9 @@ func Test_With(t *testing.T) {
     tmp = newSSH.SetPublicKeyType("ECDSA")
     assertEqual(tmp.options.PublicKeyType, KeyTypeECDSA, "Test_Get-SetPublicKeyType")
 
+    tmp = newSSH.SetGenerateType("EdDSA")
+    assertEqual(tmp.options.PublicKeyType, KeyTypeEdDSA, "Test_Get-SetGenerateType")
+
     tmp = newSSH.WithCipherName("test-CipherName")
     assertEqual(tmp.options.CipherName, "test-CipherName", "Test_Get-WithCipherName")
 

@@ -70,6 +70,13 @@ func (this CA) SetPublicKeyType(keyType string) CA {
     return this
 }
 
+// set Generate public key type
+// params:
+// [ RSA | DSA | ECDSA | EdDSA | SM2 ]
+func (this CA) SetGenerateType(typ string) CA {
+    return this.SetPublicKeyType(typ)
+}
+
 // With DSA ParameterSizes
 func (this CA) WithParameterSizes(sizes dsa.ParameterSizes) CA {
     this.options.ParameterSizes = sizes

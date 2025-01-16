@@ -57,7 +57,7 @@ func (this SSH) WithPublicKeyType(keyType PublicKeyType) SSH {
     return this
 }
 
-// public key type
+// set public key type
 // params:
 // [ RSA | DSA | ECDSA | EdDSA | SM2 ]
 func (this SSH) SetPublicKeyType(keyType string) SSH {
@@ -75,6 +75,13 @@ func (this SSH) SetPublicKeyType(keyType string) SSH {
     }
 
     return this
+}
+
+// set Generate public key type
+// params:
+// [ RSA | DSA | ECDSA | EdDSA | SM2 ]
+func (this SSH) SetGenerateType(typ string) SSH {
+    return this.SetPublicKeyType(typ)
 }
 
 // With CipherName

@@ -14,7 +14,9 @@ func Test_CreateCA(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     obj := New().
-        GenerateRSAKey(512).
+        SetPublicKeyType("RSA").
+        WithBits(512).
+        GenerateKey().
         MakeCA(pkix.Name{
             CommonName:   "test.example.com",
             Organization: []string{"Test"},
@@ -40,7 +42,59 @@ func Test_CreateCA(t *testing.T) {
     }
 }
 
-func Test_CreatePrivateKey_RSA(t *testing.T) {
+func Test_GenerateKey(t *testing.T) {
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    t.Run("GenerateRSAKey", func(t *testing.T) {
+        obj := New().
+            SetPublicKeyType("RSA").
+            WithBits(2048).
+            GenerateKey().
+            CreatePrivateKey()
+        key := obj.ToKeyString()
+
+        assertError(obj.Error(), "Test_GenerateKey")
+        assertNotEmpty(key, "Test_GenerateKey")
+    })
+
+    t.Run("GenerateECDSAKey", func(t *testing.T) {
+        obj := New().
+            SetPublicKeyType("ECDSA").
+            SetCurve("P256").
+            GenerateKey().
+            CreatePrivateKey()
+        key := obj.ToKeyString()
+
+        assertError(obj.Error(), "Test_GenerateKey")
+        assertNotEmpty(key, "Test_GenerateKey")
+    })
+
+    t.Run("GenerateEdDSAKey", func(t *testing.T) {
+        obj := New().
+            SetPublicKeyType("EdDSA").
+            GenerateKey().
+            CreatePrivateKey()
+        key := obj.ToKeyString()
+
+        assertError(obj.Error(), "Test_GenerateKey")
+        assertNotEmpty(key, "Test_GenerateKey")
+    })
+
+    t.Run("GenerateSM2Key", func(t *testing.T) {
+        obj := New().
+            SetPublicKeyType("SM2").
+            GenerateKey().
+            CreatePrivateKey()
+        key := obj.ToKeyString()
+
+        assertError(obj.Error(), "Test_GenerateKey")
+        assertNotEmpty(key, "Test_GenerateKey")
+    })
+
+}
+
+func Test_GenerateKey2(t *testing.T) {
     assertError := cryptobin_test.AssertErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -50,8 +104,8 @@ func Test_CreatePrivateKey_RSA(t *testing.T) {
             CreatePrivateKey()
         key := obj.ToKeyString()
 
-        assertError(obj.Error(), "Test_CreatePrivateKey_RSA")
-        assertNotEmpty(key, "Test_CreatePrivateKey_RSA")
+        assertError(obj.Error(), "Test_GenerateKey2")
+        assertNotEmpty(key, "Test_GenerateKey2")
     })
 
     t.Run("GenerateECDSAKey", func(t *testing.T) {
@@ -60,8 +114,8 @@ func Test_CreatePrivateKey_RSA(t *testing.T) {
             CreatePrivateKey()
         key := obj.ToKeyString()
 
-        assertError(obj.Error(), "Test_CreatePrivateKey_RSA")
-        assertNotEmpty(key, "Test_CreatePrivateKey_RSA")
+        assertError(obj.Error(), "Test_GenerateKey2")
+        assertNotEmpty(key, "Test_GenerateKey2")
     })
 
     t.Run("GenerateEdDSAKey", func(t *testing.T) {
@@ -70,8 +124,8 @@ func Test_CreatePrivateKey_RSA(t *testing.T) {
             CreatePrivateKey()
         key := obj.ToKeyString()
 
-        assertError(obj.Error(), "Test_CreatePrivateKey_RSA")
-        assertNotEmpty(key, "Test_CreatePrivateKey_RSA")
+        assertError(obj.Error(), "Test_GenerateKey2")
+        assertNotEmpty(key, "Test_GenerateKey2")
     })
 
     t.Run("GenerateSM2Key", func(t *testing.T) {
@@ -80,8 +134,8 @@ func Test_CreatePrivateKey_RSA(t *testing.T) {
             CreatePrivateKey()
         key := obj.ToKeyString()
 
-        assertError(obj.Error(), "Test_CreatePrivateKey_RSA")
-        assertNotEmpty(key, "Test_CreatePrivateKey_RSA")
+        assertError(obj.Error(), "Test_GenerateKey2")
+        assertNotEmpty(key, "Test_GenerateKey2")
     })
 
 }

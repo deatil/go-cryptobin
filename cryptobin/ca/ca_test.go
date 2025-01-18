@@ -58,6 +58,34 @@ func Test_GenerateKey(t *testing.T) {
         assertError(obj.Error(), "Test_GenerateKey")
         assertNotEmpty(prikey, "Test_GenerateKey-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
+
+        pass := []byte("12345678")
+        prikey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
+        pubkey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
+
+        assertNotEmpty(prikey2, "Test_GenerateKey-prikey2")
+        assertNotEmpty(pubkey2, "Test_GenerateKey-pubkey2")
+    })
+
+    t.Run("GenerateDSAKey", func(t *testing.T) {
+        obj := New().
+            SetPublicKeyType("DSA").
+            SetParameterSizes("L1024N160").
+            GenerateKey()
+
+        prikey := obj.CreatePrivateKey().ToKeyString()
+        pubkey := obj.CreatePublicKey().ToKeyString()
+
+        assertError(obj.Error(), "Test_GenerateKey")
+        assertNotEmpty(prikey, "Test_GenerateKey-prikey")
+        assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
+
+        pass := []byte("12345678")
+        prikey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
+        pubkey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
+
+        assertNotEmpty(prikey2, "Test_GenerateKey-prikey2")
+        assertNotEmpty(pubkey2, "Test_GenerateKey-pubkey2")
     })
 
     t.Run("GenerateECDSAKey", func(t *testing.T) {
@@ -72,6 +100,13 @@ func Test_GenerateKey(t *testing.T) {
         assertError(obj.Error(), "Test_GenerateKey")
         assertNotEmpty(prikey, "Test_GenerateKey-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
+
+        pass := []byte("12345678")
+        prikey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
+        pubkey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
+
+        assertNotEmpty(prikey2, "Test_GenerateKey-prikey2")
+        assertNotEmpty(pubkey2, "Test_GenerateKey-pubkey2")
     })
 
     t.Run("GenerateEdDSAKey", func(t *testing.T) {
@@ -85,6 +120,13 @@ func Test_GenerateKey(t *testing.T) {
         assertError(obj.Error(), "Test_GenerateKey")
         assertNotEmpty(prikey, "Test_GenerateKey-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
+
+        pass := []byte("12345678")
+        prikey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
+        pubkey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
+
+        assertNotEmpty(prikey2, "Test_GenerateKey-prikey2")
+        assertNotEmpty(pubkey2, "Test_GenerateKey-pubkey2")
     })
 
     t.Run("GenerateSM2Key", func(t *testing.T) {
@@ -98,6 +140,13 @@ func Test_GenerateKey(t *testing.T) {
         assertError(obj.Error(), "Test_GenerateKey")
         assertNotEmpty(prikey, "Test_GenerateKey-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
+
+        pass := []byte("12345678")
+        prikey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
+        pubkey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
+
+        assertNotEmpty(prikey2, "Test_GenerateKey-prikey2")
+        assertNotEmpty(pubkey2, "Test_GenerateKey-pubkey2")
     })
 
     t.Run("GenerateRSAKey 2", func(t *testing.T) {
@@ -112,6 +161,13 @@ func Test_GenerateKey(t *testing.T) {
         assertError(obj.Error(), "Test_GenerateKey")
         assertNotEmpty(prikey, "Test_GenerateKey-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
+
+        pass := []byte("12345678")
+        prikey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
+        pubkey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
+
+        assertNotEmpty(prikey2, "Test_GenerateKey-prikey2")
+        assertNotEmpty(pubkey2, "Test_GenerateKey-pubkey2")
     })
 
 }
@@ -123,6 +179,17 @@ func Test_GenerateKey2(t *testing.T) {
     t.Run("GenerateRSAKey", func(t *testing.T) {
         obj := New().
             GenerateRSAKey(2048)
+
+        prikey := obj.CreatePrivateKey().ToKeyString()
+        pubkey := obj.CreatePublicKey().ToKeyString()
+
+        assertError(obj.Error(), "Test_GenerateKey2")
+        assertNotEmpty(prikey, "Test_GenerateKey2-prikey")
+        assertNotEmpty(pubkey, "Test_GenerateKey2-pubkey")
+    })
+
+    t.Run("GenerateDSAKey", func(t *testing.T) {
+        obj := New().GenerateDSAKey("L2048N224")
 
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()

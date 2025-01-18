@@ -11,10 +11,27 @@ import (
     "crypto/x509"
     "encoding/pem"
 
+    "github.com/deatil/go-cryptobin/pkcs8"
     "github.com/deatil/go-cryptobin/pkcs12"
     "github.com/deatil/go-cryptobin/gm/sm2"
     cryptobin_x509 "github.com/deatil/go-cryptobin/x509"
     pubkey_dsa "github.com/deatil/go-cryptobin/pubkey/dsa"
+)
+
+type (
+    // options
+    Opts       = pkcs8.Opts
+    // PBKDF2 options
+    PBKDF2Opts = pkcs8.PBKDF2Opts
+    // Scrypt options
+    ScryptOpts = pkcs8.ScryptOpts
+)
+
+var (
+    // get Cipher type
+    GetCipherFromName = pkcs8.GetCipherFromName
+    // get hash type
+    GetHashFromName   = pkcs8.GetHashFromName
 )
 
 // CA 证书
@@ -166,7 +183,7 @@ func (this CA) CreateCSR() CA {
 // 私钥
 func (this CA) CreatePrivateKey() CA {
     if this.privateKey == nil {
-        err := errors.New("privateKey error.")
+        err := errors.New("privateKey empty.")
         return this.AppendError(err)
     }
 
@@ -176,6 +193,8 @@ func (this CA) CreatePrivateKey() CA {
     switch privateKey := this.privateKey.(type) {
         case *rsa.PrivateKey:
             privateKeyBytes, err = x509.MarshalPKCS8PrivateKey(privateKey)
+        case *dsa.PrivateKey:
+            privateKeyBytes, err = pubkey_dsa.MarshalPKCS8PrivateKey(privateKey)
         case *ecdsa.PrivateKey:
             privateKeyBytes, err = x509.MarshalPKCS8PrivateKey(privateKey)
         case ed25519.PrivateKey:
@@ -193,6 +212,57 @@ func (this CA) CreatePrivateKey() CA {
     privateBlock := &pem.Block{
         Type:  "PRIVATE KEY",
         Bytes: privateKeyBytes,
+    }
+
+    this.keyData = pem.EncodeToMemory(privateBlock)
+
+    return this
+}
+
+// Create PrivateKey PEM With Password
+func (this CA) CreatePrivateKeyWithPassword(password []byte, opts ...any) CA {
+    if this.privateKey == nil {
+        err := errors.New("privateKey empty.")
+        return this.AppendError(err)
+    }
+
+    opt, err := pkcs8.ParseOpts(opts...)
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    var privateKeyBytes []byte
+
+    // 生成私钥
+    switch prikey := this.privateKey.(type) {
+        case *rsa.PrivateKey:
+            privateKeyBytes, err = x509.MarshalPKCS8PrivateKey(prikey)
+        case *dsa.PrivateKey:
+            privateKeyBytes, err = pubkey_dsa.MarshalPKCS8PrivateKey(prikey)
+        case *ecdsa.PrivateKey:
+            privateKeyBytes, err = x509.MarshalPKCS8PrivateKey(prikey)
+        case ed25519.PrivateKey:
+            privateKeyBytes, err = x509.MarshalPKCS8PrivateKey(prikey)
+        case *sm2.PrivateKey:
+            privateKeyBytes, err = sm2.MarshalPrivateKey(prikey)
+        default:
+            err = errors.New("privateKey error.")
+    }
+
+    if err != nil {
+        return this.AppendError(err)
+    }
+
+    // 生成加密数据
+    privateBlock, err := pkcs8.EncryptPEMBlock(
+        rand.Reader,
+        "ENCRYPTED PRIVATE KEY",
+        privateKeyBytes,
+        []byte(password),
+        opt,
+    )
+    if err != nil {
+        return this.AppendError(err)
     }
 
     this.keyData = pem.EncodeToMemory(privateBlock)

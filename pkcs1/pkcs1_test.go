@@ -886,7 +886,7 @@ func Test_Check_PEMBlock(t *testing.T) {
     t.Run("DESEDE3_CFB", func(t *testing.T) {
         testKeyEncryptPEMBlock(t, testKey_DESEDE3_CFB)
     })
-    t.Run("3DES_OFB", func(t *testing.T) {
+    t.Run("DESEDE3_OFB", func(t *testing.T) {
         testKeyEncryptPEMBlock(t, testKey_DESEDE3_OFB)
     })
     t.Run("DESEDE3_CTR", func(t *testing.T) {

@@ -61,10 +61,8 @@ func Test_GenerateKey(t *testing.T) {
 
         pass := []byte("12345678")
         prikey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
-        pubkey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
 
         assertNotEmpty(prikey2, "Test_GenerateKey-prikey2")
-        assertNotEmpty(pubkey2, "Test_GenerateKey-pubkey2")
     })
 
     t.Run("GenerateDSAKey", func(t *testing.T) {
@@ -82,10 +80,8 @@ func Test_GenerateKey(t *testing.T) {
 
         pass := []byte("12345678")
         prikey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
-        pubkey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
 
         assertNotEmpty(prikey2, "Test_GenerateKey-prikey2")
-        assertNotEmpty(pubkey2, "Test_GenerateKey-pubkey2")
     })
 
     t.Run("GenerateECDSAKey", func(t *testing.T) {
@@ -103,10 +99,8 @@ func Test_GenerateKey(t *testing.T) {
 
         pass := []byte("12345678")
         prikey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
-        pubkey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
 
         assertNotEmpty(prikey2, "Test_GenerateKey-prikey2")
-        assertNotEmpty(pubkey2, "Test_GenerateKey-pubkey2")
     })
 
     t.Run("GenerateEdDSAKey", func(t *testing.T) {
@@ -123,10 +117,8 @@ func Test_GenerateKey(t *testing.T) {
 
         pass := []byte("12345678")
         prikey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
-        pubkey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
 
         assertNotEmpty(prikey2, "Test_GenerateKey-prikey2")
-        assertNotEmpty(pubkey2, "Test_GenerateKey-pubkey2")
     })
 
     t.Run("GenerateSM2Key", func(t *testing.T) {
@@ -143,10 +135,8 @@ func Test_GenerateKey(t *testing.T) {
 
         pass := []byte("12345678")
         prikey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
-        pubkey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
 
         assertNotEmpty(prikey2, "Test_GenerateKey-prikey2")
-        assertNotEmpty(pubkey2, "Test_GenerateKey-pubkey2")
     })
 
     t.Run("GenerateRSAKey 2", func(t *testing.T) {
@@ -164,10 +154,8 @@ func Test_GenerateKey(t *testing.T) {
 
         pass := []byte("12345678")
         prikey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
-        pubkey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
 
         assertNotEmpty(prikey2, "Test_GenerateKey-prikey2")
-        assertNotEmpty(pubkey2, "Test_GenerateKey-pubkey2")
     })
 
 }

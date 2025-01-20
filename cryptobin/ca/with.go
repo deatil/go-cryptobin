@@ -4,19 +4,19 @@ import (
     "crypto"
     "crypto/dsa"
     "crypto/elliptic"
+
+    "github.com/deatil/go-cryptobin/x509"
 )
 
 // 设置 cert
-// 可用 [*x509.Certificate | *sm2X509.Certificate]
-func (this CA) WithCert(cert any) CA {
+func (this CA) WithCert(cert *x509.Certificate) CA {
     this.cert = cert
 
     return this
 }
 
 // 设置 certRequest
-// 可用 [*x509.CertificateRequest | *sm2X509.CertificateRequest]
-func (this CA) WithCertRequest(cert any) CA {
+func (this CA) WithCertRequest(cert *x509.CertificateRequest) CA {
     this.certRequest = cert
 
     return this

@@ -5,6 +5,8 @@ import (
     "crypto"
     "crypto/dsa"
     "crypto/elliptic"
+
+    "github.com/deatil/go-cryptobin/x509"
 )
 
 // public key type
@@ -61,12 +63,10 @@ type Options struct {
  */
 type CA struct {
     // 证书数据
-    // 可用 [*x509.Certificate | *sm2X509.Certificate]
-    cert any
+    cert *x509.Certificate
 
     // 证书请求
-    // 可用 [*x509.CertificateRequest | *sm2X509.CertificateRequest]
-    certRequest any
+    certRequest *x509.CertificateRequest
 
     // 私钥
     // 可用 [*rsa.PrivateKey | *ecdsa.PrivateKey | ed25519.PrivateKey | *sm2.PrivateKey]

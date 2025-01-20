@@ -2,16 +2,15 @@ package ca
 
 import (
     "io"
-    "errors"
     "crypto/rand"
     "crypto/rsa"
     "crypto/dsa"
-    "crypto/x509"
     "crypto/ecdsa"
     "crypto/ed25519"
 
-    "github.com/deatil/go-cryptobin/gm/sm2"
+    "github.com/deatil/go-cryptobin/x509"
     "github.com/deatil/go-cryptobin/pkcs12"
+    "github.com/deatil/go-cryptobin/gm/sm2"
 )
 
 // Generate Key with Reader
@@ -185,7 +184,9 @@ func (this CA) FromPKCS12Cert(pfxData []byte, password string) CA {
     }
 
     this.privateKey = privateKey
-    this.cert = cert
+
+    this.cert = &x509.Certificate{}
+    this.cert.FromX509Certificate(cert)
 
     return this
 }
@@ -193,54 +194,6 @@ func (this CA) FromPKCS12Cert(pfxData []byte, password string) CA {
 // From PKCS12 Cert
 func FromPKCS12Cert(pfxData []byte, password string) CA {
     return defaultCA.FromPKCS12Cert(pfxData, password)
-}
-
-// From SM2 PKCS12 Cert
-func (this CA) FromSM2PKCS12Cert(pfxData []byte, password string) CA {
-    pv, cert, err := pkcs12.Decode(pfxData, password)
-    if err != nil {
-        return this.AppendError(err)
-    }
-
-    switch k := pv.(type) {
-        case *ecdsa.PrivateKey:
-            switch k.Curve {
-                case sm2.P256():
-                    sm2pub := &sm2.PublicKey{
-                        Curve: k.Curve,
-                        X:     k.X,
-                        Y:     k.Y,
-                    }
-
-                    sm2Pri := &sm2.PrivateKey{
-                        PublicKey: *sm2pub,
-                        D:         k.D,
-                    }
-
-                    if !k.IsOnCurve(k.X, k.Y) {
-                        err := errors.New("error while validating SM2 private key: %v")
-                        return this.AppendError(err)
-                    }
-
-                    this.privateKey = sm2Pri
-                    this.cert = cert
-
-                    return this
-                default:
-                    // other
-            }
-        default:
-            // other
-    }
-
-    err = errors.New("unexpected type for p12 private key")
-
-    return this.AppendError(err)
-}
-
-// From SM2 PKCS12 Cert
-func FromSM2PKCS12Cert(pfxData []byte, password string) CA {
-    return defaultCA.FromSM2PKCS12Cert(pfxData, password)
 }
 
 // =======================

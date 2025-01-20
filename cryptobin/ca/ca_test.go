@@ -19,7 +19,7 @@ func Test_CreateCA(t *testing.T) {
         GenerateKey().
         MakeCA(pkix.Name{
             CommonName:   "test.example.com",
-            Organization: []string{"Test"},
+            Organization: []string{"Test Organization"},
         }, 2, "SHA256WithRSA").
         CreateCA()
     key := obj.ToKeyString()
@@ -30,6 +30,9 @@ func Test_CreateCA(t *testing.T) {
     // ===========
 
     block, _ := pem.Decode([]byte(key))
+    if block == nil {
+        t.Fatal("failed to read cert")
+    }
 
     cert, err := cryptobin_x509.ParseCertificate(block.Bytes)
     if err != nil {

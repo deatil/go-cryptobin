@@ -10,6 +10,7 @@ import (
 // 验证
 func (this CA) Verify(rootPEM string, certPEM string, opts x509.VerifyOptions) (bool, error) {
     roots := x509.NewCertPool()
+
     ok := roots.AppendCertsFromPEM([]byte(rootPEM))
     if !ok {
         return false, errors.New("failed to parse root certificate")

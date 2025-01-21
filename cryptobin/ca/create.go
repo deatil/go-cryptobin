@@ -3,6 +3,7 @@ package ca
 import (
     "fmt"
     "errors"
+    "crypto"
     "crypto/dsa"
     "crypto/rsa"
     "crypto/ecdsa"
@@ -36,12 +37,22 @@ var (
 
 // Create CA PEM
 func (this CA) CreateCA() CA {
+    return this.CreateCAWithIssuer(nil, nil)
+}
+
+// Create CA PEM With Issuer
+func (this CA) CreateCAWithIssuer(issuer *cryptobin_x509.Certificate, issuerKey crypto.PrivateKey) CA {
     if this.publicKey == nil || this.privateKey == nil {
         err := errors.New("publicKey or privateKey error.")
         return this.AppendError(err)
     }
 
-    caBytes, err := cryptobin_x509.CreateCertificate(rand.Reader, this.cert, this.cert, this.publicKey, this.privateKey)
+    if issuer == nil {
+        issuer = this.cert
+        issuerKey = this.privateKey
+    }
+
+    caBytes, err := cryptobin_x509.CreateCertificate(rand.Reader, this.cert, issuer, this.publicKey, issuerKey)
 
     if err != nil {
         return this.AppendError(err)
@@ -58,13 +69,13 @@ func (this CA) CreateCA() CA {
 }
 
 // Create Cert PEM
-func (this CA) CreateCert(ca *cryptobin_x509.Certificate) CA {
+func (this CA) CreateCert(issuer *cryptobin_x509.Certificate, issuerKey crypto.PrivateKey) CA {
     if this.publicKey == nil || this.privateKey == nil {
         err := errors.New("publicKey or privateKey error.")
         return this.AppendError(err)
     }
 
-    certBytes, err := cryptobin_x509.CreateCertificate(rand.Reader, this.cert, ca, this.publicKey, this.privateKey)
+    certBytes, err := cryptobin_x509.CreateCertificate(rand.Reader, this.cert, issuer, this.publicKey, issuerKey)
     if err != nil {
         return this.AppendError(err)
     }
@@ -230,17 +241,15 @@ func (this CA) CreatePublicKey() CA {
     return this
 }
 
-// =======================
-
 // Create PKCS12 Cert PEM
 // caCerts 通常保留为空
-func (this CA) CreatePKCS12Cert(caCerts []*x509.Certificate, pwd string) CA {
+func (this CA) CreatePKCS12Cert(caCerts []*x509.Certificate, password string) CA {
     if this.privateKey == nil {
         err := errors.New("privateKey error.")
         return this.AppendError(err)
     }
 
-    pfxData, err := pkcs12.EncodeChain(rand.Reader, this.privateKey, this.cert.ToX509Certificate(), caCerts, pwd)
+    pfxData, err := pkcs12.EncodeChain(rand.Reader, this.privateKey, this.cert.ToX509Certificate(), caCerts, password)
     if err != nil {
         return this.AppendError(err)
     }
@@ -249,16 +258,3 @@ func (this CA) CreatePKCS12Cert(caCerts []*x509.Certificate, pwd string) CA {
 
     return this
 }
-
-// pkcs12 密钥
-func (this CA) CreatePKCS12CertTrustStore(certs []*x509.Certificate, password string) CA {
-    pfxData, err := pkcs12.EncodeTrustStore(rand.Reader, certs, password)
-    if err != nil {
-        return this.AppendError(err)
-    }
-
-    this.keyData = pfxData
-
-    return this
-}
-

@@ -46,7 +46,7 @@ func (this CA) MakeCA(
     return this
 }
 
-// 生成自签名证书
+// 生成证书
 func (this CA) MakeCert(
     subject     pkix.Name,
     expire      int,
@@ -74,6 +74,8 @@ func (this CA) MakeCert(
         },
         KeyUsage: x509.KeyUsageDigitalSignature,
 
+        IsCA: false,
+
         // 签名方式
         SignatureAlgorithm: signAlg,
     }
@@ -83,45 +85,44 @@ func (this CA) MakeCert(
 
 // 生成证书请求
 func (this CA) MakeCSR(
-    country      []string,
+    commonName   string,
     organization []string,
-    organizationalUnit []string,
-    locality      []string,
-    province      []string,
-    streetAddress []string,
-    postalCode    []string,
-    commonName    string,
+    signAlgName  string,
 ) CA {
+    signAlg := getSignatureAlgorithm(signAlgName)
+
     this.certRequest = &x509.CertificateRequest{
         Subject: pkix.Name{
-            Country: country,
+            CommonName:   commonName,
             Organization: organization,
-            OrganizationalUnit: organizationalUnit,
-            Locality: locality,
-            Province: province,
-            StreetAddress: streetAddress,
-            PostalCode: postalCode,
-            CommonName: commonName,
+
+            // Country: country,
+            // OrganizationalUnit: organizationalUnit,
+            // Locality: locality,
+            // Province: province,
+            // StreetAddress: streetAddress,
+            // PostalCode: postalCode,
 
             // SerialNumber: string,
             // Names: []pkix.AttributeTypeAndValue{}
             // ExtraNames: []pkix.AttributeTypeAndValue{}
         },
+        SignatureAlgorithm: signAlg,
     }
 
     return this
 }
 
 // 更新 Cert 数据
-func (this CA) UpdateCert(fn func(*x509.Certificate) *x509.Certificate) CA {
-    this.cert = fn(this.cert)
+func (this CA) UpdateCert(fn func(*x509.Certificate)) CA {
+    fn(this.cert)
 
     return this
 }
 
 // 更新证书请求数据
-func (this CA) UpdateCertRequest(fn func(*x509.CertificateRequest) *x509.CertificateRequest) CA {
-    this.certRequest = fn(this.certRequest)
+func (this CA) UpdateCertRequest(fn func(*x509.CertificateRequest)) CA {
+    fn(this.certRequest)
 
     return this
 }

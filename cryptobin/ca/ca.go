@@ -65,7 +65,7 @@ type CA struct {
     // 证书数据
     cert *x509.Certificate
 
-    // 证书请求
+    // 请求证书
     certRequest *x509.CertificateRequest
 
     // 私钥

@@ -8,16 +8,17 @@ import (
     "crypto/ed25519"
     "crypto/elliptic"
 
+    "github.com/deatil/go-cryptobin/x509"
     "github.com/deatil/go-cryptobin/gm/sm2"
 )
 
 // 获取 cert
-func (this CA) GetCert() any {
+func (this CA) GetCert() *x509.Certificate {
     return this.cert
 }
 
 // 获取 certRequest
-func (this CA) GetCertRequest() any {
+func (this CA) GetCertRequest() *x509.CertificateRequest {
     return this.certRequest
 }
 

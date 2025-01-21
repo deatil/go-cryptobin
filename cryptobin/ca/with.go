@@ -50,7 +50,7 @@ func (this CA) WithPublicKeyType(keyType PublicKeyType) CA {
     return this
 }
 
-// public key type
+// set public key type
 // params:
 // [ RSA | DSA | ECDSA | EdDSA | SM2 ]
 func (this CA) SetPublicKeyType(keyType string) CA {

@@ -89,41 +89,43 @@ func GenerateKey(options ...Options) CA {
 
 // ==========
 
-// From Certificate
-func (this CA) FromCertificate(der []byte) CA {
-    cert, err := x509.ParseCertificate(der)
+// From Certificate PEM
+func (this CA) FromCertificate(cert []byte) CA {
+    newCert, err := this.ParseCertificateFromPEM(cert)
     if err != nil {
         return this.AppendError(err)
     }
 
-    this.cert = cert
+    this.cert = newCert
+    this.publicKey = newCert.PublicKey
 
     return this
 }
 
-// From Certificate
-func FromCertificate(der []byte) CA {
-    return defaultCA.FromCertificate(der)
+// From Certificate PEM
+func FromCertificate(cert []byte) CA {
+    return defaultCA.FromCertificate(cert)
 }
 
-// From Certificate Request
-func (this CA) FromCertificateRequest(asn1Data []byte) CA {
-    certRequest, err := x509.ParseCertificateRequest(asn1Data)
+// From Certificate Request PEM
+func (this CA) FromCertificateRequest(cert []byte) CA {
+    certRequest, err := this.ParseCertificateRequestFromPEM(cert)
     if err != nil {
         return this.AppendError(err)
     }
 
     this.certRequest = certRequest
+    this.publicKey = certRequest.PublicKey
 
     return this
 }
 
-// From Certificate Request
-func FromCertificateRequest(asn1Data []byte) CA {
-    return defaultCA.FromCertificateRequest(asn1Data)
+// From Certificate Request PEM
+func FromCertificateRequest(cert []byte) CA {
+    return defaultCA.FromCertificateRequest(cert)
 }
 
-// From PrivateKey
+// From PrivateKey PEM
 func (this CA) FromPrivateKey(key []byte) CA {
     privateKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
     if err != nil {
@@ -135,12 +137,12 @@ func (this CA) FromPrivateKey(key []byte) CA {
     return this
 }
 
-// From PrivateKey
+// From PrivateKey PEM
 func FromPrivateKey(key []byte) CA {
     return defaultCA.FromPrivateKey(key)
 }
 
-// From PrivateKey With Password
+// From PrivateKey PEM With Password
 func (this CA) FromPrivateKeyWithPassword(key []byte, password []byte) CA {
     privateKey, err := this.ParsePKCS8PrivateKeyFromPEMWithPassword(key, password)
     if err != nil {
@@ -152,12 +154,12 @@ func (this CA) FromPrivateKeyWithPassword(key []byte, password []byte) CA {
     return this
 }
 
-// From PrivateKey With Password
+// From PrivateKey PEM With Password
 func FromPrivateKeyWithPassword(key []byte, password []byte) CA {
     return defaultCA.FromPrivateKeyWithPassword(key, password)
 }
 
-// From PublicKey
+// From PublicKey PEM
 func (this CA) FromPublicKey(key []byte) CA {
     publicKey, err := this.ParsePKCS8PublicKeyFromPEM(key)
     if err != nil {
@@ -169,7 +171,7 @@ func (this CA) FromPublicKey(key []byte) CA {
     return this
 }
 
-// From PublicKey
+// From PublicKey PEM
 func FromPublicKey(key []byte) CA {
     return defaultCA.FromPublicKey(key)
 }
@@ -178,15 +180,15 @@ func FromPublicKey(key []byte) CA {
 
 // pkcs12
 func (this CA) FromPKCS12Cert(pfxData []byte, password string) CA {
-    privateKey, cert, err := pkcs12.Decode(pfxData, password)
+    privateKey, cert, _, err := pkcs12.DecodeChain(pfxData, password)
     if err != nil {
         return this.AppendError(err)
     }
 
-    this.privateKey = privateKey
-
     this.cert = &x509.Certificate{}
     this.cert.FromX509Certificate(cert)
+
+    this.privateKey = privateKey
 
     return this
 }

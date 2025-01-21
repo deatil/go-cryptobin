@@ -10,6 +10,7 @@ import (
 
     "github.com/deatil/go-cryptobin/pkcs8"
     "github.com/deatil/go-cryptobin/gm/sm2"
+    cryptobin_x509 "github.com/deatil/go-cryptobin/x509"
     pubkey_dsa "github.com/deatil/go-cryptobin/pubkey/dsa"
 )
 
@@ -193,4 +194,26 @@ func (this CA) ParsePKCS8PublicKeyFromPEM(key []byte) (crypto.PublicKey, error) 
     }
 
     return parsedKey, nil
+}
+
+// Parse Certificate From PEM
+func (this CA) ParseCertificateFromPEM(cert []byte) (*cryptobin_x509.Certificate, error) {
+    // Parse PEM block
+    block, _ := pem.Decode(cert)
+    if block == nil {
+        return nil, ErrKeyMustBePEMEncoded
+    }
+
+    return cryptobin_x509.ParseCertificate(block.Bytes)
+}
+
+// Parse Certificate Request From PEM
+func (this CA) ParseCertificateRequestFromPEM(cert []byte) (*cryptobin_x509.CertificateRequest, error) {
+    // Parse PEM block
+    block, _ := pem.Decode(cert)
+    if block == nil {
+        return nil, ErrKeyMustBePEMEncoded
+    }
+
+    return cryptobin_x509.ParseCertificateRequest(block.Bytes)
 }

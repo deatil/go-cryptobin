@@ -15,6 +15,7 @@ import (
     "github.com/deatil/go-cryptobin/pkcs8"
     "github.com/deatil/go-cryptobin/pkcs12"
     "github.com/deatil/go-cryptobin/gm/sm2"
+    "github.com/deatil/go-cryptobin/pubkey/gost"
     cryptobin_x509 "github.com/deatil/go-cryptobin/x509"
     pubkey_dsa "github.com/deatil/go-cryptobin/pubkey/dsa"
 )
@@ -133,6 +134,8 @@ func (this CA) CreatePrivateKey() CA {
             privateKeyBytes, err = x509.MarshalPKCS8PrivateKey(privateKey)
         case *sm2.PrivateKey:
             privateKeyBytes, err = sm2.MarshalPrivateKey(privateKey)
+        case *gost.PrivateKey:
+            privateKeyBytes, err = gost.MarshalPrivateKey(privateKey)
         default:
             err = fmt.Errorf("unsupported private key type: %T", privateKey)
     }
@@ -177,6 +180,8 @@ func (this CA) CreatePrivateKeyWithPassword(password []byte, opts ...any) CA {
             privateKeyBytes, err = x509.MarshalPKCS8PrivateKey(prikey)
         case *sm2.PrivateKey:
             privateKeyBytes, err = sm2.MarshalPrivateKey(prikey)
+        case *gost.PrivateKey:
+            privateKeyBytes, err = gost.MarshalPrivateKey(prikey)
         default:
             err = errors.New("privateKey error.")
     }
@@ -223,6 +228,8 @@ func (this CA) CreatePublicKey() CA {
             publicKeyBytes, err = x509.MarshalPKIXPublicKey(pubkey)
         case *sm2.PublicKey:
             publicKeyBytes, err = sm2.MarshalPublicKey(pubkey)
+        case *gost.PublicKey:
+            publicKeyBytes, err = gost.MarshalPublicKey(pubkey)
         default:
             err = errors.New("privateKey error.")
     }

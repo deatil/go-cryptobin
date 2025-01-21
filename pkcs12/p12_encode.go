@@ -110,9 +110,8 @@ func (this *PKCS12) AddSecretKey(secretKey []byte) {
     this.secretKey = secretKey
 }
 
-//===============
+// ===============
 
-// 获取证书签名
 func (this *PKCS12) makeLocalKeyIdAttr(data []byte) (PKCS12Attribute, error) {
     var fingerprint []byte
 

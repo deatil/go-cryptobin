@@ -10,6 +10,7 @@ import (
 
     "github.com/deatil/go-cryptobin/x509"
     "github.com/deatil/go-cryptobin/gm/sm2"
+    "github.com/deatil/go-cryptobin/pubkey/gost"
 )
 
 // 获取 cert
@@ -40,6 +41,8 @@ func (this CA) GetPrivateKeyType() PublicKeyType {
             return KeyTypeEdDSA
         case *sm2.PrivateKey:
             return KeyTypeSM2
+        case *gost.PrivateKey:
+            return KeyTypeGost
     }
 
     return KeyTypeUnknown
@@ -63,6 +66,8 @@ func (this CA) GetPublicKeyType() PublicKeyType {
             return KeyTypeEdDSA
         case *sm2.PublicKey:
             return KeyTypeSM2
+        case *gost.PublicKey:
+            return KeyTypeGost
     }
 
     return KeyTypeUnknown
@@ -81,6 +86,11 @@ func (this CA) GetParameterSizes() dsa.ParameterSizes {
 // get Options Curve
 func (this CA) GetCurve() elliptic.Curve {
     return this.options.Curve
+}
+
+// 获取 Curve
+func (this CA) GetGostCurve() *gost.Curve {
+    return this.options.GostCurve
 }
 
 // get Options Bits

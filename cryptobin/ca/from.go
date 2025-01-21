@@ -11,6 +11,7 @@ import (
     "github.com/deatil/go-cryptobin/x509"
     "github.com/deatil/go-cryptobin/pkcs12"
     "github.com/deatil/go-cryptobin/gm/sm2"
+    "github.com/deatil/go-cryptobin/pubkey/gost"
 )
 
 // Generate Key with Reader
@@ -49,6 +50,14 @@ func (this CA) GenerateKeyWithSeed(reader io.Reader) CA {
             this.publicKey  = publicKey
         case KeyTypeSM2:
             privateKey, err := sm2.GenerateKey(reader)
+            if err != nil {
+                return this.AppendError(err)
+            }
+
+            this.privateKey = privateKey
+            this.publicKey  = &privateKey.PublicKey
+        case KeyTypeGost:
+            privateKey, err := gost.GenerateKey(reader, this.options.GostCurve)
             if err != nil {
                 return this.AppendError(err)
             }
@@ -260,10 +269,21 @@ func GenerateEdDSAKey() CA {
 func (this CA) GenerateSM2Key() CA {
     return this.SetPublicKeyType("SM2").
             GenerateKey()
-
 }
 
 // Generate SM2 Key
 func GenerateSM2Key() CA {
     return defaultCA.GenerateSM2Key()
+}
+
+// Generate Gost key
+func (this CA) GenerateGostKey(curve string) CA {
+    return this.SetPublicKeyType("Gost").
+            SetGostCurve(curve).
+            GenerateKey()
+}
+
+// Generate Gost Key
+func GenerateGostKey(curve string) CA {
+    return defaultCA.GenerateGostKey(curve)
 }

@@ -6,6 +6,7 @@ import (
     "crypto/elliptic"
 
     "github.com/deatil/go-cryptobin/x509"
+    "github.com/deatil/go-cryptobin/pubkey/gost"
 )
 
 // 设置 cert
@@ -52,7 +53,7 @@ func (this CA) WithPublicKeyType(keyType PublicKeyType) CA {
 
 // set public key type
 // params:
-// [ RSA | DSA | ECDSA | EdDSA | SM2 ]
+// [ RSA | DSA | ECDSA | EdDSA | SM2 | Gost ]
 func (this CA) SetPublicKeyType(keyType string) CA {
     switch keyType {
         case "RSA":
@@ -65,6 +66,8 @@ func (this CA) SetPublicKeyType(keyType string) CA {
             this.options.PublicKeyType = KeyTypeEdDSA
         case "SM2":
             this.options.PublicKeyType = KeyTypeSM2
+        case "Gost":
+            this.options.PublicKeyType = KeyTypeGost
     }
 
     return this
@@ -121,6 +124,69 @@ func (this CA) SetCurve(curve string) CA {
             this.options.Curve = elliptic.P384()
         case "P521":
             this.options.Curve = elliptic.P521()
+    }
+
+    return this
+}
+
+// 设置曲线类型
+// set gost curve
+func (this CA) WithGostCurve(curve *gost.Curve) CA {
+    this.options.GostCurve = curve
+
+    return this
+}
+
+// 设置曲线类型
+// set gost curve
+// 可选参数 / params:
+// IdGostR34102001TestParamSet
+// IdGostR34102001CryptoProAParamSet
+// IdGostR34102001CryptoProBParamSet
+// IdGostR34102001CryptoProCParamSet
+// IdGostR34102001CryptoProXchAParamSet
+// IdGostR34102001CryptoProXchBParamSet
+// Idtc26gost34102012256paramSetA
+// Idtc26gost34102012256paramSetB
+// Idtc26gost34102012256paramSetC
+// Idtc26gost34102012256paramSetD
+// Idtc26gost34102012512paramSetTest
+// Idtc26gost34102012512paramSetA
+// Idtc26gost34102012512paramSetB
+// Idtc26gost34102012512paramSetC
+func (this CA) SetGostCurve(curve string) CA {
+    switch curve {
+        case "IdGostR34102001TestParamSet":
+            this.options.GostCurve = gost.CurveIdGostR34102001TestParamSet()
+        case "IdGostR34102001CryptoProAParamSet":
+            this.options.GostCurve = gost.CurveIdGostR34102001CryptoProAParamSet()
+        case "IdGostR34102001CryptoProBParamSet":
+            this.options.GostCurve = gost.CurveIdGostR34102001CryptoProBParamSet()
+        case "IdGostR34102001CryptoProCParamSet":
+            this.options.GostCurve = gost.CurveIdGostR34102001CryptoProCParamSet()
+
+        case "IdGostR34102001CryptoProXchAParamSet":
+            this.options.GostCurve = gost.CurveIdGostR34102001CryptoProXchAParamSet()
+        case "IdGostR34102001CryptoProXchBParamSet":
+            this.options.GostCurve = gost.CurveIdGostR34102001CryptoProXchBParamSet()
+
+        case "Idtc26gost34102012256paramSetA":
+            this.options.GostCurve = gost.CurveIdtc26gost34102012256paramSetA()
+        case "Idtc26gost34102012256paramSetB":
+            this.options.GostCurve = gost.CurveIdtc26gost34102012256paramSetB()
+        case "Idtc26gost34102012256paramSetC":
+            this.options.GostCurve = gost.CurveIdtc26gost34102012256paramSetC()
+        case "Idtc26gost34102012256paramSetD":
+            this.options.GostCurve = gost.CurveIdtc26gost34102012256paramSetD()
+
+        case "Idtc26gost34102012512paramSetTest":
+            this.options.GostCurve = gost.CurveIdtc26gost34102012512paramSetTest()
+        case "Idtc26gost34102012512paramSetA":
+            this.options.GostCurve = gost.CurveIdtc26gost34102012512paramSetA()
+        case "Idtc26gost34102012512paramSetB":
+            this.options.GostCurve = gost.CurveIdtc26gost34102012512paramSetB()
+        case "Idtc26gost34102012512paramSetC":
+            this.options.GostCurve = gost.CurveIdtc26gost34102012512paramSetC()
     }
 
     return this

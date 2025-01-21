@@ -7,6 +7,7 @@ import (
     "crypto/elliptic"
 
     "github.com/deatil/go-cryptobin/x509"
+    "github.com/deatil/go-cryptobin/pubkey/gost"
 )
 
 // public key type
@@ -26,6 +27,8 @@ func (typ PublicKeyType) String() string {
             return "EdDSA"
         case KeyTypeSM2:
             return "SM2"
+        case KeyTypeGost:
+            return "Gost"
         default:
             return "unknown KeyType value " + strconv.Itoa(int(typ))
     }
@@ -38,6 +41,7 @@ const (
     KeyTypeECDSA
     KeyTypeEdDSA
     KeyTypeSM2
+    KeyTypeGost
 )
 
 // Options
@@ -50,6 +54,9 @@ type Options struct {
 
     // ecc curve
     Curve elliptic.Curve
+
+    // gost curve
+    GostCurve *gost.Curve
 
     // generates RSA private key bit size
     Bits int
@@ -93,6 +100,7 @@ func NewCA() CA {
             PublicKeyType:  KeyTypeRSA,
             ParameterSizes: dsa.L1024N160,
             Curve:          elliptic.P256(),
+            GostCurve:      gost.CurveDefault(),
             Bits:           2048,
         },
         Errors: make([]error, 0),

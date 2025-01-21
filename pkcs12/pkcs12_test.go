@@ -2009,3 +2009,98 @@ func test_NewPfx_Check(t *testing.T, pfx string) {
     assertNotEmpty(certificate, "Test_NewPfx_Check-pfxData")
     assertError(err, "Test_NewPfx_Check-pfxData")
 }
+
+var testJKS_PKCS12 = `
+-----BEGIN Data-----
+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
+-----END Data-----
+`
+
+func Test_JKS_PKCS12_Check(t *testing.T) {
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    pfxData := decodePEM(testJKS_PKCS12)
+
+    password := "123456"
+
+    privateKey, cert, err := Decode(pfxData, password)
+
+    assertError(err, "Test_JKS_PKCS12_Check-pfxData")
+    assertNotEmpty(privateKey, "Test_JKS_PKCS12_Check-pfxData")
+    assertNotEmpty(cert, "Test_JKS_PKCS12_Check-pfxData")
+}
+
+func Test_JKS_PKCS12_Check2(t *testing.T) {
+    assertError := cryptobin_test.AssertErrorT(t)
+    assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    pfxData := decodePEM(testJKS_PKCS12)
+
+    password := "123456"
+
+    p12, err := LoadFromBytes(pfxData, password)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    privateKey, attrs, err := p12.GetPrivateKey()
+
+    // t.Errorf("%v \n", attrs.Names())
+    // t.Errorf("%v \n", attrs.String())
+
+    assertError(err, "Test_JKS_PKCS12_Check2-pfxData")
+    assertNotEmpty(privateKey, "Test_JKS_PKCS12_Check2-pfxData")
+    assertNotEmpty(attrs, "Test_JKS_PKCS12_Check2-pfxData")
+
+    privateKeys, err := p12.GetAllPrivateKey()
+
+    assertError(err, "Test_JKS_PKCS12_Check2-GetAllPrivateKey")
+    assertNotEmpty(privateKeys, "Test_JKS_PKCS12_Check2-GetAllPrivateKey")
+
+    privateKeyBytes, err := p12.GetAllPrivateKeyBytes()
+
+    assertError(err, "Test_JKS_PKCS12_Check2-GetAllPrivateKeyBytes")
+    assertNotEmpty(privateKeyBytes, "Test_JKS_PKCS12_Check2-GetAllPrivateKeyBytes")
+}

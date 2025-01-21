@@ -12,6 +12,7 @@ import (
     "crypto/x509/pkix"
     "crypto/elliptic"
 
+    "github.com/deatil/go-cryptobin/pubkey/gost"
     cryptobin_x509 "github.com/deatil/go-cryptobin/x509"
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
@@ -446,6 +447,40 @@ func Test_GenerateKey(t *testing.T) {
         assertEqual(pubkey22, obj.GetPublicKey(), "Test_GenerateKey-FromPublicKey")
     })
 
+    t.Run("GenerateGostKey", func(t *testing.T) {
+        obj := New().
+            SetPublicKeyType("Gost").
+            SetGostCurve("IdGostR34102001CryptoProAParamSet").
+            GenerateKey()
+
+        prikey := obj.CreatePrivateKey().ToKeyString()
+        pubkey := obj.CreatePublicKey().ToKeyString()
+
+        assertError(obj.Error(), "Test_GenerateKey")
+        assertNotEmpty(prikey, "Test_GenerateKey-prikey")
+        assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
+
+        pass := []byte("12345678")
+        prikey2 := obj.CreatePrivateKeyWithPassword(pass).ToKeyString()
+
+        assertNotEmpty(prikey2, "Test_GenerateKey-prikey2")
+
+        prikey22 := New().
+            FromPrivateKey([]byte(prikey)).
+            GetPrivateKey()
+        assertEqual(prikey22, obj.GetPrivateKey(), "Test_GenerateKey-FromPrivateKey")
+
+        prikey223 := New().
+            FromPrivateKeyWithPassword([]byte(prikey2), pass).
+            GetPrivateKey()
+        assertEqual(prikey223, obj.GetPrivateKey(), "Test_GenerateKey-FromPrivateKeyWithPassword")
+
+        pubkey22 := New().
+            FromPublicKey([]byte(pubkey)).
+            GetPublicKey()
+        assertEqual(pubkey22, obj.GetPublicKey(), "Test_GenerateKey-FromPublicKey")
+    })
+
     t.Run("GenerateRSAKey 2", func(t *testing.T) {
         obj := New().
             SetGenerateType("RSA").
@@ -536,6 +571,18 @@ func Test_GenerateKey2(t *testing.T) {
     t.Run("GenerateSM2Key", func(t *testing.T) {
         obj := New().
             GenerateSM2Key()
+
+        prikey := obj.CreatePrivateKey().ToKeyString()
+        pubkey := obj.CreatePublicKey().ToKeyString()
+
+        assertError(obj.Error(), "Test_GenerateKey2")
+        assertNotEmpty(prikey, "Test_GenerateKey2-prikey")
+        assertNotEmpty(pubkey, "Test_GenerateKey2-pubkey")
+    })
+
+    t.Run("GenerateGostKey", func(t *testing.T) {
+        obj := New().
+            GenerateGostKey("Idtc26gost34102012256paramSetB")
 
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
@@ -710,6 +757,7 @@ func Test_Get(t *testing.T) {
         PublicKeyType:  KeyTypeRSA,
         ParameterSizes: dsa.L1024N160,
         Curve:          elliptic.P256(),
+        GostCurve:      gost.CurveIdGostR34102001CryptoProAParamSet(),
         Bits:           2048,
     }
 
@@ -735,6 +783,7 @@ func Test_Get(t *testing.T) {
     assertEqual(newCA2.GetOptions(), opts, "Test_Get-GetOptions")
     assertEqual(newCA2.GetParameterSizes(), dsa.L1024N160, "Test_Get-GetParameterSizes")
     assertEqual(newCA2.GetCurve(), elliptic.P256(), "Test_Get-GetCurve")
+    assertEqual(newCA2.GetGostCurve(), gost.CurveIdGostR34102001CryptoProAParamSet(), "Test_Get-GetGostCurve")
     assertEqual(newCA2.GetBits(), 2048, "Test_Get-GetBits")
 
     assertEqual(newCA2.GetKeyData(), []byte("test-keyData"), "Test_Get-GetKeyData")
@@ -805,6 +854,12 @@ func Test_With(t *testing.T) {
 
     tmp = newCA.SetCurve("P521")
     assertEqual(tmp.options.Curve, elliptic.P521(), "Test_Get-SetCurve")
+
+    tmp = newCA.WithGostCurve(gost.CurveIdtc26gost34102012256paramSetB())
+    assertEqual(tmp.options.GostCurve, gost.CurveIdtc26gost34102012256paramSetB(), "Test_Get-WithGostCurve")
+
+    tmp = newCA.SetGostCurve("IdGostR34102001CryptoProXchBParamSet")
+    assertEqual(tmp.options.GostCurve, gost.CurveIdGostR34102001CryptoProXchBParamSet(), "Test_Get-SetGostCurve")
 
     tmp = newCA.WithBits(2048)
     assertEqual(tmp.options.Bits, 2048, "Test_Get-WithBits")

@@ -96,8 +96,8 @@ func (this CA) MakeCSR(
             CommonName:   commonName,
             Organization: organization,
 
-            // Country: country,
             // OrganizationalUnit: organizationalUnit,
+            // Country: country,
             // Locality: locality,
             // Province: province,
             // StreetAddress: streetAddress,
@@ -132,23 +132,29 @@ func getSignatureAlgorithm(name string) x509.SignatureAlgorithm {
     data := map[string]x509.SignatureAlgorithm {
         "MD2WithRSA":       x509.MD2WithRSA,
         "MD5WithRSA":       x509.MD5WithRSA,
-        // "MD2WithRSA":    x509.MD2WithRSA,  // Unsupported.
         "SHA1WithRSA":      x509.SHA1WithRSA,
         "SHA256WithRSA":    x509.SHA256WithRSA,
         "SHA384WithRSA":    x509.SHA384WithRSA,
         "SHA512WithRSA":    x509.SHA512WithRSA,
-        // "DSAWithSHA1":   x509.DSAWithSHA1,   // Unsupported.
-        // "DSAWithSHA256": x509.DSAWithSHA256, // Unsupported.
+        "SHA256WithRSAPSS": x509.SHA256WithRSAPSS,
+        "SHA384WithRSAPSS": x509.SHA384WithRSAPSS,
+        "SHA512WithRSAPSS": x509.SHA512WithRSAPSS,
+        "PureEd25519":      x509.PureEd25519,
+        "DSAWithSHA1":      x509.DSAWithSHA1,
+        "DSAWithSHA256":    x509.DSAWithSHA256,
         "ECDSAWithSHA1":    x509.ECDSAWithSHA1,
         "ECDSAWithSHA256":  x509.ECDSAWithSHA256,
         "ECDSAWithSHA384":  x509.ECDSAWithSHA384,
         "ECDSAWithSHA512":  x509.ECDSAWithSHA512,
-        "SHA256WithRSAPSS": x509.SHA256WithRSAPSS,
-        "SHA384WithRSAPSS": x509.SHA384WithRSAPSS,
-        "SHA512WithRSAPSS": x509.SHA512WithRSAPSS,
         "SM2WithSM3":       x509.SM2WithSM3,
         "SM2WithSHA1":      x509.SM2WithSHA1,
         "SM2WithSHA256":    x509.SM2WithSHA256,
+        "SM3WithRSA":       x509.SM3WithRSA,
+        "GOST3410WithGOST34112001":    x509.GOST3410WithGOST34112001,
+        "GOST3410WithGOST34112012256": x509.GOST3410WithGOST34112012256,
+        "GOST3410WithGOST34112012512": x509.GOST3410WithGOST34112012512,
+        "ElGamalWithSHA1":      x509.ElGamalWithSHA1,
+        "ElGamalWithRIPEMD160": x509.ElGamalWithRIPEMD160,
     }
 
     if alg, ok := data[name]; ok {

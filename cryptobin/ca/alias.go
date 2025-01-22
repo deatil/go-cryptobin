@@ -6,9 +6,8 @@ import (
     "github.com/deatil/go-cryptobin/x509"
 )
 
-// pkix
 type (
-    // Subject 数据
+    // Subject data
     PkixName = pkix.Name
 
     // Extension
@@ -36,15 +35,14 @@ type (
     PkixAttributeTypeAndValueSET = pkix.AttributeTypeAndValueSET
 )
 
-// x905
 type (
-    // 证书
+    // Certificate
     Certificate = x509.Certificate
 
-    // 证书请求
+    // CertificateRequest
     CertificateRequest = x509.CertificateRequest
 
-    // 配置别名
+    // VerifyOptions
     VerifyOptions = x509.VerifyOptions
 
     // KeyUsage

@@ -12,6 +12,7 @@ import (
     "github.com/deatil/go-cryptobin/pkcs12"
     "github.com/deatil/go-cryptobin/gm/sm2"
     "github.com/deatil/go-cryptobin/pubkey/gost"
+    "github.com/deatil/go-cryptobin/pubkey/elgamal"
 )
 
 // Generate Key with Reader
@@ -58,6 +59,14 @@ func (this CA) GenerateKeyWithSeed(reader io.Reader) CA {
             this.publicKey  = &privateKey.PublicKey
         case KeyTypeGost:
             privateKey, err := gost.GenerateKey(reader, this.options.GostCurve)
+            if err != nil {
+                return this.AppendError(err)
+            }
+
+            this.privateKey = privateKey
+            this.publicKey  = &privateKey.PublicKey
+        case KeyTypeElGamal:
+            privateKey, err := elgamal.GenerateKey(reader, this.options.Bitsize, this.options.Probability)
             if err != nil {
                 return this.AppendError(err)
             }
@@ -286,4 +295,17 @@ func (this CA) GenerateGostKey(curve string) CA {
 // Generate Gost Key
 func GenerateGostKey(curve string) CA {
     return defaultCA.GenerateGostKey(curve)
+}
+
+// Generate ElGamal key
+func (this CA) GenerateElGamalKey(bitsize, probability int) CA {
+    return this.SetPublicKeyType("ElGamal").
+            WithBitsize(bitsize).
+            WithProbability(probability).
+            GenerateKey()
+}
+
+// Generate ElGamal Key
+func GenerateElGamalKey(bitsize, probability int) CA {
+    return defaultCA.GenerateElGamalKey(bitsize, probability)
 }

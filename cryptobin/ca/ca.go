@@ -29,6 +29,8 @@ func (typ PublicKeyType) String() string {
             return "SM2"
         case KeyTypeGost:
             return "Gost"
+        case KeyTypeElGamal:
+            return "ElGamal"
         default:
             return "unknown KeyType value " + strconv.Itoa(int(typ))
     }
@@ -42,6 +44,7 @@ const (
     KeyTypeEdDSA
     KeyTypeSM2
     KeyTypeGost
+    KeyTypeElGamal
 )
 
 // Options
@@ -49,17 +52,20 @@ type Options struct {
     // public key type
     PublicKeyType PublicKeyType
 
-    // DSA ParameterSizes
+    // generates DSA ParameterSizes
     ParameterSizes dsa.ParameterSizes
 
-    // ecc curve
+    // generates ECC curve
     Curve elliptic.Curve
 
-    // gost curve
+    // generates Gost curve
     GostCurve *gost.Curve
 
     // generates RSA private key bit size
     Bits int
+
+    // generates ElGamal private key bit size and probability
+    Bitsize, Probability int
 }
 
 /**
@@ -102,6 +108,8 @@ func NewCA() CA {
             Curve:          elliptic.P256(),
             GostCurve:      gost.CurveDefault(),
             Bits:           2048,
+            Bitsize:        256,
+            Probability:    64,
         },
         Errors: make([]error, 0),
     }

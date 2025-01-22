@@ -53,7 +53,7 @@ func (this CA) WithPublicKeyType(keyType PublicKeyType) CA {
 
 // set public key type
 // params:
-// [ RSA | DSA | ECDSA | EdDSA | SM2 | Gost ]
+// [ RSA | DSA | ECDSA | EdDSA | SM2 | Gost | ElGamal ]
 func (this CA) SetPublicKeyType(keyType string) CA {
     switch keyType {
         case "RSA":
@@ -68,6 +68,8 @@ func (this CA) SetPublicKeyType(keyType string) CA {
             this.options.PublicKeyType = KeyTypeSM2
         case "Gost":
             this.options.PublicKeyType = KeyTypeGost
+        case "ElGamal":
+            this.options.PublicKeyType = KeyTypeElGamal
     }
 
     return this
@@ -75,7 +77,7 @@ func (this CA) SetPublicKeyType(keyType string) CA {
 
 // set Generate public key type
 // params:
-// [ RSA | DSA | ECDSA | EdDSA | SM2 ]
+// [ RSA | DSA | ECDSA | EdDSA | SM2 | Gost | ElGamal ]
 func (this CA) SetGenerateType(typ string) CA {
     return this.SetPublicKeyType(typ)
 }
@@ -195,6 +197,20 @@ func (this CA) SetGostCurve(curve string) CA {
 // RSA private key bit size
 func (this CA) WithBits(bits int) CA {
     this.options.Bits = bits
+
+    return this
+}
+
+// ElGamal private key bit size
+func (this CA) WithBitsize(bits int) CA {
+    this.options.Bitsize = bits
+
+    return this
+}
+
+// ElGamal private key probability size
+func (this CA) WithProbability(probability int) CA {
+    this.options.Probability = probability
 
     return this
 }

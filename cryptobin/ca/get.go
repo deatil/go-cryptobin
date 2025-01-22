@@ -11,6 +11,7 @@ import (
     "github.com/deatil/go-cryptobin/x509"
     "github.com/deatil/go-cryptobin/gm/sm2"
     "github.com/deatil/go-cryptobin/pubkey/gost"
+    "github.com/deatil/go-cryptobin/pubkey/elgamal"
 )
 
 // 获取 cert
@@ -43,6 +44,8 @@ func (this CA) GetPrivateKeyType() PublicKeyType {
             return KeyTypeSM2
         case *gost.PrivateKey:
             return KeyTypeGost
+        case *elgamal.PrivateKey:
+            return KeyTypeElGamal
     }
 
     return KeyTypeUnknown
@@ -68,6 +71,8 @@ func (this CA) GetPublicKeyType() PublicKeyType {
             return KeyTypeSM2
         case *gost.PublicKey:
             return KeyTypeGost
+        case *elgamal.PublicKey:
+            return KeyTypeElGamal
     }
 
     return KeyTypeUnknown
@@ -96,6 +101,16 @@ func (this CA) GetGostCurve() *gost.Curve {
 // get Options Bits
 func (this CA) GetBits() int {
     return this.options.Bits
+}
+
+// get Options Bitsize
+func (this CA) GetBitsize() int {
+    return this.options.Bitsize
+}
+
+// get Options Probability
+func (this CA) GetProbability() int {
+    return this.options.Probability
 }
 
 // 获取 keyData

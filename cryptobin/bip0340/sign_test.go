@@ -32,8 +32,8 @@ F2iehTuwhD2yi4LHFrcB9A1sI7jXajLn+7O9fXhryw==
 
 func Test_SignASN1_And_VerifyASN1(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
 
     {
         data := "test-pass"
@@ -61,8 +61,8 @@ func Test_SignASN1_And_VerifyASN1(t *testing.T) {
 
 func Test_Sign(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
 
@@ -88,8 +88,8 @@ func Test_Sign(t *testing.T) {
 
 func Test_SignASN1(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
 
@@ -115,8 +115,8 @@ func Test_SignASN1(t *testing.T) {
 
 func Test_SignBytes(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
 
@@ -141,8 +141,8 @@ func Test_SignBytes(t *testing.T) {
 }
 
 func Test_CheckKeyPair(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     {
         obj := New().

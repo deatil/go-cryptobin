@@ -9,8 +9,8 @@ import (
 
 func Test_scanner(t *testing.T) {
     eq := cryptobin_test.AssertEqualT(t)
-    errChek := cryptobin_test.AssertErrorT(t)
-    errChekNil := cryptobin_test.AssertNotErrorNilT(t)
+    errChek := cryptobin_test.AssertNoErrorT(t)
+    errChekNil := cryptobin_test.AssertErrorT(t)
 
     d := bytes.NewBufferString("test data")
 

@@ -9,7 +9,7 @@ import (
 
 func Test_HCTR(t *testing.T) {
     assertEqual := test.AssertEqualT(t)
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
     assertNotEmpty := test.AssertNotEmptyT(t)
 
     key := []byte("kkinjkijeel22plo")

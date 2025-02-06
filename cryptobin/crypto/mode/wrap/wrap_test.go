@@ -16,7 +16,7 @@ func Test_Name(t *testing.T) {
 // 输入数据需手动处理长度，不使用补码方式
 func Test_AesWrap(t *testing.T) {
     assert := test.AssertEqualT(t)
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
 
     data := "kjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplo"
     cypt := crypto.FromString(data).
@@ -44,7 +44,7 @@ func Test_AesWrap(t *testing.T) {
 
 func Test_AesWrapWithNoIV(t *testing.T) {
     assert := test.AssertEqualT(t)
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
 
     data := "kjinjkijkolkdplokjinjkijkolkdplokjinjkijkolkdplo"
     cypt := crypto.FromString(data).
@@ -72,7 +72,7 @@ func Test_AesWrapWithNoIV(t *testing.T) {
 
 func Test_AesWrap_Check(t *testing.T) {
     assert := test.AssertEqualT(t)
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
 
     /* aes key */
     var test_wrap_key = []byte{

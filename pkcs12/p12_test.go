@@ -52,7 +52,7 @@ AhoFAAQUTqsHjebEzehtaELJnrLjW2J56JgEFBZP15Yatg/9QpAHffFPu037mYIKAgIEAA==
 `
 
 func Test_P12_Decode(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pfxData := decodePEM(testP12Key)
@@ -78,7 +78,7 @@ func Test_P12_Decode(t *testing.T) {
 
 func Test_P12_EncodeChain(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     caCerts, err := x509.ParseCertificates(decodePEM(caCert))
@@ -135,10 +135,10 @@ func Test_P12_EncodeChain(t *testing.T) {
 
 func Test_P12_EncodeSecret(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertNotBool := cryptobin_test.AssertNotBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertNotBool := cryptobin_test.AssertFalseT(t)
 
     secretKey := []byte("test-password")
     password := "passpass word"
@@ -176,7 +176,7 @@ func Test_P12_EncodeSecret(t *testing.T) {
 
 func Test_P12_EncodeTrustStore(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     certificates, err := x509.ParseCertificates(decodePEM(certificate))
@@ -211,7 +211,7 @@ func Test_P12_EncodeTrustStore(t *testing.T) {
 
 func Test_P12_EncodeTrustStoreEntries(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     certificates, err := x509.ParseCertificates(decodePEM(certificate))
@@ -257,7 +257,7 @@ func Test_P12_EncodeTrustStoreEntries(t *testing.T) {
 func Test_P12_EncodePbes2_Check(t *testing.T) {
     t.Run("EncodePbes2_Check", func(t *testing.T) {
         assertEqual := cryptobin_test.AssertEqualT(t)
-        assertError := cryptobin_test.AssertErrorT(t)
+        assertError := cryptobin_test.AssertNoErrorT(t)
 
         certificates, err := x509.ParseCertificates(decodePEM(certificate))
         assertError(err, "P12_EncodePbes2_Check-certificates")
@@ -287,7 +287,7 @@ func Test_P12_EncodePbes2_Check(t *testing.T) {
 
 func Test_P12_EncodeChain_Check(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     caCerts, err := x509.ParseCertificates(decodePEM(caCert))
     assertError(err, "P12_EncodeChain_Check-caCerts")
@@ -329,10 +329,10 @@ func Test_P12_Encode(t *testing.T) {
 func test_P12_Encode(t *testing.T, opts Opts, password string, name string) {
     t.Run(name, func(t *testing.T) {
         assertEqual := cryptobin_test.AssertEqualT(t)
-        assertError := cryptobin_test.AssertErrorT(t)
+        assertError := cryptobin_test.AssertNoErrorT(t)
         assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-        assertBool := cryptobin_test.AssertBoolT(t)
-        assertNotBool := cryptobin_test.AssertNotBoolT(t)
+        assertBool := cryptobin_test.AssertTrueT(t)
+        assertNotBool := cryptobin_test.AssertFalseT(t)
 
         certificates, err := x509.ParseCertificates(decodePEM(certificate))
         assertError(err, "P12_Encode-certificates")
@@ -374,7 +374,7 @@ func test_P12_Encode(t *testing.T, opts Opts, password string, name string) {
 }
 
 func Test_P12_ToPem(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pfxData := decodePEM(testP12Key)
@@ -399,7 +399,7 @@ func Test_P12_ToPem(t *testing.T) {
 }
 
 func Test_P12_ToOriginalPEM(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pfxData := decodePEM(testP12Key)
@@ -426,9 +426,9 @@ func Test_P12_ToOriginalPEM(t *testing.T) {
 
 // 某些库生成的 SHA1 值可能不对，不能完全的作为判断
 func Test_P12_Attrs_Verify(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
 
     pfxData := decodePEM(testNewPfx_Encode)
 
@@ -454,10 +454,10 @@ func Test_P12_Attrs_Verify(t *testing.T) {
 // 自定义 LocalKeyId
 func Test_P12_EncodeSecret_SetLocalKeyId(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertNotBool := cryptobin_test.AssertNotBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertNotBool := cryptobin_test.AssertFalseT(t)
 
     secretKey := []byte("test-password")
     password := "passpass word"
@@ -495,7 +495,7 @@ func Test_P12_EncodeSecret_SetLocalKeyId(t *testing.T) {
 
 func Test_P12_EncodeSdsiCert(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     sdsiCert := []byte("sdsiCert-data")
@@ -523,7 +523,7 @@ func Test_P12_EncodeSdsiCert(t *testing.T) {
 
 func Test_P12_EncodeCRL(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     crlBytes := []byte("crlBytes-data")
@@ -588,7 +588,7 @@ EhLrEqU=
 
 func Test_P12_EncodeCRL_OBJ(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     crlBytes := []byte("crlBytes-data")
@@ -692,7 +692,7 @@ HYjNDaIbnlqN9g==
 
 func Test_P12_Enveloped_Encode(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     certificates, err := x509.ParseCertificates(decodePEM(certificate))
@@ -808,7 +808,7 @@ xlbmLZcxcffxx/0GR/B6bctGwh8cm+sH8EvUB4pvaNeRgYgFtsEipAN2UEL3lpsKbQMW9nATnIw9nQ8O
 
 func Test_P12_Enveloped_Check(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     certificates, err := x509.ParseCertificates(decodePEM(certificate))
     assertError(err, "P12_Enveloped_Check-certificates")
@@ -857,7 +857,7 @@ PqfooLirjlapSJekxacudIazDBAhNN4STa9QHCA==
 -----END CERTIFICATE-----`
 
 func Test_P12_UnknowOid_Check(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pfxData := decodePEM(testUnknowP12Pem)
@@ -878,7 +878,7 @@ func Test_P12_UnknowOid_Check(t *testing.T) {
 }
 
 func Test_P12_Attrs_Names(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -947,7 +947,7 @@ mwcl1xQV2G5/fgICB9A=
 -----END CERTIFICATE-----`
 
 func Test_P12_Gost(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pfxData := decodePEM(testGostP12Pem)
@@ -975,7 +975,7 @@ func Test_P12_Gost(t *testing.T) {
 }
 
 func Test_P12_Gost_En(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pfxData := decodePEM(testGostP12Pem)

@@ -15,7 +15,7 @@ func Test_Name(t *testing.T) {
 
 func Test_AesCFB(t *testing.T) {
     assert := test.AssertEqualT(t)
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
 
     data := "test-pass"
     cypt := crypto.FromString(data).

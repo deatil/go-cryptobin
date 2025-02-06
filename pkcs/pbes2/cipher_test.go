@@ -9,7 +9,7 @@ import (
 
 func test_cipher(t *testing.T, cipher Cipher, name string, key []byte) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     plaintext := []byte("test data")

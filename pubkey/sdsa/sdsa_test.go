@@ -28,7 +28,7 @@ func testGenerateKey() (*PrivateKey, error) {
 
 func Test_GenerateKey(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := testGenerateKey()
 
@@ -40,7 +40,7 @@ func Test_GenerateKey(t *testing.T) {
 }
 
 func Test_Equal(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
 
     pri1, _ := testGenerateKey()
     pub1 := &pri1.PublicKey
@@ -56,9 +56,9 @@ func Test_Equal(t *testing.T) {
 }
 
 func Test_Sign(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := testGenerateKey()
     pub := &pri.PublicKey
@@ -76,9 +76,9 @@ func Test_Sign(t *testing.T) {
 }
 
 func Test_SignASN1(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := testGenerateKey()
     pub := &pri.PublicKey
@@ -96,9 +96,9 @@ func Test_SignASN1(t *testing.T) {
 }
 
 func Test_SignBytes(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := testGenerateKey()
     pub := &pri.PublicKey
@@ -116,9 +116,9 @@ func Test_SignBytes(t *testing.T) {
 }
 
 func Test_SignVerify(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := testGenerateKey()
     pub := &pri.PublicKey

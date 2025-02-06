@@ -15,7 +15,7 @@ func Test_Name(t *testing.T) {
 
 func Test_AesOCB(t *testing.T) {
     assert := test.AssertEqualT(t)
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
 
     key := "dfertf12dfertf12"
     nonce := "df35tf12df35"

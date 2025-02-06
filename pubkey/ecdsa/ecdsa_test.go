@@ -146,7 +146,7 @@ hqHtft9D9JGEHcJ0XvmRTptdYmjc/gM4syIrdaIXrbl6zfoxRhvNQOPu
 `
 
 func Test_PKCS1PrivateKeyCheck(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -171,7 +171,7 @@ func Test_PKCS1PrivateKeyCheck(t *testing.T) {
 }
 
 func Test_PKCS8PrivateKeyCheck(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pri := decodePEM(testPkcs8Prikey)

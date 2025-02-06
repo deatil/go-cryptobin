@@ -38,8 +38,8 @@ MEMwBQYDK2VxAzoAYRO+ws1nXb89sYPEeSmxFIU8Qwz04ZM8tNRVfvDuiCMWWILR
 )
 
 func testED448Sign(t *testing.T, opts *Options) {
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     data := []byte("test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass3333333333333333333333333333333333333333333333333333test-pa2222222222222222222222222222222222222222222sstest-passt111111111111111111111111111111111est-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passt-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass")
@@ -103,7 +103,7 @@ func Test_ED448Sign(t *testing.T) {
 
 func Test_CreateKey(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     obj := New().GenerateKey()
 
@@ -127,8 +127,8 @@ func Test_CreateKey(t *testing.T) {
 }
 
 func Test_CheckKeyPair(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     check := New().
         FromPublicKey([]byte(testPubkey)).
@@ -151,7 +151,7 @@ func Test_CheckKeyPair(t *testing.T) {
 
 func Test_MakePublicKey(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     ed := New().FromPrivateKey([]byte(testPrikey))
     newPubkey := ed.MakePublicKey().

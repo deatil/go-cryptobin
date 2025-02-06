@@ -70,7 +70,7 @@ var testProbability = 64
 
 func Test_GenerateKey2(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     var priv PrivateKey
     err := GenerateParameters(&priv.PublicKey.Parameters, rand.Reader, A2048B224SHA224)
@@ -86,9 +86,9 @@ func Test_GenerateKey2(t *testing.T) {
 }
 
 func Test_Sign(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     var priv PrivateKey
     err := GenerateParameters(&priv.PublicKey.Parameters, rand.Reader, A2048B224SHA224)
@@ -126,9 +126,9 @@ func Test_SignBytes(t *testing.T) {
 }
 
 func test_SignBytes(t *testing.T, sizes ParameterSizes, h Hasher) {
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     var priv PrivateKey
     err := GenerateParameters(&priv.PublicKey.Parameters, rand.Reader, sizes)
@@ -152,9 +152,9 @@ func test_SignBytes(t *testing.T, sizes ParameterSizes, h Hasher) {
 }
 
 func Test_Sign2(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     var priv PrivateKey
     err := GenerateParameters(&priv.PublicKey.Parameters, rand.Reader, A2048B224SHA224)
@@ -181,7 +181,7 @@ func Test_Sign2(t *testing.T) {
 }
 
 func test_GenerateKey(t *testing.T) *PrivateKey {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     var priv PrivateKey
     err := GenerateParameters(&priv.PublicKey.Parameters, rand.Reader, A2048B224SHA224)
@@ -195,7 +195,7 @@ func test_GenerateKey(t *testing.T) *PrivateKey {
 
 func Test_MarshalPKCS8(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
 
     pri := test_GenerateKey(t)
@@ -324,7 +324,7 @@ func Test_PrivateKey_Check(t *testing.T) {
 }
 
 func test_PrivateKey_Check(t *testing.T, pemStr string) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pri := decodePEM(pemStr)

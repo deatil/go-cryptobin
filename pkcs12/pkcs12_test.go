@@ -35,7 +35,7 @@ func encodePEM(src []byte, typ string) string {
 
 func Test_EncodeSecret(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     secretKey := []byte("test-password")
     password := "passpass word"
@@ -51,7 +51,7 @@ func Test_EncodeSecret(t *testing.T) {
 
 func Test_EncodeSecret_Passwordless(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     secretKey := []byte("test-password")
     password := ""
@@ -284,7 +284,7 @@ func Test_Encode(t *testing.T) {
 func test_Encode(t *testing.T, opts Opts, password string, name string) {
     t.Run(name, func(t *testing.T) {
         assertEqual := cryptobin_test.AssertEqualT(t)
-        assertError := cryptobin_test.AssertErrorT(t)
+        assertError := cryptobin_test.AssertNoErrorT(t)
         assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
         certificates, err := x509.ParseCertificates(decodePEM(certificate))
@@ -315,7 +315,7 @@ func test_Encode(t *testing.T, opts Opts, password string, name string) {
 
 func Test_Encode_Passwordless(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     certificates, err := x509.ParseCertificates(decodePEM(certificate))
@@ -345,7 +345,7 @@ func Test_Encode_Passwordless(t *testing.T) {
 
 func Test_EncodeChain(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     caCerts, err := x509.ParseCertificates(decodePEM(caCert))
@@ -387,7 +387,7 @@ func Test_EncodeChain(t *testing.T) {
 
 func Test_EncodeChain_Passwordless(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     caCerts, err := x509.ParseCertificates(decodePEM(caCert))
@@ -421,7 +421,7 @@ func Test_EncodeChain_Passwordless(t *testing.T) {
 
 func Test_EncodeTrustStore(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     certificates, err := x509.ParseCertificates(decodePEM(certificate))
@@ -450,7 +450,7 @@ func Test_EncodeTrustStore(t *testing.T) {
 
 func Test_EncodeTrustStore_Passwordless(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     certificates, err := x509.ParseCertificates(decodePEM(certificate))
@@ -471,7 +471,7 @@ func Test_EncodeTrustStore_Passwordless(t *testing.T) {
 
 func Test_EncodeTrustStoreEntries(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     certificates, err := x509.ParseCertificates(decodePEM(certificate))
@@ -511,7 +511,7 @@ func Test_EncodeTrustStoreEntries(t *testing.T) {
 
 func Test_EncodeTrustStoreEntries_Passwordless(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     certificates, err := x509.ParseCertificates(decodePEM(certificate))
@@ -955,7 +955,7 @@ iAH7zhVd1pukTlqlpc25x9qDfElwbwZjBWaHMSUwIwYJKoZIhvcNAQkVMRYEFFsH
 func Test_Encode_Check(t *testing.T) {
     t.Run("Encode_Check", func(t *testing.T) {
         assertEqual := cryptobin_test.AssertEqualT(t)
-        assertError := cryptobin_test.AssertErrorT(t)
+        assertError := cryptobin_test.AssertNoErrorT(t)
 
         certificates, err := x509.ParseCertificates(decodePEM(certificate))
         assertError(err, "Encode_Check-certificates")
@@ -982,7 +982,7 @@ func Test_Encode_Check(t *testing.T) {
 
 func Test_EncodeTrustStore_Check(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     certificates, err := x509.ParseCertificates(decodePEM(certificate))
     assertError(err, "EncodeTrustStore_Check-certificates")
@@ -1000,7 +1000,7 @@ func Test_EncodeTrustStore_Check(t *testing.T) {
 func Test_EncodeDes_Check(t *testing.T) {
     t.Run("EncodeDes_Check", func(t *testing.T) {
         assertEqual := cryptobin_test.AssertEqualT(t)
-        assertError := cryptobin_test.AssertErrorT(t)
+        assertError := cryptobin_test.AssertNoErrorT(t)
 
         certificates, err := x509.ParseCertificates(decodePEM(certificate))
         assertError(err, "EncodeDes_Check-certificates")
@@ -1028,7 +1028,7 @@ func Test_EncodeDes_Check(t *testing.T) {
 func Test_EncodePbes2_Check(t *testing.T) {
     t.Run("EncodePbes2_Check", func(t *testing.T) {
         assertEqual := cryptobin_test.AssertEqualT(t)
-        assertError := cryptobin_test.AssertErrorT(t)
+        assertError := cryptobin_test.AssertNoErrorT(t)
 
         certificates, err := x509.ParseCertificates(decodePEM(certificate))
         assertError(err, "EncodePbes2_Check-certificates")
@@ -1055,7 +1055,7 @@ func Test_EncodePbes2_Check(t *testing.T) {
 
 func Test_EncodeChain_Check(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     caCerts, err := x509.ParseCertificates(decodePEM(caCert))
     assertError(err, "EncodeChain_Check-caCerts")
@@ -1084,7 +1084,7 @@ func Test_EncodeChain_Check(t *testing.T) {
 }
 
 func Test_ToPem(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pfxData := decodePEM(testNewPfx_Encode)
@@ -1106,7 +1106,7 @@ func Test_ToPem(t *testing.T) {
 }
 
 func Test_Encode_Passwordless_ToPem(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     certificates, err := x509.ParseCertificates(decodePEM(certificate))
@@ -1383,7 +1383,7 @@ F6OmQIRDc68SdkZJ6024l4nWlnhTE7a4lb2Tru4k3NOTa1oECE5PVCBVU0VEAgEB
 `
 
 func Test_PBMAC1Pfx_Check(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     t.Run("PBMAC1Pfx 1", func(t *testing.T) {
@@ -1997,7 +1997,7 @@ func Test_NewPfx_Check(t *testing.T) {
 }
 
 func test_NewPfx_Check(t *testing.T, pfx string) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pfxData := decodePEM(pfx)
@@ -2058,7 +2058,7 @@ UEbbeGn5yyyO6do4y2skDxWDdrfJME0wMTANBglghkgBZQMEAgEFAAQgnxOBf2GzQk7JR4wCSUwO7Wlm
 `
 
 func Test_JKS_PKCS12_Check(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pfxData := decodePEM(testJKS_PKCS12)
@@ -2073,7 +2073,7 @@ func Test_JKS_PKCS12_Check(t *testing.T) {
 }
 
 func Test_JKS_PKCS12_Check2(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pfxData := decodePEM(testJKS_PKCS12)

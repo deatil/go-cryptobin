@@ -99,7 +99,7 @@ func Test_VerifyBadBase64(t *testing.T) {
 
 func Test_Encrypt(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     k := GenerateKey()
     msg := []byte("tset-data tset-datatset-datatset-datatset-data")

@@ -84,7 +84,7 @@ Lq8SOtCT2p9CYlAAAAFTIzOTcyQExBUFRPUC0wNkU4VU9PTwECAwQF
 
 func Test_ParseSSHKey(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     sshkeyName, sshComment, err := testParseSSHKey(testSSHkey, "")
@@ -130,7 +130,7 @@ e7vWWnvY6V5P9mDtDlrQAIfo/mULbA==
 
 func Test_ParseSSHKey_RSAEn(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     sshkeyName, sshComment, err := testParseSSHKey(testSSHkey, "123")
@@ -143,7 +143,7 @@ func Test_ParseSSHKey_RSAEn(t *testing.T) {
 
 func Test_ParseSSHKey_EcdsaEn(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -176,7 +176,7 @@ func Test_ParseSSHKey_EcdsaEn(t *testing.T) {
 
 func Test_ParseSSHKey_Ecdsa(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -197,7 +197,7 @@ func Test_ParseSSHKey_Ecdsa(t *testing.T) {
 
 func Test_ParseSSHKey_Ecdsa_With_Pass(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -227,7 +227,7 @@ func Test_ParseSSHKey_Ecdsa_With_Pass(t *testing.T) {
 
 func test_ParseSSHKey_Ecdsa_With_Pass_And_Opts(t *testing.T, opts Opts) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -281,7 +281,7 @@ func Test_ParseSSHKey_Ecdsa_With_Pass_And_Opts(t *testing.T) {
 
 func Test_ParseSSHKey_EdDSA(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     _, privateKey, err := ed25519.GenerateKey(rand.Reader)
@@ -302,7 +302,7 @@ func Test_ParseSSHKey_EdDSA(t *testing.T) {
 
 func Test_ParseSSHKey_RSA(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
@@ -323,7 +323,7 @@ func Test_ParseSSHKey_RSA(t *testing.T) {
 
 func Test_ParseSSHKey_SM2(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     privateKey, err := sm2.GenerateKey(rand.Reader)
@@ -344,7 +344,7 @@ func Test_ParseSSHKey_SM2(t *testing.T) {
 
 func Test_ParseSSHKey_DSA(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     privateKey := &dsa.PrivateKey{}

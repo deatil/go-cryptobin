@@ -36,7 +36,7 @@ YbGHpDUucpRlNYh0l0cn/cION4/lW64kO/QRYGW+HjmpuMap8Db6DWc=
 
 func Test_CreateECDHKey(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     obj := New().
         SetCurve("P256").
@@ -53,7 +53,7 @@ func Test_CreateECDHKey(t *testing.T) {
 }
 
 func Test_CreateECDHSecretKey(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
     assert := cryptobin_test.AssertEqualT(t)
 
@@ -76,7 +76,7 @@ func Test_CreateECDHSecretKey(t *testing.T) {
 
 func Test_CreateKey(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     obj := New().
         SetCurve("P256").
@@ -108,7 +108,7 @@ func Test_CreateSecretKey(t *testing.T) {
 }
 
 func test_CreateSecretKey(t *testing.T, name string) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
     assert := cryptobin_test.AssertEqualT(t)
 
@@ -144,7 +144,7 @@ func test_CreateSecretKey(t *testing.T, name string) {
 }
 
 func test_CreateSecretKeyWithPassword(t *testing.T, name string) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
     assert := cryptobin_test.AssertEqualT(t)
 

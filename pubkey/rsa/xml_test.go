@@ -23,7 +23,7 @@ var testPublicKeyCheck = `<RSAKeyValue>
 
 func Test_ParseAndMarshalPublicKey(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     testPub := []byte(testPublicKeyCheck)
     pub, err1 := ParseXMLPublicKey(testPub)
@@ -38,7 +38,7 @@ func Test_ParseAndMarshalPublicKey(t *testing.T) {
 
 func Test_ParseAndMarshalPublicKey2(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     testPub := []byte(testPublicKeyCheck)
     pub, err1 := ParseXMLPublicKey(testPub)
@@ -53,7 +53,7 @@ func Test_ParseAndMarshalPublicKey2(t *testing.T) {
 
 func Test_ParseAndMarshalPrivateKey(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     testPri := []byte(testPrivateKeyCheck)
     pri, err1 := ParseXMLPrivateKey(testPri)
@@ -68,7 +68,7 @@ func Test_ParseAndMarshalPrivateKey(t *testing.T) {
 
 func Test_ParseAndMarshalPrivateKey2(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     testPri := []byte(testPrivateKeyCheck)
     pri, err1 := ParseXMLPrivateKey(testPri)

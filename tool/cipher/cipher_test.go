@@ -8,7 +8,7 @@ import (
 
 func Test_GetCipher(t *testing.T) {
     assertNotEmpty := test.AssertNotEmptyT(t)
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
 
     res, err := GetCipher("Aes")
 

@@ -10,7 +10,7 @@ import (
 
 func Test_EncryptPKCS8PrivateKey(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     data := "test-data"
@@ -106,7 +106,7 @@ func Test_EncryptPKCS8PrivateKey2(t *testing.T) {
 
 func test_EncryptPKCS8PrivateKey2(t *testing.T, name string, opts Opts) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     t.Run(name, func(t *testing.T) {

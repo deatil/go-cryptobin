@@ -36,7 +36,7 @@ func Test_Check_Gost_PrikeyWithAttrs(t *testing.T) {
 }
 
 func Test_Update_Check(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
 
     pri := decodePEM(Gost_PrikeyWithAttrs)

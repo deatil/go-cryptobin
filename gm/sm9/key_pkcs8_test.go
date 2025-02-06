@@ -406,7 +406,7 @@ JkOPT5wBW/Lu55cAytiN/0pe0g==
 `
 
 func Test_SignKey_Check(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     mprikeyDer := decodePEM(testSignMPriv)
@@ -479,7 +479,7 @@ g3c2uOkAJBT7usXXIKsTU2Exj+iq8P2vvZD4ZvRs4VugzIITJ35MuVkj4D+r8lj4
 `
 
 func Test_EncryptKey_Check(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     mprikeyDer := decodePEM(testEncryptMPriv)
@@ -577,7 +577,7 @@ func testParsePub(der []byte) []byte {
 }
 
 func Test_SignKey_Check2(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     mprikeyDer := decodePEM(testSignMPriv2)
@@ -730,7 +730,7 @@ MEQDQgAEBKYwj40Eb6ig0GmLLCM0mOkTm+JvWp4EeQIjwxMO2BFnAGHTY4qDKmZM
 `
 
 func Test_EncryptKey_Check2(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     mprikeyDer := decodePEM(testEncryptMPriv2)

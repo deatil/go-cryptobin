@@ -40,7 +40,7 @@ func Test_FuncEncrypt(t *testing.T) {
 
 func Test_Default(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "useData5useData5"
     cypt := FromString(data).
@@ -87,7 +87,7 @@ func Test_TripleDesPKCS7Padding(t *testing.T) {
 
 func Test_AesECBPKCS5Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
     cypt := FromString(data).
@@ -115,7 +115,7 @@ func Test_AesECBPKCS5Padding(t *testing.T) {
 
 func Test_SM4ECBPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
     cypt := FromString(data).
@@ -143,7 +143,7 @@ func Test_SM4ECBPKCS7Padding(t *testing.T) {
 
 func Test_XtsPKCS5Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
     cypt := FromString(data).
@@ -171,7 +171,7 @@ func Test_XtsPKCS5Padding(t *testing.T) {
 
 func Test_AesCFB1PKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -216,7 +216,7 @@ func Test_AesCFB1PKCS7Padding(t *testing.T) {
 
 func Test_AesCFB128PKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -246,7 +246,7 @@ func Test_AesCFB128PKCS7Padding(t *testing.T) {
 
 func Test_AesPCBCPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -295,7 +295,7 @@ func Test_AesPCBCPKCS7Padding(t *testing.T) {
 
 func Test_TwoDesCFBPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -325,7 +325,7 @@ func Test_TwoDesCFBPKCS7Padding(t *testing.T) {
 
 func Test_IdeaCBCPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
     cypt := FromString(data).
@@ -355,7 +355,7 @@ func Test_IdeaCBCPKCS7Padding(t *testing.T) {
 
 func Test_RC4MD5(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
     cypt := FromString(data).
@@ -381,7 +381,7 @@ func Test_RC4MD5(t *testing.T) {
 
 func Test_SeedCFBPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -411,7 +411,7 @@ func Test_SeedCFBPKCS7Padding(t *testing.T) {
 
 func Test_AriaCFBPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -441,7 +441,7 @@ func Test_AriaCFBPKCS7Padding(t *testing.T) {
 
 func Test_CamelliaCFBPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -471,7 +471,7 @@ func Test_CamelliaCFBPKCS7Padding(t *testing.T) {
 
 func gostCFBPKCS7PaddingWithSbox(t *testing.T, sbox string) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -515,7 +515,7 @@ func Test_GostCFBPKCS7Padding(t *testing.T) {
 
 func Test_KuznyechikCFBPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -545,7 +545,7 @@ func Test_KuznyechikCFBPKCS7Padding(t *testing.T) {
 
 func Test_SerpentCFBPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -574,7 +574,7 @@ func Test_SerpentCFBPKCS7Padding(t *testing.T) {
 }
 
 func Test_OnError(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
     assertEmpty := cryptobin_test.AssertEmptyT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
@@ -608,7 +608,7 @@ func Test_OnError(t *testing.T) {
 
 func Test_AesCCMPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -638,7 +638,7 @@ func Test_AesCCMPKCS7Padding(t *testing.T) {
 
 func Test_AesOCFB(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
     cypt := FromString(data).
@@ -664,7 +664,7 @@ func Test_AesOCFB(t *testing.T) {
 
 func Test_AesOCFBFalse(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass12trtrt7yh"
     cypt := FromString(data).
@@ -690,7 +690,7 @@ func Test_AesOCFBFalse(t *testing.T) {
 
 func Test_AesCBCISO10126Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -720,7 +720,7 @@ func Test_AesCBCISO10126Padding(t *testing.T) {
 
 func Test_TripleDESCBC_Check(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     oldData := "test-pass"
 
@@ -745,7 +745,7 @@ func Test_TripleDESCBC_Check(t *testing.T) {
 
 func Test_TwoDesCBC_Check(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     oldData := "test-pass"
 
@@ -770,7 +770,7 @@ func Test_TwoDesCBC_Check(t *testing.T) {
 
 func Test_RC5PKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -800,7 +800,7 @@ func Test_RC5PKCS7Padding(t *testing.T) {
 
 func Test_RC5PKCS7Padding_Check(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     oldData := "测试数据"
 
@@ -823,7 +823,7 @@ func Test_RC5PKCS7Padding_Check(t *testing.T) {
 
 func Test_RC6PKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -853,7 +853,7 @@ func Test_RC6PKCS7Padding(t *testing.T) {
 
 func Test_RC6PKCS7Padding_Check(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     oldData := "ckijhslfg"
 
@@ -876,7 +876,7 @@ func Test_RC6PKCS7Padding_Check(t *testing.T) {
 
 func Test_SaferplusPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -906,7 +906,7 @@ func Test_SaferplusPKCS7Padding(t *testing.T) {
 
 func Test_HightPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -936,7 +936,7 @@ func Test_HightPKCS7Padding(t *testing.T) {
 
 func Test_LeaPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -966,7 +966,7 @@ func Test_LeaPKCS7Padding(t *testing.T) {
 
 func Test_Kasumi(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -996,7 +996,7 @@ func Test_Kasumi(t *testing.T) {
 
 func Test_Safer(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1026,7 +1026,7 @@ func Test_Safer(t *testing.T) {
 
 func Test_Multi2(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1056,7 +1056,7 @@ func Test_Multi2(t *testing.T) {
 
 func Test_Kseed(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1086,7 +1086,7 @@ func Test_Kseed(t *testing.T) {
 
 func Test_Khazad(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1116,7 +1116,7 @@ func Test_Khazad(t *testing.T) {
 
 func Test_AesBC(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
     cypt := FromString(data).
@@ -1146,7 +1146,7 @@ func Test_AesBC(t *testing.T) {
 
 func Test_AesHCTR(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     tweak := []byte("kkinjkijeel2pass")
     hkey := []byte("11injkijkol22plo")
@@ -1179,7 +1179,7 @@ func Test_AesHCTR(t *testing.T) {
 
 func Test_PresentPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1209,7 +1209,7 @@ func Test_PresentPKCS7Padding(t *testing.T) {
 
 func Test_Trivium(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1235,7 +1235,7 @@ func Test_Trivium(t *testing.T) {
 
 func Test_Rijndael128PKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1265,7 +1265,7 @@ func Test_Rijndael128PKCS7Padding(t *testing.T) {
 
 func Test_Rijndael192PKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1295,7 +1295,7 @@ func Test_Rijndael192PKCS7Padding(t *testing.T) {
 
 func Test_Rijndael256PKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1325,7 +1325,7 @@ func Test_Rijndael256PKCS7Padding(t *testing.T) {
 
 func Test_RijndaelPKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1355,7 +1355,7 @@ func Test_RijndaelPKCS7Padding(t *testing.T) {
 
 func Test_AESCBC_Check(t *testing.T) {
     eq := cryptobin_test.AssertEqualT(t)
-    errChek := cryptobin_test.AssertErrorT(t)
+    errChek := cryptobin_test.AssertNoErrorT(t)
 
     key := "1234567812345678"
     iv := "2233556612345678"
@@ -1378,7 +1378,7 @@ func Test_AESCBC_Check(t *testing.T) {
 
 func Test_TwinePKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1408,7 +1408,7 @@ func Test_TwinePKCS7Padding(t *testing.T) {
 
 func Test_Misty1PKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1438,7 +1438,7 @@ func Test_Misty1PKCS7Padding(t *testing.T) {
 
 func Test_Rijndael256NoPadding_Check(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     uid := "m2Ux0QezsImyNFdtDzYUBWuPf7Ir2AEwJP5l"
     str := "3365616430336134313637303438356562633734666333666136303361343062d9ac29251ae9a36ddb67f8f2ad55eea477239b4d53150feec4a01275d0b1f8b65ffc2f77774eb1203e26050d0f47273b0c35d663da0fa6ddb32b3e0f20cade3204d8f732a74f509c43251c088c523c79c87d02a91cfbc0ca0ff64e8c2e7fb4f6300c584ae84f7de531213747cd3ea50c3f3fa9fc430e784daab2f9777796b0c2"
@@ -1478,7 +1478,7 @@ func Test_Rijndael256NoPadding_Check(t *testing.T) {
 // 微信小程序 api AES256_GCM 加密测试
 func Test_Weapp_AES256_GCM_Check(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     real_plaintext := `{"_n":"o89QaPVsRu1yppIZzvSZc4","_appid":"wxba6223c06417af7b","_timestamp":1635927954,"appid":"wxba6223c06417af7b","openid":"oEWzBfmdLqhFS2mTXCo2E4Y9gJAM","scene":0,"client_ip":"127.0.0.1"}`
 
@@ -1514,7 +1514,7 @@ func Test_Weapp_AES256_GCM_Check(t *testing.T) {
 // 微信小程序 api AES256_GCM 解密测试
 func Test_Weapp_AES256_GCM_Check2(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     ct := `HExs66Ik3el+iM4IpeQ7SMEN934FRLFYOd3EmeaIrpP4EPTHckoco6O+PaoRZRa3lqaPRZT7r52f7LUok6gLxc6cdR8C4vpIIfh4xfLC4L7FNy9GbuMK1hcoi8b7gkWJcwZMkuCFNEDmqn3T49oWzAQOrY4LZnnnykv6oUJotdAsnKvmoJkLK7hRh7M2B1d2UnTnRuoIyarXc5Iojwoghx4BOvnV`
     real_ct, _ := base64.StdEncoding.DecodeString(ct)
@@ -1549,7 +1549,7 @@ func Test_Weapp_AES256_GCM_Check2(t *testing.T) {
 // 微信小程序 api SM4_GCM 解密测试
 func Test_Weapp_SM4_GCM_Check(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     ct := `fa8VugXI8UA2ugS646ZvuX0wo4qn0Eua2J9jtwACQXeVys3hP/fZDcZC4eEF9es/z/Zx6GM2piwoHKPmPbwzfNXWc/rUH/USFoKo6OBSiR8bb6QgkzYzYL9KsawMr8X/z6y8o3UzE5w65nfTySQFSpEVplD5S+SwQrLi3I2nUwS5N3SoJYsf8BHVfsYLBI9h1NocLgfjjyPYmeKsQ/t1muVWlV2Z75VbqFhM+ECgHpEvcWPDeUN5ZhZ6C/0=`
     real_ct, _ := base64.StdEncoding.DecodeString(ct)
@@ -1583,7 +1583,7 @@ func Test_Weapp_SM4_GCM_Check(t *testing.T) {
 
 func Test_AesGCM(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     key := "dfertf12dfertf12"
     nonce := "df35tf12df35"
@@ -1615,7 +1615,7 @@ func Test_AesGCM(t *testing.T) {
 
 func Test_AesGCMWithTagSize(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     key := "dfertf12dfertf12"
     nonce := "df35tf12df35"
@@ -1649,7 +1649,7 @@ func Test_AesGCMWithTagSize(t *testing.T) {
 
 func Test_AesCCM(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     key := "dfertf12dfertf12"
     nonce := "df35tf12df35"
@@ -1683,7 +1683,7 @@ func Test_AesCCM(t *testing.T) {
 
 func Test_AesCCMWithTagSize(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     key := "dfertf12dfertf12"
     nonce := "df35tf12df35"
@@ -1715,7 +1715,7 @@ func Test_AesCCMWithTagSize(t *testing.T) {
 
 func Test_Chacha20(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1741,7 +1741,7 @@ func Test_Chacha20(t *testing.T) {
 
 func Test_Chacha20poly1305(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := FromString(data).
@@ -1767,7 +1767,7 @@ func Test_Chacha20poly1305(t *testing.T) {
 
 func Test_Aes_CCM_PKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := New().FromString(data).
@@ -1797,7 +1797,7 @@ func Test_Aes_CCM_PKCS7Padding(t *testing.T) {
 
 func Test_Aes_CCMWithNonceSize_PKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := New().FromString(data).
@@ -1827,7 +1827,7 @@ func Test_Aes_CCMWithNonceSize_PKCS7Padding(t *testing.T) {
 
 func Test_Aes_CCMWithTagSize_NoPadding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := New().FromString(data).
@@ -1857,7 +1857,7 @@ func Test_Aes_CCMWithTagSize_NoPadding(t *testing.T) {
 
 func Test_Aes_CCMWithNonceAndTagSize_PKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := New().FromString(data).
@@ -1887,7 +1887,7 @@ func Test_Aes_CCMWithNonceAndTagSize_PKCS7Padding(t *testing.T) {
 
 func Test_Aes_GCM_PKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := New().FromString(data).
@@ -1917,7 +1917,7 @@ func Test_Aes_GCM_PKCS7Padding(t *testing.T) {
 
 func Test_Aes_GCMWithNonceSize_PKCS7Padding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := New().FromString(data).
@@ -1947,7 +1947,7 @@ func Test_Aes_GCMWithNonceSize_PKCS7Padding(t *testing.T) {
 
 func Test_Aes_GCMWithTagSize_NoPadding(t *testing.T) {
     assert := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-passtest-pass"
     cypt := New().FromString(data).

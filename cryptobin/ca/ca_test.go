@@ -44,7 +44,7 @@ func Test_OnError(t *testing.T) {
 }
 
 func Test_CreateCA(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -92,7 +92,7 @@ func Test_CreateCA(t *testing.T) {
 }
 
 func Test_CreateCAWithIssuer(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -139,7 +139,7 @@ func Test_CreateCAWithIssuer(t *testing.T) {
 }
 
 func Test_CreateCert(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -192,7 +192,7 @@ func Test_CreateCert(t *testing.T) {
 }
 
 func Test_CreateCSR(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -274,7 +274,7 @@ func Test_UpdateCertRequest(t *testing.T) {
 }
 
 func Test_GenerateKey(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -556,7 +556,7 @@ func Test_GenerateKey(t *testing.T) {
 }
 
 func Test_GenerateKey2(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     t.Run("GenerateRSAKey", func(t *testing.T) {
@@ -698,7 +698,7 @@ JPuxgonqBqrDgFL6n1VnWxe8tz6gB3rCccGbNxdkWGzR9y3JQOFc
 `
 
 func Test_CreatePKCS12Cert(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -721,7 +721,7 @@ func Test_CreatePKCS12Cert(t *testing.T) {
 }
 
 func Test_CreatePKCS12Cert2(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -778,7 +778,7 @@ xsRA9/ZP/g6wrVkQVhWf1g6CzDMk07F5yRujdPMKLYVIC/Rt2hCP/F8XZS8=
 
 func Test_Verify(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     ok, err := New().Verify(caRoot2, ca2, VerifyOptions{
         Intermediates: cryptobin_x509.NewCertPool(),

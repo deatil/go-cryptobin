@@ -8,7 +8,7 @@ import (
 
 func Test_LowerSafeEncrypt(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     testPub := []byte(testPublicKeyCheck)
     pub, err := ParseXMLPublicKey(testPub)

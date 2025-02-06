@@ -242,7 +242,7 @@ func signAndDetach(content []byte, cert *cryptobin_x509.Certificate, privkey *rs
 
 func Test_SignAndDetach(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     cert := decodeCert(testEncryptedTestCertificate)
     parsedKey := decodePrivateKey(testEncryptedTestPrivateKey)
@@ -314,7 +314,7 @@ func signAndDetach2(content []byte, cert *cryptobin_x509.Certificate, privkey *r
 
 func Test_SignAndDetach2(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     cert := decodeCert(testEncryptedTestCertificate)
     parsedKey := decodePrivateKey(testEncryptedTestPrivateKey)
@@ -385,7 +385,7 @@ func signWithAlgorithm(
 
 func Test_SignWithAlgorithm(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     cert := decodeCert(testEncryptedTestCertificate)
     privateKey := decodePrivateKey(testEncryptedTestPrivateKey)
@@ -507,7 +507,7 @@ func signWithAlgorithmWithSM2(
 
 func Test_SignWithAlgorithmWithSM2(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     certSM := decodeCert(signCert)
     privateKeySM := decodeSM2PrivateKey(signKey)

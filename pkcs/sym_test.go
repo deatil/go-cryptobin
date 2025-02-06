@@ -14,7 +14,7 @@ type testCbcParams []byte
 
 func Test_AES256CBC(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pass := make([]byte, 32)
@@ -44,7 +44,7 @@ type testPbeCBCParams struct {
 
 func Test_MD5AndDES(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     pass := make([]byte, 8)

@@ -8,7 +8,7 @@ import (
 
 func Test_CreateKey(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     obj := New().GenerateKey()
 
@@ -32,7 +32,7 @@ func Test_CreateSecretKey(t *testing.T) {
 }
 
 func test_CreateSecretKey(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
     assert := cryptobin_test.AssertEqualT(t)
 
@@ -64,7 +64,7 @@ func test_CreateSecretKey(t *testing.T) {
 }
 
 func test_CreateSecretKeyWithPassword(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
     assert := cryptobin_test.AssertEqualT(t)
 

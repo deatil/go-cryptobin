@@ -207,7 +207,7 @@ func Test_NewDecoder(t *testing.T) {
 }
 
 func Test_Marshal(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     buf := map[string]any{
@@ -235,7 +235,7 @@ func Test_MustMarshal(t *testing.T) {
 }
 
 func Test_SingleTorrent_Check(t *testing.T) {
-    errChek := cryptobin_test.AssertErrorT(t)
+    errChek := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -315,7 +315,7 @@ func Test_SingleTorrent_Check(t *testing.T) {
 }
 
 func Test_MultipleTorrent_Check(t *testing.T) {
-    errChek := cryptobin_test.AssertErrorT(t)
+    errChek := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 

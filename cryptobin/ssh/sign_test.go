@@ -28,8 +28,8 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL5YLiGEuiHIP3p8Uvz0mCQXP9YtN/TS7vUcc0D+BA76
 
 func Test_Sign(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
 
@@ -54,8 +54,8 @@ func Test_Sign(t *testing.T) {
 }
 
 func Test_Sign_Check(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
 
@@ -79,8 +79,8 @@ c5pto6ZM6K74kS1PDb04CQ==
 }
 
 func Test_CheckKeyPair(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     {
         obj := New().
@@ -119,8 +119,8 @@ func Test_CheckKeyPair2(t *testing.T) {
 }
 
 func test_CheckKeyPair2(t *testing.T, keyType string) {
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     obj0 := New().SetPublicKeyType(keyType).GenerateKey()
@@ -158,8 +158,8 @@ func Test_Sign2(t *testing.T) {
 
 func test_Sign2(t *testing.T, keyType string) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
 

@@ -16,7 +16,7 @@ func Test_bytesAsString(t *testing.T) {
 
 func Test_splitPieceHashes(t *testing.T) {
     eq := cryptobin_test.AssertEqualT(t)
-    errChek := cryptobin_test.AssertErrorT(t)
+    errChek := cryptobin_test.AssertNoErrorT(t)
 
     d := "test--data1234567890data..test0987654321"
     res, err := splitPieceHashes(d)

@@ -9,7 +9,7 @@ import (
 
 func Test_PublicKeyBytes_Encrypt(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     testPub := []byte(testPublicKeyCheck)
     pub, err := ParseXMLPublicKey(testPub)
@@ -35,7 +35,7 @@ func Test_PublicKeyBytes_Encrypt(t *testing.T) {
 
 func Test_PrivateKeyBytes_Encrypt(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     testPub := []byte(testPublicKeyCheck)
     pub, err := ParseXMLPublicKey(testPub)

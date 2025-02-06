@@ -29,7 +29,7 @@ func test_GenerateKey() *dsa.PrivateKey {
 
 func Test_MarshalPKCS1(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
 
     pri := test_GenerateKey()
@@ -60,7 +60,7 @@ func Test_MarshalPKCS1(t *testing.T) {
 
 func Test_MarshalPKCS8(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
 
     pri := test_GenerateKey()
@@ -133,8 +133,8 @@ func Test_MarshalPKCS8_Check(t *testing.T) {
 }
 
 func test_MarshalPKCS8_Check(t *testing.T, priv, pub string) {
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     parsedPub, err := ParsePKCS8PublicKey(decodePEM(pub))
     if err != nil {

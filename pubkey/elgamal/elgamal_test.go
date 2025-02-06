@@ -37,7 +37,7 @@ var testProbability = 64
 
 func Test_GenerateKey(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
 
@@ -51,7 +51,7 @@ func Test_GenerateKey(t *testing.T) {
 func Test_Encrypt(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
     pub := &pri.PublicKey
@@ -73,7 +73,7 @@ func Test_Encrypt(t *testing.T) {
 func Test_Encrypt_2(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
     pub := &pri.PublicKey
@@ -95,7 +95,7 @@ func Test_Encrypt_2(t *testing.T) {
 func Test_EncryptLegacy(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
     pub := &pri.PublicKey
@@ -117,7 +117,7 @@ func Test_EncryptLegacy(t *testing.T) {
 func Test_EncryptAsn1(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
     pub := &pri.PublicKey
@@ -139,7 +139,7 @@ func Test_EncryptAsn1(t *testing.T) {
 func Test_EncryptBytes(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
     pub := &pri.PublicKey
@@ -159,9 +159,9 @@ func Test_EncryptBytes(t *testing.T) {
 }
 
 func Test_Sign(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
     pub := &pri.PublicKey
@@ -180,9 +180,9 @@ func Test_Sign(t *testing.T) {
 }
 
 func Test_SignASN1(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
     pub := &pri.PublicKey
@@ -201,9 +201,9 @@ func Test_SignASN1(t *testing.T) {
 }
 
 func Test_SignBytes(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
     pub := &pri.PublicKey
@@ -223,7 +223,7 @@ func Test_SignBytes(t *testing.T) {
 
 func Test_MarshalPKCS1(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
 
     pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
@@ -255,7 +255,7 @@ func Test_MarshalPKCS1(t *testing.T) {
 
 func Test_MarshalPKCS8(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
 
     pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
@@ -309,7 +309,7 @@ var testXMLPublicKey = `
 
 func Test_MarshalXML(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
 
     pri, err := GenerateKey(rand.Reader, testBitsize, testProbability)
@@ -521,8 +521,8 @@ func test_MarshalPKCS8_Check(t *testing.T, priv, pub string) {
 }
 
 func test_MarshalPKCS8_Check2(t *testing.T, priv, pub string) {
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     parsedPub, err := ParsePKCS8PublicKey(decodePEM(pub))
     if err != nil {
@@ -566,8 +566,8 @@ func Test_MarshalPKCS1_Check(t *testing.T) {
 }
 
 func test_MarshalPKCS1_Check(t *testing.T, priv, pub string) {
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     parsedPub, err := ParsePKCS1PublicKey(decodePEM(pub))
     if err != nil {

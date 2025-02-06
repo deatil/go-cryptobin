@@ -15,7 +15,7 @@ func Test_Name(t *testing.T) {
 
 func Test_AesCFBPKCS1Padding(t *testing.T) {
     assert := test.AssertEqualT(t)
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
 
     data := "tes1tes1tes1tes1tes1tes1tes1tes1"
     cypt := crypto.FromString(data).

@@ -13,7 +13,7 @@ func Test_HSS_SignerInterface(t *testing.T) {
 }
 
 func test_HSS_SignVerify(t *testing.T, opts []HSSOpts) {
-    assertBool := test.AssertBoolT(t)
+    assertBool := test.AssertTrueT(t)
 
     priv, err := GenerateHSSKey(rand.Reader, opts)
     if err != nil {
@@ -175,8 +175,8 @@ func Test_HSS_PrivateKey_ToBytes(t *testing.T) {
 }
 
 func Test_HSS_Equal(t *testing.T) {
-    assertBool := test.AssertBoolT(t)
-    assertNotBool := test.AssertNotBoolT(t)
+    assertBool := test.AssertTrueT(t)
+    assertNotBool := test.AssertFalseT(t)
 
     t.Run("good", func(t *testing.T) {
         priv, err := GenerateHSSKey(rand.Reader, DefaultOpts)

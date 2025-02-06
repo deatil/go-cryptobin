@@ -9,7 +9,7 @@ import (
 
 func Test_Recover(t *testing.T) {
     assertEqual := test.AssertEqualT(t)
-    assertNotErrorNil := test.AssertNotErrorNilT(t)
+    assertNotErrorNil := test.AssertErrorT(t)
 
     err := Recover(func() {
         panic("test panic")

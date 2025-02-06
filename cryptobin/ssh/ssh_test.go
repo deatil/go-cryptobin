@@ -30,7 +30,7 @@ func Test_GenKey(t *testing.T) {
 }
 
 func test_GenKey(t *testing.T, keyType string) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -87,7 +87,7 @@ func Test_GenKey2(t *testing.T) {
 }
 
 func test_GenKey2(t *testing.T, keyType string) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -149,7 +149,7 @@ func Test_GenKey3(t *testing.T) {
 }
 
 func test_GenKey3(t *testing.T, keyType PublicKeyType) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -201,7 +201,7 @@ func test_GenKey3(t *testing.T, keyType PublicKeyType) {
 }
 
 func Test_GenKey5(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -254,7 +254,7 @@ func Test_GenKey_ECDSA(t *testing.T) {
 }
 
 func test_GenKey_ECDSA(t *testing.T, curve string) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -282,7 +282,7 @@ func test_GenKey_ECDSA(t *testing.T, curve string) {
 }
 
 func Test_GenKey_ECDSA_With_Comment(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -334,7 +334,7 @@ func Test_OnError(t *testing.T) {
 
 func Test_Get(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
@@ -568,7 +568,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDsUGub8db33AsanqRw4wmwFiu+J6aDp4RBpDR5nRDL
 
 func Test_ParseOpenSSHPrivateKeyToInfoFromPEM(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     newSSH := New()
 
@@ -581,7 +581,7 @@ func Test_ParseOpenSSHPrivateKeyToInfoFromPEM(t *testing.T) {
 
 func Test_ParseOpenSSHPrivateKeyToInfoFromPEM_And_En(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     newSSH := New()
 

@@ -27,8 +27,8 @@ var (
 
 func Test_XMLSign(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
 
@@ -55,7 +55,7 @@ func Test_XMLSign(t *testing.T) {
 func Test_Encrypt(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "123tesfd!df"
 
@@ -85,7 +85,7 @@ var testProbability = 64
 
 func Test_GenerateKeyPKCS1(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     obj := New().GenerateKey(testBitsize, testProbability)
     assertError(obj.Error(), "GenerateKey-Error")
@@ -111,7 +111,7 @@ func Test_GenerateKeyPKCS1(t *testing.T) {
 
 func Test_GenerateKeyPKCS8(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     obj := New().GenerateKey(testBitsize, testProbability)
     assertError(obj.Error(), "GenerateKey-Error")
@@ -193,7 +193,7 @@ u2+zYDS2Uob9qmSSFxfxLZkW5v8xExCig3QYhQ0=
 func Test_EncryptAsn1PKCS1(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "123tesfd!df"
 
@@ -221,7 +221,7 @@ func Test_EncryptAsn1PKCS1(t *testing.T) {
 func Test_EncryptAsn1PKCS8(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "123tesfd!df"
 
@@ -247,7 +247,7 @@ func Test_EncryptAsn1PKCS8(t *testing.T) {
 }
 
 func Test_CheckKeyPair(t *testing.T) {
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
 
     objCheck1 := New().
         FromPKCS1PrivateKey([]byte(pkcs1Prikey)).
@@ -277,7 +277,7 @@ func Test_CheckKeyPair(t *testing.T) {
 func Test_EncryptAsn1_1(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "123tesfd!df"
 
@@ -316,7 +316,7 @@ func Test_EncryptAsn1_1(t *testing.T) {
 func Test_EncryptAsn1_2(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "123tesfd!df"
 
@@ -355,7 +355,7 @@ func Test_EncryptAsn1_2(t *testing.T) {
 func Test_EncryptAsn1_3(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "123tesfd!df"
 
@@ -455,8 +455,8 @@ func Test_EncryptAsn1_3(t *testing.T) {
 
 func Test_Sign_2(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
 
@@ -605,7 +605,7 @@ func Test_CreatePKCS1PrivateKeyWithPassword(t *testing.T) {
 
 func test_CreatePKCS1PrivateKeyWithPassword(t *testing.T, cipher string) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     t.Run(cipher, func(t *testing.T) {

@@ -15,7 +15,7 @@ func Test_Ots_Interface(t *testing.T) {
 }
 
 func test_OtsSignVerify(t *testing.T, otstc ILmotsParam) {
-    assertBool := test.AssertBoolT(t)
+    assertBool := test.AssertTrueT(t)
 
     var err error
 
@@ -69,7 +69,7 @@ func Test_OtsSignVerify(t *testing.T) {
 }
 
 func test_OtsSignVerifyFail(t *testing.T, otstc ILmotsParam) {
-    assertNotBool := test.AssertNotBoolT(t)
+    assertNotBool := test.AssertFalseT(t)
 
     var err error
 
@@ -118,8 +118,8 @@ func Test_OtsSignVerifyFail(t *testing.T) {
 }
 
 func Test_DoubleSign(t *testing.T) {
-    assertError := test.AssertErrorT(t)
-    assertNotErrorNil := test.AssertNotErrorNilT(t)
+    assertError := test.AssertNoErrorT(t)
+    assertNotErrorNil := test.AssertErrorT(t)
 
     var err error
 
@@ -151,8 +151,8 @@ func Test_OTS_ParamName(t *testing.T) {
 }
 
 func Test_Ots_Equal(t *testing.T) {
-    assertBool := test.AssertBoolT(t)
-    assertNotBool := test.AssertNotBoolT(t)
+    assertBool := test.AssertTrueT(t)
+    assertNotBool := test.AssertFalseT(t)
 
     t.Run("good", func(t *testing.T) {
         id, err := hex.DecodeString("d08fabd4a2091ff0a8cb4ed834e74534")

@@ -21,7 +21,7 @@ func Test_Interface(t *testing.T) {
 }
 
 func Test_PKCS7Padding(t *testing.T) {
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
     assertEqual := test.AssertEqualT(t)
     assertNotEmpty := test.AssertNotEmptyT(t)
 
@@ -42,7 +42,7 @@ func Test_PKCS7Padding(t *testing.T) {
 }
 
 func Test_PKCS5Padding(t *testing.T) {
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
     assertEqual := test.AssertEqualT(t)
     assertNotEmpty := test.AssertNotEmptyT(t)
 
@@ -61,7 +61,7 @@ func Test_PKCS5Padding(t *testing.T) {
 }
 
 func Test_ZeroPadding(t *testing.T) {
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
     assertEqual := test.AssertEqualT(t)
     assertNotEmpty := test.AssertNotEmptyT(t)
 
@@ -82,7 +82,7 @@ func Test_ZeroPadding(t *testing.T) {
 }
 
 func Test_ISO97971Padding(t *testing.T) {
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
     assertEqual := test.AssertEqualT(t)
     assertNotEmpty := test.AssertNotEmptyT(t)
 
@@ -103,7 +103,7 @@ func Test_ISO97971Padding(t *testing.T) {
 }
 
 func Test_PBOC2Padding(t *testing.T) {
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
     assertEqual := test.AssertEqualT(t)
     assertNotEmpty := test.AssertNotEmptyT(t)
 
@@ -124,7 +124,7 @@ func Test_PBOC2Padding(t *testing.T) {
 }
 
 func Test_X923Padding(t *testing.T) {
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
     assertEqual := test.AssertEqualT(t)
     assertNotEmpty := test.AssertNotEmptyT(t)
 
@@ -145,7 +145,7 @@ func Test_X923Padding(t *testing.T) {
 }
 
 func Test_ISO10126Padding(t *testing.T) {
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
     assertEqual := test.AssertEqualT(t)
     assertNotEmpty := test.AssertNotEmptyT(t)
 
@@ -165,7 +165,7 @@ func Test_ISO10126Padding(t *testing.T) {
 }
 
 func Test_ISO7816_4Padding(t *testing.T) {
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
     assertEqual := test.AssertEqualT(t)
     assertNotEmpty := test.AssertNotEmptyT(t)
 
@@ -186,7 +186,7 @@ func Test_ISO7816_4Padding(t *testing.T) {
 }
 
 func Test_TBCPadding(t *testing.T) {
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
     assertEqual := test.AssertEqualT(t)
     assertNotEmpty := test.AssertNotEmptyT(t)
 
@@ -207,7 +207,7 @@ func Test_TBCPadding(t *testing.T) {
 }
 
 func Test_TBCPadding_2(t *testing.T) {
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
     assertEqual := test.AssertEqualT(t)
     assertNotEmpty := test.AssertNotEmptyT(t)
 
@@ -228,7 +228,7 @@ func Test_TBCPadding_2(t *testing.T) {
 }
 
 func Test_PKCS1Padding(t *testing.T) {
-    assertError := test.AssertErrorT(t)
+    assertError := test.AssertNoErrorT(t)
     assertEqual := test.AssertEqualT(t)
     assertNotEmpty := test.AssertNotEmptyT(t)
 

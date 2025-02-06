@@ -77,7 +77,7 @@ Vu0zCh5hkl/0r9vPzPeqGpHJv3eJw/zF+gZWxn2LvLcKkQTcGutSwVdVRQ==
 
 func Test_SignASN1_RC2_40En(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
     objSign := NewECDSA().
@@ -91,7 +91,7 @@ func Test_SignASN1_RC2_40En(t *testing.T) {
 
 func Test_SignASN1_RC2_64En(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
     objSign := NewECDSA().
@@ -105,7 +105,7 @@ func Test_SignASN1_RC2_64En(t *testing.T) {
 
 func Test_SignASN1_RC2_128En(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
     objSign := NewECDSA().
@@ -119,7 +119,7 @@ func Test_SignASN1_RC2_128En(t *testing.T) {
 
 func Test_SignASN1_RC5_256En(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
     objSign := NewECDSA().
@@ -133,7 +133,7 @@ func Test_SignASN1_RC5_256En(t *testing.T) {
 
 func Test_SignASN1_RC5_192En(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     data := "test-pass"
     objSign := NewECDSA().
@@ -147,8 +147,8 @@ func Test_SignASN1_RC5_192En(t *testing.T) {
 
 func Test_SignASN1_RC5_128En(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
 
     data := "test-pass"
     objSign := NewECDSA().
@@ -171,8 +171,8 @@ func Test_SignASN1_RC5_128En(t *testing.T) {
 }
 
 func Test_VerifyASN1En(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
 
     data := "test-pass"
     sig := "MEUCIBhAZzrS6jM4MfwibzA+j0vBkTEQGvkiDWhx7E6/ePUmAiEAt1uTZXUPGNU9nY8ZS3UxcJCRqwh/G8eeyrAVwM3qen4="
@@ -186,7 +186,7 @@ func Test_VerifyASN1En(t *testing.T) {
 }
 
 func Test_PublickeyXY(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -212,7 +212,7 @@ func Test_PublickeyXY(t *testing.T) {
 }
 
 func Test_PublickeyXY_2(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -238,7 +238,7 @@ func Test_PublickeyXY_2(t *testing.T) {
 }
 
 func Test_PublickeyXY_String(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -259,7 +259,7 @@ func Test_PublickeyXY_String(t *testing.T) {
 }
 
 func Test_PublickeyXY_Bytes(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -282,7 +282,7 @@ func Test_PublickeyXY_Bytes(t *testing.T) {
 }
 
 func Test_PrivateKeyD(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -302,7 +302,7 @@ func Test_PrivateKeyD(t *testing.T) {
 }
 
 func Test_PrivateKey_Bytes(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -357,7 +357,7 @@ func Test_CreatePKCS1PrivateKeyWithPassword(t *testing.T) {
 
 func test_CreatePKCS1PrivateKeyWithPassword(t *testing.T, cipher string) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     t.Run(cipher, func(t *testing.T) {
@@ -389,7 +389,7 @@ func test_CreatePKCS1PrivateKeyWithPassword(t *testing.T, cipher string) {
 }
 
 func Test_PKCS8PrivateKey_Der(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -411,7 +411,7 @@ func Test_PKCS8PrivateKey_Der(t *testing.T) {
 }
 
 func Test_PKCS1PrivateKey_Der(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -433,7 +433,7 @@ func Test_PKCS1PrivateKey_Der(t *testing.T) {
 }
 
 func Test_PublicKey_Der(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -540,8 +540,8 @@ func Test_SignWithEncoding(t *testing.T) {
 
 func test_SignWithEncoding(t *testing.T, encoding EncodingType) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     gen := GenerateKey("P256")
 
@@ -568,7 +568,7 @@ func test_SignWithEncoding(t *testing.T, encoding EncodingType) {
 }
 
 func Test_SignWithEncoding_Two_Check(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
     assertNotEqual := cryptobin_test.AssertNotEqualT(t)
 

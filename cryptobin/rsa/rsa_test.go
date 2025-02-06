@@ -13,7 +13,7 @@ import (
 // Test_PrimeKeyGeneration
 func Test_PrimeKeyGeneration(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
 
     size := 768
     if testing.Short() {
@@ -88,7 +88,7 @@ tGjMoEruLNj7fkPcNQIDAQAB
 
 func Test_RSAPkcs1Sign(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertTrue := cryptobin_test.AssertTrueT(t)
 
     data := "test-pass"
@@ -118,7 +118,7 @@ func Test_RSAPkcs1Sign(t *testing.T) {
 
 func Test_RSAPkcs8Sign(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertTrue := cryptobin_test.AssertTrueT(t)
 
     data := "test-pass22222"
@@ -160,7 +160,7 @@ MLk4PHD/ToU63V0h1QIDAQAB
 
 func Test_PubNE(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
 
     en := NewRSA().
@@ -208,7 +208,7 @@ func Test_CreatePKCS1PrivateKeyWithPassword(t *testing.T) {
 
 func test_CreatePKCS1PrivateKeyWithPassword(t *testing.T, cipher string) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     t.Run(cipher, func(t *testing.T) {
@@ -325,7 +325,7 @@ CQIDAQAB
 // https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/getting_started/api_signature.html
 // 微信小程序 api RSAwithSHA256 验证测试
 func Test_Weapp_RSA_Verify(t *testing.T) {
-    assertError := cryptobin_test.AssertErrorT(t)
+    assertError := cryptobin_test.AssertNoErrorT(t)
     assertTrue := cryptobin_test.AssertTrueT(t)
 
     req_data := `{"iv":"r2WDQt56rEAmMuoR","data":"HExs66Ik3el+iM4IpeQ7SMEN934FRLFYOd3EmeaIrpP4EPTHckoco6O+PaoRZRa3lqaPRZT7r52f7LUok6gLxc6cdR8C4vpIIfh4xfLC4L7FNy9GbuMK1hcoi8b7gkWJcwZMkuCFNEDmqn3T49oWzAQOrY4LZnnnykv6oUJotdAsnKvmoJkLK7hRh7M2B1d2UnTnRuoIyarXc5Iojwoghx4BOvnV","authtag":"z2BFD8QctKXTuBlhICGOjQ=="}`

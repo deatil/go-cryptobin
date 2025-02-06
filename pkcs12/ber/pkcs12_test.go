@@ -110,8 +110,8 @@ func Test_SM2Pkcs12_Decode(t *testing.T) {
 
 func Test_P12_SM2Pkcs12_Decode(t *testing.T) {
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
-    assertBool := cryptobin_test.AssertBoolT(t)
-    assertNotBool := cryptobin_test.AssertNotBoolT(t)
+    assertBool := cryptobin_test.AssertTrueT(t)
+    assertNotBool := cryptobin_test.AssertFalseT(t)
 
     ber, err := base64.StdEncoding.DecodeString(sm2Pkcs12)
     if err != nil {

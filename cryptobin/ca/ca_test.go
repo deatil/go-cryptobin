@@ -44,7 +44,7 @@ func Test_OnError(t *testing.T) {
 }
 
 func Test_CreateCA(t *testing.T) {
-    assertError := cryptobin_test.AssertNoErrorT(t)
+    assertNoError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -60,7 +60,7 @@ func Test_CreateCA(t *testing.T) {
     ca := obj.CreateCA().ToKeyString()
     prikey := obj.CreatePrivateKey().ToKeyString()
 
-    assertError(obj.Error(), "Test_CreateCA")
+    assertNoError(obj.Error(), "Test_CreateCA")
     assertNotEmpty(ca, "Test_CreateCA-ca")
     assertNotEmpty(prikey, "Test_CreateCA-prikey")
 
@@ -92,7 +92,7 @@ func Test_CreateCA(t *testing.T) {
 }
 
 func Test_CreateCAWithIssuer(t *testing.T) {
-    assertError := cryptobin_test.AssertNoErrorT(t)
+    assertNoError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -108,7 +108,7 @@ func Test_CreateCAWithIssuer(t *testing.T) {
     root := obj.CreateCA().ToKeyString()
     prikey := obj.CreatePrivateKey().ToKeyString()
 
-    assertError(obj.Error(), "Test_CreateCAWithIssuer")
+    assertNoError(obj.Error(), "Test_CreateCAWithIssuer")
     assertNotEmpty(root, "Test_CreateCAWithIssuer-root")
     assertNotEmpty(prikey, "Test_CreateCAWithIssuer-prikey")
 
@@ -125,7 +125,7 @@ func Test_CreateCAWithIssuer(t *testing.T) {
         CreateCAWithIssuer(obj.GetCert(), obj.GetPrivateKey())
     ca := obj2.ToKeyString()
 
-    assertError(obj2.Error(), "Test_CreateCAWithIssuer-CreateCert")
+    assertNoError(obj2.Error(), "Test_CreateCAWithIssuer-CreateCert")
     assertNotEmpty(ca, "Test_CreateCAWithIssuer-CreateCert")
 
     // ===========
@@ -139,7 +139,7 @@ func Test_CreateCAWithIssuer(t *testing.T) {
 }
 
 func Test_CreateCert(t *testing.T) {
-    assertError := cryptobin_test.AssertNoErrorT(t)
+    assertNoError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -155,7 +155,7 @@ func Test_CreateCert(t *testing.T) {
     ca := obj.CreateCA().ToKeyString()
     prikey := obj.CreatePrivateKey().ToKeyString()
 
-    assertError(obj.Error(), "Test_CreateCert")
+    assertNoError(obj.Error(), "Test_CreateCert")
     assertNotEmpty(ca, "Test_CreateCert")
     assertNotEmpty(prikey, "Test_CreateCert-prikey")
 
@@ -178,7 +178,7 @@ func Test_CreateCert(t *testing.T) {
         CreateCert(obj.GetCert(), obj.GetPrivateKey())
     cert := obj2.ToKeyString()
 
-    assertError(obj2.Error(), "Test_CreateCert-CreateCert")
+    assertNoError(obj2.Error(), "Test_CreateCert-CreateCert")
     assertNotEmpty(cert, "Test_CreateCert-CreateCert")
 
     // ===========
@@ -192,7 +192,7 @@ func Test_CreateCert(t *testing.T) {
 }
 
 func Test_CreateCSR(t *testing.T) {
-    assertError := cryptobin_test.AssertNoErrorT(t)
+    assertNoError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -209,7 +209,7 @@ func Test_CreateCSR(t *testing.T) {
     cert0 := obj.CreateCSR().ToKeyString()
     prikey := obj.CreatePrivateKey().ToKeyString()
 
-    assertError(obj.Error(), "Test_CreateCSR")
+    assertNoError(obj.Error(), "Test_CreateCSR")
     assertNotEmpty(cert0, "Test_CreateCSR")
     assertNotEmpty(prikey, "Test_CreateCSR-prikey")
 
@@ -274,7 +274,7 @@ func Test_UpdateCertRequest(t *testing.T) {
 }
 
 func Test_GenerateKey(t *testing.T) {
-    assertError := cryptobin_test.AssertNoErrorT(t)
+    assertNoError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -287,7 +287,7 @@ func Test_GenerateKey(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey")
+        assertNoError(obj.Error(), "Test_GenerateKey")
         assertNotEmpty(prikey, "Test_GenerateKey-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
 
@@ -322,7 +322,7 @@ func Test_GenerateKey(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey")
+        assertNoError(obj.Error(), "Test_GenerateKey")
         assertNotEmpty(prikey, "Test_GenerateKey-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
 
@@ -356,7 +356,7 @@ func Test_GenerateKey(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey")
+        assertNoError(obj.Error(), "Test_GenerateKey")
         assertNotEmpty(prikey, "Test_GenerateKey-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
 
@@ -389,7 +389,7 @@ func Test_GenerateKey(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey")
+        assertNoError(obj.Error(), "Test_GenerateKey")
         assertNotEmpty(prikey, "Test_GenerateKey-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
 
@@ -422,7 +422,7 @@ func Test_GenerateKey(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey")
+        assertNoError(obj.Error(), "Test_GenerateKey")
         assertNotEmpty(prikey, "Test_GenerateKey-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
 
@@ -456,7 +456,7 @@ func Test_GenerateKey(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey")
+        assertNoError(obj.Error(), "Test_GenerateKey")
         assertNotEmpty(prikey, "Test_GenerateKey-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
 
@@ -491,7 +491,7 @@ func Test_GenerateKey(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey")
+        assertNoError(obj.Error(), "Test_GenerateKey")
         assertNotEmpty(prikey, "Test_GenerateKey-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
 
@@ -528,7 +528,7 @@ func Test_GenerateKey(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey")
+        assertNoError(obj.Error(), "Test_GenerateKey")
         assertNotEmpty(prikey, "Test_GenerateKey-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey-pubkey")
 
@@ -556,7 +556,7 @@ func Test_GenerateKey(t *testing.T) {
 }
 
 func Test_GenerateKey2(t *testing.T) {
-    assertError := cryptobin_test.AssertNoErrorT(t)
+    assertNoError := cryptobin_test.AssertNoErrorT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
     t.Run("GenerateRSAKey", func(t *testing.T) {
@@ -566,7 +566,7 @@ func Test_GenerateKey2(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey2")
+        assertNoError(obj.Error(), "Test_GenerateKey2")
         assertNotEmpty(prikey, "Test_GenerateKey2-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey2-pubkey")
     })
@@ -577,7 +577,7 @@ func Test_GenerateKey2(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey2")
+        assertNoError(obj.Error(), "Test_GenerateKey2")
         assertNotEmpty(prikey, "Test_GenerateKey2-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey2-pubkey")
     })
@@ -589,7 +589,7 @@ func Test_GenerateKey2(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey2")
+        assertNoError(obj.Error(), "Test_GenerateKey2")
         assertNotEmpty(prikey, "Test_GenerateKey2-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey2-pubkey")
     })
@@ -601,7 +601,7 @@ func Test_GenerateKey2(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey2")
+        assertNoError(obj.Error(), "Test_GenerateKey2")
         assertNotEmpty(prikey, "Test_GenerateKey2-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey2-pubkey")
     })
@@ -613,7 +613,7 @@ func Test_GenerateKey2(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey2")
+        assertNoError(obj.Error(), "Test_GenerateKey2")
         assertNotEmpty(prikey, "Test_GenerateKey2-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey2-pubkey")
     })
@@ -625,7 +625,7 @@ func Test_GenerateKey2(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey2")
+        assertNoError(obj.Error(), "Test_GenerateKey2")
         assertNotEmpty(prikey, "Test_GenerateKey2-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey2-pubkey")
     })
@@ -637,7 +637,7 @@ func Test_GenerateKey2(t *testing.T) {
         prikey := obj.CreatePrivateKey().ToKeyString()
         pubkey := obj.CreatePublicKey().ToKeyString()
 
-        assertError(obj.Error(), "Test_GenerateKey2")
+        assertNoError(obj.Error(), "Test_GenerateKey2")
         assertNotEmpty(prikey, "Test_GenerateKey2-prikey")
         assertNotEmpty(pubkey, "Test_GenerateKey2-pubkey")
     })
@@ -698,7 +698,7 @@ JPuxgonqBqrDgFL6n1VnWxe8tz6gB3rCccGbNxdkWGzR9y3JQOFc
 `
 
 func Test_CreatePKCS12Cert(t *testing.T) {
-    assertError := cryptobin_test.AssertNoErrorT(t)
+    assertNoError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -710,7 +710,7 @@ func Test_CreatePKCS12Cert(t *testing.T) {
         CreatePKCS12Cert(nil, pwd)
     p12 := obj.ToKeyString()
 
-    assertError(obj.Error(), "Test_CreatePKCS12Cert")
+    assertNoError(obj.Error(), "Test_CreatePKCS12Cert")
     assertNotEmpty(p12, "Test_CreatePKCS12Cert")
 
     // ===========
@@ -721,7 +721,7 @@ func Test_CreatePKCS12Cert(t *testing.T) {
 }
 
 func Test_CreatePKCS12Cert2(t *testing.T) {
-    assertError := cryptobin_test.AssertNoErrorT(t)
+    assertNoError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
 
@@ -737,14 +737,14 @@ func Test_CreatePKCS12Cert2(t *testing.T) {
         }, pwd)
     p12 := obj.ToKeyString()
 
-    assertError(obj.Error(), "Test_CreatePKCS12Cert2")
+    assertNoError(obj.Error(), "Test_CreatePKCS12Cert2")
     assertNotEmpty(p12, "Test_CreatePKCS12Cert2")
 
     // ===========
 
     parseP12 := New().FromPKCS12Cert([]byte(p12), pwd)
 
-    assertError(parseP12.Error(), "Test_CreatePKCS12Cert2-FromPKCS12Cert")
+    assertNoError(parseP12.Error(), "Test_CreatePKCS12Cert2-FromPKCS12Cert")
     assertEqual(parseP12.GetPrivateKey(), obj.GetPrivateKey(), "Test_CreatePKCS12Cert-FromPKCS12Cert")
 }
 
@@ -778,13 +778,13 @@ xsRA9/ZP/g6wrVkQVhWf1g6CzDMk07F5yRujdPMKLYVIC/Rt2hCP/F8XZS8=
 
 func Test_Verify(t *testing.T) {
     assertEqual := cryptobin_test.AssertEqualT(t)
-    assertError := cryptobin_test.AssertNoErrorT(t)
+    assertNoError := cryptobin_test.AssertNoErrorT(t)
 
     ok, err := New().Verify(caRoot2, ca2, VerifyOptions{
         Intermediates: cryptobin_x509.NewCertPool(),
     })
 
-    assertError(err, "Test_Verify")
+    assertNoError(err, "Test_Verify")
     assertEqual(ok, true, "Test_Verify")
 }
 

@@ -4,15 +4,10 @@ import (
     "testing"
     "crypto/rand"
 
-    "github.com/deatil/go-cryptobin/pubkey/ecdsa"
     "github.com/deatil/go-cryptobin/elliptic/secp256k1"
 
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
-
-func init() {
-    ecdsa.AddNamedCurve(secp256k1.S256(), secp256k1.OIDNamedCurveSecp256k1)
-}
 
 var (
     prikeyRC2_40En = `
@@ -334,6 +329,8 @@ func Test_PrivateKey_Bytes_2(t *testing.T) {
     assertNoError := cryptobin_test.AssertNoErrorT(t)
     assertEqual := cryptobin_test.AssertEqualT(t)
     assertNotEmpty := cryptobin_test.AssertNotEmptyT(t)
+
+    AddNamedCurve(secp256k1.S256(), secp256k1.OIDNamedCurveSecp256k1)
 
     obj := New().WithCurve(secp256k1.S256()).GenerateKey()
 

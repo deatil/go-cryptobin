@@ -16,22 +16,12 @@ type Cipher struct {
     counter uint64
 }
 
-// key is 32 bytes, nonce is 16 bytes.
+// key is 32 bytes, nonce is 8 or 24 bytes.
 func NewCipher(key, nonce []byte) (cipher.Stream, error) {
-    var fixedSizedKey [32]byte
-    if len(key) != 32 {
-        return nil, errors.New("go-cryptobin/salsa20: key size must be 32")
-    }
-
-    copy(fixedSizedKey[:], key)
-
-    return &Cipher{
-        key:   fixedSizedKey,
-        nonce: nonce,
-    }, nil
+    return NewCipherWithCounter(key, nonce, 0)
 }
 
-// key is 32 bytes, nonce is 16 bytes.
+// key is 32 bytes, nonce is 8 or 24 bytes.
 func NewCipherWithCounter(key, nonce []byte, counter uint64) (cipher.Stream, error) {
     var fixedSizedKey [32]byte
     if len(key) != 32 {
@@ -39,6 +29,17 @@ func NewCipherWithCounter(key, nonce []byte, counter uint64) (cipher.Stream, err
     }
 
     copy(fixedSizedKey[:], key)
+
+    if len(nonce) == 24 {
+        var subKey [32]byte
+        var hNonce [16]byte
+        copy(hNonce[:], nonce[:16])
+        salsa.HSalsa20(&subKey, &hNonce, &fixedSizedKey, &salsa.Sigma)
+        nonce = nonce[16:]
+        fixedSizedKey = subKey
+    } else if len(nonce) != 8 {
+        return nil, errors.New("go-cryptobin/salsa20: nonce size must be either 8 (Salsa20) or 24 (XSalsa20)")
+    }
 
     return &Cipher{
         key:     fixedSizedKey,

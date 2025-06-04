@@ -16,7 +16,7 @@ type Cipher struct {
     counter uint64
 }
 
-// key is 32 bytes, nonce is 16 bytes.
+// key is 32 bytes, nonce is 8 bytes.
 func NewCipher(key, nonce []byte) (cipher.Stream, error) {
     var fixedSizedKey [32]byte
     if len(key) != 32 {
@@ -31,7 +31,7 @@ func NewCipher(key, nonce []byte) (cipher.Stream, error) {
     }, nil
 }
 
-// key is 32 bytes, nonce is 16 bytes.
+// key is 32 bytes, nonce is 8 bytes.
 func NewCipherWithCounter(key, nonce []byte, counter uint64) (cipher.Stream, error) {
     var fixedSizedKey [32]byte
     if len(key) != 32 {

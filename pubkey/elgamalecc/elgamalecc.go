@@ -8,6 +8,12 @@ import (
     "crypto/rand"
     "crypto/subtle"
     "crypto/elliptic"
+    "encoding/asn1"
+)
+
+var (
+    ErrPrivateKey = errors.New("go-cryptobin/elgamalecc: incorrect private key")
+    ErrPublicKey  = errors.New("go-cryptobin/elgamalecc: incorrect public key")
 )
 
 var one = big.NewInt(1)
@@ -158,6 +164,52 @@ func Decrypt(priv *PrivateKey, C1x, C1y *big.Int, C2 *big.Int) (plain []byte, er
     plain = p.Bytes()
 
     return
+}
+
+type encryptedData struct {
+    C1 []byte
+    C2 *big.Int
+}
+
+// Encrypted and return asn.1 data
+func EncryptASN1(random io.Reader, pub *PublicKey, data []byte) ([]byte, error) {
+    if pub == nil {
+        return nil, ErrPublicKey
+    }
+
+    C1x, C1y, C2, err := Encrypt(random, pub, data)
+    if err != nil {
+        return nil, err
+    }
+
+    C1 := elliptic.Marshal(pub.Curve, C1x, C1y)
+
+    enc, err := asn1.Marshal(encryptedData{
+        C1: C1,
+        C2: C2,
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    return enc, nil
+}
+
+// Decrypt asn.1 marshal data
+func DecryptASN1(priv *PrivateKey, data []byte) ([]byte, error) {
+    if priv == nil {
+        return nil, ErrPrivateKey
+    }
+
+    var enc encryptedData
+    _, err := asn1.Unmarshal(data, &enc)
+    if err != nil {
+        return nil, err
+    }
+
+    C1x, C1y := elliptic.Unmarshal(priv.Curve, enc.C1)
+
+    return Decrypt(priv, C1x, C1y, enc.C2)
 }
 
 // randFieldElement returns a random element of the order of the given

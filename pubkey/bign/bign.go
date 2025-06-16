@@ -531,3 +531,46 @@ func randFieldElement(rand io.Reader, c elliptic.Curve) (k *big.Int, err error) 
     }
 }
 
+// Encrypt with Elgamal
+func ElgamalEncrypt(random io.Reader, pub *PublicKey, data []byte) (C1x, C1y *big.Int, C2 *big.Int, err error) {
+    x := new(big.Int).SetBytes(data)
+
+    curve := pub.Curve
+    n := curve.Params().N
+
+    r, err := rand.Int(random, n)
+    if err != nil {
+        err = errors.New("go-cryptobin/bign: invalid rand k")
+        return
+    }
+
+    rYx, rYy := curve.ScalarMult(pub.X, pub.Y, r.Bytes())
+    rGx, rGy := curve.ScalarBaseMult(r.Bytes())
+
+    rYBytes := elliptic.Marshal(curve, rYx, rYy)
+
+    rYval := new(big.Int).SetBytes(rYBytes)
+    C2 = new(big.Int).Add(rYval, x)
+
+    C1x, C1y = new(big.Int).Set(rGx), new(big.Int).Set(rGy)
+
+    return
+}
+
+// Decrypt with Elgamal
+func ElgamalDecrypt(priv *PrivateKey, C1x, C1y *big.Int, C2 *big.Int) (plain []byte, err error) {
+    curve := priv.Curve
+
+    xCx, xCy := curve.ScalarMult(C1x, C1y, priv.D.Bytes())
+
+    xCBytes := elliptic.Marshal(curve, xCx, xCy)
+
+    xCval := new(big.Int).SetBytes(xCBytes)
+
+    p := new(big.Int).Set(C2)
+    p.Sub(p, xCval)
+
+    plain = p.Bytes()
+
+    return
+}

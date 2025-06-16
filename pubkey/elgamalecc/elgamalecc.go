@@ -5,7 +5,6 @@ import (
     "errors"
     "math/big"
     "crypto"
-    "crypto/rand"
     "crypto/subtle"
     "crypto/elliptic"
     "encoding/asn1"
@@ -127,11 +126,10 @@ func Encrypt(random io.Reader, pub *PublicKey, data []byte) (C1x, C1y *big.Int, 
     x := new(big.Int).SetBytes(data)
 
     curve := pub.Curve
-    n := curve.Params().N
 
-    r, err := rand.Int(random, n)
+    r, err := randFieldElement(random, curve)
     if err != nil {
-        err = errors.New("go-cryptobin/bign: invalid rand k")
+        err = errors.New("go-cryptobin/bign: invalid rand r")
         return
     }
 

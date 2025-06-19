@@ -59,6 +59,11 @@ func (priv *PrivateKey) Public() crypto.PublicKey {
     return &priv.PublicKey
 }
 
+// Decrypt decrypts ciphertext with priv.
+func (priv *PrivateKey) Decrypt(rand io.Reader, ciphertext []byte, opts crypto.DecrypterOpts) (plaintext []byte, err error) {
+    return DecryptASN1(priv, ciphertext)
+}
+
 // Generate the PrivateKey
 func GenerateKey(random io.Reader, c elliptic.Curve) (*PrivateKey, error) {
     d, err := randFieldElement(random, c)

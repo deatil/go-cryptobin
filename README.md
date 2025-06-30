@@ -2,7 +2,7 @@
 
 go-cryptobin is a go encrypt or decrypt library.
 
-<p align="center">
+<p align="left">
 <a href="https://pkg.go.dev/github.com/deatil/go-cryptobin" ><img src="https://pkg.go.dev/badge/deatil/go-cryptobin.svg" alt="Go Reference"></a>
 <a href="https://codecov.io/gh/deatil/go-cryptobin" ><img src="https://codecov.io/gh/deatil/go-cryptobin/graph/badge.svg?token=SS2Z1IY0XL"/></a>
 <a href="https://goreportcard.com/report/github.com/deatil/go-cryptobin" ><img src="https://goreportcard.com/badge/github.com/deatil/go-cryptobin" /></a>

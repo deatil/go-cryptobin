@@ -264,7 +264,7 @@ func panicIfNotOnCurve(curve elliptic.Curve, x, y *big.Int) {
     }
 
     if !curve.IsOnCurve(x, y) {
-        panic("go-cryptobin/kg: attempted operation on invalid point")
+        panic("go-cryptobin/e521: attempted operation on invalid point")
     }
 }
 

@@ -1,18 +1,16 @@
-package kg
+package e521
 
 import (
     "fmt"
     "bytes"
     "testing"
-    "math/big"
     "crypto"
     "crypto/rand"
-    "crypto/sha256"
     "crypto/elliptic"
     "encoding/pem"
     "encoding/hex"
 
-    "github.com/deatil/go-cryptobin/elliptic/kg"
+    "github.com/deatil/go-cryptobin/elliptic/e521"
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
@@ -42,12 +40,11 @@ func encodePEM(src []byte, typ string) string {
 }
 
 func Test_Interface(t *testing.T) {
-    var _ crypto.Signer     = (*PrivateKey)(nil)
-    var _ crypto.SignerOpts = (*SignerOpts)(nil)
+    var _ crypto.Signer = (*PrivateKey)(nil)
 }
 
 func Test_SignerInterface(t *testing.T) {
-    priv, err := GenerateKey(rand.Reader, kg.KG256r1())
+    priv, err := GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
     }
@@ -59,29 +56,25 @@ func Test_SignerInterface(t *testing.T) {
 }
 
 func Test_NewPrivateKey(t *testing.T) {
-    p224 := kg.KG256r1()
-
-    priv, err := GenerateKey(rand.Reader, p224)
+    priv, err := GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
     }
 
     privBytes := PrivateKeyTo(priv)
-    priv2, err := NewPrivateKey(p224, privBytes)
+    priv2, err := NewPrivateKey(privBytes)
     if err != nil {
         t.Fatal(err)
     }
 
-    if !priv2.Equal(priv) {
-        t.Error("NewPrivateKey Equal error")
-    }
+    cryptobin_test.Equal(t, priv2, priv, "NewPrivateKey Equal error")
 
     // ======
 
     pub := &priv.PublicKey
 
     pubBytes := PublicKeyTo(pub)
-    pub2, err := NewPublicKey(p224, pubBytes)
+    pub2, err := NewPublicKey(pubBytes)
     if err != nil {
         t.Fatal(err)
     }
@@ -92,7 +85,7 @@ func Test_NewPrivateKey(t *testing.T) {
 }
 
 func Test_Public(t *testing.T) {
-    priv, err := GenerateKey(rand.Reader, kg.KG256r1())
+    priv, err := GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
     }
@@ -106,14 +99,14 @@ func Test_Public(t *testing.T) {
 }
 
 func Test_Equal(t *testing.T) {
-    priv, err := GenerateKey(rand.Reader, kg.KG256r1())
+    priv, err := GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
     }
 
     pub := &priv.PublicKey
 
-    priv2, err := GenerateKey(rand.Reader, kg.KG256r1())
+    priv2, err := GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
     }
@@ -129,7 +122,7 @@ func Test_Equal(t *testing.T) {
 }
 
 func Test_SignVerify(t *testing.T) {
-    priv, err := GenerateKey(rand.Reader, kg.KG256r1())
+    priv, err := GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
     }
@@ -138,117 +131,51 @@ func Test_SignVerify(t *testing.T) {
 
     data := []byte("test-data test-data test-data test-data test-data")
 
-    sig, err := SignASN1(rand.Reader, priv, sha256.New, data)
+    sig, err := priv.Sign(rand.Reader, data, nil)
     if err != nil {
         t.Fatal(err)
     }
 
-    res, _ := VerifyASN1(pub, sha256.New, data, sig)
-    if !res {
-        t.Error("VerifyASN1 fail")
-    }
-
-}
-
-func Test_SignVerify1(t *testing.T) {
-    priv, err := GenerateKey(rand.Reader, kg.KG384r1())
-    if err != nil {
-        t.Fatal(err)
-    }
-
-    pub := &priv.PublicKey
-
-    data := []byte("test-data test-data test-data test-data test-data")
-
-    sig, err := SignASN1(rand.Reader, priv, sha256.New, data)
-    if err != nil {
-        t.Fatal(err)
-    }
-
-    res, _ := VerifyASN1(pub, sha256.New, data, sig)
-    if !res {
-        t.Error("VerifyASN1 fail")
-    }
-
-}
-
-func Test_SignVerify2(t *testing.T) {
-    priv, err := GenerateKey(rand.Reader, kg.KG256r1())
-    if err != nil {
-        t.Fatal(err)
-    }
-
-    pub := &priv.PublicKey
-
-    data := []byte("test-data test-data test-data test-data test-data")
-
-    sig, err := priv.Sign(rand.Reader, data, &SignerOpts{
-        Hash: sha256.New,
-    })
-    if err != nil {
-        t.Fatal(err)
-    }
-
-    res := pub.Verify(data, sig, &SignerOpts{
-        Hash: sha256.New,
-    })
+    res := pub.Verify(data, sig)
     if !res {
         t.Error("Verify fail")
     }
 
 }
 
-func Test_ECDH(t *testing.T) {
-    priv, err := GenerateKey(rand.Reader, kg.KG256r1())
+func Test_SignVerify2(t *testing.T) {
+    priv, err := GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
     }
 
     pub := &priv.PublicKey
 
-    priv2, err := GenerateKey(rand.Reader, kg.KG256r1())
+    data := []byte("test-data test-data test-data test-data test-data")
+
+    sig, err := Sign(rand.Reader, priv, data)
     if err != nil {
         t.Fatal(err)
     }
 
-    pub2 := &priv2.PublicKey
-
-    priv3, err := GenerateKey(rand.Reader, kg.KG256r1())
-    if err != nil {
-        t.Fatal(err)
+    res, _ := Verify(pub, data, sig)
+    if !res {
+        t.Error("VerifyASN1 fail")
     }
-
-    secret1, err := priv.ECDH(pub2)
-    if err != nil {
-        t.Fatal(err)
-    }
-
-    secret2, err := priv2.ECDH(pub)
-    if err != nil {
-        t.Fatal(err)
-    }
-
-    secret3, err := priv3.ECDH(pub)
-    if err != nil {
-        t.Fatal(err)
-    }
-
-    cryptobin_test.Equal(t, secret2, secret1, "ECDH equal")
-    cryptobin_test.NotEqual(t, secret3, secret2, "ECDH not equal")
 }
 
 func Test_Marshal(t *testing.T) {
-    curve := kg.KG256r1()
+    curve := e521.E521()
 
-    priv, err := GenerateKey(rand.Reader, curve)
+    priv, err := GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
     }
 
     pub := &priv.PublicKey
 
-    pubBytes := kg.Marshal(pub.Curve, pub.X, pub.Y)
-    pubBytes2 := kg.MarshalCompressed(pub.Curve, pub.X, pub.Y)
+    pubBytes := e521.Marshal(pub.Curve, pub.X, pub.Y)
+    pubBytes2 := e521.MarshalCompressed(pub.Curve, pub.X, pub.Y)
 
     // t.Errorf("\n k: %x, \n p: %x \n", priv.D, pubBytes2)
 
@@ -276,33 +203,25 @@ func Test_Marshal(t *testing.T) {
 func Test_Vec_Check(t *testing.T) {
     for i, td := range testSigVec {
         t.Run(fmt.Sprintf("index %d", i), func(t *testing.T) {
-            curve := kg.KG256r1()
+            curve := e521.E521()
 
             if len(td.secretKey) > 0 {
-                priv, err := NewPrivateKey(curve, td.secretKey)
+                priv, err := NewPrivateKey(td.secretKey)
                 if err != nil {
                     t.Fatal(err)
                 }
 
                 pub := &priv.PublicKey
 
-                pubBytes := pub.X.Bytes()
+                pubBytes := e521.MarshalCompressed(pub.Curve, pub.X, pub.Y)
 
                 // check publicKey
                 if !bytes.Equal(pubBytes, td.publicKey) {
                     t.Errorf("PublicKey got: %x, want: %x", pubBytes, td.publicKey)
                 }
 
-                // do sig
-                k := new(big.Int).SetBytes(td.auxRand)
-
-                r, s, err := SignUsingKToRS(k, priv, sha256.New, td.message)
-                if err != nil {
-                    t.Error("SignUsingKToRS fail")
-                }
-
                 // check sig
-                sig, err := encodeSignature(r, s)
+                sig, err := priv.Sign(rand.Reader, td.message, nil)
                 if err != nil {
                     t.Error("encode sig fail")
                 }
@@ -313,9 +232,7 @@ func Test_Vec_Check(t *testing.T) {
 
             }
 
-            pubBytes := append([]byte{byte(3)}, td.publicKey...)
-
-            x, y := elliptic.UnmarshalCompressed(curve, pubBytes)
+            x, y := e521.UnmarshalCompressed(curve, td.publicKey)
             if x == nil || y == nil {
                 t.Fatal("publicKey error")
             }
@@ -326,7 +243,7 @@ func Test_Vec_Check(t *testing.T) {
                 Y: y,
             }
 
-            veri, _ := VerifyASN1(pubkey, sha256.New, td.message, td.signature)
+            veri := pubkey.Verify(td.message, td.signature)
             if veri != td.verification {
                 t.Error("VerifyASN1 fail")
             }
@@ -336,11 +253,9 @@ func Test_Vec_Check(t *testing.T) {
 
 }
 
-// sha256, KG256r1
 type testVec struct {
     secretKey []byte
     publicKey []byte
-    auxRand   []byte
     message   []byte
     signature []byte
     verification bool
@@ -348,21 +263,19 @@ type testVec struct {
 
 var testSigVec = []testVec{
     {
-        secretKey: fromHex("47A50FB8BB7E77CD4EA275196DAEBFF3C104B34668B950EE6D1E2A569A473940"),
-        publicKey: fromHex("6FD88E06683F486F67E13A62B7C6E4848042B465100F9C916CD42B85DD8AEFA5"),
-        auxRand:   fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"),
+        secretKey: fromHex("313e78bd2f5eb3f0a9ee0120496cb3c891a3d4f79d1b8c01f81cd7d70bcadefbb941a3058dabe6b5dbe559b6f5331cc0087af6a367d47555d5cb95a8dacea4d167"),
+        publicKey: fromHex("8fa4530c005ec60d22cf5cea67b5059745acac5f20346b2cfefdce3d3f2ffa7687ed22c8bb7c758ccee7a98e834b0cf612cc70526d3d7e752887e2ce2f5de8a9ea01"),
         message:   fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"),
-        signature: fromHex("3046022100AA054D043604B77933DE1C1E2905E99EB081E163C43CA7B323CDEFE00D2049750221009C264BDE65B8E5761CB475A9311749C0397081C71D4F2822A6A3F050D8272D6C"),
+        signature: fromHex("fe7941e471caa627fffcb566564acdf2c895099d9f674096dbdfd5a08f77a45d0866241ad2f62b248446b4b7edd62713689a0b3b973ebf4cb0947994d8183be154003f0cfb128a6741451926d1e4ab914606c1227293f9140b1cecdd345eddd370662e678e887414a6cc1df22fb7795c0ff16bbbace6f1ad895c01de85febaed73c80100"),
         verification: true,
     },
 
     // fail
     {
-        secretKey: fromHex("47A50FB8BB7E77CD4EA275196DAEBFF3C104B34668B950EE6D1E2A569A473940"),
-        publicKey: fromHex("6FD88E06683F486F67E13A62B7C6E4848042B465100F9C916CD42B85DD8AEFA5"),
-        auxRand:   fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"),
+        secretKey: fromHex("22713dc2f3d8a4611e9266d8a2a9e3d237505dc34c65d87d598b9a4e6c41b35e3d090458e66c8213a4af011e5614377960c99d9f84e379fdd1f1e168b163b5d930"),
+        publicKey: fromHex("1627c32ce2b21b1acad2786f92f1314ee673bb3569a9a8db7f9e7dd0072c54dfe42e6f49fd6321012c7c1e3155d8f7433329c1d5f12310200305683199091f647100"),
         message:   fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"),
-        signature: fromHex("3246022100AA054D043604B77933DE1C1E2905E99EB081E163C43CA7B323CDEFE00D2049750221009C264BDE65B8E5761CB475A9311749C0397081C71D4F2822A6A3F050D8272D6C"),
+        signature: fromHex("fe7941e471caa627fffcb566564acdf2c895099d9f674096dbdfd5a08f77a45d0866241ad2f62b248446b4b7edd62713689a0b3b973ebf4cb0947994d8183be154003f0cfb128a6741451926d1e4ab914606c1227293f9140b1cecdd345eddd370662e678e887414a6cc1df22fb7795c0ff16bbbace6f1ad895c01de85febaed73c80100"),
         verification: false,
     },
 }

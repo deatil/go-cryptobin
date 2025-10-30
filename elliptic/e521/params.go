@@ -54,6 +54,7 @@ func (curve *E521Curve) polynomial(y *big.Int) *big.Int {
     return x2
 }
 
+// IsOnCurve reports whether the given (x,y) lies on the curve.
 // check equation: x² + y² ≡ 1 + d*x²*y² (mod p),
 // so we can check equation: x² = (1 - y²) / (1 - d*y²).
 func (curve *E521Curve) IsOnCurve(x, y *big.Int) bool {
@@ -67,6 +68,7 @@ func (curve *E521Curve) IsOnCurve(x, y *big.Int) bool {
     return curve.polynomial(y).Cmp(x2) == 0
 }
 
+// Add returns the sum of (x1,y1) and (x2,y2)
 func (curve *E521Curve) Add(x1, y1, x2, y2 *big.Int) (*big.Int, *big.Int) {
     if x1.Sign() == 0 && y1.Sign() == 0 {
         return x2, y2
@@ -106,7 +108,7 @@ func (curve *E521Curve) Add(x1, y1, x2, y2 *big.Int) (*big.Int, *big.Int) {
     return x3, y3
 }
 
-// Double dobra um ponto na curva Edwards
+// Double returns 2*(x,y)
 func (curve *E521Curve) Double(x1, y1 *big.Int) (*big.Int, *big.Int) {
     return curve.Add(x1, y1, x1, y1)
 }

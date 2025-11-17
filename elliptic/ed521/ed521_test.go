@@ -144,3 +144,21 @@ func Test_MarshalCompressed(t *testing.T) {
     cryptobin_test.Equal(t, a1, x)
     cryptobin_test.Equal(t, b1, y)
 }
+
+func Test_MarshalPoint(t *testing.T) {
+    a1 := bigintFromHex("135e8ba63870ade80365ee6b6832d971a83c8519310bed795809637bd61e4d54676d0823d7a95d26291be2742994d833b16d306dcea0574b57924aac6b62552ef81")
+    b1 := bigintFromHex("d6e622c17fb2723b47ef82f0a704694689c96c5cc12f24b42a735b89283c6bd47fe0596dff8841603414b8b3a5c681d72750e03a807f6668a008738876e2f1fcde")
+
+    m := MarshalPoint(ED521(), a1, b1)
+
+    m2 := fmt.Sprintf("%x", m)
+    mcheck := "defcf1e276887308a068667f803ae05027d781c6a5b3b81434604188ff6d59e07fd46b3c28895b732ab4242fc15c6cc989466904a7f082ef473b72b27fc122e6d680"
+
+    cryptobin_test.Equal(t, mcheck, m2)
+
+    mcheck2 := bigintFromHex(mcheck).Bytes()
+
+    x, y := UnmarshalPoint(ED521(), mcheck2)
+    cryptobin_test.Equal(t, a1, x)
+    cryptobin_test.Equal(t, b1, y)
+}

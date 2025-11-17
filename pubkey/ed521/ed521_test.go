@@ -4,7 +4,6 @@ import (
     "fmt"
     "bytes"
     "testing"
-    "math/big"
     "crypto"
     "crypto/rand"
     "crypto/elliptic"
@@ -230,13 +229,7 @@ func Test_SignVerify_fail(t *testing.T) {
         t.Fatal(err)
     }
 
-    R, S, _ := parseSignature(sig)
-    R.Add(R, big.NewInt(1))
-
-    sig, err = encodeSignature(R, S)
-    if err != nil {
-        t.Fatal(err)
-    }
+    sig[len(sig)-6] = sig[len(sig)-6] + 1
 
     res, _ := Verify(pub, data, sig)
     cryptobin_test.False(t, res)
@@ -344,7 +337,7 @@ var testSigVec = []testVec{
         secretKey: fromHex("313e78bd2f5eb3f0a9ee0120496cb3c891a3d4f79d1b8c01f81cd7d70bcadefbb941a3058dabe6b5dbe559b6f5331cc0087af6a367d47555d5cb95a8dacea4d167"),
         publicKey: fromHex("03015c5b1c1dbdb4e81225cfd8bbfa14b01148b3d3741e9dc0d16c4d40ac8d72eb6752a9015c6aa5c87239491d1d49f292b67a78987283f430af271572e030f9d7f862"),
         message:   fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"),
-        signature: fromHex("3081870242018c284f975122ffb3cb1097b316bbd03f9e03c295d1344b08dc20bba159e7acc28a0048b222a4a39cdd8139ececa2ac7122c4fa8d234a90c4a3cb7f0dff87379d33024128cbc3c194aa653bd038e8a43ec4c9cd8ca293377596dc29c3c6105c5e0bc86cbc6e11949b8ab8ed9b7e65cd2780baaf098e57c73ef2b6ae85e970cd8795c573f8"),
+        signature: fromHex("a6659ed7213f736f46c10c983329523cf246fd0126406bd533783f80b33893b52c899c37e5f8012b378214b983fad7cde1b1d528977a4892cb8abc4872a59d18c500782fdeafb0c93ea7a4f8b16028df15ff05644ede3698ca88c1602ede83c68342aaa013cec1ea2e8d65d4bed0764f8b42e9548a2e41d49786aa0ad2ed782d6c353200"),
         verification: true,
     },
 
@@ -353,7 +346,7 @@ var testSigVec = []testVec{
         secretKey: fromHex("22713dc2f3d8a4611e9266d8a2a9e3d237505dc34c65d87d598b9a4e6c41b35e3d090458e66c8213a4af011e5614377960c99d9f84e379fdd1f1e168b163b5d930"),
         publicKey: fromHex("0300d4a01d6c5cd88d226e33ab966991d6939c72d7012f209a7fc7006d0b9f93df99e8ab5543cb5d27a2818f27cad1648bfecdd49e7772ded70ee7043444a518683019"),
         message:   fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"),
-        signature: fromHex("3081870242018c284f975122ffb3cb1097b316bbd03f9e03c295d1344b08dc20bba159e7acc28a0048b222a4a39cdd8139ececa2ac7122c4fa8d234a90c4a3cb7f0dff87379d33024128cbc3c194aa653bd038e8a43ec4c9cd8ca293377596dc29c3c6105c5e0bc86cbc6e11949b8ab8ed9b7e65cd2780baaf098e57c73ef2b6ae85e970cd8795c573f8"),
+        signature: fromHex("a6659ed7213f736f46c10c983329523cf246fd0126406bd533783f80b33893b52c899c37e5f8012b378214b983fad7cde1b1d528977a4892cb8abc4872a59d18c500782fdeafb0c93ea7a4f8b16028df15ff05644ede3698ca88c1602ede83c68342aaa013cec1ea2e8d65d4bed0764f8b42e9548a2e41d49786aa0ad2ed782d6c353200"),
         verification: false,
     },
 }

@@ -10,8 +10,6 @@ import (
     "crypto/elliptic"
 
     "golang.org/x/crypto/sha3"
-    "golang.org/x/crypto/cryptobyte"
-    "golang.org/x/crypto/cryptobyte/asn1"
 
     "github.com/deatil/go-cryptobin/elliptic/ed521"
 )
@@ -27,6 +25,12 @@ var (
 const (
     // ContextMaxSize is the maximum length (in bytes) allowed for context.
     ContextMaxSize = 255
+    // PublicKeySize is the size, in bytes, of public keys as used in this package.
+    PublicKeySize = 133
+    // PrivateKeySize is the size, in bytes, of private keys as used in this package.
+    PrivateKeySize = 66
+    // SignatureSize is the size, in bytes, of signatures generated and verified by this package.
+    SignatureSize = 132
     // SeedSize is the size, in bytes, of private key seeds.
     SeedSize = 66
 )
@@ -180,7 +184,7 @@ func NewPrivateKey(d []byte) (*PrivateKey, error) {
 
 // return PrivateKey data
 func PrivateKeyTo(key *PrivateKey) []byte {
-    privateKey := make([]byte, (key.Curve.Params().N.BitLen()+7)/8)
+    privateKey := make([]byte, PrivateKeySize)
     return key.D.FillBytes(privateKey)
 }
 
@@ -245,10 +249,14 @@ func sign(privateKey *PrivateKey, message []byte, domPre, context string) ([]byt
         PHM = message
     }
 
-    n := privateKey.Curve.Params().N
+    params := privateKey.Curve.Params()
+    n := params.N
+    byteLen := (params.BitSize + 7) / 8
+
+    var tmpBuf []byte
 
     seed := privateKey.D.Bytes()
-    publicKeyBytes := ed521.MarshalCompressed(privateKey.Curve, privateKey.X, privateKey.Y)
+    publicKeyBytes := ed521.MarshalPoint(privateKey.Curve, privateKey.X, privateKey.Y)
 
     h := make([]byte, 132)
     sha3.ShakeSum256(h, seed)
@@ -267,20 +275,30 @@ func sign(privateKey *PrivateKey, message []byte, domPre, context string) ([]byt
     messageDigest := make([]byte, 132)
     mh.Read(messageDigest)
 
+    messageDigest = ed521.Reverse(messageDigest)
+
     r := new(big.Int).SetBytes(messageDigest)
     r.Mod(r, n)
 
     _, R := privateKey.Curve.ScalarBaseMult(r.Bytes())
 
+    buf := make([]byte, 2*byteLen)
+    R.FillBytes(buf[:byteLen])
+
+    tmpBuf = ed521.Reverse(buf[:byteLen])
+    copy(buf[:byteLen], tmpBuf)
+
     kh := sha3.NewShake256()
     kh.Write([]byte(domPre))
     kh.Write([]byte{byte(len(context))})
     kh.Write([]byte(context))
-    kh.Write(R.Bytes())
+    kh.Write(buf[:byteLen])
     kh.Write(publicKeyBytes)
     kh.Write(PHM)
     hramDigest := make([]byte, 132)
     kh.Read(hramDigest)
+
+    hramDigest = ed521.Reverse(hramDigest)
 
     k := new(big.Int).SetBytes(hramDigest)
     k.Mod(k, n)
@@ -290,7 +308,11 @@ func sign(privateKey *PrivateKey, message []byte, domPre, context string) ([]byt
     S.Add(S, r)
     S.Mod(S, n)
 
-    return encodeSignature(R, S)
+    S.FillBytes(buf[byteLen:])
+    tmpBuf = ed521.Reverse(buf[byteLen:])
+    copy(buf[byteLen:], tmpBuf)
+
+    return buf, nil
 }
 
 // VerifyWithOptions reports whether sig is a valid signature of message by
@@ -333,11 +355,6 @@ func VerifyWithOptions(publicKey *PublicKey, message, sig []byte, opts crypto.Si
 
 // Verify reports whether sig is a valid signature of message by publicKey.
 func verify(publicKey *PublicKey, message, sig []byte, domPre, context string) bool {
-    R, S, err := parseSignature(sig)
-    if err != nil {
-        return false
-    }
-
     var PHM []byte
 
     if domPre == domPrefixPh {
@@ -349,23 +366,36 @@ func verify(publicKey *PublicKey, message, sig []byte, domPre, context string) b
     }
 
     curve := publicKey.Curve
+    params := curve.Params()
     n := curve.Params().N
+    byteLen := (params.BitSize + 7) / 8
 
-    publicKeyBytes := ed521.MarshalCompressed(publicKey.Curve, publicKey.X, publicKey.Y)
+    if len(sig) != 2*byteLen {
+        return false
+    }
+
+    RBytes := ed521.Reverse(sig[:byteLen])
+    SBytes := ed521.Reverse(sig[byteLen:])
+
+    R := new(big.Int).SetBytes(RBytes)
+    S := new(big.Int).SetBytes(SBytes)
+
+    publicKeyBytes := ed521.MarshalPoint(publicKey.Curve, publicKey.X, publicKey.Y)
 
     kh := sha3.NewShake256()
     kh.Write([]byte(domPre))
     kh.Write([]byte{byte(len(context))})
     kh.Write([]byte(context))
-    kh.Write(R.Bytes())
+    kh.Write(sig[:byteLen])
     kh.Write(publicKeyBytes)
     kh.Write(PHM)
     hramDigest := make([]byte, 132)
     kh.Read(hramDigest)
 
+    hramDigest = ed521.Reverse(hramDigest)
+
     k := new(big.Int).SetBytes(hramDigest)
     k.Mod(k, n)
-
     k.Mod(k.Neg(k), n)
 
     // r = S - k * pub
@@ -374,35 +404,6 @@ func verify(publicKey *PublicKey, message, sig []byte, domPre, context string) b
     _, y2 := curve.Add(x21, y21, x22, y22)
 
     return bigIntEqual(R, y2)
-}
-
-func encodeSignature(r, s *big.Int) ([]byte, error) {
-    var b cryptobyte.Builder
-    b.AddASN1(asn1.SEQUENCE, func(b *cryptobyte.Builder) {
-        b.AddASN1BigInt(r)
-        b.AddASN1BigInt(s)
-    })
-
-    return b.Bytes()
-}
-
-func parseSignature(sig []byte) (r, s *big.Int, err error) {
-    var inner cryptobyte.String
-    input := cryptobyte.String(sig)
-
-    r = new(big.Int)
-    s = new(big.Int)
-
-    if !input.ReadASN1(&inner, asn1.SEQUENCE) ||
-        !input.Empty() ||
-        !inner.ReadASN1Integer(r) ||
-        !inner.ReadASN1Integer(s) ||
-        !inner.Empty() {
-        err = ErrInvalidASN1
-        return
-    }
-
-    return
 }
 
 func randFieldElement(rand io.Reader, curve elliptic.Curve) (*big.Int, error) {

@@ -252,6 +252,42 @@ func (curve *Ed521Curve) UnmarshalCompressed(data []byte) (x, y *big.Int) {
     return
 }
 
+func (curve *Ed521Curve) UnmarshalPoint(data []byte) (x, y *big.Int) {
+    byteLen := (curve.BitSize + 7) / 8
+    if len(data) != byteLen {
+        return
+    }
+
+    size := len(data)
+    eP := make([]byte, size)
+    copy(eP, data)
+
+    sign := eP[size-1] & 0x80
+    eP[size - 1] &= 0x7F // got 0x7F = ~0x80
+
+    eP = Reverse(eP)
+
+    p := curve.Params().P
+    y = new(big.Int).SetBytes(eP)
+    if y.Cmp(p) >= 0 {
+        return
+    }
+
+    // x² = (y² - 1) / (dy² - 1)
+    x = curve.polynomial(y)
+    x = x.ModSqrt(x, curve.P)
+    if x == nil {
+        return
+    }
+
+    if byte(sign) != data[0]&1 {
+        x.Sub(p, x)
+        x.Mod(x, p)
+    }
+
+    return
+}
+
 func Marshal(curve elliptic.Curve, x, y *big.Int) []byte {
     panicIfNotOnCurve(curve, x, y)
 
@@ -290,6 +326,34 @@ func Unmarshal(curve elliptic.Curve, data []byte) (*big.Int, *big.Int) {
 func UnmarshalCompressed(curve elliptic.Curve, data []byte) (*big.Int, *big.Int) {
     if c, ok := curve.(*Ed521Curve); ok {
         return c.UnmarshalCompressed(data)
+    }
+
+    return nil, nil
+}
+
+func MarshalPoint(curve elliptic.Curve, x, y *big.Int) []byte {
+    panicIfNotOnCurve(curve, x, y)
+
+    byteLen := (curve.Params().BitSize + 7) / 8
+
+    compressed := make([]byte, byteLen)
+    y.FillBytes(compressed)
+
+    compressed = Reverse(compressed)
+
+    one := big.NewInt(1)
+
+    xx := new(big.Int).Set(x)
+    if xx.And(xx, one).Cmp(one) == 0 {
+        compressed[byteLen-1] |= 0x80
+    }
+
+    return compressed
+}
+
+func UnmarshalPoint(curve elliptic.Curve, data []byte) (*big.Int, *big.Int) {
+    if c, ok := curve.(*Ed521Curve); ok {
+        return c.UnmarshalPoint(data)
     }
 
     return nil, nil

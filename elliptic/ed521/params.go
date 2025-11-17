@@ -5,7 +5,7 @@ import (
     "crypto/elliptic"
 )
 
-// E521
+// Ed521 curve
 type Ed521Curve struct {
     Name    string
     P       *big.Int
@@ -367,7 +367,7 @@ func panicIfNotOnCurve(curve elliptic.Curve, x, y *big.Int) {
     }
 
     if !curve.IsOnCurve(x, y) {
-        panic("go-cryptobin/e521: attempted operation on invalid point")
+        panic("go-cryptobin/ed521: attempted operation on invalid point")
     }
 }
 

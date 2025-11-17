@@ -1,4 +1,4 @@
-package e521
+package ed521
 
 import (
     "fmt"
@@ -16,7 +16,7 @@ func bigintFromHex(s string) *big.Int {
 }
 
 func Test_Interface(t *testing.T) {
-    var _ elliptic.Curve = (*E521Curve)(nil)
+    var _ elliptic.Curve = (*Ed521Curve)(nil)
 }
 
 func Test_Curve_Add(t *testing.T) {
@@ -26,7 +26,7 @@ func Test_Curve_Add(t *testing.T) {
         a2 := bigintFromHex("10ffba2f442444980490d51fb67b6b29f30a96e00aeebb058fb396f1d56862925f84a403612cf7a32586abe1e8085f44e28426a2f0684c9e7adbfaf99bd2788aad0")
         b2 := bigintFromHex("5d33e51bfe1cbb3c263ad569b213be723a45920ac38070147d8d85c1779b4fe4eaa0912a17765f2d87bb2ac27106fb8d019152c373e9ea060f591c1d85141cc830")
 
-        xx, yy := E521().Add(a1, b1, a2, b2)
+        xx, yy := ED521().Add(a1, b1, a2, b2)
 
         xx2 := fmt.Sprintf("%x", xx.Bytes())
         yy2 := fmt.Sprintf("%x", yy.Bytes())
@@ -46,7 +46,7 @@ func Test_Curve_Add(t *testing.T) {
         a1 := bigintFromHex("135e8ba63870ade80365ee6b6832d971a83c8519310bed795809637bd61e4d54676d0823d7a95d26291be2742994d833b16d306dcea0574b57924aac6b62552ef81")
         b1 := bigintFromHex("d6e622c17fb2723b47ef82f0a704694689c96c5cc12f24b42a735b89283c6bd47fe0596dff8841603414b8b3a5c681d72750e03a807f6668a008738876e2f1fcde")
 
-        xx, yy := E521().Add(a1, b1, a1, b1)
+        xx, yy := ED521().Add(a1, b1, a1, b1)
 
         xx2 := fmt.Sprintf("%x", xx.Bytes())
         yy2 := fmt.Sprintf("%x", yy.Bytes())
@@ -66,7 +66,7 @@ func Test_Curve_Add(t *testing.T) {
         a1 := bigintFromHex("135e8ba63870ade80365ee6b6832d971a83c8519310bed795809637bd61e4d54676d0823d7a95d26291be2742994d833b16d306dcea0574b57924aac6b62552ef81")
         b1 := bigintFromHex("d6e622c17fb2723b47ef82f0a704694689c96c5cc12f24b42a735b89283c6bd47fe0596dff8841603414b8b3a5c681d72750e03a807f6668a008738876e2f1fcde")
 
-        xx, yy := E521().Double(a1, b1)
+        xx, yy := ED521().Double(a1, b1)
 
         xx2 := fmt.Sprintf("%x", xx.Bytes())
         yy2 := fmt.Sprintf("%x", yy.Bytes())
@@ -90,7 +90,7 @@ func Test_Curve_ScalarMult(t *testing.T) {
         b1 := bigintFromHex("d6e622c17fb2723b47ef82f0a704694689c96c5cc12f24b42a735b89283c6bd47fe0596dff8841603414b8b3a5c681d72750e03a807f6668a008738876e2f1fcde")
         k := bigintFromHex("10ffba2f442444980490d51fb67b6b29f30a96e00aeebb058fb396f1d56862925f84a403612cf7a32586abe1e8085f44e28426a2f0684c9e7adbfaf99bd2788aad0")
 
-        xx, yy := E521().ScalarMult(a1, b1, k.Bytes())
+        xx, yy := ED521().ScalarMult(a1, b1, k.Bytes())
 
         xx2 := fmt.Sprintf("%x", xx.Bytes())
         yy2 := fmt.Sprintf("%x", yy.Bytes())
@@ -109,7 +109,7 @@ func Test_Curve_ScalarMult(t *testing.T) {
     {
         k := bigintFromHex("10ffba2f442444980490d51fb67b6b29f30a96e00aeebb058fb396f1d56862925f84a403612cf7a32586abe1e8085f44e28426a2f0684c9e7adbfaf99bd2788aad0")
 
-        xx, yy := E521().ScalarBaseMult(k.Bytes())
+        xx, yy := ED521().ScalarBaseMult(k.Bytes())
 
         xx2 := fmt.Sprintf("%x", xx.Bytes())
         yy2 := fmt.Sprintf("%x", yy.Bytes())
@@ -131,7 +131,7 @@ func Test_MarshalCompressed(t *testing.T) {
     a1 := bigintFromHex("135e8ba63870ade80365ee6b6832d971a83c8519310bed795809637bd61e4d54676d0823d7a95d26291be2742994d833b16d306dcea0574b57924aac6b62552ef81")
     b1 := bigintFromHex("d6e622c17fb2723b47ef82f0a704694689c96c5cc12f24b42a735b89283c6bd47fe0596dff8841603414b8b3a5c681d72750e03a807f6668a008738876e2f1fcde")
 
-    m := MarshalCompressed(E521(), a1, b1)
+    m := MarshalCompressed(ED521(), a1, b1)
 
     m2 := fmt.Sprintf("%x", m)
     mcheck := "0300d6e622c17fb2723b47ef82f0a704694689c96c5cc12f24b42a735b89283c6bd47fe0596dff8841603414b8b3a5c681d72750e03a807f6668a008738876e2f1fcde"
@@ -140,7 +140,7 @@ func Test_MarshalCompressed(t *testing.T) {
 
     mcheck2 := bigintFromHex(mcheck).Bytes()
 
-    x, y := UnmarshalCompressed(E521(), mcheck2)
+    x, y := UnmarshalCompressed(ED521(), mcheck2)
     cryptobin_test.Equal(t, a1, x)
     cryptobin_test.Equal(t, b1, y)
 }

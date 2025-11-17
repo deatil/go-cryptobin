@@ -13,7 +13,7 @@ import (
     "golang.org/x/crypto/cryptobyte"
     "golang.org/x/crypto/cryptobyte/asn1"
 
-    "github.com/deatil/go-cryptobin/elliptic/e521"
+    "github.com/deatil/go-cryptobin/elliptic/ed521"
 )
 
 var (
@@ -138,7 +138,7 @@ func (priv *PrivateKey) Sign(rand io.Reader, message []byte, opts crypto.SignerO
 
 // GenerateKey returns Ed521 PrivateKey
 func GenerateKey(rand io.Reader) (*PrivateKey, error) {
-    curve := e521.E521()
+    curve := ed521.ED521()
 
     k, err := randFieldElement(rand, curve)
     if err != nil {
@@ -153,7 +153,7 @@ func newKeyFromSeed(seed []byte) (*PrivateKey, error) {
         panic("go-cryptobin/ed521: bad seed length: " + strconv.Itoa(l))
     }
 
-    curve := e521.E521()
+    curve := ed521.ED521()
 
     k := new(big.Int).SetBytes(seed)
 
@@ -186,7 +186,7 @@ func PrivateKeyTo(key *PrivateKey) []byte {
 
 // New a PublicKey from publicKey data
 func NewPublicKey(data []byte) (*PublicKey, error) {
-    curve := e521.E521()
+    curve := ed521.ED521()
 
     x, y := elliptic.Unmarshal(curve, data)
     if x == nil || y == nil {
@@ -204,7 +204,7 @@ func NewPublicKey(data []byte) (*PublicKey, error) {
 
 // return PublicKey data
 func PublicKeyTo(key *PublicKey) []byte {
-    return e521.Marshal(key.Curve, key.X, key.Y)
+    return ed521.Marshal(key.Curve, key.X, key.Y)
 }
 
 // sign data and return marshal plain data
@@ -248,7 +248,7 @@ func sign(privateKey *PrivateKey, message []byte, domPre, context string) ([]byt
     n := privateKey.Curve.Params().N
 
     seed := privateKey.D.Bytes()
-    publicKey := e521.MarshalCompressed(privateKey.Curve, privateKey.X, privateKey.Y)
+    publicKeyBytes := ed521.MarshalCompressed(privateKey.Curve, privateKey.X, privateKey.Y)
 
     h := make([]byte, 132)
     sha3.ShakeSum256(h, seed)
@@ -277,7 +277,7 @@ func sign(privateKey *PrivateKey, message []byte, domPre, context string) ([]byt
     kh.Write([]byte{byte(len(context))})
     kh.Write([]byte(context))
     kh.Write(R.Bytes())
-    kh.Write(publicKey)
+    kh.Write(publicKeyBytes)
     kh.Write(PHM)
     hramDigest := make([]byte, 132)
     kh.Read(hramDigest)
@@ -351,7 +351,7 @@ func verify(publicKey *PublicKey, message, sig []byte, domPre, context string) b
     curve := publicKey.Curve
     n := curve.Params().N
 
-    publicKeyBytes := e521.MarshalCompressed(publicKey.Curve, publicKey.X, publicKey.Y)
+    publicKeyBytes := ed521.MarshalCompressed(publicKey.Curve, publicKey.X, publicKey.Y)
 
     kh := sha3.NewShake256()
     kh.Write([]byte(domPre))
@@ -368,7 +368,7 @@ func verify(publicKey *PublicKey, message, sig []byte, domPre, context string) b
 
     k.Mod(k.Neg(k), n)
 
-    // r = S - k * pri
+    // r = S - k * pub
     x21, y21 := curve.ScalarMult(publicKey.X, publicKey.Y, k.Bytes())
     x22, y22 := curve.ScalarBaseMult(S.Bytes())
     _, y2 := curve.Add(x21, y21, x22, y22)

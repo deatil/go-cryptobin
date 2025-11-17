@@ -1,11 +1,12 @@
-package e521
+package ed521
 
 import (
     "math/big"
     "crypto/elliptic"
 )
 
-type E521Curve struct {
+// E521
+type Ed521Curve struct {
     Name    string
     P       *big.Int
     N       *big.Int
@@ -14,7 +15,7 @@ type E521Curve struct {
     BitSize int
 }
 
-func (curve *E521Curve) Params() *elliptic.CurveParams {
+func (curve *Ed521Curve) Params() *elliptic.CurveParams {
     cp := new(elliptic.CurveParams)
     cp.Name = curve.Name
     cp.P = curve.P
@@ -26,7 +27,7 @@ func (curve *E521Curve) Params() *elliptic.CurveParams {
 }
 
 // polynomial returns (y² - 1) / (dy² - 1).
-func (curve *E521Curve) polynomial(y *big.Int) *big.Int {
+func (curve *Ed521Curve) polynomial(y *big.Int) *big.Int {
     // x² + y² = 1 + dx²y²
     // dx²y² - x² = x²(dy² - 1) = y² - 1
     // x² = (y² - 1) / (dy² - 1)
@@ -58,7 +59,7 @@ func (curve *E521Curve) polynomial(y *big.Int) *big.Int {
 // IsOnCurve reports whether the given (x,y) lies on the curve.
 // check equation: x² + y² ≡ 1 + d*x²*y² (mod p),
 // so we can check equation: x² = (1 - y²) / (1 - d*y²).
-func (curve *E521Curve) IsOnCurve(x, y *big.Int) bool {
+func (curve *Ed521Curve) IsOnCurve(x, y *big.Int) bool {
     if x.Sign() == 0 && y.Sign() == 0 {
         return true
     }
@@ -70,7 +71,7 @@ func (curve *E521Curve) IsOnCurve(x, y *big.Int) bool {
 }
 
 // Add returns the sum of (x1,y1) and (x2,y2)
-func (curve *E521Curve) Add(x1, y1, x2, y2 *big.Int) (x, y *big.Int) {
+func (curve *Ed521Curve) Add(x1, y1, x2, y2 *big.Int) (x, y *big.Int) {
     if x1.Sign() == 0 && y1.Sign() == 0 {
         return x2, y2
     }
@@ -81,52 +82,83 @@ func (curve *E521Curve) Add(x1, y1, x2, y2 *big.Int) (x, y *big.Int) {
     panicIfNotOnCurve(curve, x1, y1)
     panicIfNotOnCurve(curve, x2, y2)
 
-    x1y2 := new(big.Int).Mul(x1, y2)
-    x2y1 := new(big.Int).Mul(x2, y1)
+    // C = X1*X2
+    c := new(big.Int).Mul(x1, x2)
+    // D = Y1*Y2
+    d := new(big.Int).Mul(y1, y2)
 
-    y1y2 := new(big.Int).Mul(y1, y2)
-    x1x2 := new(big.Int).Mul(x1, x2)
+    // E = d*C*D
+    e := new(big.Int).Mul(c, curve.D)
+    e.Mul(e, d)
+    e.Mod(e, curve.P)
 
-    // c = d*x1*x2*y1*y2
-    c := new(big.Int).Mul(x1x2, y1y2)
-    c.Mul(c, curve.D)
-    c.Mod(c, curve.P)
+    // F = B-E
+    f := new(big.Int).Sub(big.NewInt(1), e)
+    // G = B+E
+    g := new(big.Int).Add(big.NewInt(1), e)
 
-    // x = (x1*y2 + x2*y1) / (d*x1*x2*y1*y2 + 1)
-    rx1 := new(big.Int).Add(x1y2, x2y1)
-    rx2 := new(big.Int).Add(c, big.NewInt(1))
-    invRx2 := new(big.Int).ModInverse(rx2, curve.P)
-    if invRx2 == nil {
-        return
-    }
+    // H = (X1+Y1)*(X2+Y2)
+    tmp1 := new(big.Int).Add(x1, y1)
+    tmp2 := new(big.Int).Add(x2, y2)
+    h := new(big.Int).Mul(tmp1, tmp2)
 
-    x = new(big.Int).Mul(rx1, invRx2)
+    // Z3 = F*G
+    z := new(big.Int).Mul(f, g)
+    zInv := new(big.Int).ModInverse(z, curve.P)
+
+    // X3 = (z^-1) * A*F*(H-C-D)
+    x = new(big.Int).Sub(h, c)
+    x.Sub(x, d)
+    x.Mul(x, f)
+    x.Mul(x, zInv)
     x.Mod(x, curve.P)
 
-    // y = (x1*x2 - y1*y2) / (d*x1*x2*y1*y2 - 1)
-    ry1 := new(big.Int).Sub(x1x2, y1y2)
-    ry2 := new(big.Int).Sub(c, big.NewInt(1))
-    invRy2 := new(big.Int).ModInverse(ry2, curve.P)
-    if invRx2 == nil {
-        return
-    }
-
-    y = new(big.Int).Mul(ry1, invRy2)
+    // Y3 = (z^-1) * A*G*(D-C)
+    y = new(big.Int).Sub(d, c)
+    y.Mul(y, g)
+    y.Mul(y, zInv)
     y.Mod(y, curve.P)
 
-    // return result (x, y)
     return
 }
 
 // Double returns 2*(x,y)
-func (curve *E521Curve) Double(x1, y1 *big.Int) (*big.Int, *big.Int) {
-    x2 := new(big.Int).Set(x1)
-    y2 := new(big.Int).Set(y1)
+func (curve *Ed521Curve) Double(x1, y1 *big.Int) (*big.Int, *big.Int) {
+    // B = (X1+Y1)^2
+    b := new(big.Int).Add(x1, y1)
+    b.Mul(b, b)
 
-    return curve.Add(x2, y2, x2, y2)
+    // C = X1^2
+    c := new(big.Int).Mul(x1, x1)
+    // D = Y1^2
+    d := new(big.Int).Mul(y1, y1)
+
+    // E = C+D
+    e := new(big.Int).Add(c, d)
+
+    // J = E-2*H
+    j := new(big.Int).Sub(e, big.NewInt(2))
+
+    // Z3 = E*J
+    z := new(big.Int).Mul(e, j)
+    zInv := new(big.Int).ModInverse(z, curve.P)
+
+    // X3 = (z^-1) * (B-E)*J
+    x := new(big.Int).Sub(b, e)
+    x.Mul(x, j)
+    x.Mul(x, zInv)
+    x.Mod(x, curve.P)
+
+    // Y3 = (z^-1) * E*(C-D)
+    y := new(big.Int).Sub(c, d)
+    y.Mul(y, e)
+    y.Mul(y, zInv)
+    y.Mod(y, curve.P)
+
+    return x, y
 }
 
-func (curve *E521Curve) ScalarMult(Bx, By *big.Int, k []byte) (*big.Int, *big.Int) {
+func (curve *Ed521Curve) ScalarMult(Bx, By *big.Int, k []byte) (*big.Int, *big.Int) {
     x, y := big.NewInt(0), big.NewInt(1)
 
     Bx2 := new(big.Int).Set(Bx)
@@ -147,20 +179,20 @@ func (curve *E521Curve) ScalarMult(Bx, By *big.Int, k []byte) (*big.Int, *big.In
     return x, y
 }
 
-func (curve *E521Curve) ScalarBaseMult(k []byte) (*big.Int, *big.Int) {
+func (curve *Ed521Curve) ScalarBaseMult(k []byte) (*big.Int, *big.Int) {
     return curve.ScalarMult(curve.Gx, curve.Gy, k)
 }
 
-func (curve *E521Curve) Marshal(x, y *big.Int) []byte {
+func (curve *Ed521Curve) Marshal(x, y *big.Int) []byte {
     return Marshal(curve, x, y)
 }
 
 // MarshalCompressed compresses Edwards point according to RFC 8032: store sign bit of x
-func (curve *E521Curve) MarshalCompressed(x, y *big.Int) []byte {
+func (curve *Ed521Curve) MarshalCompressed(x, y *big.Int) []byte {
     return MarshalCompressed(curve, x, y)
 }
 
-func (curve *E521Curve) Unmarshal(data []byte) (*big.Int, *big.Int) {
+func (curve *Ed521Curve) Unmarshal(data []byte) (*big.Int, *big.Int) {
     if len(data) == 0 {
         return nil, nil
     }
@@ -191,7 +223,7 @@ func (curve *E521Curve) Unmarshal(data []byte) (*big.Int, *big.Int) {
 }
 
 // UnmarshalCompressed decompresses a compressed point according to RFC 8032
-func (curve *E521Curve) UnmarshalCompressed(data []byte) (x, y *big.Int) {
+func (curve *Ed521Curve) UnmarshalCompressed(data []byte) (x, y *big.Int) {
     byteLen := (curve.BitSize + 7) / 8
     if len(data) != 1+byteLen {
         return
@@ -248,7 +280,7 @@ func MarshalCompressed(curve elliptic.Curve, x, y *big.Int) []byte {
 }
 
 func Unmarshal(curve elliptic.Curve, data []byte) (*big.Int, *big.Int) {
-    if c, ok := curve.(*E521Curve); ok {
+    if c, ok := curve.(*Ed521Curve); ok {
         return c.Unmarshal(data)
     }
 
@@ -256,7 +288,7 @@ func Unmarshal(curve elliptic.Curve, data []byte) (*big.Int, *big.Int) {
 }
 
 func UnmarshalCompressed(curve elliptic.Curve, data []byte) (*big.Int, *big.Int) {
-    if c, ok := curve.(*E521Curve); ok {
+    if c, ok := curve.(*Ed521Curve); ok {
         return c.UnmarshalCompressed(data)
     }
 

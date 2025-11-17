@@ -7,12 +7,12 @@ import (
 
     "golang.org/x/crypto/cryptobyte"
 
-    "github.com/deatil/go-cryptobin/elliptic/e521"
+    "github.com/deatil/go-cryptobin/elliptic/ed521"
 )
 
 var (
     // E-521 EdDSA oid
-    oidPublicKeyE521 = asn1.ObjectIdentifier{1, 3, 6, 1, 4, 1, 44588, 2, 1}
+    oidPublicKeyED521 = asn1.ObjectIdentifier{1, 3, 6, 1, 4, 1, 44588, 2, 1}
 )
 
 // Marshal privateKey struct
@@ -38,7 +38,7 @@ type publicKeyInfo struct {
 
 // Marshal PublicKey to der
 func MarshalPublicKey(pub *PublicKey) ([]byte, error) {
-    if pub.Curve != e521.E521() {
+    if pub.Curve != ed521.ED521() {
         return nil, errors.New("go-cryptobin/ed521: unsupported curve")
     }
 
@@ -46,7 +46,7 @@ func MarshalPublicKey(pub *PublicKey) ([]byte, error) {
 
     pkix := pkixPublicKey{
         Algo: pkix.AlgorithmIdentifier{
-            Algorithm:  oidPublicKeyE521,
+            Algorithm:  oidPublicKeyED521,
             Parameters: asn1.RawValue{Tag: asn1.TagOID},
         },
         BitString: asn1.BitString{
@@ -71,7 +71,7 @@ func ParsePublicKey(derBytes []byte) (pub *PublicKey, err error) {
         return
     }
 
-    algoEq := pki.Algorithm.Algorithm.Equal(oidPublicKeyE521)
+    algoEq := pki.Algorithm.Algorithm.Equal(oidPublicKeyED521)
     if !algoEq {
         err = errors.New("go-cryptobin/ed521: unknown public key algorithm")
         return
@@ -84,14 +84,14 @@ func ParsePublicKey(derBytes []byte) (pub *PublicKey, err error) {
 
 // Marshal PrivateKey to der
 func MarshalPrivateKey(priv *PrivateKey) ([]byte, error) {
-    if priv.Curve != e521.E521() {
+    if priv.Curve != ed521.ED521() {
         return nil, errors.New("go-cryptobin/ed521: unsupported curve")
     }
 
     var privKey pkcs8
 
     privKey.Algo = pkix.AlgorithmIdentifier{
-        Algorithm:  oidPublicKeyE521,
+        Algorithm:  oidPublicKeyED521,
         Parameters: asn1.RawValue{
             Tag: asn1.TagOID,
         },
@@ -112,7 +112,7 @@ func ParsePrivateKey(der []byte) (*PrivateKey, error) {
         return nil, err
     }
 
-    algoEq := privKey.Algo.Algorithm.Equal(oidPublicKeyE521)
+    algoEq := privKey.Algo.Algorithm.Equal(oidPublicKeyED521)
     if !algoEq {
         err = errors.New("go-cryptobin/ed521: unknown private key algorithm")
         return nil, err

@@ -1,18 +1,18 @@
-package e521
+package ed521
 
 import (
     "math/big"
 )
 
-var e521 *E521Curve
+var ed521 *Ed521Curve
 
 func initAll() {
     initE521()
 }
 
 func initE521() {
-    e521 = &E521Curve{
-        Name:    "E-521",
+    ed521 = &Ed521Curve{
+        Name:    "Ed521",
         P:       bigFromHex("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
         N:       bigFromHex("7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd15b6c64746fc85f736b8af5e7ec53f04fbd8c4569a8f1f4540ea2435f5180d6b"),
         D:       bigFromHex("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa4331"),

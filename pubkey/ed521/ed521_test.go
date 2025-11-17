@@ -11,7 +11,7 @@ import (
     "encoding/pem"
     "encoding/hex"
 
-    "github.com/deatil/go-cryptobin/elliptic/e521"
+    "github.com/deatil/go-cryptobin/elliptic/ed521"
     cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
@@ -243,7 +243,7 @@ func Test_SignVerify_fail(t *testing.T) {
 }
 
 func Test_Marshal(t *testing.T) {
-    curve := e521.E521()
+    curve := ed521.ED521()
 
     priv, err := GenerateKey(rand.Reader)
     if err != nil {
@@ -252,8 +252,8 @@ func Test_Marshal(t *testing.T) {
 
     pub := &priv.PublicKey
 
-    pubBytes := e521.Marshal(pub.Curve, pub.X, pub.Y)
-    pubBytes2 := e521.MarshalCompressed(pub.Curve, pub.X, pub.Y)
+    pubBytes := ed521.Marshal(pub.Curve, pub.X, pub.Y)
+    pubBytes2 := ed521.MarshalCompressed(pub.Curve, pub.X, pub.Y)
 
     // t.Errorf("\n k: %x, \n p: %x \n", priv.D, pubBytes2)
 
@@ -281,7 +281,7 @@ func Test_Marshal(t *testing.T) {
 func Test_Vec_Check(t *testing.T) {
     for i, td := range testSigVec {
         t.Run(fmt.Sprintf("index %d", i), func(t *testing.T) {
-            curve := e521.E521()
+            curve := ed521.ED521()
 
             if len(td.secretKey) > 0 {
                 priv, err := NewPrivateKey(td.secretKey)
@@ -291,7 +291,7 @@ func Test_Vec_Check(t *testing.T) {
 
                 pub := &priv.PublicKey
 
-                pubBytes := e521.MarshalCompressed(pub.Curve, pub.X, pub.Y)
+                pubBytes := ed521.MarshalCompressed(pub.Curve, pub.X, pub.Y)
 
                 // check publicKey
                 if !bytes.Equal(pubBytes, td.publicKey) {
@@ -310,7 +310,7 @@ func Test_Vec_Check(t *testing.T) {
 
             }
 
-            x, y := e521.UnmarshalCompressed(curve, td.publicKey)
+            x, y := ed521.UnmarshalCompressed(curve, td.publicKey)
             if x == nil || y == nil {
                 t.Fatal("publicKey error")
             }

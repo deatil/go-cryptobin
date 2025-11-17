@@ -1,4 +1,4 @@
-package e521
+package ed521
 
 import (
     "sync"
@@ -10,13 +10,13 @@ import (
 // https://eprint.iacr.org/2013/647
 
 var (
-    // E-521 EdDSA curve oid
-    OIDE521 = asn1.ObjectIdentifier{1, 3, 6, 1, 4, 1, 44588, 2, 1}
+    // Ed-521 curve oid
+    OIDED521 = asn1.ObjectIdentifier{1, 3, 6, 1, 4, 1, 44588, 2, 1}
 )
 
 var once sync.Once
 
-func E521() *E521Curve {
+func ED521() *Ed521Curve {
     once.Do(initAll)
-    return e521
+    return ed521
 }

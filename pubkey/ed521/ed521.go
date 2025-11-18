@@ -26,7 +26,7 @@ const (
     // ContextMaxSize is the maximum length (in bytes) allowed for context.
     ContextMaxSize = 255
     // PublicKeySize is the size, in bytes, of public keys as used in this package.
-    PublicKeySize = 133
+    PublicKeySize = 66
     // PrivateKeySize is the size, in bytes, of private keys as used in this package.
     PrivateKeySize = 66
     // SignatureSize is the size, in bytes, of signatures generated and verified by this package.
@@ -107,6 +107,11 @@ func (priv *PrivateKey) Equal(x crypto.PrivateKey) bool {
         bigIntEqual(priv.D, xx.D)
 }
 
+func (priv *PrivateKey) Seed() []byte {
+    seed := make([]byte, SeedSize)
+    return priv.D.FillBytes(seed)
+}
+
 // Sign creates a signature for message
 func (priv *PrivateKey) Sign(rand io.Reader, message []byte, opts crypto.SignerOpts) ([]byte, error) {
     var context string
@@ -149,32 +154,35 @@ func GenerateKey(rand io.Reader) (*PrivateKey, error) {
         return nil, err
     }
 
-    return newKeyFromSeed(k.Bytes())
+    bytes := make([]byte, SeedSize)
+    return newKeyFromSeed(k.FillBytes(bytes))
 }
 
 func newKeyFromSeed(seed []byte) (*PrivateKey, error) {
-    if l := len(seed); l > SeedSize {
+    if l := len(seed); l != SeedSize {
         panic("go-cryptobin/ed521: bad seed length: " + strconv.Itoa(l))
     }
 
     curve := ed521.ED521()
 
+    h := make([]byte, 132)
+    sha3.ShakeSum256(h, seed)
+
     k := new(big.Int).SetBytes(seed)
 
-    n := new(big.Int).Sub(curve.Params().N, one)
-    if k.Cmp(n) >= 0 {
-        return nil, errors.New("go-cryptobin/ed521: privateKey's seed is overflow")
-    }
-
-    h := make([]byte, 132)
-    sha3.ShakeSum256(h, k.Bytes())
+    scalar := ed521.GetPrivateScalar(h[:66])
 
     priv := new(PrivateKey)
     priv.PublicKey.Curve = curve
     priv.D = k
-    priv.PublicKey.X, priv.PublicKey.Y = curve.ScalarBaseMult(h[:66])
+    priv.PublicKey.X, priv.PublicKey.Y = curve.ScalarBaseMult(scalar)
 
     return priv, nil
+}
+
+// New a private key from seed bytes
+func NewKeyFromSeed(seed []byte) (*PrivateKey, error) {
+    return newKeyFromSeed(seed)
 }
 
 // New a private key from key data bytes
@@ -192,7 +200,7 @@ func PrivateKeyTo(key *PrivateKey) []byte {
 func NewPublicKey(data []byte) (*PublicKey, error) {
     curve := ed521.ED521()
 
-    x, y := elliptic.Unmarshal(curve, data)
+    x, y := ed521.UnmarshalPoint(curve, data)
     if x == nil || y == nil {
         return nil, errors.New("go-cryptobin/ed521: incorrect public key")
     }
@@ -208,7 +216,7 @@ func NewPublicKey(data []byte) (*PublicKey, error) {
 
 // return PublicKey data
 func PublicKeyTo(key *PublicKey) []byte {
-    return ed521.Marshal(key.Curve, key.X, key.Y)
+    return ed521.MarshalPoint(key.Curve, key.X, key.Y)
 }
 
 // sign data and return marshal plain data
@@ -253,15 +261,14 @@ func sign(privateKey *PrivateKey, message []byte, domPre, context string) ([]byt
     n := params.N
     byteLen := (params.BitSize + 7) / 8
 
-    var tmpBuf []byte
-
-    seed := privateKey.D.Bytes()
+    seed := privateKey.Seed()
     publicKeyBytes := ed521.MarshalPoint(privateKey.Curve, privateKey.X, privateKey.Y)
 
     h := make([]byte, 132)
     sha3.ShakeSum256(h, seed)
 
-    s := new(big.Int).SetBytes(h[:66])
+    scalar := ed521.GetPrivateScalar(h[:66])
+    s := new(big.Int).SetBytes(scalar)
     s.Mod(s, n)
 
     prefix := h[66:]
@@ -280,19 +287,14 @@ func sign(privateKey *PrivateKey, message []byte, domPre, context string) ([]byt
     r := new(big.Int).SetBytes(messageDigest)
     r.Mod(r, n)
 
-    _, R := privateKey.Curve.ScalarBaseMult(r.Bytes())
-
-    buf := make([]byte, 2*byteLen)
-    R.FillBytes(buf[:byteLen])
-
-    tmpBuf = ed521.Reverse(buf[:byteLen])
-    copy(buf[:byteLen], tmpBuf)
+    Rx, Ry := privateKey.Curve.ScalarBaseMult(r.Bytes())
+    R := ed521.MarshalPoint(privateKey.Curve, Rx, Ry)
 
     kh := sha3.NewShake256()
     kh.Write([]byte(domPre))
     kh.Write([]byte{byte(len(context))})
     kh.Write([]byte(context))
-    kh.Write(buf[:byteLen])
+    kh.Write(R)
     kh.Write(publicKeyBytes)
     kh.Write(PHM)
     hramDigest := make([]byte, 132)
@@ -308,11 +310,13 @@ func sign(privateKey *PrivateKey, message []byte, domPre, context string) ([]byt
     S.Add(S, r)
     S.Mod(S, n)
 
-    S.FillBytes(buf[byteLen:])
-    tmpBuf = ed521.Reverse(buf[byteLen:])
-    copy(buf[byteLen:], tmpBuf)
+    SBytes := ed521.Reverse(S.FillBytes(make([]byte, byteLen)))
 
-    return buf, nil
+    sig := make([]byte, 2*byteLen)
+    copy(sig[:byteLen], R)
+    copy(sig[byteLen:], SBytes)
+
+    return sig, nil
 }
 
 // VerifyWithOptions reports whether sig is a valid signature of message by
@@ -374,10 +378,14 @@ func verify(publicKey *PublicKey, message, sig []byte, domPre, context string) b
         return false
     }
 
-    RBytes := ed521.Reverse(sig[:byteLen])
-    SBytes := ed521.Reverse(sig[byteLen:])
+    R := sig[:byteLen]
 
-    R := new(big.Int).SetBytes(RBytes)
+    Rx, Ry := ed521.UnmarshalPoint(curve, R)
+    if Rx == nil && Ry == nil {
+        return false
+    }
+
+    SBytes := ed521.Reverse(sig[byteLen:])
     S := new(big.Int).SetBytes(SBytes)
 
     publicKeyBytes := ed521.MarshalPoint(publicKey.Curve, publicKey.X, publicKey.Y)
@@ -386,7 +394,7 @@ func verify(publicKey *PublicKey, message, sig []byte, domPre, context string) b
     kh.Write([]byte(domPre))
     kh.Write([]byte{byte(len(context))})
     kh.Write([]byte(context))
-    kh.Write(sig[:byteLen])
+    kh.Write(R)
     kh.Write(publicKeyBytes)
     kh.Write(PHM)
     hramDigest := make([]byte, 132)
@@ -401,16 +409,16 @@ func verify(publicKey *PublicKey, message, sig []byte, domPre, context string) b
     // r = S - k * pub
     x21, y21 := curve.ScalarMult(publicKey.X, publicKey.Y, k.Bytes())
     x22, y22 := curve.ScalarBaseMult(S.Bytes())
-    _, y2 := curve.Add(x21, y21, x22, y22)
+    y1, y2 := curve.Add(x21, y21, x22, y22)
 
-    return bigIntEqual(R, y2)
+    return bigIntEqual(Rx, y1) &&
+        bigIntEqual(Ry, y2)
 }
 
 func randFieldElement(rand io.Reader, curve elliptic.Curve) (*big.Int, error) {
     N := curve.Params().N
 
-    byteLen := (N.BitLen() + 7) / 8
-    bytes := make([]byte, byteLen)
+    bytes := make([]byte, SeedSize)
 
     for {
         _, err := io.ReadFull(rand, bytes)
@@ -418,9 +426,9 @@ func randFieldElement(rand io.Reader, curve elliptic.Curve) (*big.Int, error) {
             return nil, err
         }
 
-        num := new(big.Int).SetBytes(bytes)
-        if num.Cmp(N) < 0 {
-            return num, nil
+        k := new(big.Int).SetBytes(bytes)
+        if k.Cmp(N) < 0 {
+            return k, nil
         }
     }
 }

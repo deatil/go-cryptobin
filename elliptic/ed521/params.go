@@ -5,6 +5,8 @@ import (
     "crypto/elliptic"
 )
 
+var one = big.NewInt(1)
+
 // Ed521 curve
 type Ed521Curve struct {
     Name    string
@@ -280,7 +282,12 @@ func (curve *Ed521Curve) UnmarshalPoint(data []byte) (x, y *big.Int) {
         return
     }
 
-    if byte(sign) != data[0]&1 {
+    if sign > 0 {
+        sign = 1
+    }
+
+    xx := new(big.Int).Set(x)
+    if xx.And(xx, one).Cmp(big.NewInt(int64(sign))) != 0 {
         x.Sub(p, x)
         x.Mod(x, p)
     }
@@ -341,11 +348,9 @@ func MarshalPoint(curve elliptic.Curve, x, y *big.Int) []byte {
 
     compressed = Reverse(compressed)
 
-    one := big.NewInt(1)
-
     xx := new(big.Int).Set(x)
     if xx.And(xx, one).Cmp(one) == 0 {
-        compressed[byteLen-1] |= 0x80
+        compressed[len(compressed)-1] |= 0x80
     }
 
     return compressed
@@ -369,6 +374,24 @@ func panicIfNotOnCurve(curve elliptic.Curve, x, y *big.Int) {
     if !curve.IsOnCurve(x, y) {
         panic("go-cryptobin/ed521: attempted operation on invalid point")
     }
+}
+
+func GetPrivateScalar(buffer []byte) []byte {
+    a := pruningBuffer(buffer)
+    s := Reverse(a)
+
+    return s
+}
+
+func pruningBuffer(b []byte) []byte {
+    buffer := make([]byte, len(b))
+    copy(buffer, b)
+
+    buffer[0] &= 0xFC
+    buffer[len(buffer) - 1] = 0
+    buffer[len(buffer) - 2] |= 0x80
+
+    return buffer
 }
 
 // Reverse bytes

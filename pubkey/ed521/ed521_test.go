@@ -84,7 +84,7 @@ func Test_NewPrivateKey(t *testing.T) {
     }
 }
 
-func aTest_Public(t *testing.T) {
+func Test_Public(t *testing.T) {
     priv, err := GenerateKey(rand.Reader)
     if err != nil {
         t.Fatal(err)
@@ -271,6 +271,28 @@ func Test_Marshal(t *testing.T) {
     cryptobin_test.Equal(t, pub, pub3)
 }
 
+var privBytes = "2367b29bceaca04d6fe50d959dee3d706f3a5f605ce5aac0205c54cdda59145c573b932814c7405770cd46171a0eb44c911f8e851adeefcc77e5841bf86e0b6486dd"
+var pubBytes = "72c86f2d561e5d3db6e350a92b0287a2434207b3869cd013ccbf1034c82b647b7548bc927975da76e750c991a443a11d23a264888b36c73e6a48a2602f777d3ff081"
+
+func Test_Key(t *testing.T) {
+    privPlain := fromHex(privBytes)
+    pubPlain := fromHex(pubBytes)
+
+    priv, err := NewKeyFromSeed(privPlain)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    pub0 := &priv.PublicKey
+
+    pub1, err := NewPublicKey(pubPlain)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    cryptobin_test.Equal(t, pub0, pub1)
+}
+
 func Test_Vec_Check(t *testing.T) {
     for i, td := range testSigVec {
         t.Run(fmt.Sprintf("index %d", i), func(t *testing.T) {
@@ -316,7 +338,7 @@ func Test_Vec_Check(t *testing.T) {
 
             veri := pubkey.Verify(td.message, td.signature)
             if veri != td.verification {
-                t.Error("VerifyASN1 fail")
+                t.Error("Verify fail")
             }
 
         })
@@ -334,19 +356,19 @@ type testVec struct {
 
 var testSigVec = []testVec{
     {
-        secretKey: fromHex("313e78bd2f5eb3f0a9ee0120496cb3c891a3d4f79d1b8c01f81cd7d70bcadefbb941a3058dabe6b5dbe559b6f5331cc0087af6a367d47555d5cb95a8dacea4d167"),
-        publicKey: fromHex("03015c5b1c1dbdb4e81225cfd8bbfa14b01148b3d3741e9dc0d16c4d40ac8d72eb6752a9015c6aa5c87239491d1d49f292b67a78987283f430af271572e030f9d7f862"),
+        secretKey: fromHex("22713dc2f3d8a4611e9266d8a2a9e3d237505dc34c65d87d598b9a4e6c41b35e3d090458e66c8213a4af011e5614377960c99d9f84e379fdd1f1e168b163b5d93012"),
+        publicKey: fromHex("020006be6a2ea17441c94e25799154b049ebae2fedcedfb27355ab03f9eb802d239677c340392fe113ffb18138b95dc8ba3efd766401cabfc4cc30d0ccdce7b178d954"),
         message:   fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"),
-        signature: fromHex("a6659ed7213f736f46c10c983329523cf246fd0126406bd533783f80b33893b52c899c37e5f8012b378214b983fad7cde1b1d528977a4892cb8abc4872a59d18c500782fdeafb0c93ea7a4f8b16028df15ff05644ede3698ca88c1602ede83c68342aaa013cec1ea2e8d65d4bed0764f8b42e9548a2e41d49786aa0ad2ed782d6c353200"),
+        signature: fromHex("e6309d7d752de236179d694954f9345a73b1abcbe7ebde16e5e0fa1a4ed60003839a13f03fe1fccfecdac66614b8aff731e7956678be247b8f19795b20351a578301780dd7e6d41db086ef9bdc4658cbcc3d86d259b7e36ea399b075da86f2559489c64f59d196c5a439b3c5442609912dee28721d82dd08c71884b7f406961510110e00"),
         verification: true,
     },
 
     // fail
     {
-        secretKey: fromHex("22713dc2f3d8a4611e9266d8a2a9e3d237505dc34c65d87d598b9a4e6c41b35e3d090458e66c8213a4af011e5614377960c99d9f84e379fdd1f1e168b163b5d930"),
-        publicKey: fromHex("0300d4a01d6c5cd88d226e33ab966991d6939c72d7012f209a7fc7006d0b9f93df99e8ab5543cb5d27a2818f27cad1648bfecdd49e7772ded70ee7043444a518683019"),
+        secretKey: fromHex("22713dc2f3d8a4611e9266d8a2a9e3d237505dc34c65d87d598b9a4e6c41b35e3d090458e66c8213a4af011e5614377960c99d9f84e379fdd1f1e168b163b5d93012"),
+        publicKey: fromHex("020006be6a2ea17441c94e25799154b049ebae2fedcedfb27355ab03f9eb802d239677c340392fe113ffb18138b95dc8ba3efd766401cabfc4cc30d0ccdce7b178d954"),
         message:   fromHex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"),
-        signature: fromHex("a6659ed7213f736f46c10c983329523cf246fd0126406bd533783f80b33893b52c899c37e5f8012b378214b983fad7cde1b1d528977a4892cb8abc4872a59d18c500782fdeafb0c93ea7a4f8b16028df15ff05644ede3698ca88c1602ede83c68342aaa013cec1ea2e8d65d4bed0764f8b42e9548a2e41d49786aa0ad2ed782d6c353200"),
+        signature: fromHex("3bd0454bd7a48f25fa40e0ebd76c1eb48e7fff63f606f35f9a8de9fc6d8fde0f75c10c0d97b7dc3001c5da6da681ff95d1a6ace65c19134ca727b99b1c349752ee01e8c9d1f325ab430511bcbf1e009d37418f56f132383ed55e43d97c04feff5a6f875fa64458ab73f9e4d1ad93cc978a7939a9afe532e8e6162b7bcb986f04a2282a00"),
         verification: false,
     },
 }

@@ -2,10 +2,12 @@ package ed448
 
 import (
     "bytes"
+    "testing"
     "crypto"
     "crypto/rand"
     "encoding/hex"
-    "testing"
+
+    cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
 type zeroReader struct{}
@@ -15,6 +17,11 @@ func (zeroReader) Read(buf []byte) (int, error) {
         buf[i] = 0
     }
     return len(buf), nil
+}
+
+func fromHex(s string) []byte {
+    h, _ := hex.DecodeString(s)
+    return h
 }
 
 func decodeHex(t testing.TB, s string) []byte {
@@ -324,6 +331,21 @@ func TestEqual(t *testing.T) {
     if private.Equal(otherPriv) {
         t.Errorf("different private keys are Equal")
     }
+}
+
+var privBytes = "c4eab05d357007c632f3dbb48489924d552b08fe0c353a0d4a1f00acda2c463afbea67c5e8d2877c5e3bc397a659949ef8021e954e0a12274e"
+var pubBytes = "43ba28f430cdff456ae531545f7ecd0ac834a55d9358c0372bfa0c6c6798c0866aea01eb00742802b8438ea4cb82169c235160627b4c3a9480"
+
+func Test_Key(t *testing.T) {
+    privPlain := fromHex(privBytes)
+    pubPlain := fromHex(pubBytes)
+
+    priv := NewKeyFromSeed(privPlain)
+    pub0 := priv.Public()
+
+    pub1 := PublicKey(pubPlain)
+
+    cryptobin_test.Equal(t, pub0, pub1)
 }
 
 func TestVerify(t *testing.T) {

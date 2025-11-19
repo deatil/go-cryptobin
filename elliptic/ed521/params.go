@@ -364,18 +364,6 @@ func UnmarshalPoint(curve elliptic.Curve, data []byte) (*big.Int, *big.Int) {
     return nil, nil
 }
 
-func panicIfNotOnCurve(curve elliptic.Curve, x, y *big.Int) {
-    // (0, 0) is the point at infinity by convention. It's ok to operate on it,
-    // although IsOnCurve is documented to return false for it. See Issue 37294.
-    if x.Sign() == 0 && y.Sign() == 0 {
-        return
-    }
-
-    if !curve.IsOnCurve(x, y) {
-        panic("go-cryptobin/ed521: attempted operation on invalid point")
-    }
-}
-
 func GetPrivateScalar(buffer []byte) []byte {
     a := pruningBuffer(buffer)
     s := Reverse(a)
@@ -404,4 +392,16 @@ func Reverse(b []byte) []byte {
     }
 
     return d
+}
+
+func panicIfNotOnCurve(curve elliptic.Curve, x, y *big.Int) {
+    // (0, 0) is the point at infinity by convention. It's ok to operate on it,
+    // although IsOnCurve is documented to return false for it. See Issue 37294.
+    if x.Sign() == 0 && y.Sign() == 0 {
+        return
+    }
+
+    if !curve.IsOnCurve(x, y) {
+        panic("go-cryptobin/ed521: attempted operation on invalid point")
+    }
 }

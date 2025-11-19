@@ -10,7 +10,7 @@ import (
 // https://eprint.iacr.org/2013/647
 
 var (
-    // Ed-521 curve oid
+    // Ed521 curve oid
     OIDED521 = asn1.ObjectIdentifier{1, 3, 6, 1, 4, 1, 44588, 2, 1}
 )
 

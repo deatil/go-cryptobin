@@ -262,7 +262,7 @@ func sign(privateKey *PrivateKey, message []byte, domPre, context string) ([]byt
     byteLen := (params.BitSize + 7) / 8
 
     seed := privateKey.Seed()
-    publicKeyBytes := ed521.MarshalPoint(privateKey.Curve, privateKey.X, privateKey.Y)
+    eA := ed521.MarshalPoint(privateKey.Curve, privateKey.X, privateKey.Y)
 
     h := make([]byte, 132)
     sha3.ShakeSum256(h, seed)
@@ -295,7 +295,7 @@ func sign(privateKey *PrivateKey, message []byte, domPre, context string) ([]byt
     kh.Write([]byte{byte(len(context))})
     kh.Write([]byte(context))
     kh.Write(R)
-    kh.Write(publicKeyBytes)
+    kh.Write(eA)
     kh.Write(PHM)
     hramDigest := make([]byte, 132)
     kh.Read(hramDigest)
@@ -388,14 +388,14 @@ func verify(publicKey *PublicKey, message, sig []byte, domPre, context string) b
     SBytes := ed521.Reverse(sig[byteLen:])
     S := new(big.Int).SetBytes(SBytes)
 
-    publicKeyBytes := ed521.MarshalPoint(publicKey.Curve, publicKey.X, publicKey.Y)
+    eA := ed521.MarshalPoint(publicKey.Curve, publicKey.X, publicKey.Y)
 
     kh := sha3.NewShake256()
     kh.Write([]byte(domPre))
     kh.Write([]byte{byte(len(context))})
     kh.Write([]byte(context))
     kh.Write(R)
-    kh.Write(publicKeyBytes)
+    kh.Write(eA)
     kh.Write(PHM)
     hramDigest := make([]byte, 132)
     kh.Read(hramDigest)

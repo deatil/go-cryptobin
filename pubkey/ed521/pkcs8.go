@@ -11,7 +11,7 @@ import (
 )
 
 var (
-    // E-521 EdDSA oid
+    // Ed521 oid
     oidPublicKeyED521 = asn1.ObjectIdentifier{1, 3, 6, 1, 4, 1, 44588, 2, 1}
 )
 

@@ -269,7 +269,7 @@ func (curve *Ed521Curve) UnmarshalPoint(data []byte) (x, y *big.Int) {
 
     eP = Reverse(eP)
 
-    p := curve.Params().P
+    p := curve.P
     y = new(big.Int).SetBytes(eP)
     if y.Cmp(p) >= 0 {
         return
@@ -277,7 +277,7 @@ func (curve *Ed521Curve) UnmarshalPoint(data []byte) (x, y *big.Int) {
 
     // x² = (y² - 1) / (dy² - 1)
     x = curve.polynomial(y)
-    x = x.ModSqrt(x, curve.P)
+    x = x.ModSqrt(x, p)
     if x == nil {
         return
     }

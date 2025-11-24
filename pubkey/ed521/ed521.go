@@ -112,6 +112,19 @@ func (priv *PrivateKey) Seed() []byte {
     return priv.D.FillBytes(seed)
 }
 
+func (priv *PrivateKey) Bytes() []byte {
+    seed := make([]byte, SeedSize)
+    priv.D.FillBytes(seed)
+
+    pub := ed521.MarshalPoint(priv.Curve, priv.X, priv.Y)
+
+    buf := make([]byte, 132)
+    copy(buf[:66], seed)
+    copy(buf[66:], pub)
+
+    return buf
+}
+
 // Sign creates a signature for message
 func (priv *PrivateKey) Sign(rand io.Reader, message []byte, opts crypto.SignerOpts) ([]byte, error) {
     var context string
@@ -160,7 +173,7 @@ func GenerateKey(rand io.Reader) (*PrivateKey, error) {
 
 func newKeyFromSeed(seed []byte) (*PrivateKey, error) {
     if l := len(seed); l != SeedSize {
-        panic("go-cryptobin/ed521: bad seed length: " + strconv.Itoa(l))
+        return nil, errors.New("go-cryptobin/ed521: bad seed length: " + strconv.Itoa(l))
     }
 
     curve := ed521.ED521()
@@ -183,6 +196,24 @@ func newKeyFromSeed(seed []byte) (*PrivateKey, error) {
 // New a private key from seed bytes
 func NewKeyFromSeed(seed []byte) (*PrivateKey, error) {
     return newKeyFromSeed(seed)
+}
+
+// New a private key from bytes
+func NewKeyFromBytes(bytes []byte) (*PrivateKey, error) {
+    if l := len(bytes); l != 132 {
+        return nil, errors.New("go-cryptobin/ed521: bad bytes length: " + strconv.Itoa(l))
+    }
+
+    curve := ed521.ED521()
+
+    k := new(big.Int).SetBytes(bytes[:66])
+
+    priv := new(PrivateKey)
+    priv.PublicKey.Curve = curve
+    priv.D = k
+    priv.PublicKey.X, priv.PublicKey.Y = ed521.UnmarshalPoint(curve, bytes[66:])
+
+    return priv, nil
 }
 
 // New a private key from key data bytes

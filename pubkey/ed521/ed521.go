@@ -28,7 +28,7 @@ const (
     // PublicKeySize is the size, in bytes, of public keys as used in this package.
     PublicKeySize = 66
     // PrivateKeySize is the size, in bytes, of private keys as used in this package.
-    PrivateKeySize = 66
+    PrivateKeySize = 132
     // SignatureSize is the size, in bytes, of signatures generated and verified by this package.
     SignatureSize = 132
     // SeedSize is the size, in bytes, of private key seeds.
@@ -118,9 +118,9 @@ func (priv *PrivateKey) Bytes() []byte {
 
     pub := ed521.MarshalPoint(priv.Curve, priv.X, priv.Y)
 
-    buf := make([]byte, 132)
-    copy(buf[:66], seed)
-    copy(buf[66:], pub)
+    buf := make([]byte, PrivateKeySize)
+    copy(buf[:SeedSize], seed)
+    copy(buf[SeedSize:], pub)
 
     return buf
 }
@@ -200,13 +200,13 @@ func NewKeyFromSeed(seed []byte) (*PrivateKey, error) {
 
 // New a private key from bytes
 func NewKeyFromBytes(bytes []byte) (*PrivateKey, error) {
-    if l := len(bytes); l != 132 {
+    if l := len(bytes); l != PrivateKeySize {
         return nil, errors.New("go-cryptobin/ed521: bad bytes length: " + strconv.Itoa(l))
     }
 
     curve := ed521.ED521()
 
-    k := new(big.Int).SetBytes(bytes[:66])
+    k := new(big.Int).SetBytes(bytes[:SeedSize])
 
     priv := new(PrivateKey)
     priv.PublicKey.Curve = curve
@@ -223,7 +223,7 @@ func NewPrivateKey(d []byte) (*PrivateKey, error) {
 
 // return PrivateKey data
 func PrivateKeyTo(key *PrivateKey) []byte {
-    privateKey := make([]byte, PrivateKeySize)
+    privateKey := make([]byte, SeedSize)
     return key.D.FillBytes(privateKey)
 }
 

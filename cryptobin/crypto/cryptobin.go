@@ -6,7 +6,7 @@ import (
 )
 
 /**
- * 对称加密 / Cryptobin
+ * Cryptobin
  *
  * @create 2022-3-19
  * @author deatil

@@ -1,6 +1,6 @@
 ## 使用文档
 
-查看可根据链接跳转
+这里列出了常用的一些文档，可根据链接查看
 
 * 对称加密 使用文档: [encrypt.md](encrypt.md)
 * rsa 使用文档: [rsa.md](rsa.md)
@@ -10,6 +10,7 @@
 * ecsdsa 使用文档: [ecsdsa.md](ecsdsa.md)
 * eddsa 使用文档: [eddsa.md](eddsa.md)
 * ed448 使用文档: [ed448.md](ed448.md)
+* ed521 使用文档: [ed521.md](ed521.md)
 * sm2 使用文档: [sm2.md](sm2.md)
 * elgamal 使用文档: [elgamal.md](elgamal.md)
 * gost 使用文档: [gost.md](gost.md)

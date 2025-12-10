@@ -7,7 +7,7 @@ import (
     "github.com/deatil/go-cryptobin/pubkey/ed521"
 )
 
-// 私钥签名
+// privateKey Sign
 func (this ED521) Sign() ED521 {
     if this.privateKey == nil {
         err := errors.New("go-cryptobin/ed521: privateKey empty.")
@@ -24,7 +24,7 @@ func (this ED521) Sign() ED521 {
     return this
 }
 
-// 公钥验证
+// publicKey Verify
 func (this ED521) Verify(data []byte) ED521 {
     if this.publicKey == nil {
         err := errors.New("go-cryptobin/ed521: publicKey empty.")

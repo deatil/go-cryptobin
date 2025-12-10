@@ -41,7 +41,7 @@ func (this Cryptobin) Encrypt() Cryptobin {
     })
 
     if err != nil {
-        return this.AppendError(err).triggerError()
+        return this.AppendTriggerError(err)
     }
 
     return this
@@ -52,17 +52,17 @@ func (this Cryptobin) encrypt() Cryptobin {
     // Encrypt
     newEncrypt, err := getEncrypt(this.multiple)
     if err != nil {
-        return this.AppendError(err).triggerError()
+        return this.AppendTriggerError(err)
     }
 
     dst, err := newEncrypt.Encrypt(this.data, NewConfig(this))
     if err != nil {
-        return this.AppendError(err).triggerError()
+        return this.AppendTriggerError(err)
     }
 
     this.parsedData = dst
 
-    return this.triggerError()
+    return this.TriggerError()
 }
 
 // 解密
@@ -73,7 +73,7 @@ func (this Cryptobin) Decrypt() Cryptobin {
     })
 
     if err != nil {
-        return this.AppendError(err).triggerError()
+        return this.AppendTriggerError(err)
     }
 
     return this
@@ -84,17 +84,17 @@ func (this Cryptobin) decrypt() Cryptobin {
     // Encrypt
     newEncrypt, err := getEncrypt(this.multiple)
     if err != nil {
-        return this.AppendError(err).triggerError()
+        return this.AppendTriggerError(err)
     }
 
     dst, err := newEncrypt.Decrypt(this.data, NewConfig(this))
     if err != nil {
-        return this.AppendError(err).triggerError()
+        return this.AppendTriggerError(err)
     }
 
     this.parsedData = dst
 
-    return this.triggerError()
+    return this.TriggerError()
 }
 
 // ====================
@@ -103,11 +103,11 @@ func (this Cryptobin) decrypt() Cryptobin {
 // Func Encrypt
 func (this Cryptobin) FuncEncrypt(fn func(Cryptobin) Cryptobin) Cryptobin {
     err := recover.Recover(func() {
-        this = fn(this).triggerError()
+        this = fn(this).TriggerError()
     })
 
     if err != nil {
-        return this.AppendError(err).triggerError()
+        return this.AppendTriggerError(err)
     }
 
     return this
@@ -117,11 +117,11 @@ func (this Cryptobin) FuncEncrypt(fn func(Cryptobin) Cryptobin) Cryptobin {
 // Func Decrypt
 func (this Cryptobin) FuncDecrypt(fn func(Cryptobin) Cryptobin) Cryptobin {
     err := recover.Recover(func() {
-        this = fn(this).triggerError()
+        this = fn(this).TriggerError()
     })
 
     if err != nil {
-        return this.AppendError(err).triggerError()
+        return this.AppendTriggerError(err)
     }
 
     return this

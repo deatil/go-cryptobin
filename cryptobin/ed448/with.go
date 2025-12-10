@@ -5,28 +5,28 @@ import (
     "github.com/deatil/go-cryptobin/pubkey/ed448"
 )
 
-// 设置 PrivateKey
+// With PrivateKey
 func (this ED448) WithPrivateKey(data ed448.PrivateKey) ED448 {
     this.privateKey = data
 
     return this
 }
 
-// 设置 PublicKey
+// With PublicKey
 func (this ED448) WithPublicKey(data ed448.PublicKey) ED448 {
     this.publicKey = data
 
     return this
 }
 
-// 设置 options
+// With options
 func (this ED448) WithOptions(op *Options) ED448 {
     this.options = op
 
     return this
 }
 
-// 设置 options
+// With options
 // 可用类型 [ED448Ph | ED448]
 func (this ED448) SetOptions(name string, context ...string) ED448 {
     ctx := ""
@@ -52,28 +52,28 @@ func (this ED448) SetOptions(name string, context ...string) ED448 {
     return this
 }
 
-// 设置 data
+// With data
 func (this ED448) WithData(data []byte) ED448 {
     this.data = data
 
     return this
 }
 
-// 设置 parsedData
+// With parsedData
 func (this ED448) WithParsedData(data []byte) ED448 {
     this.parsedData = data
 
     return this
 }
 
-// 设置 verify
+// With verify
 func (this ED448) WithVerify(data bool) ED448 {
     this.verify = data
 
     return this
 }
 
-// 设置错误
+// With error list
 func (this ED448) WithErrors(errs []error) ED448 {
     this.Errors = errs
 

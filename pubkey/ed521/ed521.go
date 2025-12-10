@@ -211,7 +211,7 @@ func NewKeyFromBytes(bytes []byte) (*PrivateKey, error) {
     priv := new(PrivateKey)
     priv.PublicKey.Curve = curve
     priv.D = k
-    priv.PublicKey.X, priv.PublicKey.Y = ed521.UnmarshalPoint(curve, bytes[66:])
+    priv.PublicKey.X, priv.PublicKey.Y = ed521.UnmarshalPoint(curve, bytes[SeedSize:])
 
     return priv, nil
 }

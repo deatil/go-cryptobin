@@ -1,13 +1,13 @@
 package dsa
 
-// 检测公钥私钥是否匹配
+// Check KeyPair
 func (this DSA) CheckKeyPair() bool {
-    // 私钥导出的公钥
+    // from private key
     pubKeyFromPriKey := this.MakePublicKey().
         CreatePublicKey().
         ToKeyString()
 
-    // 公钥数据
+    // pubkey data
     pubKeyFromPubKey := this.CreatePublicKey().ToKeyString()
 
     if pubKeyFromPriKey == "" || pubKeyFromPubKey == "" {

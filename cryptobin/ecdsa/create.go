@@ -11,23 +11,24 @@ import (
 )
 
 type (
-    // 配置
+    // Options
     Opts       = pkcs8.Opts
-    // PBKDF2 配置
+    // PBKDF2 Options
     PBKDF2Opts = pkcs8.PBKDF2Opts
-    // Scrypt 配置
+    // Scrypt Options
     ScryptOpts = pkcs8.ScryptOpts
 )
 
 var (
-    // 获取 Cipher 类型
+    // Get cipher from name
     GetCipherFromName = pkcs8.GetCipherFromName
-    // 获取 hash 类型
+    // Get hash from name
     GetHashFromName   = pkcs8.GetHashFromName
 )
 
 // 生成私钥 pem 数据, PKCS1 别名
-// 使用:
+// Create PrivateKey PEM data
+// example:
 // obj := New().WithCurve("P521").GenerateKey()
 // priKey := obj.CreatePrivateKey().ToKeyString()
 func (this ECDSA) CreatePrivateKey() ECDSA {
@@ -35,6 +36,7 @@ func (this ECDSA) CreatePrivateKey() ECDSA {
 }
 
 // 生成私钥带密码 pem 数据, PKCS1 别名
+// Create PrivateKey PEM data with password
 // CreatePrivateKeyWithPassword("123", "AES256CBC")
 // PEMCipher: DESCBC | DESEDE3CBC | AES128CBC | AES192CBC | AES256CBC
 func (this ECDSA) CreatePrivateKeyWithPassword(password string, opts ...string) ECDSA {
@@ -43,7 +45,7 @@ func (this ECDSA) CreatePrivateKeyWithPassword(password string, opts ...string) 
 
 // ====================
 
-// 生成私钥 pem 数据
+// Create PKCS1 PrivateKey PEM data
 func (this ECDSA) CreatePKCS1PrivateKey() ECDSA {
     if this.privateKey == nil {
         err := errors.New("go-cryptobin/ecdsa: privateKey empty.")
@@ -65,7 +67,7 @@ func (this ECDSA) CreatePKCS1PrivateKey() ECDSA {
     return this
 }
 
-// 生成私钥带密码 pem 数据
+// Create PKCS1 PrivateKey PEM data with password
 func (this ECDSA) CreatePKCS1PrivateKeyWithPassword(password string, opts ...string) ECDSA {
     if this.privateKey == nil {
         err := errors.New("go-cryptobin/ecdsa: privateKey empty.")
@@ -109,7 +111,7 @@ func (this ECDSA) CreatePKCS1PrivateKeyWithPassword(password string, opts ...str
 
 // ====================
 
-// 生成 PKCS8 私钥 pem 数据
+// Create PKCS8 PrivateKey PEM data
 func (this ECDSA) CreatePKCS8PrivateKey() ECDSA {
     if this.privateKey == nil {
         err := errors.New("go-cryptobin/ecdsa: privateKey empty.")
@@ -131,7 +133,7 @@ func (this ECDSA) CreatePKCS8PrivateKey() ECDSA {
     return this
 }
 
-// 生成 PKCS8 私钥带密码 pem 数据
+// Create PKCS8 PrivateKey PEM data with password
 // CreatePKCS8PrivateKeyWithPassword("123", "AES256CBC", "SHA256")
 func (this ECDSA) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any) ECDSA {
     if this.privateKey == nil {
@@ -169,7 +171,7 @@ func (this ECDSA) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any
 
 // ====================
 
-// 生成公钥 pem 数据
+// Create PublicKey PEM data
 func (this ECDSA) CreatePublicKey() ECDSA {
     if this.publicKey == nil {
         err := errors.New("go-cryptobin/ecdsa: publicKey empty.")

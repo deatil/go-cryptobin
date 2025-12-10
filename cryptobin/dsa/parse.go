@@ -17,7 +17,7 @@ var (
     ErrNotDSAPublicKey     = errors.New("go-cryptobin/dsa: key is not a valid DSA public key")
 )
 
-// 解析私钥
+// Parse PKCS1 PrivateKey From PEM
 func (this DSA) ParsePKCS1PrivateKeyFromPEM(key []byte) (*dsa.PrivateKey, error) {
     var err error
 
@@ -36,7 +36,7 @@ func (this DSA) ParsePKCS1PrivateKeyFromPEM(key []byte) (*dsa.PrivateKey, error)
     return pkey, nil
 }
 
-// 解析私钥带密码
+// Parse PKCS1 PrivateKey From PEM With Password
 func (this DSA) ParsePKCS1PrivateKeyFromPEMWithPassword(key []byte, password string) (*dsa.PrivateKey, error) {
     var err error
 
@@ -60,7 +60,7 @@ func (this DSA) ParsePKCS1PrivateKeyFromPEMWithPassword(key []byte, password str
     return pkey, nil
 }
 
-// 解析公钥
+// Parse PKCS1 PublicKey From PEM
 func (this DSA) ParsePKCS1PublicKeyFromPEM(key []byte) (*dsa.PublicKey, error) {
     var err error
 
@@ -91,8 +91,7 @@ func (this DSA) ParsePKCS1PublicKeyFromPEM(key []byte) (*dsa.PublicKey, error) {
 
 // =============
 
-
-// 解析私钥 PKCS8
+// Parse PKCS8 PrivateKey From PEM
 func (this DSA) ParsePKCS8PrivateKeyFromPEM(key []byte) (*dsa.PrivateKey, error) {
     var err error
 
@@ -111,7 +110,7 @@ func (this DSA) ParsePKCS8PrivateKeyFromPEM(key []byte) (*dsa.PrivateKey, error)
     return pkey, nil
 }
 
-// 解析 PKCS8 带密码的私钥
+// Parse PKCS8 PrivateKey From PEM With Password
 func (this DSA) ParsePKCS8PrivateKeyFromPEMWithPassword(key []byte, password string) (*dsa.PrivateKey, error) {
     var err error
 
@@ -134,7 +133,7 @@ func (this DSA) ParsePKCS8PrivateKeyFromPEMWithPassword(key []byte, password str
     return pkey, nil
 }
 
-// 解析公钥 PKCS8
+// Parse PKCS8 PublicKey From PEM
 func (this DSA) ParsePKCS8PublicKeyFromPEM(key []byte) (*dsa.PublicKey, error) {
     var err error
 
@@ -166,12 +165,12 @@ func (this DSA) ParsePKCS8PublicKeyFromPEM(key []byte) (*dsa.PublicKey, error) {
 
 // ============
 
-// 解析 xml 私钥
+// Parse PrivateKey From XML
 func (this DSA) ParsePrivateKeyFromXML(key []byte) (*dsa.PrivateKey, error) {
     return cryptobin_dsa.ParseXMLPrivateKey(key)
 }
 
-// 解析 xml 公钥
+// Parse PublicKey From XML
 func (this DSA) ParsePublicKeyFromXML(key []byte) (*dsa.PublicKey, error) {
     return cryptobin_dsa.ParseXMLPublicKey(key)
 }

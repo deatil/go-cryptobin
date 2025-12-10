@@ -7,7 +7,6 @@ import (
 )
 
 type (
-    // 设置
     Options = ed448.Options
 )
 
@@ -23,32 +22,32 @@ const (
  * @author deatil
  */
 type ED448 struct {
-    // 私钥
+    // PrivateKey
     privateKey ed448.PrivateKey
 
-    // 公钥
+    // PublicKey
     publicKey ed448.PublicKey
 
-    // 设置
+    // options
     options *Options
 
-    // [私钥/公钥]数据
+    // [PrivateKey/PublicKey]data
     keyData []byte
 
-    // 传入数据
+    // input data
     data []byte
 
-    // 解析后的数据
+    // parsed data
     parsedData []byte
 
-    // 验证结果
+    // verify data
     verify bool
 
-    // 错误
+    // error list
     Errors []error
 }
 
-// 构造函数
+// NewED448
 func NewED448() ED448 {
     return ED448{
         options: &Options{
@@ -61,12 +60,12 @@ func NewED448() ED448 {
     }
 }
 
-// 构造函数
+// New ED448
 func New() ED448 {
     return NewED448()
 }
 
 var (
-    // 默认
+    // default New ED448
     defaultED448 = NewED448()
 )

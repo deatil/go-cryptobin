@@ -28,38 +28,38 @@ const (
  * @author deatil
  */
 type ECDSA struct {
-    // 私钥
+    // PrivateKey
     privateKey *ecdsa.PrivateKey
 
-    // 公钥
+    // publicKey
     publicKey *ecdsa.PublicKey
 
-    // 生成类型
+    // curve type
     curve elliptic.Curve
 
-    // 签名验证类型
+    // sign hash type
     signHash HashFunc
 
-    // 数据编码方式
+    // data encoding type
     encoding EncodingType
 
-    // [私钥/公钥]数据
+    // [PrivateKey/PublicKey]data
     keyData []byte
 
-    // 传入数据
+    // input data
     data []byte
 
-    // 解析后的数据
+    // parsed data
     parsedData []byte
 
-    // 验证结果
+    // verify data
     verify bool
 
-    // 错误
+    // error list
     Errors []error
 }
 
-// 构造函数
+// NewECDSA
 func NewECDSA() ECDSA {
     return ECDSA{
         curve:    elliptic.P256(),
@@ -69,12 +69,12 @@ func NewECDSA() ECDSA {
     }
 }
 
-// 构造函数
+// New ECDSA
 func New() ECDSA {
     return NewECDSA()
 }
 
 var (
-    // 默认
+    // default New ECDSA
     defaultECDSA = NewECDSA()
 )

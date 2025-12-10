@@ -16,7 +16,7 @@ var (
     ErrNotEdPublicKey      = errors.New("go-cryptobin/ed521: key is not a valid ED521 public key")
 )
 
-// 解析私钥
+// Parse PrivateKey From PEM
 func (this ED521) ParsePrivateKeyFromPEM(key []byte) (crypto.PrivateKey, error) {
     // Parse PEM block
     var block *pem.Block
@@ -31,7 +31,7 @@ func (this ED521) ParsePrivateKeyFromPEM(key []byte) (crypto.PrivateKey, error) 
     return nil, ErrNotEdPrivateKey
 }
 
-// 解析私钥带密码
+// Parse PrivateKey From PEM With Password
 func (this ED521) ParsePrivateKeyFromPEMWithPassword(key []byte, password string) (crypto.PrivateKey, error) {
     var err error
 
@@ -53,7 +53,7 @@ func (this ED521) ParsePrivateKeyFromPEMWithPassword(key []byte, password string
     return nil, ErrNotEdPrivateKey
 }
 
-// 解析公钥
+// Parse PublicKey From PEM
 func (this ED521) ParsePublicKeyFromPEM(key []byte) (crypto.PublicKey, error) {
     var err error
 

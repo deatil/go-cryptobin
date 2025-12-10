@@ -4,14 +4,14 @@ import (
     "github.com/deatil/go-cryptobin/tool/errors"
 )
 
-// 添加错误
+// append error
 func (this ECDH) AppendError(err ...error) ECDH {
     this.Errors = append(this.Errors, err...)
 
     return this
 }
 
-// 获取错误
+// return error
 func (this ECDH) Error() error {
     return errors.Join(this.Errors...)
 }

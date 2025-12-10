@@ -8,7 +8,7 @@ import (
     "github.com/deatil/go-cryptobin/tool/pem"
 )
 
-// 生成密钥
+// GenerateKey With Seed
 func (this ECDH) GenerateKeyWithSeed(reader io.Reader) ECDH {
     privateKey, err := this.curve.GenerateKey(reader)
     if err != nil {
@@ -21,24 +21,24 @@ func (this ECDH) GenerateKeyWithSeed(reader io.Reader) ECDH {
     return this
 }
 
-// 生成密钥
+// GenerateKey With Seed
 func GenerateKeyWithSeed(reader io.Reader, curve string) ECDH {
     return defaultECDH.SetCurve(curve).GenerateKeyWithSeed(reader)
 }
 
-// 生成密钥
+// GenerateKey
 func (this ECDH) GenerateKey() ECDH {
     return this.GenerateKeyWithSeed(rand.Reader)
 }
 
-// 生成密钥
+// GenerateKey
 func GenerateKey(curve string) ECDH {
     return defaultECDH.SetCurve(curve).GenerateKey()
 }
 
 // ==========
 
-// 私钥
+// From PrivateKey bytes
 func (this ECDH) FromPrivateKey(key []byte) ECDH {
     parsedKey, err := this.ParsePrivateKeyFromPEM(key)
     if err != nil {
@@ -50,12 +50,12 @@ func (this ECDH) FromPrivateKey(key []byte) ECDH {
     return this
 }
 
-// 私钥
+// From PrivateKey bytes
 func FromPrivateKey(key []byte) ECDH {
     return defaultECDH.FromPrivateKey(key)
 }
 
-// 私钥带密码
+// From PrivateKey bytes With Password
 func (this ECDH) FromPrivateKeyWithPassword(key []byte, password string) ECDH {
     parsedKey, err := this.ParsePrivateKeyFromPEMWithPassword(key, password)
     if err != nil {
@@ -67,12 +67,12 @@ func (this ECDH) FromPrivateKeyWithPassword(key []byte, password string) ECDH {
     return this
 }
 
-// 私钥
+// From PrivateKey bytes With Password
 func FromPrivateKeyWithPassword(key []byte, password string) ECDH {
     return defaultECDH.FromPrivateKeyWithPassword(key, password)
 }
 
-// 公钥
+// From PublicKey bytes
 func (this ECDH) FromPublicKey(key []byte) ECDH {
     parsedKey, err := this.ParsePublicKeyFromPEM(key)
     if err != nil {
@@ -84,14 +84,14 @@ func (this ECDH) FromPublicKey(key []byte) ECDH {
     return this
 }
 
-// 公钥
+// From PublicKey bytes
 func FromPublicKey(key []byte) ECDH {
     return defaultECDH.FromPublicKey(key)
 }
 
 // ==========
 
-// DER 私钥
+// From PrivateKey Der bytes
 func (this ECDH) FromPrivateKeyDer(der []byte) ECDH {
     key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
@@ -105,7 +105,12 @@ func (this ECDH) FromPrivateKeyDer(der []byte) ECDH {
     return this
 }
 
-// DER 公钥
+// From PublicKey Der bytes
+func FromPrivateKeyDer(der []byte) ECDH {
+    return defaultECDH.FromPrivateKeyDer(der)
+}
+
+// From PublicKey Der bytes
 func (this ECDH) FromPublicKeyDer(der []byte) ECDH {
     key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
@@ -119,9 +124,14 @@ func (this ECDH) FromPublicKeyDer(der []byte) ECDH {
     return this
 }
 
+// From PublicKey Der bytes
+func FromPublicKeyDer(der []byte) ECDH {
+    return defaultECDH.FromPublicKeyDer(der)
+}
+
 // ==========
 
-// 私钥, 库自使用的 asn1 格式
+// From ECDH PrivateKey bytes
 func (this ECDH) FromECDHPrivateKey(key []byte) ECDH {
     parsedKey, err := this.ParseECDHPrivateKeyFromPEM(key)
     if err != nil {
@@ -133,12 +143,12 @@ func (this ECDH) FromECDHPrivateKey(key []byte) ECDH {
     return this
 }
 
-// 私钥, 库自使用的 asn1 格式
+// From ECDH PrivateKey bytes
 func FromECDHPrivateKey(key []byte) ECDH {
     return defaultECDH.FromECDHPrivateKey(key)
 }
 
-// 私钥带密码, 库自使用的 asn1 格式
+// From ECDH PrivateKey bytes With Password
 func (this ECDH) FromECDHPrivateKeyWithPassword(key []byte, password string) ECDH {
     parsedKey, err := this.ParseECDHPrivateKeyFromPEMWithPassword(key, password)
     if err != nil {
@@ -150,12 +160,12 @@ func (this ECDH) FromECDHPrivateKeyWithPassword(key []byte, password string) ECD
     return this
 }
 
-// 私钥, 库自使用的 asn1 格式
+// From ECDH PrivateKey bytes With Password
 func FromECDHPrivateKeyWithPassword(key []byte, password string) ECDH {
     return defaultECDH.FromECDHPrivateKeyWithPassword(key, password)
 }
 
-// 公钥, 库自使用的 asn1 格式
+// From ECDH PublicKey bytes
 func (this ECDH) FromECDHPublicKey(key []byte) ECDH {
     parsedKey, err := this.ParseECDHPublicKeyFromPEM(key)
     if err != nil {
@@ -167,14 +177,14 @@ func (this ECDH) FromECDHPublicKey(key []byte) ECDH {
     return this
 }
 
-// 公钥, 库自使用的 asn1 格式
+// From ECDH PublicKey bytes
 func FromECDHPublicKey(key []byte) ECDH {
     return defaultECDH.FromECDHPublicKey(key)
 }
 
 // ==========
 
-// DER 私钥, 库自使用的 asn1 格式
+// From ECDH PrivateKey Der bytes
 func (this ECDH) FromECDHPrivateKeyDer(der []byte) ECDH {
     key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
@@ -188,7 +198,12 @@ func (this ECDH) FromECDHPrivateKeyDer(der []byte) ECDH {
     return this
 }
 
-// DER 公钥, 库自使用的 asn1 格式
+// From ECDH PrivateKey Der bytes
+func FromECDHPrivateKeyDer(der []byte) ECDH {
+    return defaultECDH.FromECDHPrivateKeyDer(der)
+}
+
+// From ECDH PublicKey Der bytes
 func (this ECDH) FromECDHPublicKeyDer(der []byte) ECDH {
     key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
@@ -200,4 +215,9 @@ func (this ECDH) FromECDHPublicKeyDer(der []byte) ECDH {
     this.publicKey = parsedKey.(*ecdh.PublicKey)
 
     return this
+}
+
+// From ECDH PublicKey Der bytes
+func FromECDHPublicKeyDer(der []byte) ECDH {
+    return defaultECDH.FromECDHPublicKeyDer(der)
 }

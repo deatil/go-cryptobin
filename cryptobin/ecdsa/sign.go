@@ -7,7 +7,7 @@ import (
     "crypto/ecdsa"
 )
 
-// 私钥签名
+// privateKey Sign
 func (this ECDSA) Sign() ECDSA {
     switch this.encoding {
         case EncodingASN1:
@@ -19,7 +19,7 @@ func (this ECDSA) Sign() ECDSA {
     return this.SignASN1()
 }
 
-// 公钥验证
+// publicKey Verify
 // 使用原始数据[data]对比签名后数据
 func (this ECDSA) Verify(data []byte) ECDSA {
     switch this.encoding {
@@ -34,7 +34,7 @@ func (this ECDSA) Verify(data []byte) ECDSA {
 
 // ===============
 
-// 私钥签名 ASN1
+// privateKey Sign and return asn1 encode
 func (this ECDSA) SignASN1() ECDSA {
     if this.privateKey == nil {
         err := errors.New("go-cryptobin/ecdsa: privateKey empty.")
@@ -56,8 +56,7 @@ func (this ECDSA) SignASN1() ECDSA {
     return this.AppendError(err)
 }
 
-
-// 公钥验证 ASN1
+// publicKey Verify from asn1 encode data
 // 使用原始数据[data]对比签名后数据
 func (this ECDSA) VerifyASN1(data []byte) ECDSA {
     if this.publicKey == nil {
@@ -75,10 +74,9 @@ func (this ECDSA) VerifyASN1(data []byte) ECDSA {
     return this
 }
 
-
 // ===============
 
-// 私钥签名 Bytes
+// privateKey Sign and return bytes encode
 func (this ECDSA) SignBytes() ECDSA {
     if this.privateKey == nil {
         err := errors.New("go-cryptobin/ecdsa: privateKey empty.")
@@ -107,7 +105,7 @@ func (this ECDSA) SignBytes() ECDSA {
     return this.AppendError(err)
 }
 
-// 公钥验证 Bytes
+// publicKey Verify from bytes encode data
 // 使用原始数据[data]对比签名后数据
 func (this ECDSA) VerifyBytes(data []byte) ECDSA {
     if this.publicKey == nil {
@@ -138,7 +136,6 @@ func (this ECDSA) VerifyBytes(data []byte) ECDSA {
 
 // ===============
 
-// 签名后数据
 func (this ECDSA) dataHash(data []byte) ([]byte, error) {
     if this.signHash == nil {
         return nil, errors.New("go-cryptobin/ecdsa: Hash func not set.")

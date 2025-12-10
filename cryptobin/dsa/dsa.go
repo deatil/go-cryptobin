@@ -27,35 +27,35 @@ const (
  * @author deatil
  */
 type DSA struct {
-    // 私钥
+    // PrivateKey
     privateKey *dsa.PrivateKey
 
-    // 公钥
+    // PublicKey
     publicKey *dsa.PublicKey
 
-    // [私钥/公钥]数据
+    // [PrivateKey/PublicKey]data
     keyData []byte
 
-    // 传入数据
+    // input data
     data []byte
 
-    // 解析后的数据
+    // parsed data
     parsedData []byte
 
-    // 签名验证类型
+    // sign hash type
     signHash HashFunc
 
-    // 数据编码方式
+    // encoding type
     encoding EncodingType
 
-    // 验证结果
+    // verify data
     verify bool
 
-    // 错误
+    // error list
     Errors []error
 }
 
-// 构造函数
+// NewDSA
 func NewDSA() DSA {
     return DSA{
         signHash: sha256.New,
@@ -64,12 +64,12 @@ func NewDSA() DSA {
     }
 }
 
-// 构造函数
+// New DSA
 func New() DSA {
     return NewDSA()
 }
 
 var (
-    // 默认
+    // default New DSA
     defaultDSA = NewDSA()
 )

@@ -7,7 +7,7 @@ import (
     "github.com/deatil/go-cryptobin/pubkey/ecies"
 )
 
-// 公钥加密
+// publicKey Encrypt data
 // ECDSA 核心为对称加密
 func (this ECDSA) Encrypt() ECDSA {
     if this.publicKey == nil {
@@ -27,7 +27,7 @@ func (this ECDSA) Encrypt() ECDSA {
     return this
 }
 
-// 私钥解密
+// privateKey Decrypt data
 // ECDSA 核心为对称加密
 func (this ECDSA) Decrypt() ECDSA {
     if this.privateKey == nil {

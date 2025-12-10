@@ -6,32 +6,31 @@ import (
 
 /**
  * ecdh
- * go 最低版本需要 `1.20rc1`。
  *
  * @create 2022-8-7
  * @author deatil
  */
 type ECDH struct {
-    // 私钥
+    // PrivateKey
     privateKey *ecdh.PrivateKey
 
-    // 公钥
+    // publicKey
     publicKey *ecdh.PublicKey
 
-    // 散列方式
+    // curve type
     curve ecdh.Curve
 
-    // [私钥/公钥]数据
+    // [PrivateKey/PublicKey]data
     keyData []byte
 
-    // 密码数据
+    // secret data
     secretData []byte
 
-    // 错误
+    // error list
     Errors []error
 }
 
-// 构造函数
+// NewECDH
 func NewECDH() ECDH {
     return ECDH{
         curve:  ecdh.P256(),
@@ -39,12 +38,12 @@ func NewECDH() ECDH {
     }
 }
 
-// 构造函数
+// New ECDH
 func New() ECDH {
     return NewECDH()
 }
 
 var (
-    // 默认
+    // default New ECDH
     defaultECDH = NewECDH()
 )

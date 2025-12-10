@@ -7,7 +7,7 @@ import (
     "github.com/deatil/go-cryptobin/pubkey/ed448"
 )
 
-// 生成公钥
+// Make PublicKey
 func (this ED448) MakePublicKey() ED448 {
     this.publicKey = ed448.PublicKey{}
 
@@ -22,7 +22,7 @@ func (this ED448) MakePublicKey() ED448 {
     return this
 }
 
-// 生成密钥 der 数据
+// Make Key Der data
 func (this ED448) MakeKeyDer() ED448 {
     var block *pem.Block
     if block, _ = pem.Decode(this.keyData); block == nil {

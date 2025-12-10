@@ -4,29 +4,29 @@ import (
     "crypto/ecdh"
 )
 
-// 设置 PrivateKey
+// set PrivateKey
 func (this ECDH) WithPrivateKey(data *ecdh.PrivateKey) ECDH {
     this.privateKey = data
 
     return this
 }
 
-// 设置 PublicKey
+// set PublicKey
 func (this ECDH) WithPublicKey(data *ecdh.PublicKey) ECDH {
     this.publicKey = data
 
     return this
 }
 
-// 设置散列方式
+// set curve type
 func (this ECDH) WithCurve(data ecdh.Curve) ECDH {
     this.curve = data
 
     return this
 }
 
-// 设置散列方式
-// 可用参数 [P521 | P384 | P256 | X25519]
+// set curve type string
+// params [P521 | P384 | P256 | X25519]
 func (this ECDH) SetCurve(curve string) ECDH {
     switch curve {
         case "P521":
@@ -42,21 +42,21 @@ func (this ECDH) SetCurve(curve string) ECDH {
     return this
 }
 
-// 设置 keyData
+// set keyData
 func (this ECDH) WithKeyData(data []byte) ECDH {
     this.keyData = data
 
     return this
 }
 
-// 设置 secretData
+// set secretData
 func (this ECDH) WithSecretData(data []byte) ECDH {
     this.secretData = data
 
     return this
 }
 
-// 设置错误
+// set error list
 func (this ECDH) WithErrors(errs []error) ECDH {
     this.Errors = errs
 

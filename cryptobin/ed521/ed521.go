@@ -7,7 +7,6 @@ import (
 )
 
 type (
-    // 设置
     Options = ed521.Options
 )
 

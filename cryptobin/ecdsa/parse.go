@@ -17,7 +17,7 @@ var (
     ErrNotECPrivateKey     = errors.New("go-cryptobin/ecdsa: key is not a valid ECDSA private key")
 )
 
-// 解析私钥
+// Parse PKCS1 PrivateKey From PEM
 func (this ECDSA) ParsePKCS1PrivateKeyFromPEM(key []byte) (*ecdsa.PrivateKey, error) {
     // Parse PEM block
     var block *pem.Block
@@ -34,7 +34,7 @@ func (this ECDSA) ParsePKCS1PrivateKeyFromPEM(key []byte) (*ecdsa.PrivateKey, er
     return pkey, nil
 }
 
-// 解析私钥带密码
+// Parse PKCS1 PrivateKey From PEM With Password
 func (this ECDSA) ParsePKCS1PrivateKeyFromPEMWithPassword(key []byte, password string) (*ecdsa.PrivateKey, error) {
     var err error
 
@@ -60,7 +60,7 @@ func (this ECDSA) ParsePKCS1PrivateKeyFromPEMWithPassword(key []byte, password s
 
 // ==========
 
-// 解析私钥
+// Parse PKCS8 PrivateKey From PEM
 func (this ECDSA) ParsePKCS8PrivateKeyFromPEM(key []byte) (*ecdsa.PrivateKey, error) {
     var err error
 
@@ -79,7 +79,7 @@ func (this ECDSA) ParsePKCS8PrivateKeyFromPEM(key []byte) (*ecdsa.PrivateKey, er
     return pkey, nil
 }
 
-// 解析 PKCS8 带密码的私钥
+// Parse PKCS8 PrivateKey From PEM With Password
 func (this ECDSA) ParsePKCS8PrivateKeyFromPEMWithPassword(key []byte, password string) (*ecdsa.PrivateKey, error) {
     var err error
 
@@ -104,7 +104,7 @@ func (this ECDSA) ParsePKCS8PrivateKeyFromPEMWithPassword(key []byte, password s
 
 // ==========
 
-// 解析公钥
+// Parse PublicKey From PEM
 func (this ECDSA) ParsePublicKeyFromPEM(key []byte) (*ecdsa.PublicKey, error) {
     var err error
 

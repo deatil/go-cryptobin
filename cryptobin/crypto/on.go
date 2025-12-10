@@ -16,7 +16,7 @@ func (this Cryptobin) OnError(fn ErrorFunc) Cryptobin {
 
 // 触发错误事件
 // trigger Error
-func (this Cryptobin) triggerError() Cryptobin {
+func (this Cryptobin) TriggerError() Cryptobin {
     this.errEvent.Trigger(this.Errors)
 
     return this

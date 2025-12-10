@@ -11,43 +11,43 @@ import (
 )
 
 type (
-    // 配置
+    // Options
     Opts       = pkcs8.Opts
-    // PBKDF2 配置
+    // PBKDF2 Options
     PBKDF2Opts = pkcs8.PBKDF2Opts
-    // Scrypt 配置
+    // Scrypt Options
     ScryptOpts = pkcs8.ScryptOpts
 )
 
 var (
-    // 获取 Cipher 类型
+    // Get cipher from name
     GetCipherFromName = pkcs8.GetCipherFromName
-    // 获取 hash 类型
+    // Get hash from name
     GetHashFromName   = pkcs8.GetHashFromName
 )
 
-// 生成私钥 pem 数据
+// Create PrivateKey PEM data
 // dsa := New().GenerateKey("L2048N256")
 // priKey := dsa.CreatePrivateKey().ToKeyString()
 func (this DSA) CreatePrivateKey() DSA {
     return this.CreatePKCS1PrivateKey()
 }
 
-// 生成私钥带密码 pem 数据
+// Create PrivateKey PEM data with password
 // CreatePrivateKeyWithPassword("123", "AES256CBC")
 // PEMCipher: DESCBC | DESEDE3CBC | AES128CBC | AES192CBC | AES256CBC
 func (this DSA) CreatePrivateKeyWithPassword(password string, opts ...string) DSA {
     return this.CreatePKCS1PrivateKeyWithPassword(password, opts...)
 }
 
-// 生成公钥 pem 数据
+// Create PublicKey PEM data
 func (this DSA) CreatePublicKey() DSA {
     return this.CreatePKCS1PublicKey()
 }
 
 // ==========
 
-// 生成 pkcs1 私钥 pem 数据
+// Create PKCS1 PrivateKey PEM data
 func (this DSA) CreatePKCS1PrivateKey() DSA {
     if this.privateKey == nil {
         err := errors.New("go-cryptobin/dsa: privateKey empty.")
@@ -69,7 +69,7 @@ func (this DSA) CreatePKCS1PrivateKey() DSA {
     return this
 }
 
-// 生成 pkcs1 私钥带密码 pem 数据
+// Create PKCS1 PrivateKey PEM data with password
 // CreatePKCS1PrivateKeyWithPassword("123", "AES256CBC")
 // PEMCipher: DESCBC | DESEDE3CBC | AES128CBC | AES192CBC | AES256CBC
 func (this DSA) CreatePKCS1PrivateKeyWithPassword(password string, opts ...string) DSA {
@@ -113,7 +113,7 @@ func (this DSA) CreatePKCS1PrivateKeyWithPassword(password string, opts ...strin
     return this
 }
 
-// 生成 pkcs1 公钥 pem 数据
+// Create PKCS1 PublicKey PEM data
 func (this DSA) CreatePKCS1PublicKey() DSA {
     if this.publicKey == nil {
         err := errors.New("go-cryptobin/dsa: publicKey empty.")
@@ -137,7 +137,7 @@ func (this DSA) CreatePKCS1PublicKey() DSA {
 
 // ==========
 
-// 生成 pkcs8 私钥 pem 数据
+// Create PKCS8 PrivateKey PEM data
 func (this DSA) CreatePKCS8PrivateKey() DSA {
     if this.privateKey == nil {
         err := errors.New("go-cryptobin/dsa: privateKey empty.")
@@ -159,7 +159,7 @@ func (this DSA) CreatePKCS8PrivateKey() DSA {
     return this
 }
 
-// 生成 PKCS8 私钥带密码 pem 数据
+// Create PKCS8 PrivateKey PEM data with password
 // CreatePKCS8PrivateKeyWithPassword("123", "AES256CBC", "SHA256")
 func (this DSA) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any) DSA {
     if this.privateKey == nil {
@@ -195,7 +195,7 @@ func (this DSA) CreatePKCS8PrivateKeyWithPassword(password string, opts ...any) 
     return this
 }
 
-// 生成公钥 pem 数据
+// Create PKCS8 PublicKey PEM data
 func (this DSA) CreatePKCS8PublicKey() DSA {
     if this.publicKey == nil {
         err := errors.New("go-cryptobin/dsa: publicKey empty.")
@@ -219,7 +219,7 @@ func (this DSA) CreatePKCS8PublicKey() DSA {
 
 // ====================
 
-// 生成私钥 xml 数据
+// Create PrivateKey XML data
 func (this DSA) CreateXMLPrivateKey() DSA {
     if this.privateKey == nil {
         err := errors.New("go-cryptobin/dsa: privateKey empty.")
@@ -236,7 +236,7 @@ func (this DSA) CreateXMLPrivateKey() DSA {
     return this
 }
 
-// 生成公钥 xml 数据
+// Create PublicKey XML data
 func (this DSA) CreateXMLPublicKey() DSA {
     if this.publicKey == nil {
         err := errors.New("go-cryptobin/dsa: publicKey empty.")

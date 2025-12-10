@@ -9,7 +9,7 @@ import (
     "github.com/deatil/go-cryptobin/pubkey/ed521"
 )
 
-// GenerateKey
+// GenerateKey With Seed
 func (this ED521) GenerateKeyWithSeed(reader io.Reader) ED521 {
     privateKey, err := ed521.GenerateKey(reader)
     if err != nil {
@@ -22,7 +22,7 @@ func (this ED521) GenerateKeyWithSeed(reader io.Reader) ED521 {
     return this
 }
 
-// GenerateKey
+// GenerateKey With Seed
 func GenerateKeyWithSeed(reader io.Reader) ED521 {
     return defaultED521.GenerateKeyWithSeed(reader)
 }
@@ -39,7 +39,7 @@ func GenerateKey() ED521 {
 
 // ==========
 
-// 私钥
+// From PrivateKey bytes
 func (this ED521) FromPrivateKey(key []byte) ED521 {
     parsedKey, err := this.ParsePrivateKeyFromPEM(key)
     if err != nil {
@@ -51,12 +51,12 @@ func (this ED521) FromPrivateKey(key []byte) ED521 {
     return this
 }
 
-// 私钥
+// From PrivateKey bytes
 func FromPrivateKey(key []byte) ED521 {
     return defaultED521.FromPrivateKey(key)
 }
 
-// 私钥带密码
+// From PrivateKey bytes With Password
 func (this ED521) FromPrivateKeyWithPassword(key []byte, password string) ED521 {
     parsedKey, err := this.ParsePrivateKeyFromPEMWithPassword(key, password)
     if err != nil {
@@ -68,12 +68,12 @@ func (this ED521) FromPrivateKeyWithPassword(key []byte, password string) ED521 
     return this
 }
 
-// 私钥
+// From PrivateKey bytes With Password
 func FromPrivateKeyWithPassword(key []byte, password string) ED521 {
     return defaultED521.FromPrivateKeyWithPassword(key, password)
 }
 
-// 公钥
+// From PublicKey bytes
 func (this ED521) FromPublicKey(key []byte) ED521 {
     parsedKey, err := this.ParsePublicKeyFromPEM(key)
     if err != nil {
@@ -85,14 +85,14 @@ func (this ED521) FromPublicKey(key []byte) ED521 {
     return this
 }
 
-// 公钥
+// From PublicKey bytes
 func FromPublicKey(key []byte) ED521 {
     return defaultED521.FromPublicKey(key)
 }
 
 // ==========
 
-// DER 私钥
+// From PrivateKey Der bytes
 func (this ED521) FromPrivateKeyDer(der []byte) ED521 {
     key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
@@ -106,7 +106,12 @@ func (this ED521) FromPrivateKeyDer(der []byte) ED521 {
     return this
 }
 
-// DER 公钥
+// From PrivateKey Der bytes
+func FromPrivateKeyDer(der []byte) ED521 {
+    return defaultED521.FromPrivateKeyDer(der)
+}
+
+// From PublicKey Der bytes
 func (this ED521) FromPublicKeyDer(der []byte) ED521 {
     key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
@@ -120,9 +125,14 @@ func (this ED521) FromPublicKeyDer(der []byte) ED521 {
     return this
 }
 
+// From PublicKey Der bytes
+func FromPublicKeyDer(der []byte) ED521 {
+    return defaultED521.FromPublicKeyDer(der)
+}
+
 // ==========
 
-// 私钥 Seed
+// From PrivateKey Seed bytes
 func (this ED521) FromPrivateKeySeed(seed []byte) ED521 {
     prikey, err := ed521.NewKeyFromSeed(seed)
     if err != nil {
@@ -134,7 +144,7 @@ func (this ED521) FromPrivateKeySeed(seed []byte) ED521 {
     return this
 }
 
-// 私钥 Seed
+// From PrivateKey Seed bytes
 func FromPrivateKeySeed(seed []byte) ED521 {
     return defaultED521.FromPrivateKeySeed(seed)
 }
@@ -172,31 +182,31 @@ func (this ED521) FromPrivateKeyString(keyString string) ED521 {
 
 // ==========
 
-// 字节
+// From Bytes
 func (this ED521) FromBytes(data []byte) ED521 {
     this.data = data
 
     return this
 }
 
-// 字节
+// From Bytes
 func FromBytes(data []byte) ED521 {
     return defaultED521.FromBytes(data)
 }
 
-// 字符
+// From String
 func (this ED521) FromString(data string) ED521 {
     this.data = []byte(data)
 
     return this
 }
 
-// 字符
+// From String
 func FromString(data string) ED521 {
     return defaultED521.FromString(data)
 }
 
-// Base64
+// From Base64 String
 func (this ED521) FromBase64String(data string) ED521 {
     newData, err := encoding.Base64Decode(data)
 
@@ -205,12 +215,12 @@ func (this ED521) FromBase64String(data string) ED521 {
     return this.AppendError(err)
 }
 
-// Base64
+// From Base64 String
 func FromBase64String(data string) ED521 {
     return defaultED521.FromBase64String(data)
 }
 
-// Hex
+// From Hex String
 func (this ED521) FromHexString(data string) ED521 {
     newData, err := encoding.HexDecode(data)
 
@@ -219,7 +229,7 @@ func (this ED521) FromHexString(data string) ED521 {
     return this.AppendError(err)
 }
 
-// Hex
+// From Hex String
 func FromHexString(data string) ED521 {
     return defaultED521.FromHexString(data)
 }

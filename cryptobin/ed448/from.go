@@ -9,7 +9,7 @@ import (
     "github.com/deatil/go-cryptobin/pubkey/ed448"
 )
 
-// 生成密钥
+// GenerateKey With Seed
 func (this ED448) GenerateKeyWithSeed(reader io.Reader) ED448 {
     publicKey, privateKey, err := ed448.GenerateKey(reader)
     if err != nil {
@@ -22,24 +22,24 @@ func (this ED448) GenerateKeyWithSeed(reader io.Reader) ED448 {
     return this
 }
 
-// 生成密钥
+// GenerateKey With Seed
 func GenerateKeyWithSeed(reader io.Reader) ED448 {
     return defaultED448.GenerateKeyWithSeed(reader)
 }
 
-// 生成密钥
+// GenerateKey
 func (this ED448) GenerateKey() ED448 {
     return this.GenerateKeyWithSeed(rand.Reader)
 }
 
-// 生成密钥
+// GenerateKey
 func GenerateKey() ED448 {
     return defaultED448.GenerateKey()
 }
 
 // ==========
 
-// 私钥
+// From PrivateKey bytes
 func (this ED448) FromPrivateKey(key []byte) ED448 {
     parsedKey, err := this.ParsePrivateKeyFromPEM(key)
     if err != nil {
@@ -51,12 +51,12 @@ func (this ED448) FromPrivateKey(key []byte) ED448 {
     return this
 }
 
-// 私钥
+// From PrivateKey bytes
 func FromPrivateKey(key []byte) ED448 {
     return defaultED448.FromPrivateKey(key)
 }
 
-// 私钥带密码
+// From PrivateKey bytes With Password
 func (this ED448) FromPrivateKeyWithPassword(key []byte, password string) ED448 {
     parsedKey, err := this.ParsePrivateKeyFromPEMWithPassword(key, password)
     if err != nil {
@@ -68,12 +68,12 @@ func (this ED448) FromPrivateKeyWithPassword(key []byte, password string) ED448 
     return this
 }
 
-// 私钥
+// From PrivateKey bytes With Password
 func FromPrivateKeyWithPassword(key []byte, password string) ED448 {
     return defaultED448.FromPrivateKeyWithPassword(key, password)
 }
 
-// 公钥
+// From PublicKey bytes
 func (this ED448) FromPublicKey(key []byte) ED448 {
     parsedKey, err := this.ParsePublicKeyFromPEM(key)
     if err != nil {
@@ -85,14 +85,14 @@ func (this ED448) FromPublicKey(key []byte) ED448 {
     return this
 }
 
-// 公钥
+// From PublicKey bytes
 func FromPublicKey(key []byte) ED448 {
     return defaultED448.FromPublicKey(key)
 }
 
 // ==========
 
-// DER 私钥
+// From PrivateKey Der bytes
 func (this ED448) FromPrivateKeyDer(der []byte) ED448 {
     key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
@@ -106,7 +106,12 @@ func (this ED448) FromPrivateKeyDer(der []byte) ED448 {
     return this
 }
 
-// DER 公钥
+// From PrivateKey Der bytes
+func FromPrivateKeyDer(der []byte) ED448 {
+    return defaultED448.FromPrivateKeyDer(der)
+}
+
+// From PublicKey Der bytes
 func (this ED448) FromPublicKeyDer(der []byte) ED448 {
     key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
@@ -120,16 +125,21 @@ func (this ED448) FromPublicKeyDer(der []byte) ED448 {
     return this
 }
 
+// From PublicKey Der bytes
+func FromPublicKeyDer(der []byte) ED448 {
+    return defaultED448.FromPublicKeyDer(der)
+}
+
 // ==========
 
-// 私钥 Seed
+// From PrivateKey Seed bytes
 func (this ED448) FromPrivateKeySeed(seed []byte) ED448 {
     this.privateKey = ed448.NewKeyFromSeed(seed)
 
     return this
 }
 
-// 私钥 Seed
+// From PrivateKey Seed bytes
 func FromPrivateKeySeed(seed []byte) ED448 {
     return defaultED448.FromPrivateKeySeed(seed)
 }
@@ -157,31 +167,31 @@ func (this ED448) FromPrivateKeyString(keyString string) ED448 {
 
 // ==========
 
-// 字节
+// From Bytes
 func (this ED448) FromBytes(data []byte) ED448 {
     this.data = data
 
     return this
 }
 
-// 字节
+// From Bytes
 func FromBytes(data []byte) ED448 {
     return defaultED448.FromBytes(data)
 }
 
-// 字符
+// From String
 func (this ED448) FromString(data string) ED448 {
     this.data = []byte(data)
 
     return this
 }
 
-// 字符
+// From String
 func FromString(data string) ED448 {
     return defaultED448.FromString(data)
 }
 
-// Base64
+// From Base64 String
 func (this ED448) FromBase64String(data string) ED448 {
     newData, err := encoding.Base64Decode(data)
 
@@ -190,12 +200,12 @@ func (this ED448) FromBase64String(data string) ED448 {
     return this.AppendError(err)
 }
 
-// Base64
+// From Base64 String
 func FromBase64String(data string) ED448 {
     return defaultED448.FromBase64String(data)
 }
 
-// Hex
+// From Hex String
 func (this ED448) FromHexString(data string) ED448 {
     newData, err := encoding.HexDecode(data)
 
@@ -204,7 +214,7 @@ func (this ED448) FromHexString(data string) ED448 {
     return this.AppendError(err)
 }
 
-// Hex
+// From Hex String
 func FromHexString(data string) ED448 {
     return defaultED448.FromHexString(data)
 }

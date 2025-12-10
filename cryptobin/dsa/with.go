@@ -6,42 +6,42 @@ import (
     "github.com/deatil/go-cryptobin/tool/hash"
 )
 
-// 设置 PrivateKey
+// Set PrivateKey
 func (this DSA) WithPrivateKey(data *dsa.PrivateKey) DSA {
     this.privateKey = data
 
     return this
 }
 
-// 设置 PublicKey
+// Set PublicKey
 func (this DSA) WithPublicKey(data *dsa.PublicKey) DSA {
     this.publicKey = data
 
     return this
 }
 
-// 设置 data
+// Set data
 func (this DSA) WithData(data []byte) DSA {
     this.data = data
 
     return this
 }
 
-// 设置 parsedData
+// Set parsedData
 func (this DSA) WithParsedData(data []byte) DSA {
     this.parsedData = data
 
     return this
 }
 
-// 设置 hash 类型
+// Set hash type
 func (this DSA) WithSignHash(data HashFunc) DSA {
     this.signHash = data
 
     return this
 }
 
-// 设置 hash 类型
+// Set hash type
 // 可用参数可查看 Hash 结构体数据
 func (this DSA) SetSignHash(data string) DSA {
     hash, err := hash.GetHash(data)
@@ -54,31 +54,31 @@ func (this DSA) SetSignHash(data string) DSA {
     return this
 }
 
-// 设置编码方式
+// Set encoding type
 func (this DSA) WithEncoding(encoding EncodingType) DSA {
     this.encoding = encoding
 
     return this
 }
 
-// 设置 ASN1 编码方式
+// Set ASN1 Encoding
 func (this DSA) WithEncodingASN1() DSA {
     return this.WithEncoding(EncodingASN1)
 }
 
-// 设置明文编码方式
+// Set Plain Encoding
 func (this DSA) WithEncodingBytes() DSA {
     return this.WithEncoding(EncodingBytes)
 }
 
-// 设置 verify
+// Set verify
 func (this DSA) WithVerify(data bool) DSA {
     this.verify = data
 
     return this
 }
 
-// 设置错误
+// Set error list
 func (this DSA) WithErrors(errs []error) DSA {
     this.Errors = errs
 

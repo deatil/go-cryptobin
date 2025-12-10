@@ -5,7 +5,7 @@ import(
     "encoding/pem"
 )
 
-// 生成公钥
+// Make PublicKey
 func (this ECDSA) MakePublicKey() ECDSA {
     this.publicKey = nil
 
@@ -19,7 +19,7 @@ func (this ECDSA) MakePublicKey() ECDSA {
     return this
 }
 
-// 生成密钥 der 数据
+// Make Key Der data
 func (this ECDSA) MakeKeyDer() ECDSA {
     var block *pem.Block
     if block, _ = pem.Decode(this.keyData); block == nil {

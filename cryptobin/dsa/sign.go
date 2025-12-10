@@ -9,7 +9,7 @@ import (
     "encoding/asn1"
 )
 
-// 私钥签名
+// privateKey Sign
 func (this DSA) Sign() DSA {
     switch this.encoding {
         case EncodingASN1:
@@ -21,7 +21,7 @@ func (this DSA) Sign() DSA {
     return this.SignASN1()
 }
 
-// 公钥验证
+// publicKey Verify
 // 使用原始数据[data]对比签名后数据
 func (this DSA) Verify(data []byte) DSA {
     switch this.encoding {
@@ -40,7 +40,7 @@ type dsaSignature struct {
     R, S *big.Int
 }
 
-// 私钥签名
+// privateKey Sign ASN1
 func (this DSA) SignASN1() DSA {
     if this.privateKey == nil {
         err := errors.New("go-cryptobin/dsa: privateKey empty.")
@@ -62,7 +62,7 @@ func (this DSA) SignASN1() DSA {
     return this.AppendError(err)
 }
 
-// 公钥验证
+// publicKey Verify ASN1
 // 使用原始数据[data]对比签名后数据
 func (this DSA) VerifyASN1(data []byte) DSA {
     if this.publicKey == nil {
@@ -89,11 +89,11 @@ func (this DSA) VerifyASN1(data []byte) DSA {
 // ===============
 
 const (
-    // 字节大小
+    // dsa ByteLen
     dsaByteLen = 32
 )
 
-// 私钥签名
+// privateKey Sign Bytes
 func (this DSA) SignBytes() DSA {
     if this.privateKey == nil {
         err := errors.New("go-cryptobin/dsa: privateKey empty.")
@@ -125,7 +125,7 @@ func (this DSA) SignBytes() DSA {
     return this
 }
 
-// 公钥验证
+// publicKey Verify Bytes
 // 使用原始数据[data]对比签名后数据
 func (this DSA) VerifyBytes(data []byte) DSA {
     if this.publicKey == nil {
@@ -156,7 +156,7 @@ func (this DSA) VerifyBytes(data []byte) DSA {
 
 // ===============
 
-// 私钥签名
+// privateKey Sign With Separator
 func (this DSA) SignWithSeparator(separator ...string) DSA {
     if this.privateKey == nil {
         err := errors.New("go-cryptobin/dsa: privateKey empty.")
@@ -195,7 +195,7 @@ func (this DSA) SignWithSeparator(separator ...string) DSA {
     return this
 }
 
-// 公钥验证
+// publicKey Verify With Separator
 // 使用原始数据[data]对比签名后数据
 func (this DSA) VerifyWithSeparator(data []byte, separator ...string) DSA {
     if this.publicKey == nil {
@@ -239,7 +239,6 @@ func (this DSA) VerifyWithSeparator(data []byte, separator ...string) DSA {
 
 // ===============
 
-// 签名后数据
 func (this DSA) dataHash(data []byte) ([]byte, error) {
     if this.signHash == nil {
         return nil, errors.New("go-cryptobin/dsa: hash func empty.")

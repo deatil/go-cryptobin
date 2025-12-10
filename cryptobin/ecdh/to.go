@@ -4,34 +4,34 @@ import (
     "github.com/deatil/go-cryptobin/tool/encoding"
 )
 
-// 私钥/公钥
+// output key bytes data
 func (this ECDH) ToKeyBytes() []byte {
     return this.keyData
 }
 
-// 私钥/公钥
+// output key string data
 func (this ECDH) ToKeyString() string {
     return string(this.keyData)
 }
 
 // =================
 
-// 输出字节
+// output bytes data
 func (this ECDH) ToBytes() []byte {
     return this.secretData
 }
 
-// 输出字符
+// output string data
 func (this ECDH) ToString() string {
     return string(this.secretData)
 }
 
-// 输出Base64
+// output base64 data
 func (this ECDH) ToBase64String() string {
     return encoding.Base64Encode(this.secretData)
 }
 
-// 输出Hex
+// output hex data
 func (this ECDH) ToHexString() string {
     return encoding.HexEncode(this.secretData)
 }

@@ -10,22 +10,22 @@ import (
 )
 
 type (
-    // 配置
+    // Options
     Opts       = pkcs8.Opts
-    // PBKDF2 配置
+    // PBKDF2 Options
     PBKDF2Opts = pkcs8.PBKDF2Opts
-    // Scrypt 配置
+    // Scrypt Options
     ScryptOpts = pkcs8.ScryptOpts
 )
 
 var (
-    // 获取 Cipher 类型
+    // Get cipher from name
     GetCipherFromName = pkcs8.GetCipherFromName
-    // 获取 hash 类型
+    // Get hash from name
     GetHashFromName   = pkcs8.GetHashFromName
 )
 
-// 生成私钥 pem 数据
+// Create PrivateKey PEM data
 func (this ED448) CreatePrivateKey() ED448 {
     if this.privateKey == nil {
         err := errors.New("go-cryptobin/ed448: privateKey empty.")
@@ -47,7 +47,7 @@ func (this ED448) CreatePrivateKey() ED448 {
     return this
 }
 
-// 生成 PKCS8 私钥带密码 pem 数据
+// Create PrivateKey PEM data with password
 // CreatePrivateKeyWithPassword("123", "AES256CBC", "SHA256")
 func (this ED448) CreatePrivateKeyWithPassword(password string, opts ...any) ED448 {
     if this.privateKey == nil {
@@ -83,7 +83,7 @@ func (this ED448) CreatePrivateKeyWithPassword(password string, opts ...any) ED4
     return this
 }
 
-// 生成公钥 pem 数据
+// Create PublicKey PEM data
 func (this ED448) CreatePublicKey() ED448 {
     if this.publicKey == nil {
         err := errors.New("go-cryptobin/ed448: publicKey empty.")

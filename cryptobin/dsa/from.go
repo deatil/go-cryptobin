@@ -9,8 +9,8 @@ import (
     "github.com/deatil/go-cryptobin/tool/encoding"
 )
 
-// 生成密钥
-// 可用参数 [L1024N160 | L2048N224 | L2048N256 | L3072N256]
+// GenerateKey With Seed
+// params [L1024N160 | L2048N224 | L2048N256 | L3072N256]
 func (this DSA) GenerateKeyWithSeed(paramReader, generateReader io.Reader, ln string) DSA {
     var paramSize dsa.ParameterSizes
 
@@ -38,27 +38,27 @@ func (this DSA) GenerateKeyWithSeed(paramReader, generateReader io.Reader, ln st
     return this
 }
 
-// 生成密钥
-// 可用参数 [L1024N160 | L2048N224 | L2048N256 | L3072N256]
+// GenerateKey With Seed
+// params [L1024N160 | L2048N224 | L2048N256 | L3072N256]
 func GenerateKeyWithSeed(paramReader, generateReader io.Reader, ln string) DSA {
     return defaultDSA.GenerateKeyWithSeed(paramReader, generateReader, ln)
 }
 
-// 生成密钥
-// 可用参数 [L1024N160 | L2048N224 | L2048N256 | L3072N256]
+// GenerateKey
+// params [L1024N160 | L2048N224 | L2048N256 | L3072N256]
 func (this DSA) GenerateKey(ln string) DSA {
     return this.GenerateKeyWithSeed(rand.Reader, rand.Reader, ln)
 }
 
-// 生成密钥
-// 可用参数 [L1024N160 | L2048N224 | L2048N256 | L3072N256]
+// GenerateKey
+// params [L1024N160 | L2048N224 | L2048N256 | L3072N256]
 func GenerateKey(ln string) DSA {
     return defaultDSA.GenerateKey(ln)
 }
 
 // ==========
 
-// 私钥
+// From PrivateKey bytes
 func (this DSA) FromPrivateKey(key []byte) DSA {
     parsedKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
     if err == nil {
@@ -77,12 +77,12 @@ func (this DSA) FromPrivateKey(key []byte) DSA {
     return this
 }
 
-// 私钥
+// From PrivateKey bytes
 func FromPrivateKey(key []byte) DSA {
     return defaultDSA.FromPrivateKey(key)
 }
 
-// 私钥带密码
+// From PrivateKey bytes With Password
 func (this DSA) FromPrivateKeyWithPassword(key []byte, password string) DSA {
     parsedKey, err := this.ParsePKCS8PrivateKeyFromPEMWithPassword(key, password)
     if err == nil {
@@ -101,12 +101,12 @@ func (this DSA) FromPrivateKeyWithPassword(key []byte, password string) DSA {
     return this
 }
 
-// 私钥带密码
+// From PrivateKey bytes With Password
 func FromPrivateKeyWithPassword(key []byte, password string) DSA {
     return defaultDSA.FromPrivateKeyWithPassword(key, password)
 }
 
-// 公钥
+// From PublicKey bytes
 func (this DSA) FromPublicKey(key []byte) DSA {
     parsedKey, err := this.ParsePKCS8PublicKeyFromPEM(key)
     if err == nil {
@@ -125,14 +125,14 @@ func (this DSA) FromPublicKey(key []byte) DSA {
     return this
 }
 
-// 公钥
+// From PublicKey bytes
 func FromPublicKey(key []byte) DSA {
     return defaultDSA.FromPublicKey(key)
 }
 
 // ==========
 
-// PKCS1 私钥
+// From PKCS1 PrivateKey bytes
 func (this DSA) FromPKCS1PrivateKey(key []byte) DSA {
     parsedKey, err := this.ParsePKCS1PrivateKeyFromPEM(key)
     if err != nil {
@@ -144,12 +144,12 @@ func (this DSA) FromPKCS1PrivateKey(key []byte) DSA {
     return this
 }
 
-// PKCS1 私钥
+// From PKCS1 PrivateKey bytes
 func FromPKCS1PrivateKey(key []byte) DSA {
     return defaultDSA.FromPKCS1PrivateKey(key)
 }
 
-// PKCS1 私钥带密码
+// From PKCS1 PrivateKey bytes With Password
 func (this DSA) FromPKCS1PrivateKeyWithPassword(key []byte, password string) DSA {
     parsedKey, err := this.ParsePKCS1PrivateKeyFromPEMWithPassword(key, password)
     if err != nil {
@@ -161,12 +161,12 @@ func (this DSA) FromPKCS1PrivateKeyWithPassword(key []byte, password string) DSA
     return this
 }
 
-// PKCS1 私钥带密码
+// From PKCS1 PrivateKey bytes With Password
 func FromPKCS1PrivateKeyWithPassword(key []byte, password string) DSA {
     return defaultDSA.FromPKCS1PrivateKeyWithPassword(key, password)
 }
 
-// PKCS1 公钥
+// From PKCS1 PublicKey bytes
 func (this DSA) FromPKCS1PublicKey(key []byte) DSA {
     parsedKey, err := this.ParsePKCS1PublicKeyFromPEM(key)
     if err != nil {
@@ -178,14 +178,14 @@ func (this DSA) FromPKCS1PublicKey(key []byte) DSA {
     return this
 }
 
-// PKCS1 公钥
+// From PKCS1 PublicKey bytes
 func FromPKCS1PublicKey(key []byte) DSA {
     return defaultDSA.FromPKCS1PublicKey(key)
 }
 
 // ==========
 
-// PKCS8 私钥
+// From PKCS8 PrivateKey bytes
 func (this DSA) FromPKCS8PrivateKey(key []byte) DSA {
     parsedKey, err := this.ParsePKCS8PrivateKeyFromPEM(key)
     if err != nil {
@@ -197,12 +197,12 @@ func (this DSA) FromPKCS8PrivateKey(key []byte) DSA {
     return this
 }
 
-// PKCS8 私钥
+// From PKCS8 PrivateKey bytes
 func FromPKCS8PrivateKey(key []byte) DSA {
     return defaultDSA.FromPKCS8PrivateKey(key)
 }
 
-// PKCS8 私钥带密码
+// From PKCS8 PrivateKey bytes With Password
 func (this DSA) FromPKCS8PrivateKeyWithPassword(key []byte, password string) DSA {
     parsedKey, err := this.ParsePKCS8PrivateKeyFromPEMWithPassword(key, password)
     if err != nil {
@@ -214,12 +214,12 @@ func (this DSA) FromPKCS8PrivateKeyWithPassword(key []byte, password string) DSA
     return this
 }
 
-// PKCS8 私钥带密码
+// From PKCS8 PrivateKey bytes With Password
 func FromPKCS8PrivateKeyWithPassword(key []byte, password string) DSA {
     return defaultDSA.FromPKCS8PrivateKeyWithPassword(key, password)
 }
 
-// PKCS8 公钥
+// From PKCS8 PublicKey bytes
 func (this DSA) FromPKCS8PublicKey(key []byte) DSA {
     parsedKey, err := this.ParsePKCS8PublicKeyFromPEM(key)
     if err != nil {
@@ -231,14 +231,14 @@ func (this DSA) FromPKCS8PublicKey(key []byte) DSA {
     return this
 }
 
-// PKCS8 公钥
+// From PKCS8 PublicKey bytes
 func FromPKCS8PublicKey(key []byte) DSA {
     return defaultDSA.FromPKCS8PublicKey(key)
 }
 
 // ==========
 
-// Pkcs1 DER 私钥
+// From PKCS1 PrivateKey Der bytes
 func (this DSA) FromPKCS1PrivateKeyDer(der []byte) DSA {
     key := pem.EncodeToPEM(der, "DSA PRIVATE KEY")
 
@@ -252,7 +252,7 @@ func (this DSA) FromPKCS1PrivateKeyDer(der []byte) DSA {
     return this
 }
 
-// PKCS1 DER 公钥
+// From PKCS1 PublicKey Der bytes
 func (this DSA) FromPKCS1PublicKeyDer(der []byte) DSA {
     key := pem.EncodeToPEM(der, "DSA PUBLIC KEY")
 
@@ -268,7 +268,7 @@ func (this DSA) FromPKCS1PublicKeyDer(der []byte) DSA {
 
 // ==========
 
-// Pkcs8 DER 私钥
+// From PKCS8 PrivateKey Der bytes
 func (this DSA) FromPKCS8PrivateKeyDer(der []byte) DSA {
     key := pem.EncodeToPEM(der, "PRIVATE KEY")
 
@@ -282,7 +282,7 @@ func (this DSA) FromPKCS8PrivateKeyDer(der []byte) DSA {
     return this
 }
 
-// PKCS8 DER 公钥
+// From PKCS8 PublicKey Der bytes
 func (this DSA) FromPKCS8PublicKeyDer(der []byte) DSA {
     key := pem.EncodeToPEM(der, "PUBLIC KEY")
 
@@ -298,7 +298,7 @@ func (this DSA) FromPKCS8PublicKeyDer(der []byte) DSA {
 
 // ==========
 
-// XML 私钥
+// From PrivateKey XML bytes
 func (this DSA) FromXMLPrivateKey(key []byte) DSA {
     privateKey, err := this.ParsePrivateKeyFromXML(key)
     if err != nil {
@@ -310,12 +310,12 @@ func (this DSA) FromXMLPrivateKey(key []byte) DSA {
     return this
 }
 
-// XML 私钥
+// From PrivateKey XML bytes
 func FromXMLPrivateKey(key []byte) DSA {
     return defaultDSA.FromXMLPrivateKey(key)
 }
 
-// XML 公钥
+// From PublicKey XML bytes
 func (this DSA) FromXMLPublicKey(key []byte) DSA {
     publicKey, err := this.ParsePublicKeyFromXML(key)
     if err != nil {
@@ -327,38 +327,38 @@ func (this DSA) FromXMLPublicKey(key []byte) DSA {
     return this
 }
 
-// XML 公钥
+// From PublicKey XML bytes
 func FromXMLPublicKey(key []byte) DSA {
     return defaultDSA.FromXMLPublicKey(key)
 }
 
 // ==========
 
-// 字节
+// From Bytes
 func (this DSA) FromBytes(data []byte) DSA {
     this.data = data
 
     return this
 }
 
-// 字节
+// From Bytes
 func FromBytes(data []byte) DSA {
     return defaultDSA.FromBytes(data)
 }
 
-// 字符
+// From String
 func (this DSA) FromString(data string) DSA {
     this.data = []byte(data)
 
     return this
 }
 
-// 字符
+// From String
 func FromString(data string) DSA {
     return defaultDSA.FromString(data)
 }
 
-// Base64
+// From Base64 String
 func (this DSA) FromBase64String(data string) DSA {
     newData, err := encoding.Base64Decode(data)
 
@@ -367,12 +367,12 @@ func (this DSA) FromBase64String(data string) DSA {
     return this.AppendError(err)
 }
 
-// Base64
+// From Base64 String
 func FromBase64String(data string) DSA {
     return defaultDSA.FromBase64String(data)
 }
 
-// Hex
+// From Hex String
 func (this DSA) FromHexString(data string) DSA {
     newData, err := encoding.HexDecode(data)
 
@@ -381,7 +381,7 @@ func (this DSA) FromHexString(data string) DSA {
     return this.AppendError(err)
 }
 
-// Hex
+// From Hex String
 func FromHexString(data string) DSA {
     return defaultDSA.FromHexString(data)
 }

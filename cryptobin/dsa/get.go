@@ -4,32 +4,32 @@ import (
     "crypto/dsa"
 )
 
-// 获取 PrivateKey
+// get PrivateKey
 func (this DSA) GetPrivateKey() *dsa.PrivateKey {
     return this.privateKey
 }
 
-// 获取 PublicKey
+// get PublicKey
 func (this DSA) GetPublicKey() *dsa.PublicKey {
     return this.publicKey
 }
 
-// 获取 keyData
+// get keyData
 func (this DSA) GetKeyData() []byte {
     return this.keyData
 }
 
-// 获取 data
+// get data
 func (this DSA) GetData() []byte {
     return this.data
 }
 
-// 获取 parsedData
+// get parsed data
 func (this DSA) GetParsedData() []byte {
     return this.parsedData
 }
 
-// 获取 hash 类型
+// get hash type
 func (this DSA) GetSignHash() HashFunc {
     return this.signHash
 }
@@ -39,12 +39,12 @@ func (this DSA) GetEncoding() EncodingType {
     return this.encoding
 }
 
-// 获取验证后情况
+// get verify
 func (this DSA) GetVerify() bool {
     return this.verify
 }
 
-// 获取错误
+// get error list
 func (this DSA) GetErrors() []error {
     return this.Errors
 }

@@ -19,7 +19,7 @@ var (
     ErrNotPublicKey        = errors.New("go-cryptobin/ecdh: key is not a valid ecdh public key")
 )
 
-// 解析私钥
+// Parse PrivateKey From PEM
 func (this ECDH) ParsePrivateKeyFromPEM(key []byte) (crypto.PrivateKey, error) {
     var err error
 
@@ -50,7 +50,7 @@ func (this ECDH) ParsePrivateKeyFromPEM(key []byte) (crypto.PrivateKey, error) {
     return nil, ErrNotPrivateKey
 }
 
-// 解析私钥带密码
+// Parse PrivateKey From PEM With Password
 func (this ECDH) ParsePrivateKeyFromPEMWithPassword(key []byte, password string) (crypto.PrivateKey, error) {
     var err error
 
@@ -85,7 +85,7 @@ func (this ECDH) ParsePrivateKeyFromPEMWithPassword(key []byte, password string)
     return nil, ErrNotPrivateKey
 }
 
-// 解析公钥
+// Parse PublicKey From PEM
 func (this ECDH) ParsePublicKeyFromPEM(key []byte) (crypto.PublicKey, error) {
     var err error
 
@@ -122,7 +122,7 @@ func (this ECDH) ParsePublicKeyFromPEM(key []byte) (crypto.PublicKey, error) {
 
 // ==========================================
 
-// 解析私钥
+// Parse ECDH PrivateKey From PEM
 func (this ECDH) ParseECDHPrivateKeyFromPEM(key []byte) (crypto.PrivateKey, error) {
     var err error
 
@@ -148,7 +148,7 @@ func (this ECDH) ParseECDHPrivateKeyFromPEM(key []byte) (crypto.PrivateKey, erro
     return cryptobin_ecdh.ToPrivateKey(pkey)
 }
 
-// 解析私钥带密码
+// Parse ECDH PrivateKey From PEM With Password
 func (this ECDH) ParseECDHPrivateKeyFromPEMWithPassword(key []byte, password string) (crypto.PrivateKey, error) {
     var err error
 
@@ -178,7 +178,7 @@ func (this ECDH) ParseECDHPrivateKeyFromPEMWithPassword(key []byte, password str
     return cryptobin_ecdh.ToPrivateKey(pkey)
 }
 
-// 解析公钥
+// Parse ECDH PublicKey From PEM
 func (this ECDH) ParseECDHPublicKeyFromPEM(key []byte) (crypto.PublicKey, error) {
     var err error
 

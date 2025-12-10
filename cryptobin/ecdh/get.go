@@ -4,32 +4,32 @@ import (
     "crypto/ecdh"
 )
 
-// 获取 PrivateKey
+// Get PrivateKey
 func (this ECDH) GetPrivateKey() *ecdh.PrivateKey {
     return this.privateKey
 }
 
-// 获取 PublicKey
+// Get PublicKey
 func (this ECDH) GetPublicKey() *ecdh.PublicKey {
     return this.publicKey
 }
 
-// 获取散列方式
+// Get curve
 func (this ECDH) GetCurve() ecdh.Curve {
     return this.curve
 }
 
-// 获取 keyData
+// Get keyData
 func (this ECDH) GetKeyData() []byte {
     return this.keyData
 }
 
-// 获取 secretData
+// Get secretData
 func (this ECDH) GetSecretData() []byte {
     return this.secretData
 }
 
-// 获取错误
+// get errors
 func (this ECDH) GetErrors() []error {
     return this.Errors
 }

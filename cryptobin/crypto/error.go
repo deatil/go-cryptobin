@@ -12,6 +12,11 @@ func (this Cryptobin) AppendError(err ...error) Cryptobin {
     return this
 }
 
+// Append Trigger Error
+func (this Cryptobin) AppendTriggerError(err ...error) Cryptobin {
+    return this.AppendError(err...).TriggerError()
+}
+
 // 获取错误
 // get error
 func (this Cryptobin) Error() error {

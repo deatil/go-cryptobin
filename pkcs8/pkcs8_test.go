@@ -700,7 +700,7 @@ Z3E/tti8bFM6JjLtiaX7FQ==
 `
 
 func Test_EncryptPEMBlock_Scrypt(t *testing.T) {
-    privateKey, err := rsa.GenerateKey(rand.Reader, 512)
+    privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
     if err != nil {
         t.Fatal("GenerateKey error: " + err.Error())
     }
@@ -741,7 +741,7 @@ func Test_EncryptPEMBlock_Scrypt(t *testing.T) {
 }
 
 func Test_EncryptPEMBlock_Pkcs8(t *testing.T) {
-    privateKey, err := rsa.GenerateKey(rand.Reader, 512)
+    privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
     if err != nil {
         t.Fatal("GenerateKey error: " + err.Error())
     }

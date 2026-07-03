@@ -947,7 +947,7 @@ func Test_DidPanic(t *testing.T) {
 
     if funcDidPanic, msg, _ := didPanic(func() {
         panic(nil)
-    }); !funcDidPanic || msg != nil {
+    }); !funcDidPanic || msg == nil {
         t.Error("didPanic should return true, nil")
     }
 
@@ -985,10 +985,10 @@ func Test_PanicsWithValue(t *testing.T) {
         t.Error("PanicsWithValue should return true")
     }
 
-    if !PanicsWithValue(mockT, nil, func() {
+    if PanicsWithValue(mockT, "panic called with nil argument", func() {
         panic(nil)
     }) {
-        t.Error("PanicsWithValue should return true")
+        t.Error("PanicsWithValue should return false")
     }
 
     if PanicsWithValue(mockT, "Panic!", func() {

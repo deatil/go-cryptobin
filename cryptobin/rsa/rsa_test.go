@@ -235,7 +235,7 @@ func test_CreatePKCS1PrivateKeyWithPassword(t *testing.T, cipher string) {
 
         assertNotEmpty(newPrikey, "Test_CreatePKCS1PrivateKeyWithPassword-newPrikey")
 
-        assertEqual(newPrikey, prikey, "Test_CreatePKCS1PrivateKeyWithPassword")
+        assertEqual(true, prikey.Equal(newPrikey), "Test_CreatePKCS1PrivateKeyWithPassword")
     })
 }
 

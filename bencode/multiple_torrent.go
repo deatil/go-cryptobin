@@ -11,24 +11,24 @@ import (
 type MultipleTorrent struct {
     // `bencode:""`
     // tracker服务器的URL 字符串
-    Announce     string          `bencode:"announce"`
+    Announce     string       `bencode:"announce"`
     // 备用tracker服务器列表 列表
     // 发现 announce-list 后面跟了两个l(ll) announce-listll
-    AnnounceList [][]string      `bencode:"announce-list,omitempty"`
+    AnnounceList [][]string   `bencode:"announce-list,omitempty"`
     // 种子的创建时间 整数
-    CreatDate    int64           `bencode:"creation date"`
+    CreatDate    int64        `bencode:"creation date"`
     // 备注 字符串
-    Comment      string          `bencode:"comment"`
+    Comment      string       `bencode:"comment"`
     // 创建者 字符串
-    CreatedBy    string          `bencode:"created by"`
+    CreatedBy    string       `bencode:"created by"`
     // 详情
-    Info         MultipleInfo    `bencode:"info"`
+    Info         MultipleInfo `bencode:"info"`
     // 包含一系列ip和相应端口的列表，是用于连接DHT初始node
-    Nodes        [][]any         `bencode:"nodes,omitempty"`
+    Nodes        [][]any      `bencode:"nodes,omitempty"`
     // 文件的默认编码
-    Encoding     string          `bencode:"encoding,omitempty"`
+    Encoding     string       `bencode:"encoding,omitempty"`
     // 备注的utf-8编码
-    CommentUtf8  string          `bencode:"comment.utf-8,omitempty"`
+    CommentUtf8  string       `bencode:"comment.utf-8,omitempty"`
 }
 
 // 获取备用节点

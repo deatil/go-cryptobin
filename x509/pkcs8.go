@@ -19,6 +19,17 @@ type pkcs8 struct {
     Attributes []asn1.RawValue `asn1:"optional,tag:0"`
 }
 
+// Pasrse PKCS8 Key
+func PasrsePKCS8Key(privateKey []byte) (*pkcs8, error) {
+    var privKey pkcs8
+    _, err := asn1.Unmarshal(privateKey, &privKey)
+    if err != nil {
+        return nil, err
+    }
+
+    return &privKey, nil
+}
+
 // GetAttributes
 func (this *pkcs8) GetAttributes() (attributes []pkcs8Attribute) {
     for _, rawAttr := range this.Attributes {
@@ -157,15 +168,4 @@ func (this *pkcs8) GetAttrCount(id asn1.ObjectIdentifier) int {
 // Marshal
 func (this *pkcs8) Marshal() ([]byte, error) {
     return asn1.Marshal(*this)
-}
-
-// Pasrse PKCS8 Key
-func PasrsePKCS8Key(privateKey []byte) (*pkcs8, error) {
-    var privKey pkcs8
-    _, err := asn1.Unmarshal(privateKey, &privKey)
-    if err != nil {
-        return nil, err
-    }
-
-    return &privKey, nil
 }

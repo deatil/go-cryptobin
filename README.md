@@ -24,7 +24,7 @@ English | [中文](README_CN.md)
 
 ### Env
 
- - Go >= 1.20
+ - Go >= 1.25
 
 
 ### Download

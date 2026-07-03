@@ -89,8 +89,8 @@ type SingleInfo struct {
     PieceLength int    `bencode:"piece length"`
     Length      int    `bencode:"length"`
 
-    Name        string `bencode:"name"`
-    NameUtf8    string `bencode:"name.utf-8,omitempty"`
+    Name     string `bencode:"name"`
+    NameUtf8 string `bencode:"name.utf-8,omitempty"`
 
     // 文件发布者
     Publisher     string `bencode:"publisher,omitempty"`
@@ -100,8 +100,8 @@ type SingleInfo struct {
     PublisherUrl     string `bencode:"publisher-url,omitempty"`
     PublisherUrlUtf8 string `bencode:"publisher-url.utf-8,omitempty"`
 
-    MD5Sum           string `bencode:"md5sum,omitempty"`
-    Private          bool   `bencode:"private,omitempty"`
+    MD5Sum  string `bencode:"md5sum,omitempty"`
+    Private bool   `bencode:"private,omitempty"`
 }
 
 // 每个分片的 SHA-1 hash 长度是20 把他们从Pieces中切出来

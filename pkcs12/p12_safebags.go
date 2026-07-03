@@ -3,6 +3,7 @@ package pkcs12
 import (
     "io"
     "fmt"
+    "bytes"
     "errors"
     "encoding/pem"
     "encoding/asn1"
@@ -122,18 +123,39 @@ func (this *PKCS12) getSafeContents(p12Data, password []byte) (bags []SafeBag, u
         return nil, nil, err
     }
 
+    var authenticatedSafes []byte
+    if pfx.AuthSafe.Content.IsCompound {
+        var buf bytes.Buffer
+        authSafeBytes := pfx.AuthSafe.Content.Bytes
+
+        for {
+            var part []byte
+            authSafeBytes, _ = asn1.Unmarshal(authSafeBytes, &part)
+
+            buf.Write(part)
+
+            if authSafeBytes == nil {
+                break
+            }
+        }
+
+        authenticatedSafes = buf.Bytes()
+    } else {
+        authenticatedSafes = pfx.AuthSafe.Content.Bytes
+    }
+
     if len(pfx.MacData.Mac.Algorithm.Algorithm) == 0 {
         if !(len(password) == 2 && password[0] == 0 && password[1] == 0) {
             return nil, nil, errors.New("go-cryptobin/pkcs12: no MAC in data")
         }
     } else {
-        if err := pfx.MacData.Verify(pfx.AuthSafe.Content.Bytes, password); err != nil {
+        if err := pfx.MacData.Verify(authenticatedSafes, password); err != nil {
             if err == ErrIncorrectPassword && len(password) == 2 && password[0] == 0 && password[1] == 0 {
                 // some implementations use an empty byte array
                 // for the empty string password try one more
                 // time with empty-empty password
                 password = nil
-                err = pfx.MacData.Verify(pfx.AuthSafe.Content.Bytes, password)
+                err = pfx.MacData.Verify(authenticatedSafes, password)
             }
 
             if err != nil {
@@ -143,7 +165,7 @@ func (this *PKCS12) getSafeContents(p12Data, password []byte) (bags []SafeBag, u
     }
 
     var authenticatedSafe []ContentInfo
-    if err := unmarshal(pfx.AuthSafe.Content.Bytes, &authenticatedSafe); err != nil {
+    if err := unmarshal(authenticatedSafes, &authenticatedSafe); err != nil {
         return nil, nil, err
     }
 

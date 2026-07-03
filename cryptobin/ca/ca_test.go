@@ -299,12 +299,12 @@ func Test_GenerateKey(t *testing.T) {
         prikey22 := New().
             FromPrivateKey([]byte(prikey)).
             GetPrivateKey()
-        assertEqual(prikey22, obj.GetPrivateKey(), "Test_GenerateKey-FromPrivateKey")
+        assertEqual(true, prikey22.(*rsa.PrivateKey).Equal(obj.GetPrivateKey()), "Test_GenerateKey-FromPrivateKey")
 
         prikey223 := New().
             FromPrivateKeyWithPassword([]byte(prikey2), pass).
             GetPrivateKey()
-        assertEqual(prikey223, obj.GetPrivateKey(), "Test_GenerateKey-FromPrivateKeyWithPassword")
+        assertEqual(true, prikey223.(*rsa.PrivateKey).Equal(obj.GetPrivateKey()), "Test_GenerateKey-FromPrivateKeyWithPassword")
 
         pubkey22 := New().
             FromPublicKey([]byte(pubkey)).
@@ -540,12 +540,12 @@ func Test_GenerateKey(t *testing.T) {
         prikey22 := New().
             FromPrivateKey([]byte(prikey)).
             GetPrivateKey()
-        assertEqual(prikey22, obj.GetPrivateKey(), "Test_GenerateKey-FromPrivateKey")
+        assertEqual(true, prikey22.(*rsa.PrivateKey).Equal(obj.GetPrivateKey()), "Test_GenerateKey-FromPrivateKey")
 
         prikey223 := New().
             FromPrivateKeyWithPassword([]byte(prikey2), pass).
             GetPrivateKey()
-        assertEqual(prikey223, obj.GetPrivateKey(), "Test_GenerateKey-FromPrivateKeyWithPassword")
+        assertEqual(true, prikey223.(*rsa.PrivateKey).Equal(obj.GetPrivateKey()), "Test_GenerateKey-FromPrivateKeyWithPassword")
 
         pubkey22 := New().
             FromPublicKey([]byte(pubkey)).

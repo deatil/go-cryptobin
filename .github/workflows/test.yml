@@ -29,7 +29,10 @@ jobs:
         run: go mod tidy
 
       - name: Unit tests
-        run: go test ./...
+        run: go test -coverprofile=cover_no.out ./...
+
+      - name: Clean cover_no.out
+        run: rm ./cover_no.out
 
   test_cover:
     runs-on: ubuntu-latest

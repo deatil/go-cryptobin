@@ -158,7 +158,7 @@ func Test_VerifyPKCS1v15(t *testing.T) {
     h.Write([]byte(msg))
     hashed := h.Sum(nil)
 
-    err := VerifyPKCS1v15(pubkey, crypto.SHA256, hashed, signed)
+    err := VerifyPKCS1v15(pubkey, HasherSha256, hashed, signed)
     if err != nil {
         t.Fatal(err)
     }

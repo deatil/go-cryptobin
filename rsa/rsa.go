@@ -161,7 +161,11 @@ func (priv *PrivateKey) Sign(rand io.Reader, digest []byte, opts crypto.SignerOp
         return SignPSS(rand, priv, pssOpts.Hash, digest, pssOpts)
     }
 
-    return SignPKCS1v15(rand, priv, opts.HashFunc(), digest)
+    if pkcs1v15Opts, ok := opts.(*PKCS1v15Options); ok {
+        return SignPKCS1v15(rand, priv, pkcs1v15Opts.Hasher, digest)
+    }
+
+    return nil, errors.New("go-cryptobin/rsa: opts not supported")
 }
 
 // Decrypt decrypts ciphertext with priv. If opts is nil or of type

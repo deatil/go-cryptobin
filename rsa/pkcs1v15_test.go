@@ -6,7 +6,6 @@ package rsa_test
 
 import (
     "bytes"
-    "crypto"
     "crypto/rand"
     "crypto/sha1"
     "crypto/sha256"
@@ -203,7 +202,7 @@ func TestSignPKCS1v15(t *testing.T) {
         h.Write([]byte(test.in))
         digest := h.Sum(nil)
 
-        s, err := SignPKCS1v15(nil, rsaPrivateKey, crypto.SHA1, digest)
+        s, err := SignPKCS1v15(nil, rsaPrivateKey, HasherSha1, digest)
         if err != nil {
             t.Errorf("#%d %s", i, err)
         }
@@ -223,7 +222,7 @@ func TestVerifyPKCS1v15(t *testing.T) {
 
         sig, _ := hex.DecodeString(test.out)
 
-        err := VerifyPKCS1v15(&rsaPrivateKey.PublicKey, crypto.SHA1, digest, sig)
+        err := VerifyPKCS1v15(&rsaPrivateKey.PublicKey, HasherSha1, digest, sig)
         if err != nil {
             t.Errorf("#%d %s", i, err)
         }
@@ -248,14 +247,14 @@ func TestUnpaddedSignature(t *testing.T) {
     // file.
     expectedSig := decodeBase64("pX4DR8azytjdQ1rtUiC040FjkepuQut5q2ZFX1pTjBrOVKNjgsCDyiJDGZTCNoh9qpXYbhl7iEym30BWWwuiZg==")
 
-    sig, err := SignPKCS1v15(nil, rsaPrivateKey, crypto.Hash(0), msg)
+    sig, err := SignPKCS1v15(nil, rsaPrivateKey, HasherNone, msg)
     if err != nil {
         t.Fatalf("SignPKCS1v15 failed: %s", err)
     }
     if !bytes.Equal(sig, expectedSig) {
         t.Fatalf("signature is not expected value: got %x, want %x", sig, expectedSig)
     }
-    if err := VerifyPKCS1v15(&rsaPrivateKey.PublicKey, crypto.Hash(0), msg, sig); err != nil {
+    if err := VerifyPKCS1v15(&rsaPrivateKey.PublicKey, HasherNone, msg, sig); err != nil {
         t.Fatalf("signature failed to verify: %s", err)
     }
 }
@@ -316,7 +315,7 @@ O3AnTcdHB51iaZpWfxPSnew8yfulAgMBAAE=
     }
 
     h := sha256.Sum256([]byte("hello"))
-    err = VerifyPKCS1v15(pub, crypto.SHA256, h[:], sig)
+    err = VerifyPKCS1v15(pub, HasherSha256, h[:], sig)
     if err == nil {
         t.Fatal("VerifyPKCS1v15 accepted a truncated signature")
     }

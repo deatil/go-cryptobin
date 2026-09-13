@@ -11,11 +11,9 @@ import (
     "crypto/rand"
     "crypto/sha1"
     "crypto/sha256"
-    "crypto/x509"
     "encoding/pem"
     "flag"
     "fmt"
-    // "internal/testenv"
     "math/big"
     "strings"
     "testing"
@@ -224,25 +222,25 @@ func testEverything(t *testing.T, priv *PrivateKey) {
     }
 
     hash := sha256.Sum256(msg)
-    sig, err := SignPKCS1v15(nil, priv, crypto.SHA256, hash[:])
+    sig, err := SignPKCS1v15(nil, priv, HasherSha256, hash[:])
     if err == ErrMessageTooLong {
         t.Log("key too small for SignPKCS1v15")
     } else if err != nil {
         t.Errorf("SignPKCS1v15: %v", err)
     }
     if err == nil {
-        err = VerifyPKCS1v15(&priv.PublicKey, crypto.SHA256, hash[:], sig)
+        err = VerifyPKCS1v15(&priv.PublicKey, HasherSha256, hash[:], sig)
         if err != nil {
             t.Errorf("VerifyPKCS1v15: %v", err)
         }
         sig[1] ^= 0x80
-        err = VerifyPKCS1v15(&priv.PublicKey, crypto.SHA256, hash[:], sig)
+        err = VerifyPKCS1v15(&priv.PublicKey, HasherSha256, hash[:], sig)
         if err == nil {
             t.Errorf("VerifyPKCS1v15 success for tampered signature")
         }
         sig[1] ^= 0x80
         hash[1] ^= 0x80
-        err = VerifyPKCS1v15(&priv.PublicKey, crypto.SHA256, hash[:], sig)
+        err = VerifyPKCS1v15(&priv.PublicKey, HasherSha256, hash[:], sig)
         if err == nil {
             t.Errorf("VerifyPKCS1v15 success for tampered message")
         }
@@ -327,27 +325,12 @@ func testingKey(s string) string { return strings.ReplaceAll(s, "TESTING KEY", "
 
 func parseKey(s string) *PrivateKey {
     p, _ := pem.Decode([]byte(s))
-    k, err := x509.ParsePKCS1PrivateKey(p.Bytes)
+    k, err := ParsePKCS1PrivateKey(p.Bytes)
     if err != nil {
         panic(err)
     }
 
-    kk := &PrivateKey{
-        PublicKey: PublicKey{
-            N: new(big.Int).Set(k.N),
-            E: k.E,
-        },
-        D:      new(big.Int).Set(k.D),
-        Primes: make([]*big.Int, len(k.Primes)),
-    }
-
-    for i, ik := range k.Primes {
-        kk.Primes[i] = new(big.Int).Set(ik)
-    }
-
-    kk.Precompute()
-
-    return kk
+    return k
 }
 
 var test2048Key = parseKey(testingKey(`-----BEGIN RSA TESTING KEY-----
@@ -563,7 +546,7 @@ func BenchmarkSignPKCS1v15(b *testing.B) {
         var sink byte
         b.ResetTimer()
         for i := 0; i < b.N; i++ {
-            s, err := SignPKCS1v15(rand.Reader, test2048Key, crypto.SHA256, hashed[:])
+            s, err := SignPKCS1v15(rand.Reader, test2048Key, HasherSha256, hashed[:])
             if err != nil {
                 b.Fatal(err)
             }
@@ -575,14 +558,14 @@ func BenchmarkSignPKCS1v15(b *testing.B) {
 func BenchmarkVerifyPKCS1v15(b *testing.B) {
     b.Run("2048", func(b *testing.B) {
         hashed := sha256.Sum256([]byte("testing"))
-        s, err := SignPKCS1v15(rand.Reader, test2048Key, crypto.SHA256, hashed[:])
+        s, err := SignPKCS1v15(rand.Reader, test2048Key, HasherSha256, hashed[:])
         if err != nil {
             b.Fatal(err)
         }
 
         b.ResetTimer()
         for i := 0; i < b.N; i++ {
-            err := VerifyPKCS1v15(&test2048Key.PublicKey, crypto.SHA256, hashed[:], s)
+            err := VerifyPKCS1v15(&test2048Key.PublicKey, HasherSha256, hashed[:], s)
             if err != nil {
                 b.Fatal(err)
             }

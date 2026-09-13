@@ -5,7 +5,6 @@
 package rsa_test
 
 import (
-    "crypto"
     "crypto/aes"
     "crypto/cipher"
     "crypto/rand"
@@ -92,7 +91,7 @@ func ExampleSignPKCS1v15() {
     // of writing (2016).
     hashed := sha256.Sum256(message)
 
-    signature, err := rsa.SignPKCS1v15(nil, rsaPrivateKey, crypto.SHA256, hashed[:])
+    signature, err := rsa.SignPKCS1v15(nil, rsaPrivateKey, rsa.HasherSha256, hashed[:])
     if err != nil {
         fmt.Fprintf(os.Stderr, "Error from signing: %s\n", err)
         return
@@ -112,7 +111,7 @@ func ExampleVerifyPKCS1v15() {
     // of writing (2016).
     hashed := sha256.Sum256(message)
 
-    err := rsa.VerifyPKCS1v15(&rsaPrivateKey.PublicKey, crypto.SHA256, hashed[:], signature)
+    err := rsa.VerifyPKCS1v15(&rsaPrivateKey.PublicKey, rsa.HasherSha256, hashed[:], signature)
     if err != nil {
         fmt.Fprintf(os.Stderr, "Error from verification: %s\n", err)
         return

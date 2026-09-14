@@ -9,12 +9,10 @@ import (
     "crypto/rand"
     "crypto/sha1"
     "crypto/sha256"
-    "crypto/x509"
     "encoding/base64"
     "encoding/hex"
     "encoding/pem"
     "io"
-    "math/big"
     "testing"
     "testing/quick"
 
@@ -28,6 +26,11 @@ func decodeBase64(in string) []byte {
         return nil
     }
     return out[0:n]
+}
+
+func decodeHex(in string) []byte {
+    out, _ := hex.DecodeString(string(in))
+    return out
 }
 
 type DecryptPKCS1v15Test struct {
@@ -291,17 +294,12 @@ tAboUGBxTDq3ZroNism3DaMIbKPyYrAqhKov1h5V
 
 func parsePublicKey(s string) *PublicKey {
     p, _ := pem.Decode([]byte(s))
-    k, err := x509.ParsePKCS1PublicKey(p.Bytes)
+    k, err := ParsePKCS1PublicKey(p.Bytes)
     if err != nil {
         panic(err)
     }
 
-    kk := &PublicKey{
-        N: new(big.Int).Set(k.N),
-        E: k.E,
-    }
-
-    return kk
+    return k
 }
 
 func TestShortPKCS1v15Signature(t *testing.T) {
@@ -318,5 +316,31 @@ O3AnTcdHB51iaZpWfxPSnew8yfulAgMBAAE=
     err = VerifyPKCS1v15(pub, HasherSha256, h[:], sig)
     if err == nil {
         t.Fatal("VerifyPKCS1v15 accepted a truncated signature")
+    }
+}
+
+func TestUnpaddedSignatureAndSM3(t *testing.T) {
+    msg := []byte("Thu Dec 19 18:06:16 EST 2026\n")
+    hashed, _ := HasherSM3.HashMsg([]byte(msg))
+
+    expectedSig := decodeHex("44ea5304130afc1d628f66d0198af5ec2b2760e3e041490a1a672849a1914eef26533ae06db9a0f93b85902815fd94626d7fa33039592e18bf722307606b6dd2")
+
+    sig, err := SignPKCS1v15(nil, rsaPrivateKey, HasherSM3, hashed)
+    if err != nil {
+        t.Fatalf("SignPKCS1v15 failed: %s", err)
+    }
+    if !bytes.Equal(sig, expectedSig) {
+        t.Fatalf("signature is not expected value: got %x, want %x", sig, expectedSig)
+    }
+    if err := VerifyPKCS1v15(&rsaPrivateKey.PublicKey, HasherSM3, hashed, sig); err != nil {
+        t.Fatalf("signature failed to verify: %s", err)
+    }
+
+    // ======= 
+
+    hashed2 := append(HasherSM3.HashPrefixe(), hashed...)
+
+    if err := VerifyPKCS1v15(&rsaPrivateKey.PublicKey, HasherNone, hashed2, sig); err != nil {
+        t.Fatalf("signature failed with HasherNone to verify: %s", err)
     }
 }

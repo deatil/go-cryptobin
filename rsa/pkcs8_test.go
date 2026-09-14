@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	. "github.com/deatil/go-cryptobin/rsa"
-    cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
+	cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
 // Generated using:

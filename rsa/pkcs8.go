@@ -1,16 +1,15 @@
 package rsa
 
 import (
+	"bytes"
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"errors"
 	"fmt"
-	"bytes"
 	"math/big"
 
 	"golang.org/x/crypto/cryptobyte"
 	cryptobyte_asn1 "golang.org/x/crypto/cryptobyte/asn1"
-
 )
 
 var oidPublicKeyRSA = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 1}

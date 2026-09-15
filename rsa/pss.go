@@ -1,7 +1,5 @@
 package rsa
 
-// This file implements the RSASSA-PSS signature scheme according to RFC 8017.
-
 import (
 	"bytes"
 	"crypto"
@@ -10,6 +8,8 @@ import (
 	"io"
 )
 
+// This file implements the RSASSA-PSS signature scheme according to RFC 8017.
+//
 // Per RFC 8017, Section 9.1
 //
 //	EM = MGF1 xor DB || H( 8*0x00 || mHash || salt ) || 0xbc

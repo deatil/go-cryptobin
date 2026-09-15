@@ -19,9 +19,9 @@ import (
 )
 
 func fromPem(str string) []byte {
-    pb, _ := pem.Decode([]byte(str))
+	pb, _ := pem.Decode([]byte(str))
 
-    return pb.Bytes
+	return pb.Bytes
 }
 
 func TestKeyGeneration(t *testing.T) {
@@ -909,57 +909,57 @@ CKuHRG+AP579dncdUnOMvfXOtkdM4vk0+hWASBQzM9xzVcztCa+koAugjVaLS9A+
 9uQoqEeVNTckxx0S2bYevRy7hGQmUJTyQm3j1zEUR5jpdbL83Fbq
 -----END RSA PRIVATE KEY-----`
 
-    der := fromPem(prikey_pem)
+	der := fromPem(prikey_pem)
 
-    prikey, _ := ParsePKCS1PrivateKey(der)
+	prikey, _ := ParsePKCS1PrivateKey(der)
 
-    return prikey
+	return prikey
 }
 
 func TestDecryptOAEPWithOptions_Check(t *testing.T) {
-    prikey := get_private_key()
+	prikey := get_private_key()
 
-    msg := []byte("message-data")
-    label := []byte("label-test")
+	msg := []byte("message-data")
+	label := []byte("label-test")
 
 	opts := &OAEPOptions{
-		Hash: crypto.SHA384,
+		Hash:    crypto.SHA384,
 		MGFHash: crypto.SHA256,
-		Label: label,
+		Label:   label,
 	}
 
 	enmsg := "d1c26a4556c1e747c0388eec95785f38840ea37b55b8577bafc2f59e079da4e7712916839d3b1d9c12bb2a9869ead29471968c8e09d9b7f40587fc4a480cc19d908ff2d76102da695cfd2d4d33d2f1c96450ba1f99532bce9945fba0410ed88e25e648e536200fd6d46152d999034ad561c1086dcdbd7f3ce8aa9617f73efdaa75ddf88888184323c2beefc27822729cc19bc5d3018e76f6a380b6d012a9fd4cb42ba702df06ab8201243b99c5d337824d92178f69458216473c439d6ff2417a32dffbf138061e4e7f97dc72a8dea6bf45a64c6ab2a1105655bf36dd71b3bd6fa38041556d0fd4a8193194ce1ceb78bf3cd5e6bbfa763eb36afe2f146960de0c"
 
-    out, err := DecryptOAEPWithOptions(nil, prikey, decodeHex(enmsg), opts)
-    if err != nil {
-        t.Fatal(err)
-    }
+	out, err := DecryptOAEPWithOptions(nil, prikey, decodeHex(enmsg), opts)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	cryptobin_test.Equal(t, string(msg), string(out))
 }
 
 func TestEncryptOAEPWithOptions(t *testing.T) {
-    prikey := get_private_key()
-    pubkey := &prikey.PublicKey
+	prikey := get_private_key()
+	pubkey := &prikey.PublicKey
 
-    msg := []byte("message-data")
-    label := []byte("label-test")
+	msg := []byte("message-data")
+	label := []byte("label-test")
 
 	opts := &OAEPOptions{
-		Hash: crypto.SHA384,
+		Hash:    crypto.SHA384,
 		MGFHash: crypto.SHA256,
-		Label: label,
+		Label:   label,
 	}
 
-    enmsg, err := EncryptOAEPWithOptions(rand.Reader, pubkey, msg, opts)
-    if err != nil {
-        t.Fatal(err)
-    }
+	enmsg, err := EncryptOAEPWithOptions(rand.Reader, pubkey, msg, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    out, err := DecryptOAEPWithOptions(nil, prikey, enmsg, opts)
-    if err != nil {
-        t.Fatal(err)
-    }
+	out, err := DecryptOAEPWithOptions(nil, prikey, enmsg, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	cryptobin_test.Equal(t, string(msg), string(out))
 }

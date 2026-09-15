@@ -11,9 +11,10 @@ import (
 	"hash"
 	"io"
 
-	"github.com/deatil/go-cryptobin/hash/sm3"
 	"golang.org/x/crypto/ripemd160"
 	"golang.org/x/crypto/sha3"
+
+	"github.com/deatil/go-cryptobin/hash/sm3"
 )
 
 // These are ASN1 DER structures:

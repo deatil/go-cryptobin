@@ -8,6 +8,22 @@ import (
 	cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
+var rsaX931PrivateKey = parseKey(testingKey(`-----BEGIN RSA TESTING KEY-----
+MIICWwIBAAKBgQCXkhwdfZkthwkHIjrS6RQHx5QQz99uV6NbnNds/WyKlUDfVoh6
+lVcT85qrqKNLmiC1ThgYkJz4IspZwxiPNbT5fXEJ5VYi30h+61Nu4kgSYPXGbAcV
+mF5XcIcaFgCMh8Is2a0mtDBvv+34Wo8fClWwzeRuf1ghjvxw7Ps0WG2HpwIDAQAB
+AoGAe2bEpynzxUJUkk9HDyIeYbsWjJ2BbkfBwzutlJm7fhTILU05bnwZ2i+SNMHm
+uQ2yJYqASberZMaGcpBJdYcnYFwD7gCuoXxQokoM/AXzCljlcsUTcZLhhz820TQI
+/ZIZ5wmojqW/+08h1rGg5zTgWc0k0Vz3HxIpDDIpAneN7VkCQQDGLQVu+GdvkUZ5
+Oky81y9BBRDNQ1qRv4rghDnJckYK2nrH8mb81Abc2jl5u3CCu2P5D7gu+cDw8OUZ
+hSos236zAkEAw8vdQFCpdr09KdwwwsluNKxAD2rlFlU1bkvZi1qqoiiDn4hSYYJ4
+j6VwSDVi6pNJhLo8Li08yRdN12FFgynNPQJAGeJng0cOu5POEKd8vm2cznFK8ISL
+n93U1d5vbdBvNZuzzcnribpn6xDV0QCagXjYZf+XnwsgGFhelCbAi3tf4QJAdKib
+Ax8MWXsXXkGbq/NofmnDIWyHYm8Sjs0SqT00Pbn18q++peqe+reP1vY4IZvwSezM
+vpaliQshjhqe2C+n4QJAOG1YEz/6HO1WENJSrCYm052XY6WUYWovpoQK7H+s7hjs
+337p1vYdte9DzX7KlWAVjLvW94SPQ4+rfAiseKG7zQ==
+-----END RSA TESTING KEY-----`))
+
 func TestEncryptPrivateKeyWithOptions(t *testing.T) {
 	msg := []byte("12345678abcde")
 
@@ -22,7 +38,7 @@ func TestEncryptPrivateKeyWithOptions(t *testing.T) {
 		demsg, err := DecryptPublicKeyWithOptions(&rsaPrivateKey.PublicKey, ciphertext, EncrypterOptions{
 			Padding: RsaPkcs1Padding,
 		})
-		if ; err != nil {
+		if err != nil {
 			t.Fatalf("Failed to decrypt message: %s", err)
 		}
 	
@@ -36,7 +52,7 @@ func TestEncryptPrivateKeyWithOptions(t *testing.T) {
 		demsg2, err := DecryptPublicKeyWithOptions(&rsaPrivateKey.PublicKey, ct, EncrypterOptions{
 			Padding: RsaPkcs1Padding,
 		})
-		if ; err != nil {
+		if err != nil {
 			t.Fatalf("Failed to decrypt message check: %s", err)
 		}
 	
@@ -55,7 +71,7 @@ func TestEncryptPrivateKeyWithOptions(t *testing.T) {
 		demsg, err := DecryptPublicKeyWithOptions(&rsaPrivateKey.PublicKey, ciphertext, EncrypterOptions{
 			Padding: RsaX931Padding,
 		})
-		if ; err != nil {
+		if err != nil {
 			t.Fatalf("Failed to decrypt message: %s", err)
 		}
 	
@@ -69,7 +85,7 @@ func TestEncryptPrivateKeyWithOptions(t *testing.T) {
 		demsg2, err := DecryptPublicKeyWithOptions(&rsaPrivateKey.PublicKey, ct, EncrypterOptions{
 			Padding: RsaX931Padding,
 		})
-		if ; err != nil {
+		if err != nil {
 			t.Fatalf("Failed to decrypt message check: %s", err)
 		}
 	
@@ -90,7 +106,7 @@ func TestEncryptPrivateKeyWithOptions(t *testing.T) {
 		demsg, err := DecryptPublicKeyWithOptions(&rsaPrivateKey.PublicKey, ciphertext, EncrypterOptions{
 			Padding: RsaNoPadding,
 		})
-		if ; err != nil {
+		if err != nil {
 			t.Fatalf("Failed to decrypt message: %s", err)
 		}
 	
@@ -104,7 +120,7 @@ func TestEncryptPrivateKeyWithOptions(t *testing.T) {
 		demsg2, err := DecryptPublicKeyWithOptions(&rsaPrivateKey.PublicKey, ct, EncrypterOptions{
 			Padding: RsaNoPadding,
 		})
-		if ; err != nil {
+		if err != nil {
 			t.Fatalf("Failed to decrypt message check: %s", err)
 		}
 	
@@ -125,7 +141,7 @@ func TestEncryptPrivateKeyWithOptions(t *testing.T) {
 		demsg, err := DecryptPublicKeyWithOptions(&rsaPrivateKey.PublicKey, ciphertext, EncrypterOptions{
 			Padding: RsaX931Padding,
 		})
-		if ; err != nil {
+		if err != nil {
 			t.Fatalf("Failed to decrypt message: %s", err)
 		}
 	
@@ -145,7 +161,7 @@ func TestEncryptPrivateKeyWithOptions(t *testing.T) {
 		demsg, err := DecryptPublicKeyWithOptions(&rsaPrivateKey.PublicKey, ciphertext, EncrypterOptions{
 			Padding: RsaX931Padding,
 		})
-		if ; err != nil {
+		if err != nil {
 			t.Fatalf("Failed to decrypt message: %s", err)
 		}
 	
@@ -165,7 +181,7 @@ func TestEncryptPrivateKeyWithOptions(t *testing.T) {
 		demsg, err := DecryptPublicKeyWithOptions(&rsaPrivateKey.PublicKey, ciphertext, EncrypterOptions{
 			Padding: RsaX931Padding,
 		})
-		if ; err != nil {
+		if err != nil {
 			t.Fatalf("Failed to decrypt message: %s", err)
 		}
 	
@@ -187,7 +203,7 @@ func TestEncryptWithOptions(t *testing.T) {
 		demsg, err := DecryptWithOptions(rand.Reader, rsaPrivateKey, ciphertext, EncrypterOptions{
 			Padding: RsaPkcs1Padding,
 		})
-		if ; err != nil {
+		if err != nil {
 			t.Fatalf("Failed to decrypt message: %s", err)
 		}
 
@@ -201,40 +217,7 @@ func TestEncryptWithOptions(t *testing.T) {
 		demsg2, err := DecryptWithOptions(rand.Reader, rsaPrivateKey, ct, EncrypterOptions{
 			Padding: RsaPkcs1Padding,
 		})
-		if ; err != nil {
-			t.Fatalf("Failed to decrypt message check: %s", err)
-		}
-
-		cryptobin_test.Equal(t, true, len(demsg2) > 0)
-		cryptobin_test.Equal(t, "rsa PKCS1-v1_5 encrypt and decrypt", string(demsg2))
-	}
-
-	{
-		ciphertext, err := EncryptWithOptions(rand.Reader, &rsaPrivateKey.PublicKey, msg, EncrypterOptions{
-			Padding: RsaX931Padding,
-		})
 		if err != nil {
-			t.Fatalf("Failed to encrypt message: %s", err)
-		}
-
-		demsg, err := DecryptWithOptions(rand.Reader, rsaPrivateKey, ciphertext, EncrypterOptions{
-			Padding: RsaX931Padding,
-		})
-		if ; err != nil {
-			t.Fatalf("Failed to decrypt message: %s", err)
-		}
-
-		cryptobin_test.Equal(t, string(msg), string(demsg))
-
-		// ========
-
-		ciphertext2 := "a8de190dac0aec1c0ad1cdf2eeece64e9e71845475c315d05c06ac6f35a359fa3afcb89175519c450b8e46a9b64ca1f66740e078aa6efc481bbb2eed61dcf5ed"
-		ct := decodeHex(ciphertext2)
-
-		demsg2, err := DecryptWithOptions(rand.Reader, rsaPrivateKey, ct, EncrypterOptions{
-			Padding: RsaX931Padding,
-		})
-		if ; err != nil {
 			t.Fatalf("Failed to decrypt message check: %s", err)
 		}
 
@@ -255,7 +238,7 @@ func TestEncryptWithOptions(t *testing.T) {
 		demsg, err := DecryptWithOptions(rand.Reader, rsaPrivateKey, ciphertext, EncrypterOptions{
 			Padding: RsaNoPadding,
 		})
-		if ; err != nil {
+		if err != nil {
 			t.Fatalf("Failed to decrypt message: %s", err)
 		}
 
@@ -269,7 +252,7 @@ func TestEncryptWithOptions(t *testing.T) {
 		demsg2, err := DecryptWithOptions(rand.Reader, rsaPrivateKey, ct, EncrypterOptions{
 			Padding: RsaNoPadding,
 		})
-		if ; err != nil {
+		if err != nil {
 			t.Fatalf("Failed to decrypt message check: %s", err)
 		}
 
@@ -277,63 +260,19 @@ func TestEncryptWithOptions(t *testing.T) {
 		cryptobin_test.Equal(t, string(msg2), string(demsg2))
 	}
 
-	{
-		msg2 := []byte("rsa PKCS1-v1_5 encrypt and decryptrsa PKCS1-v1_5 encrypt andd")
+}
 
-		ciphertext, err := EncryptWithOptions(rand.Reader, &rsaPrivateKey.PublicKey, msg2, EncrypterOptions{
-			Padding: RsaX931Padding,
-		})
-		if err != nil {
-			t.Fatalf("Failed to encrypt message: %s", err)
-		}
+func TestDecryptPublicKeyWithOptionsCheck(t *testing.T) {
+	ciphertext2 := "2B576194CCA758B99DE32BB18CEACB77D0EB4AA04E7B44153265F6E812A8F63B2F97F1F06121CEECE7B5B45B22869F067F73D7D97504E2F625324E4127350F711864B6A305F08A50F86FFC0DC52A677A0E9742431193E6F9AB33813390EB403ED8768E14EB237CE15921572BE5870E777468D743032E41DE7FC681EDC1D0824B"
+	ct := decodeHex(ciphertext2)
 
-		demsg, err := DecryptWithOptions(rand.Reader, rsaPrivateKey, ciphertext, EncrypterOptions{
-			Padding: RsaX931Padding,
-		})
-		if ; err != nil {
-			t.Fatalf("Failed to decrypt message: %s", err)
-		}
-
-		cryptobin_test.Equal(t, string(msg2), string(demsg))
+	demsg2, err := DecryptPublicKeyWithOptions(&rsaX931PrivateKey.PublicKey, ct, EncrypterOptions{
+		Padding: RsaX931Padding,
+	})
+	if err != nil {
+		t.Fatalf("Failed to decrypt message check: %s", err)
 	}
 
-	{
-		msg2 := []byte("rsa PKCS1-v1_5 encrypt and decryptrsa PKCS1-v1_5 encrypt and d")
-
-		ciphertext, err := EncryptWithOptions(rand.Reader, &rsaPrivateKey.PublicKey, msg2, EncrypterOptions{
-			Padding: RsaX931Padding,
-		})
-		if err != nil {
-			t.Fatalf("Failed to encrypt message: %s", err)
-		}
-
-		demsg, err := DecryptWithOptions(rand.Reader, rsaPrivateKey, ciphertext, EncrypterOptions{
-			Padding: RsaX931Padding,
-		})
-		if ; err != nil {
-			t.Fatalf("Failed to decrypt message: %s", err)
-		}
-
-		cryptobin_test.Equal(t, string(msg2), string(demsg))
-	}
-
-	{
-		msg2 := []byte("rsa PKCS1-v1_5 encrypt and decryptrsa PKCS1-v1_5 encrypt and")
-
-		ciphertext, err := EncryptWithOptions(rand.Reader, &rsaPrivateKey.PublicKey, msg2, EncrypterOptions{
-			Padding: RsaX931Padding,
-		})
-		if err != nil {
-			t.Fatalf("Failed to encrypt message: %s", err)
-		}
-
-		demsg, err := DecryptWithOptions(rand.Reader, rsaPrivateKey, ciphertext, EncrypterOptions{
-			Padding: RsaX931Padding,
-		})
-		if ; err != nil {
-			t.Fatalf("Failed to decrypt message: %s", err)
-		}
-
-		cryptobin_test.Equal(t, string(msg2), string(demsg))
-	}
+	cryptobin_test.Equal(t, true, len(demsg2) > 0)
+	cryptobin_test.Equal(t, "Hello RSA X9.31", string(demsg2))
 }

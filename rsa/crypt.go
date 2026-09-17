@@ -3,6 +3,7 @@ package rsa
 import (
 	"errors"
 	"hash"
+    "math/big"
 
 	"github.com/deatil/go-cryptobin/tool/bigmod"
 )
@@ -132,11 +133,91 @@ func decryptWithCheck(priv *PrivateKey, ciphertext []byte) ([]byte, error) {
 	return decrypt(priv, ciphertext, withCheck)
 }
 
-func encryptPrivateKey(priv *PrivateKey, plaintext []byte) ([]byte, error) {
-	return decryptWithoutCheck(priv, plaintext)
+func encryptPrivateKey(priv *PrivateKey, plaintext []byte, opts EncrypterOptions) ([]byte, error) {
+	var (
+		err  error
+		m, c *bigmod.Nat
+		N    *bigmod.Modulus
+		t0   = bigmod.NewNat()
+	)
+
+	if priv.Precomputed.n == nil {
+		N, err = bigmod.NewModulusFromBig(priv.N)
+		if err != nil {
+			return nil, ErrDecryption
+		}
+
+		c, err = bigmod.NewNat().SetBytes(plaintext, N)
+		if err != nil {
+			return nil, ErrDecryption
+		}
+
+		m = bigmod.NewNat().Exp(c, priv.D.Bytes(), N)
+	} else {
+		N = priv.Precomputed.n
+		P, Q := priv.Precomputed.p, priv.Precomputed.q
+		Qinv, err := bigmod.NewNat().SetBytes(priv.Precomputed.Qinv.Bytes(), P)
+		if err != nil {
+			return nil, ErrDecryption
+		}
+
+		c, err = bigmod.NewNat().SetBytes(plaintext, N)
+		if err != nil {
+			return nil, ErrDecryption
+		}
+
+		// m = c ^ Dp mod p
+		m = bigmod.NewNat().Exp(t0.Mod(c, P), priv.Precomputed.Dp.Bytes(), P)
+		// m2 = c ^ Dq mod q
+		m2 := bigmod.NewNat().Exp(t0.Mod(c, Q), priv.Precomputed.Dq.Bytes(), Q)
+		// m = m - m2 mod p
+		m.Sub(t0.Mod(m2, P), P)
+		// m = m * Qinv mod p
+		m.Mul(Qinv, P)
+		// m = m * q mod N
+		m.ExpandFor(N).Mul(t0.Mod(Q.Nat(), N), N)
+		// m = m + m2 mod N
+		m.Add(m2.ExpandFor(N), N)
+	}
+
+	if opts.Padding == RsaX931Padding {
+		ret := new(big.Int).SetBytes(m.Bytes(N))
+
+		f := new(big.Int).Sub(priv.N, ret)
+		if f.Cmp(ret) < 0 {
+			ret = new(big.Int).Set(f)
+		}
+
+		return ret.FillBytes(make([]byte, priv.Size())), nil
+	}
+
+	return m.Bytes(N), nil
 }
 
-func decryptPublicKey(pub *PublicKey, ciphertext []byte) ([]byte, error) {
-	return encrypt(pub, ciphertext)
+func decryptPublicKey(pub *PublicKey, ciphertext []byte, opts EncrypterOptions) ([]byte, error) {
+	N, err := bigmod.NewModulusFromBig(pub.N)
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := bigmod.NewNat().SetBytes(ciphertext, N)
+	if err != nil {
+		return nil, err
+	}
+	e := uint(pub.E)
+
+	m := bigmod.NewNat().ExpShort(c, e, N)
+
+	mm := new(big.Int).SetBytes(m.Bytes(N))
+	bigint16 := new(big.Int).SetInt64(int64(16))
+
+	m2 := new(big.Int).Mod(mm, bigint16)
+	if opts.Padding == RsaX931Padding && m2.Int64() != 12 {
+		mm = new(big.Int).Sub(pub.N, mm)
+
+		return mm.FillBytes(make([]byte, pub.Size())), nil
+	}
+
+	return m.Bytes(N), nil
 }
 

@@ -2,6 +2,7 @@ package rsa
 
 import (
 	"io"
+	"errors"
 
 	"github.com/deatil/go-cryptobin/tool/randutil"
 )
@@ -33,10 +34,10 @@ func EncryptWithOptions(random io.Reader, pub *PublicKey, msg []byte, opts Encry
 	switch opts.Padding {
 	case RsaPkcs1Padding:
 		em, err = rsaPkcs1Type2Pad(random, k, msg)
-	case RsaX931Padding:
-		em, err = rsaX931Pad(k, msg)
 	case RsaNoPadding:
 		em, err = rsaNoPad(k, msg)
+	default:
+		return nil, errors.New("go-cryptobin/rsa: padding not supported")
 	}
 
 	if err != nil {
@@ -63,10 +64,10 @@ func DecryptWithOptions(random io.Reader, priv *PrivateKey, ciphertext []byte, o
 	switch opts.Padding {
 	case RsaPkcs1Padding:
 		m, err = rsaPkcs1Type2Unpad(k, em)
-	case RsaX931Padding:
-		m, err = rsaX931Unpad(k, em)
 	case RsaNoPadding:
 		m, err = rsaNoUnpad(k, em)
+	default:
+		return nil, errors.New("go-cryptobin/rsa: padding not supported")
 	}
 
 	if err != nil {
@@ -99,7 +100,7 @@ func EncryptPrivateKeyWithOptions(priv *PrivateKey, msg []byte, opts EncrypterOp
 		return nil, err
 	}
 
-	return encryptPrivateKey(priv, em)
+	return encryptPrivateKey(priv, em, opts)
 }
 
 func DecryptPublicKeyWithOptions(pub *PublicKey, ciphertext []byte, opts EncrypterOptions) ([]byte, error) {
@@ -109,7 +110,7 @@ func DecryptPublicKeyWithOptions(pub *PublicKey, ciphertext []byte, opts Encrypt
 
 	k := pub.Size()
 
-	em, err := decryptPublicKey(pub, ciphertext)
+	em, err := decryptPublicKey(pub, ciphertext, opts)
 	if err != nil {
 		return nil, err
 	}

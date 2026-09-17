@@ -351,7 +351,7 @@ func TestEncryptPrivateKeyPKCS1v15(t *testing.T) {
 	}
 
 	demsg, err := DecryptPublicKeyPKCS1v15(&rsaPrivateKey.PublicKey, ciphertext)
-	if ; err != nil {
+	if err != nil {
 		t.Fatalf("Failed to decrypt message: %s", err)
 	}
 
@@ -363,7 +363,7 @@ func TestEncryptPrivateKeyPKCS1v15(t *testing.T) {
 	ct := decodeHex(ciphertext2)
 
 	demsg2, err := DecryptPublicKeyPKCS1v15(&rsaPrivateKey.PublicKey, ct)
-	if ; err != nil {
+	if err != nil {
 		t.Fatalf("Failed to decrypt message check: %s", err)
 	}
 
@@ -381,7 +381,7 @@ func TestEncryptPKCS1v15_2(t *testing.T) {
 	}
 
 	demsg, err := DecryptPKCS1v15(rand.Reader, rsaPrivateKey, ciphertext)
-	if ; err != nil {
+	if err != nil {
 		t.Fatalf("Failed to decrypt message: %s", err)
 	}
 
@@ -393,7 +393,7 @@ func TestEncryptPKCS1v15_2(t *testing.T) {
 	ct := decodeHex(ciphertext2)
 
 	demsg2, err := DecryptPKCS1v15(rand.Reader, rsaPrivateKey, ct)
-	if ; err != nil {
+	if err != nil {
 		t.Fatalf("Failed to decrypt message check: %s", err)
 	}
 

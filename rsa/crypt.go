@@ -123,3 +123,20 @@ func decrypt(priv *PrivateKey, ciphertext []byte, check bool) ([]byte, error) {
 
 	return m.Bytes(N), nil
 }
+
+func decryptWithoutCheck(priv *PrivateKey, ciphertext []byte) ([]byte, error) {
+	return decrypt(priv, ciphertext, noCheck)
+}
+
+func decryptWithCheck(priv *PrivateKey, ciphertext []byte) ([]byte, error) {
+	return decrypt(priv, ciphertext, withCheck)
+}
+
+func encryptPrivateKey(priv *PrivateKey, plaintext []byte) ([]byte, error) {
+	return decryptWithoutCheck(priv, plaintext)
+}
+
+func decryptPublicKey(pub *PublicKey, ciphertext []byte) ([]byte, error) {
+	return encrypt(pub, ciphertext)
+}
+

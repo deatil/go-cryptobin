@@ -93,7 +93,7 @@ func decryptOAEP(hash, mgfHash hash.Hash, random io.Reader, priv *PrivateKey, ci
 		return nil, ErrDecryption
 	}
 
-	em, err := decrypt(priv, ciphertext, noCheck)
+	em, err := decryptWithoutCheck(priv, ciphertext)
 	if err != nil {
 		return nil, err
 	}

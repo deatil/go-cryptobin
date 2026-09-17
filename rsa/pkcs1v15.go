@@ -3,8 +3,6 @@ package rsa
 import (
 	"crypto/subtle"
 	"io"
-
-	"github.com/deatil/go-cryptobin/tool/randutil"
 )
 
 // This file implements encryption and decryption using PKCS #1 v1.5 padding.
@@ -33,28 +31,9 @@ type PKCS1v15DecryptOptions struct {
 // WARNING: use of this function to encrypt plaintexts other than
 // session keys is dangerous. Use RSA OAEP in new protocols.
 func EncryptPKCS1v15(random io.Reader, pub *PublicKey, msg []byte) ([]byte, error) {
-	randutil.MaybeReadByte(random)
-
-	if err := checkPub(pub); err != nil {
-		return nil, err
-	}
-	k := pub.Size()
-	if len(msg) > k-11 {
-		return nil, ErrMessageTooLong
-	}
-
-	// EM = 0x00 || 0x02 || PS || 0x00 || M
-	em := make([]byte, k)
-	em[1] = 2
-	ps, mm := em[2:len(em)-len(msg)-1], em[len(em)-len(msg):]
-	err := nonZeroRandomBytes(ps, random)
-	if err != nil {
-		return nil, err
-	}
-	em[len(em)-len(msg)-1] = 0
-	copy(mm, msg)
-
-	return encrypt(pub, em)
+	return EncryptWithOptions(random, pub, msg, EncrypterOptions{
+		Padding: RsaPkcs1Padding,
+	})
 }
 
 // DecryptPKCS1v15 decrypts a plaintext using RSA and the padding scheme from PKCS #1 v1.5.
@@ -66,19 +45,9 @@ func EncryptPKCS1v15(random io.Reader, pub *PublicKey, msg []byte) ([]byte, erro
 // forge signatures as if they had the private key. See
 // DecryptPKCS1v15SessionKey for a way of solving this problem.
 func DecryptPKCS1v15(random io.Reader, priv *PrivateKey, ciphertext []byte) ([]byte, error) {
-	if err := checkPub(&priv.PublicKey); err != nil {
-		return nil, err
-	}
-
-	valid, out, index, err := decryptPKCS1v15(priv, ciphertext)
-	if err != nil {
-		return nil, err
-	}
-	if valid == 0 {
-		return nil, ErrDecryption
-	}
-
-	return out[index:], nil
+	return DecryptWithOptions(random, priv, ciphertext, EncrypterOptions{
+		Padding: RsaPkcs1Padding,
+	})
 }
 
 // DecryptPKCS1v15SessionKey decrypts a session key using RSA and the padding
@@ -153,31 +122,22 @@ func decryptPKCS1v15(priv *PrivateKey, ciphertext []byte) (valid int, em []byte,
 		return
 	}
 
-	em, err = decrypt(priv, ciphertext, noCheck)
+	em, err = decryptWithoutCheck(priv, ciphertext)
 	if err != nil {
 		return
 	}
 
-	firstByteIsZero := subtle.ConstantTimeByteEq(em[0], 0)
-	secondByteIsTwo := subtle.ConstantTimeByteEq(em[1], 2)
+	return rsaPkcs1Type2UnpadInternal(em)
+}
 
-	// The remainder of the plaintext must be a string of non-zero random
-	// octets, followed by a 0, followed by the message.
-	//   lookingForIndex: 1 iff we are still looking for the zero.
-	//   index: the offset of the first zero byte.
-	lookingForIndex := 1
+func EncryptPrivateKeyPKCS1v15(priv *PrivateKey, msg []byte) ([]byte, error) {
+	return EncryptPrivateKeyWithOptions(priv, msg, EncrypterOptions{
+		Padding: RsaPkcs1Padding,
+	})
+}
 
-	for i := 2; i < len(em); i++ {
-		equals0 := subtle.ConstantTimeByteEq(em[i], 0)
-		index = subtle.ConstantTimeSelect(lookingForIndex&equals0, i, index)
-		lookingForIndex = subtle.ConstantTimeSelect(equals0, 0, lookingForIndex)
-	}
-
-	// The PS padding must be at least 8 bytes long, and it starts two
-	// bytes into em.
-	validPS := subtle.ConstantTimeLessOrEq(2+8, index)
-
-	valid = firstByteIsZero & secondByteIsTwo & (^lookingForIndex & 1) & validPS
-	index = subtle.ConstantTimeSelect(valid, index+1, 0)
-	return valid, em, index, nil
+func DecryptPublicKeyPKCS1v15(pub *PublicKey, ciphertext []byte) ([]byte, error) {
+	return DecryptPublicKeyWithOptions(pub, ciphertext, EncrypterOptions{
+		Padding: RsaPkcs1Padding,
+	})
 }

@@ -159,7 +159,7 @@ func SignPKCS1v15(random io.Reader, priv *PrivateKey, hasher IHasher, hashed []b
 	copy(em[k-tLen:k-hashLen], prefix)
 	copy(em[k-hashLen:k], hashed)
 
-	return decrypt(priv, em, withCheck)
+	return decryptWithCheck(priv, em)
 }
 
 // VerifyPKCS1v15 verifies an RSA PKCS #1 v1.5 signature.

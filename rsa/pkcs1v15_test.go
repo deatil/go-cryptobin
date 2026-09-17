@@ -13,6 +13,7 @@ import (
 	"testing/quick"
 
 	. "github.com/deatil/go-cryptobin/rsa"
+	cryptobin_test "github.com/deatil/go-cryptobin/tool/test"
 )
 
 func decodeBase64(in string) []byte {
@@ -339,4 +340,64 @@ func TestUnpaddedSignatureAndSM3(t *testing.T) {
 	if err := VerifyPKCS1v15(&rsaPrivateKey.PublicKey, HasherNone, hashed2, sig); err != nil {
 		t.Fatalf("signature failed with HasherNone to verify: %s", err)
 	}
+}
+
+func TestEncryptPrivateKeyPKCS1v15(t *testing.T) {
+	msg := []byte("12345678abcde")
+
+	ciphertext, err := EncryptPrivateKeyPKCS1v15(rsaPrivateKey, msg)
+	if err != nil {
+		t.Fatalf("Failed to encrypt message: %s", err)
+	}
+
+	demsg, err := DecryptPublicKeyPKCS1v15(&rsaPrivateKey.PublicKey, ciphertext)
+	if ; err != nil {
+		t.Fatalf("Failed to decrypt message: %s", err)
+	}
+
+	cryptobin_test.Equal(t, string(msg), string(demsg))
+
+	// ========
+
+	ciphertext2 := "7b1783ab067d84749b14f4da0fe63467a16c087ac1edf552387665e73047ebd1cc881fc064b5b2e427ceebefd50616f9ada687c828416e44bdaf29ed07d62551"
+	ct := decodeHex(ciphertext2)
+
+	demsg2, err := DecryptPublicKeyPKCS1v15(&rsaPrivateKey.PublicKey, ct)
+	if ; err != nil {
+		t.Fatalf("Failed to decrypt message check: %s", err)
+	}
+
+	cryptobin_test.Equal(t, true, len(demsg2) > 0)
+	cryptobin_test.Equal(t, "rsa PKCS1-v1_5 encrypt and decrypt", string(demsg2))
+
+}
+
+func TestEncryptPKCS1v15_2(t *testing.T) {
+	msg := []byte("12345678abcde")
+
+	ciphertext, err := EncryptPKCS1v15(rand.Reader, &rsaPrivateKey.PublicKey, msg)
+	if err != nil {
+		t.Fatalf("Failed to encrypt message: %s", err)
+	}
+
+	demsg, err := DecryptPKCS1v15(rand.Reader, rsaPrivateKey, ciphertext)
+	if ; err != nil {
+		t.Fatalf("Failed to decrypt message: %s", err)
+	}
+
+	cryptobin_test.Equal(t, string(msg), string(demsg))
+
+	// ========
+
+	ciphertext2 := "24d17d224f3181383660c4e7d3d4092cc9f7fb015b344aa24afb90e1979fdfc35e7561b1fe217eb18371bf84a8b54e27b043d7b2f69d0418d6621ff0ab10c484"
+	ct := decodeHex(ciphertext2)
+
+	demsg2, err := DecryptPKCS1v15(rand.Reader, rsaPrivateKey, ct)
+	if ; err != nil {
+		t.Fatalf("Failed to decrypt message check: %s", err)
+	}
+
+	cryptobin_test.Equal(t, true, len(demsg2) > 0)
+	cryptobin_test.Equal(t, "rsa PKCS1-v1_5 encrypt and decrypt", string(demsg2))
+
 }

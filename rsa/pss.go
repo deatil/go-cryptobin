@@ -220,7 +220,7 @@ func signPSSWithSalt(priv *PrivateKey, hash crypto.Hash, hashed, salt []byte) ([
 		em = emNew
 	}
 
-	return decrypt(priv, em, withCheck)
+	return decryptWithCheck(priv, em)
 }
 
 const (

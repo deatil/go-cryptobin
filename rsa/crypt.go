@@ -204,20 +204,23 @@ func decryptPublicKey(pub *PublicKey, ciphertext []byte, opts EncrypterOptions) 
 	if err != nil {
 		return nil, err
 	}
-	e := uint(pub.E)
 
+	e := uint(pub.E)
 	m := bigmod.NewNat().ExpShort(c, e, N)
 
-	mm := new(big.Int).SetBytes(m.Bytes(N))
-	bigint16 := new(big.Int).SetInt64(int64(16))
+	mBytes := m.Bytes(N)
 
-	m2 := new(big.Int).Mod(mm, bigint16)
-	if opts.Padding == RsaX931Padding && m2.Int64() != 12 {
+	// it is true if (m & 0xf) != 12
+	mm := new(big.Int).SetBytes(mBytes)
+	bigint15 := new(big.Int).SetInt64(int64(0xf))
+
+	mLast4bit := new(big.Int).And(mm, bigint15)
+	if opts.Padding == RsaX931Padding && mLast4bit.Int64() != 12 {
 		mm = new(big.Int).Sub(pub.N, mm)
 
 		return mm.FillBytes(make([]byte, pub.Size())), nil
 	}
 
-	return m.Bytes(N), nil
+	return mBytes, nil
 }
 

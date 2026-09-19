@@ -31,9 +31,11 @@ type PKCS1v15DecryptOptions struct {
 // WARNING: use of this function to encrypt plaintexts other than
 // session keys is dangerous. Use RSA OAEP in new protocols.
 func EncryptPKCS1v15(random io.Reader, pub *PublicKey, msg []byte) ([]byte, error) {
-	return EncryptWithOptions(random, pub, msg, EncrypterOptions{
-		Padding: RsaPkcs1Padding,
-	})
+	encrypter := NewEncrypter()
+	encrypter.WithPadding(RsaPkcs1Padding)
+	encrypter.WithRandom(random)
+
+	return encrypter.Encrypt(pub, msg)
 }
 
 // DecryptPKCS1v15 decrypts a plaintext using RSA and the padding scheme from PKCS #1 v1.5.
@@ -45,9 +47,11 @@ func EncryptPKCS1v15(random io.Reader, pub *PublicKey, msg []byte) ([]byte, erro
 // forge signatures as if they had the private key. See
 // DecryptPKCS1v15SessionKey for a way of solving this problem.
 func DecryptPKCS1v15(random io.Reader, priv *PrivateKey, ciphertext []byte) ([]byte, error) {
-	return DecryptWithOptions(random, priv, ciphertext, EncrypterOptions{
-		Padding: RsaPkcs1Padding,
-	})
+	encrypter := NewEncrypter()
+	encrypter.WithPadding(RsaPkcs1Padding)
+	encrypter.WithRandom(random)
+
+	return encrypter.Decrypt(priv, ciphertext)
 }
 
 // DecryptPKCS1v15SessionKey decrypts a session key using RSA and the padding
@@ -131,13 +135,15 @@ func decryptPKCS1v15(priv *PrivateKey, ciphertext []byte) (valid int, em []byte,
 }
 
 func EncryptPrivateKeyPKCS1v15(priv *PrivateKey, msg []byte) ([]byte, error) {
-	return EncryptPrivateKeyWithOptions(priv, msg, EncrypterOptions{
-		Padding: RsaPkcs1Padding,
-	})
+	encrypter := NewEncrypter()
+	encrypter.WithPadding(RsaPkcs1Padding)
+
+	return encrypter.EncryptPrivateKey(priv, msg)
 }
 
 func DecryptPublicKeyPKCS1v15(pub *PublicKey, ciphertext []byte) ([]byte, error) {
-	return DecryptPublicKeyWithOptions(pub, ciphertext, EncrypterOptions{
-		Padding: RsaPkcs1Padding,
-	})
+	encrypter := NewEncrypter()
+	encrypter.WithPadding(RsaPkcs1Padding)
+
+	return encrypter.DecryptPublicKey(pub, ciphertext)
 }

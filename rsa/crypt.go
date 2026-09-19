@@ -3,7 +3,7 @@ package rsa
 import (
 	"errors"
 	"hash"
-    "math/big"
+	"math/big"
 
 	"github.com/deatil/go-cryptobin/tool/bigmod"
 )
@@ -133,7 +133,7 @@ func decryptWithCheck(priv *PrivateKey, ciphertext []byte) ([]byte, error) {
 	return decrypt(priv, ciphertext, withCheck)
 }
 
-func encryptPrivateKey(priv *PrivateKey, plaintext []byte, opts EncrypterOptions) ([]byte, error) {
+func encryptPrivateKey(priv *PrivateKey, plaintext []byte, padding RsaPadding) ([]byte, error) {
 	var (
 		err  error
 		m, c *bigmod.Nat
@@ -180,7 +180,7 @@ func encryptPrivateKey(priv *PrivateKey, plaintext []byte, opts EncrypterOptions
 		m.Add(m2.ExpandFor(N), N)
 	}
 
-	if opts.Padding == RsaX931Padding {
+	if padding == RsaX931Padding {
 		ret := new(big.Int).SetBytes(m.Bytes(N))
 
 		f := new(big.Int).Sub(priv.N, ret)
@@ -194,7 +194,7 @@ func encryptPrivateKey(priv *PrivateKey, plaintext []byte, opts EncrypterOptions
 	return m.Bytes(N), nil
 }
 
-func decryptPublicKey(pub *PublicKey, ciphertext []byte, opts EncrypterOptions) ([]byte, error) {
+func decryptPublicKey(pub *PublicKey, ciphertext []byte, padding RsaPadding) ([]byte, error) {
 	N, err := bigmod.NewModulusFromBig(pub.N)
 	if err != nil {
 		return nil, err
@@ -215,7 +215,7 @@ func decryptPublicKey(pub *PublicKey, ciphertext []byte, opts EncrypterOptions) 
 	bigint15 := new(big.Int).SetInt64(int64(0xf))
 
 	mLast4bit := new(big.Int).And(mm, bigint15)
-	if opts.Padding == RsaX931Padding && mLast4bit.Int64() != 12 {
+	if padding == RsaX931Padding && mLast4bit.Int64() != 12 {
 		mm = new(big.Int).Sub(pub.N, mm)
 
 		return mm.FillBytes(make([]byte, pub.Size())), nil
@@ -223,4 +223,3 @@ func decryptPublicKey(pub *PublicKey, ciphertext []byte, opts EncrypterOptions) 
 
 	return mBytes, nil
 }
-

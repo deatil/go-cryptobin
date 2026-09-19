@@ -1,8 +1,9 @@
 package rsa
 
 import (
-	"io"
 	"errors"
+	"hash"
+	"io"
 
 	"github.com/deatil/go-cryptobin/tool/randutil"
 )
@@ -10,17 +11,58 @@ import (
 type RsaPadding uint
 
 const (
-    RsaPkcs1Padding RsaPadding = 1 + iota
-    RsaX931Padding
-    RsaNoPadding
+	RsaPkcs1Padding RsaPadding = 1 + iota
+	RsaOaepPadding
+	RsaX931Padding
+	RsaNoPadding
 )
 
-type EncrypterOptions struct {
-	Padding RsaPadding
+type Encrypter struct {
+	// rsa padding type
+	padding RsaPadding
+
+	// rsa rand
+	random io.Reader
+
+	// Hash is the hash function that will be used when generating the mask.
+	hash hash.Hash
+
+	// MGFHash is the hash function used for MGF1.
+	// If zero, Hash is used instead.
+	mgfHash hash.Hash
+
+	// Label is an arbitrary byte string that must be equal to the value
+	// used when encrypting.
+	label []byte
 }
 
-func EncryptWithOptions(random io.Reader, pub *PublicKey, msg []byte, opts EncrypterOptions) ([]byte, error) {
-	randutil.MaybeReadByte(random)
+func NewEncrypter() *Encrypter {
+	e := new(Encrypter)
+	return e
+}
+
+func (e *Encrypter) WithPadding(padding RsaPadding) {
+	e.padding = padding
+}
+
+func (e *Encrypter) WithRandom(random io.Reader) {
+	e.random = random
+}
+
+func (e *Encrypter) WithHash(hash hash.Hash) {
+	e.hash = hash
+}
+
+func (e *Encrypter) WithMGFHash(mgfHash hash.Hash) {
+	e.mgfHash = mgfHash
+}
+
+func (e *Encrypter) WithLabel(label []byte) {
+	e.label = label
+}
+
+func (e *Encrypter) Encrypt(pub *PublicKey, msg []byte) ([]byte, error) {
+	randutil.MaybeReadByte(e.random)
 
 	if err := checkPub(pub); err != nil {
 		return nil, err
@@ -31,9 +73,15 @@ func EncryptWithOptions(random io.Reader, pub *PublicKey, msg []byte, opts Encry
 	var em []byte
 	var err error
 
-	switch opts.Padding {
+	switch e.padding {
 	case RsaPkcs1Padding:
-		em, err = rsaPkcs1Type2Pad(random, k, msg)
+		em, err = rsaPkcs1Type2Pad(e.random, k, msg)
+	case RsaOaepPadding:
+		if e.mgfHash != nil {
+			em, err = rsaOaepPad(e.hash, e.mgfHash, e.random, k, msg, e.label)
+		} else {
+			em, err = rsaOaepPad(e.hash, e.hash, e.random, k, msg, e.label)
+		}
 	case RsaNoPadding:
 		em, err = rsaNoPad(k, msg)
 	default:
@@ -47,7 +95,7 @@ func EncryptWithOptions(random io.Reader, pub *PublicKey, msg []byte, opts Encry
 	return encrypt(pub, em)
 }
 
-func DecryptWithOptions(random io.Reader, priv *PrivateKey, ciphertext []byte, opts EncrypterOptions) ([]byte, error) {
+func (e *Encrypter) Decrypt(priv *PrivateKey, ciphertext []byte) ([]byte, error) {
 	if err := checkPub(&priv.PublicKey); err != nil {
 		return nil, err
 	}
@@ -61,9 +109,15 @@ func DecryptWithOptions(random io.Reader, priv *PrivateKey, ciphertext []byte, o
 
 	var m []byte
 
-	switch opts.Padding {
+	switch e.padding {
 	case RsaPkcs1Padding:
 		m, err = rsaPkcs1Type2Unpad(k, em)
+	case RsaOaepPadding:
+		if e.mgfHash != nil {
+			m, err = rsaOaepUnpad(e.hash, e.mgfHash, k, em, e.label)
+		} else {
+			m, err = rsaOaepUnpad(e.hash, e.hash, k, em, e.label)
+		}
 	case RsaNoPadding:
 		m, err = rsaNoUnpad(k, em)
 	default:
@@ -77,7 +131,7 @@ func DecryptWithOptions(random io.Reader, priv *PrivateKey, ciphertext []byte, o
 	return m, nil
 }
 
-func EncryptPrivateKeyWithOptions(priv *PrivateKey, msg []byte, opts EncrypterOptions) ([]byte, error) {
+func (e *Encrypter) EncryptPrivateKey(priv *PrivateKey, msg []byte) ([]byte, error) {
 	if err := checkPub(&priv.PublicKey); err != nil {
 		return nil, err
 	}
@@ -87,7 +141,7 @@ func EncryptPrivateKeyWithOptions(priv *PrivateKey, msg []byte, opts EncrypterOp
 	var em []byte
 	var err error
 
-	switch opts.Padding {
+	switch e.padding {
 	case RsaPkcs1Padding:
 		em, err = rsaPkcs1Type1Pad(k, msg)
 	case RsaX931Padding:
@@ -100,24 +154,24 @@ func EncryptPrivateKeyWithOptions(priv *PrivateKey, msg []byte, opts EncrypterOp
 		return nil, err
 	}
 
-	return encryptPrivateKey(priv, em, opts)
+	return encryptPrivateKey(priv, em, e.padding)
 }
 
-func DecryptPublicKeyWithOptions(pub *PublicKey, ciphertext []byte, opts EncrypterOptions) ([]byte, error) {
+func (e *Encrypter) DecryptPublicKey(pub *PublicKey, ciphertext []byte) ([]byte, error) {
 	if err := checkPub(pub); err != nil {
 		return nil, err
 	}
 
 	k := pub.Size()
 
-	em, err := decryptPublicKey(pub, ciphertext, opts)
+	em, err := decryptPublicKey(pub, ciphertext, e.padding)
 	if err != nil {
 		return nil, err
 	}
 
 	var m []byte
 
-	switch opts.Padding {
+	switch e.padding {
 	case RsaPkcs1Padding:
 		m, err = rsaPkcs1Type1Unpad(k, em)
 	case RsaX931Padding:

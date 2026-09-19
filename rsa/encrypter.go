@@ -4,8 +4,6 @@ import (
 	"errors"
 	"hash"
 	"io"
-
-	"github.com/deatil/go-cryptobin/tool/randutil"
 )
 
 type RsaPadding uint
@@ -28,7 +26,6 @@ type Encrypter struct {
 	hash hash.Hash
 
 	// MGFHash is the hash function used for MGF1.
-	// If zero, Hash is used instead.
 	mgfHash hash.Hash
 
 	// Label is an arbitrary byte string that must be equal to the value
@@ -62,8 +59,6 @@ func (e *Encrypter) WithLabel(label []byte) {
 }
 
 func (e *Encrypter) Encrypt(pub *PublicKey, msg []byte) ([]byte, error) {
-	randutil.MaybeReadByte(e.random)
-
 	if err := checkPub(pub); err != nil {
 		return nil, err
 	}

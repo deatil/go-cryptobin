@@ -127,9 +127,9 @@ func rsaOaepPad(hash, mgfHash hash.Hash, random io.Reader, emLen int, msg []byte
 		return nil, ErrMessageTooLong
 	}
 
+	hash.Reset()
 	hash.Write(label)
 	lHash := hash.Sum(nil)
-	hash.Reset()
 
 	em := make([]byte, emLen)
 	seed := em[1 : 1+hash.Size()]
@@ -155,9 +155,9 @@ func rsaOaepUnpad(hash, mgfHash hash.Hash, k int, em []byte, label []byte) ([]by
 		return nil, ErrDecryption
 	}
 
+	hash.Reset()
 	hash.Write(label)
 	lHash := hash.Sum(nil)
-	hash.Reset()
 
 	firstByteIsZero := subtle.ConstantTimeByteEq(em[0], 0)
 

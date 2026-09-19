@@ -54,7 +54,6 @@ func encryptOAEP(hash, mgfHash hash.Hash, random io.Reader, pub *PublicKey, msg 
 		return nil, err
 	}
 
-	hash.Reset()
 	k := pub.Size()
 	if len(msg) > k-2*hash.Size()-2 {
 		return nil, ErrMessageTooLong

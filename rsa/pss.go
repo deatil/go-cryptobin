@@ -62,12 +62,12 @@ func emsaPSSEncode(mHash []byte, emBits int, salt []byte, hash hash.Hash) ([]byt
 
 	var prefix [8]byte
 
+	hash.Reset()
 	hash.Write(prefix[:])
 	hash.Write(mHash)
 	hash.Write(salt)
 
 	h = hash.Sum(h[:0])
-	hash.Reset()
 
 	// 7.  Generate an octet string PS consisting of emLen - sLen - hLen - 2
 	//     zero octets. The length of PS may be 0.
@@ -183,6 +183,7 @@ func emsaPSSVerify(mHash, em []byte, emBits, sLen int, hash hash.Hash) error {
 	//
 	// 13. Let H' = Hash(M'), an octet string of length hLen.
 	var prefix [8]byte
+	hash.Reset()
 	hash.Write(prefix[:])
 	hash.Write(mHash)
 	hash.Write(salt)
@@ -269,12 +270,6 @@ var invalidSaltLenErr = errors.New("crypto/rsa: PSSOptions.SaltLength cannot be 
 // using bytes from rand. Most applications should use [crypto/rand.Reader] as
 // rand.
 func SignPSS(rand io.Reader, priv *PrivateKey, hash crypto.Hash, digest []byte, opts *PSSOptions) ([]byte, error) {
-	// Note that while we don't commit to deterministic execution with respect
-	// to the rand stream, we also don't apply MaybeReadByte, so per Hyrum's Law
-	// it's probably relied upon by some. It's a tolerable promise because a
-	// well-specified number of random bytes is included in the signature, in a
-	// well-specified way.
-
 	if opts != nil && opts.Hash != 0 {
 		hash = opts.Hash
 	}

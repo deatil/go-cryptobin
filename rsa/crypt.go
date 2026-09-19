@@ -30,15 +30,16 @@ func mgf1XOR(out []byte, hash hash.Hash, seed []byte) {
 
 	done := 0
 	for done < len(out) {
+		hash.Reset()
 		hash.Write(seed)
 		hash.Write(counter[0:4])
 		digest = hash.Sum(digest[:0])
-		hash.Reset()
 
 		for i := 0; i < len(digest) && done < len(out); i++ {
 			out[done] ^= digest[i]
 			done++
 		}
+
 		incCounter(&counter)
 	}
 }

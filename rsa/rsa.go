@@ -124,7 +124,7 @@ func (priv *PrivateKey) Decrypt(rand io.Reader, ciphertext []byte, opts crypto.D
 		}
 
 	default:
-		return nil, errors.New("crypto/rsa: invalid options for Decrypt")
+		return nil, errors.New("go-cryptobin/rsa: invalid options for Decrypt")
 	}
 }
 
@@ -165,12 +165,12 @@ func (priv *PrivateKey) Validate() error {
 	for _, prime := range priv.Primes {
 		// Any primes ≤ 1 will cause divide-by-zero panics later.
 		if prime.Cmp(bigOne) <= 0 {
-			return errors.New("crypto/rsa: invalid prime value")
+			return errors.New("go-cryptobin/rsa: invalid prime value")
 		}
 		modulus.Mul(modulus, prime)
 	}
 	if modulus.Cmp(priv.N) != 0 {
-		return errors.New("crypto/rsa: invalid modulus")
+		return errors.New("go-cryptobin/rsa: invalid modulus")
 	}
 
 	// Check that de ≡ 1 mod p-1, for each prime.
@@ -185,7 +185,7 @@ func (priv *PrivateKey) Validate() error {
 		pminus1 := new(big.Int).Sub(prime, bigOne)
 		congruence.Mod(de, pminus1)
 		if congruence.Cmp(bigOne) != 0 {
-			return errors.New("crypto/rsa: invalid exponents")
+			return errors.New("go-cryptobin/rsa: invalid exponents")
 		}
 	}
 	return nil
@@ -258,9 +258,9 @@ func (priv *PrivateKey) PrecomputeLegacy() {
 }
 
 var (
-	errPublicModulus       = errors.New("crypto/rsa: missing public modulus")
-	errPublicExponentSmall = errors.New("crypto/rsa: public exponent too small")
-	errPublicExponentLarge = errors.New("crypto/rsa: public exponent too large")
+	errPublicModulus       = errors.New("go-cryptobin/rsa: missing public modulus")
+	errPublicExponentSmall = errors.New("go-cryptobin/rsa: public exponent too small")
+	errPublicExponentLarge = errors.New("go-cryptobin/rsa: public exponent too large")
 )
 
 // checkPub sanity checks the public key before we use it.

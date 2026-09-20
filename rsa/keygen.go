@@ -6,8 +6,6 @@ import (
 	"io"
 	"math"
 	"math/big"
-
-	"github.com/deatil/go-cryptobin/tool/randutil"
 )
 
 // GenerateKey generates a random RSA private key of the given bit size.
@@ -22,30 +20,13 @@ func GenerateKey(random io.Reader, bits int) (*PrivateKey, error) {
 // GenerateMultiPrimeKey generates a multi-prime RSA keypair of the given bit
 // size and the given random source.
 //
-// Table 1 in "[On the Security of Multi-prime RSA]" suggests maximum numbers of
-// primes for a given bit size.
-//
-// Although the public keys are compatible (actually, indistinguishable) from
-// the 2-prime case, the private keys are not. Thus it may not be possible to
-// export multi-prime private keys in certain formats or to subsequently import
-// them into other code.
-//
-// This package does not implement CRT optimizations for multi-prime RSA, so the
-// keys with more than two primes will have worse performance.
-//
-// Deprecated: The use of this function with a number of primes different from
-// two is not recommended for the above security, compatibility, and performance
-// reasons. Use GenerateKey instead.
-//
 // [On the Security of Multi-prime RSA]: http://www.cacr.math.uwaterloo.ca/techreports/2006/cacr2006-16.pdf
 func GenerateMultiPrimeKey(random io.Reader, nprimes int, bits int) (*PrivateKey, error) {
-	randutil.MaybeReadByte(random)
-
 	priv := new(PrivateKey)
 	priv.E = 65537
 
 	if nprimes < 2 {
-		return nil, errors.New("crypto/rsa: GenerateMultiPrimeKey: nprimes must be >= 2")
+		return nil, errors.New("go-cryptobin/rsa: GenerateMultiPrimeKey: nprimes must be >= 2")
 	}
 
 	if bits < 64 {
@@ -59,7 +40,7 @@ func GenerateMultiPrimeKey(random io.Reader, nprimes int, bits int) (*PrivateKey
 		// in a reasonable amount of time.
 		pi /= 2
 		if pi <= float64(nprimes) {
-			return nil, errors.New("crypto/rsa: too few primes of given length to generate an RSA key")
+			return nil, errors.New("go-cryptobin/rsa: too few primes of given length to generate an RSA key")
 		}
 	}
 

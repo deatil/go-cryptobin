@@ -95,12 +95,12 @@ func (e *Encrypter) Decrypt(priv *PrivateKey, ciphertext []byte) ([]byte, error)
 		return nil, err
 	}
 
-	k := priv.Size()
-
 	em, err := decryptWithoutCheck(priv, ciphertext)
 	if err != nil {
 		return nil, err
 	}
+
+	k := priv.Size()
 
 	var m []byte
 
@@ -157,12 +157,12 @@ func (e *Encrypter) DecryptPublicKey(pub *PublicKey, ciphertext []byte) ([]byte,
 		return nil, err
 	}
 
-	k := pub.Size()
-
 	em, err := decryptPublicKey(pub, ciphertext, e.padding)
 	if err != nil {
 		return nil, err
 	}
+
+	k := pub.Size()
 
 	var m []byte
 

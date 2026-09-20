@@ -9,11 +9,11 @@ import (
 
 // ErrDecryption represents a failure to decrypt a message.
 // It is deliberately vague to avoid adaptive attacks.
-var ErrDecryption = errors.New("crypto/rsa: decryption error")
+var ErrDecryption = errors.New("go-cryptobin/rsa: decryption error")
 
 // ErrVerification represents a failure to verify a signature.
 // It is deliberately vague to avoid adaptive attacks.
-var ErrVerification = errors.New("crypto/rsa: verification error")
+var ErrVerification = errors.New("go-cryptobin/rsa: verification error")
 
 // bigIntEqual reports whether a and b are equal leaking only their bit length
 // through timing side-channels.

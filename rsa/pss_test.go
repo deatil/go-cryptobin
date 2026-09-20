@@ -286,8 +286,7 @@ func TestInvalidPSSSaltLength(t *testing.T) {
 	}
 
 	digest := sha256.Sum256([]byte("message"))
-	// We don't check the exact error matches, because crypto/rsa
-	// return two different error variables, which have the same content but are not equal.
+
 	if _, err := SignPSS(rand.Reader, key, crypto.SHA256, digest[:], &PSSOptions{
 		SaltLength: -2,
 		Hash:       crypto.SHA256,
@@ -295,8 +294,6 @@ func TestInvalidPSSSaltLength(t *testing.T) {
 		t.Fatalf("SignPSS unexpected error: got %v, want %v", err, InvalidSaltLenErr)
 	}
 
-	// We don't check the specific error here, because crypto/rsa
-	// return different errors, so we just check that _an error_ was returned.
 	if err := VerifyPSS(&key.PublicKey, crypto.SHA256, []byte{1, 2, 3}, make([]byte, 31), &PSSOptions{
 		SaltLength: -2,
 	}); err == nil {

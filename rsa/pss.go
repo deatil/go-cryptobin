@@ -35,7 +35,7 @@ func emsaPSSEncode(mHash []byte, emBits int, salt []byte, hash hash.Hash) ([]byt
 	// 2.  Let mHash = Hash(M), an octet string of length hLen.
 
 	if len(mHash) != hLen {
-		return nil, errors.New("crypto/rsa: input must be hashed with given hash")
+		return nil, errors.New("go-cryptobin/rsa: input must be hashed with given hash")
 	}
 
 	// 3.  If emLen < hLen + sLen + 2, output "encoding error" and stop.
@@ -105,7 +105,7 @@ func emsaPSSVerify(mHash, em []byte, emBits, sLen int, hash hash.Hash) error {
 	}
 	emLen := (emBits + 7) / 8
 	if emLen != len(em) {
-		return errors.New("rsa: internal error: inconsistent length")
+		return errors.New("go-cryptobin/rsa: internal error: inconsistent length")
 	}
 
 	// 1.  If the length of M is greater than the input limitation for the
@@ -258,7 +258,7 @@ func (opts *PSSOptions) saltLength() int {
 	return opts.SaltLength
 }
 
-var invalidSaltLenErr = errors.New("crypto/rsa: PSSOptions.SaltLength cannot be negative")
+var invalidSaltLenErr = errors.New("go-cryptobin/rsa: PSSOptions.SaltLength cannot be negative")
 
 // SignPSS calculates the signature of digest using PSS.
 //

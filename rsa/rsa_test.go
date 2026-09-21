@@ -691,8 +691,8 @@ func Test2DecryptOAEP(t *testing.T) {
 	priv := new(PrivateKey)
 	priv.PublicKey = PublicKey{N: n, E: testEncryptOAEPData[0].e}
 	priv.D = d
-	sha1 := crypto.SHA1
-	sha256 := crypto.SHA256
+	sha1 := crypto.SHA1.New()
+	sha256 := crypto.SHA256.New()
 
 	out, err := priv.Decrypt(random, in, &OAEPOptions{MGFHash: sha1, Hash: sha256})
 
@@ -923,8 +923,8 @@ func TestDecryptOAEPWithOptions_Check(t *testing.T) {
 	label := []byte("label-test")
 
 	opts := &OAEPOptions{
-		Hash:    crypto.SHA384,
-		MGFHash: crypto.SHA256,
+		Hash:    crypto.SHA384.New(),
+		MGFHash: crypto.SHA256.New(),
 		Label:   label,
 	}
 
@@ -946,8 +946,8 @@ func TestEncryptOAEPWithOptions(t *testing.T) {
 	label := []byte("label-test")
 
 	opts := &OAEPOptions{
-		Hash:    crypto.SHA384,
-		MGFHash: crypto.SHA256,
+		Hash:    crypto.SHA384.New(),
+		MGFHash: crypto.SHA256.New(),
 		Label:   label,
 	}
 

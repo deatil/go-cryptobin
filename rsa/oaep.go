@@ -1,7 +1,6 @@
 package rsa
 
 import (
-	"crypto"
 	"hash"
 	"io"
 )
@@ -10,11 +9,11 @@ import (
 // crypto.Decrypter interface.
 type OAEPOptions struct {
 	// Hash is the hash function that will be used when generating the mask.
-	Hash crypto.Hash
+	Hash hash.Hash
 
 	// MGFHash is the hash function used for MGF1.
 	// If zero, Hash is used instead.
-	MGFHash crypto.Hash
+	MGFHash hash.Hash
 
 	// Label is an arbitrary byte string that must be equal to the value
 	// used when encrypting.
@@ -33,32 +32,23 @@ func DecryptOAEP(hash hash.Hash, random io.Reader, priv *PrivateKey, ciphertext 
 
 // EncryptOAEPWithOptions encrypts the given message with RSA-OAEP.
 func EncryptOAEPWithOptions(random io.Reader, pub *PublicKey, msg []byte, opts *OAEPOptions) ([]byte, error) {
-	if opts.MGFHash > 0 {
-		return encryptOAEP(opts.Hash.New(), opts.MGFHash.New(), random, pub, msg, opts.Label)
+	if opts.MGFHash != nil {
+		return encryptOAEP(opts.Hash, opts.MGFHash, random, pub, msg, opts.Label)
 	}
 
-	return encryptOAEP(opts.Hash.New(), opts.Hash.New(), random, pub, msg, opts.Label)
+	return encryptOAEP(opts.Hash, opts.Hash, random, pub, msg, opts.Label)
 }
 
 // DecryptOAEPWithOptions decrypts ciphertext using RSA-OAEP.
 func DecryptOAEPWithOptions(random io.Reader, priv *PrivateKey, ciphertext []byte, opts *OAEPOptions) ([]byte, error) {
-	if opts.MGFHash > 0 {
-		return decryptOAEP(opts.Hash.New(), opts.MGFHash.New(), random, priv, ciphertext, opts.Label)
+	if opts.MGFHash != nil {
+		return decryptOAEP(opts.Hash, opts.MGFHash, random, priv, ciphertext, opts.Label)
 	}
 
-	return decryptOAEP(opts.Hash.New(), opts.Hash.New(), random, priv, ciphertext, opts.Label)
+	return decryptOAEP(opts.Hash, opts.Hash, random, priv, ciphertext, opts.Label)
 }
 
 func encryptOAEP(hash, mgfHash hash.Hash, random io.Reader, pub *PublicKey, msg []byte, label []byte) ([]byte, error) {
-	if err := checkPub(pub); err != nil {
-		return nil, err
-	}
-
-	k := pub.Size()
-	if len(msg) > k-2*hash.Size()-2 {
-		return nil, ErrMessageTooLong
-	}
-
 	encrypter := NewEncrypter()
 	encrypter.WithPadding(RsaOaepPadding)
 	encrypter.WithRandom(random)
@@ -70,15 +60,6 @@ func encryptOAEP(hash, mgfHash hash.Hash, random io.Reader, pub *PublicKey, msg 
 }
 
 func decryptOAEP(hash, mgfHash hash.Hash, random io.Reader, priv *PrivateKey, ciphertext []byte, label []byte) ([]byte, error) {
-	if err := checkPub(&priv.PublicKey); err != nil {
-		return nil, err
-	}
-
-	k := priv.Size()
-	if len(ciphertext) > k || k < hash.Size()*2+2 {
-		return nil, ErrDecryption
-	}
-
 	encrypter := NewEncrypter()
 	encrypter.WithPadding(RsaOaepPadding)
 	encrypter.WithRandom(random)

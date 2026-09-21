@@ -103,10 +103,10 @@ func (priv *PrivateKey) Decrypt(rand io.Reader, ciphertext []byte, opts crypto.D
 
 	switch opts := opts.(type) {
 	case *OAEPOptions:
-		if opts.MGFHash == 0 {
-			return decryptOAEP(opts.Hash.New(), opts.Hash.New(), rand, priv, ciphertext, opts.Label)
+		if opts.MGFHash == nil {
+			return decryptOAEP(opts.Hash, opts.Hash, rand, priv, ciphertext, opts.Label)
 		} else {
-			return decryptOAEP(opts.Hash.New(), opts.MGFHash.New(), rand, priv, ciphertext, opts.Label)
+			return decryptOAEP(opts.Hash, opts.MGFHash, rand, priv, ciphertext, opts.Label)
 		}
 
 	case *PKCS1v15DecryptOptions:

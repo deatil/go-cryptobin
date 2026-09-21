@@ -9,7 +9,6 @@ import (
 	"crypto/subtle"
 	"errors"
 	"hash"
-	"io"
 
 	"golang.org/x/crypto/ripemd160"
 	"golang.org/x/crypto/sha3"
@@ -131,33 +130,17 @@ func (opts *PKCS1v15Options) HashFunc() crypto.Hash {
 // be the result of hashing the input message using the given hash
 // function. If hash is zero, hashed is signed directly. This isn't
 // advisable except for interoperability.
-//
-// The random parameter is legacy and ignored, and it can be nil.
-//
-// This function is deterministic. Thus, if the set of possible
-// messages is small, an attacker may be able to build a map from
-// messages to signatures and identify the signed messages. As ever,
-// signatures provide authenticity, not confidentiality.
-func SignPKCS1v15(random io.Reader, priv *PrivateKey, hasher IHasher, hashed []byte) ([]byte, error) {
-	hashLen, prefix, err := pkcs1v15HashInfo(hasher, len(hashed))
+func SignPKCS1v15(priv *PrivateKey, hasher IHasher, hashed []byte) ([]byte, error) {
+	prefix, err := pkcs1v15HashInfo(hasher, len(hashed))
 	if err != nil {
 		return nil, err
 	}
 
-	tLen := len(prefix) + hashLen
 	k := priv.Size()
-	if k < tLen+11 {
-		return nil, ErrMessageTooLong
+	em, err := emsaPKCS1v15Encode(hashed, k, prefix)
+	if err != nil {
+		return nil, err
 	}
-
-	// EM = 0x00 || 0x01 || PS || 0x00 || T
-	em := make([]byte, k)
-	em[1] = 1
-	for i := 2; i < k-tLen-1; i++ {
-		em[i] = 0xff
-	}
-	copy(em[k-tLen:k-hashLen], prefix)
-	copy(em[k-hashLen:k], hashed)
 
 	return decryptWithCheck(priv, em)
 }
@@ -168,14 +151,13 @@ func SignPKCS1v15(random io.Reader, priv *PrivateKey, hasher IHasher, hashed []b
 // returning a nil error. If hash is zero then hashed is used directly. This
 // isn't advisable except for interoperability.
 func VerifyPKCS1v15(pub *PublicKey, hasher IHasher, hashed []byte, sig []byte) error {
-	hashLen, prefix, err := pkcs1v15HashInfo(hasher, len(hashed))
+	prefix, err := pkcs1v15HashInfo(hasher, len(hashed))
 	if err != nil {
 		return err
 	}
 
-	tLen := len(prefix) + hashLen
 	k := pub.Size()
-	if k < tLen+11 {
+	if k < len(prefix)+len(hashed)+11 {
 		return ErrVerification
 	}
 
@@ -191,15 +173,45 @@ func VerifyPKCS1v15(pub *PublicKey, hasher IHasher, hashed []byte, sig []byte) e
 		return ErrVerification
 	}
 
+	return emsaPKCS1v15Verify(hashed, em, k, prefix)
+}
+
+func emsaPKCS1v15Encode(mHash []byte, emLen int, prefix []byte) (em []byte, err error) {
+	hashLen := len(mHash)
+
+	tLen := len(prefix) + hashLen
+	if emLen < tLen+11 {
+		return nil, ErrMessageTooLong
+	}
+
+	// EM = 0x00 || 0x01 || PS || 0x00 || T
+	em = make([]byte, emLen)
+	em[1] = 1
+	for i := 2; i < emLen-tLen-1; i++ {
+		em[i] = 0xff
+	}
+	copy(em[emLen-tLen:emLen-hashLen], prefix)
+	copy(em[emLen-hashLen:emLen], mHash)
+
+	return
+}
+
+func emsaPKCS1v15Verify(mHash []byte, em []byte, emLen int, prefix []byte) error {
+	hashLen := len(mHash)
+	tLen := len(prefix) + hashLen
+	if emLen < tLen+11 {
+		return ErrVerification
+	}
+
 	// EM = 0x00 || 0x01 || PS || 0x00 || T
 
 	ok := subtle.ConstantTimeByteEq(em[0], 0)
 	ok &= subtle.ConstantTimeByteEq(em[1], 1)
-	ok &= subtle.ConstantTimeCompare(em[k-hashLen:k], hashed)
-	ok &= subtle.ConstantTimeCompare(em[k-tLen:k-hashLen], prefix)
-	ok &= subtle.ConstantTimeByteEq(em[k-tLen-1], 0)
+	ok &= subtle.ConstantTimeCompare(em[emLen-hashLen:emLen], mHash)
+	ok &= subtle.ConstantTimeCompare(em[emLen-tLen:emLen-hashLen], prefix)
+	ok &= subtle.ConstantTimeByteEq(em[emLen-tLen-1], 0)
 
-	for i := 2; i < k-tLen-1; i++ {
+	for i := 2; i < emLen-tLen-1; i++ {
 		ok &= subtle.ConstantTimeByteEq(em[i], 0xff)
 	}
 
@@ -210,15 +222,16 @@ func VerifyPKCS1v15(pub *PublicKey, hasher IHasher, hashed []byte, sig []byte) e
 	return nil
 }
 
-func pkcs1v15HashInfo(hasher IHasher, inLen int) (hashLen int, prefix []byte, err error) {
+func pkcs1v15HashInfo(hasher IHasher, inLen int) (prefix []byte, err error) {
 	prefix = hasher.HashPrefixe()
 	if len(prefix) == 0 {
-		return inLen, nil, nil
+		return
 	}
 
-	hashLen = hasher.HashSize()
+	hashLen := hasher.HashSize()
 	if inLen != hashLen {
-		return 0, nil, errors.New("go-cryptobin/rsa: input must be hashed message")
+		err = errors.New("go-cryptobin/rsa: input must be hashed message")
+		return
 	}
 
 	return

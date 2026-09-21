@@ -261,4 +261,3 @@ func TestDecryptPublicKeyWithOptionsCheck(t *testing.T) {
 	cryptobin_test.Equal(t, true, len(demsg2) > 0)
 	cryptobin_test.Equal(t, "Hello RSA X9.31", string(demsg2))
 }
-

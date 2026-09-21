@@ -202,7 +202,7 @@ func TestSignPKCS1v15(t *testing.T) {
 		h.Write([]byte(test.in))
 		digest := h.Sum(nil)
 
-		s, err := SignPKCS1v15(nil, rsaPrivateKey, HasherSha1, digest)
+		s, err := SignPKCS1v15(rsaPrivateKey, HasherSha1, digest)
 		if err != nil {
 			t.Errorf("#%d %s", i, err)
 		}
@@ -247,7 +247,7 @@ func TestUnpaddedSignature(t *testing.T) {
 	// file.
 	expectedSig := decodeBase64("pX4DR8azytjdQ1rtUiC040FjkepuQut5q2ZFX1pTjBrOVKNjgsCDyiJDGZTCNoh9qpXYbhl7iEym30BWWwuiZg==")
 
-	sig, err := SignPKCS1v15(nil, rsaPrivateKey, HasherNone, msg)
+	sig, err := SignPKCS1v15(rsaPrivateKey, HasherNone, msg)
 	if err != nil {
 		t.Fatalf("SignPKCS1v15 failed: %s", err)
 	}
@@ -322,7 +322,7 @@ func TestUnpaddedSignatureAndSM3(t *testing.T) {
 
 	expectedSig := decodeHex("44ea5304130afc1d628f66d0198af5ec2b2760e3e041490a1a672849a1914eef26533ae06db9a0f93b85902815fd94626d7fa33039592e18bf722307606b6dd2")
 
-	sig, err := SignPKCS1v15(nil, rsaPrivateKey, HasherSM3, hashed)
+	sig, err := SignPKCS1v15(rsaPrivateKey, HasherSM3, hashed)
 	if err != nil {
 		t.Fatalf("SignPKCS1v15 failed: %s", err)
 	}

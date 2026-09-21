@@ -225,7 +225,7 @@ func testEverything(t *testing.T, priv *PrivateKey) {
 	}
 
 	hash := sha256.Sum256(msg)
-	sig, err := SignPKCS1v15(nil, priv, HasherSha256, hash[:])
+	sig, err := SignPKCS1v15(priv, HasherSha256, hash[:])
 	if err == ErrMessageTooLong {
 		t.Log("key too small for SignPKCS1v15")
 	} else if err != nil {
@@ -549,7 +549,7 @@ func BenchmarkSignPKCS1v15(b *testing.B) {
 		var sink byte
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
-			s, err := SignPKCS1v15(rand.Reader, test2048Key, HasherSha256, hashed[:])
+			s, err := SignPKCS1v15(test2048Key, HasherSha256, hashed[:])
 			if err != nil {
 				b.Fatal(err)
 			}
@@ -561,7 +561,7 @@ func BenchmarkSignPKCS1v15(b *testing.B) {
 func BenchmarkVerifyPKCS1v15(b *testing.B) {
 	b.Run("2048", func(b *testing.B) {
 		hashed := sha256.Sum256([]byte("testing"))
-		s, err := SignPKCS1v15(rand.Reader, test2048Key, HasherSha256, hashed[:])
+		s, err := SignPKCS1v15(test2048Key, HasherSha256, hashed[:])
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -880,7 +880,7 @@ var testEncryptOAEPData = []testEncryptOAEPStruct{
 	},
 }
 
-func get_private_key() *PrivateKey {
+func getPrivateKey() *PrivateKey {
 	prikey_pem := `-----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEA4f5wg5l2hKsTeNem/V41fGnJm6gOdrj8ym3rFkEU/wT8RDtn
 SgFEZOQpHEgQ7JL38xUfU0Y3g6aYw9QT0hJ7mCpz9Er5qLaMXJwZxzHzAahlfA0i
@@ -917,7 +917,7 @@ CKuHRG+AP579dncdUnOMvfXOtkdM4vk0+hWASBQzM9xzVcztCa+koAugjVaLS9A+
 }
 
 func TestDecryptOAEPWithOptions_Check(t *testing.T) {
-	prikey := get_private_key()
+	prikey := getPrivateKey()
 
 	msg := []byte("message-data")
 	label := []byte("label-test")
@@ -939,7 +939,7 @@ func TestDecryptOAEPWithOptions_Check(t *testing.T) {
 }
 
 func TestEncryptOAEPWithOptions(t *testing.T) {
-	prikey := get_private_key()
+	prikey := getPrivateKey()
 	pubkey := &prikey.PublicKey
 
 	msg := []byte("message-data")

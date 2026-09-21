@@ -189,23 +189,23 @@ func Test_VerifyPSS(t *testing.T) {
 func TestMgf1XORCheck(t *testing.T) {
 	{
 		msg := []byte("asdf")
-		out := make([]byte, 32 * 2 + 1);
-	
+		out := make([]byte, 32*2+1)
+
 		mgf1XOR(out[:31], sha256.New(), msg)
-	
+
 		check := "ed1b846bb9263900c81782ad08eb1701fa8c7221c6576377317f5ce809899f"
 
-		cryptobin_test.Equal(t, check, toHex(out[:31]))	
+		cryptobin_test.Equal(t, check, toHex(out[:31]))
 	}
 
 	{
 		msg := []byte("asdf")
-		out := make([]byte, 32 * 2 + 1);
-	
+		out := make([]byte, 32*2+1)
+
 		mgf1XOR(out, sha256.New(), msg)
-	
+
 		check := "ed1b846bb9263900c81782ad08eb1701fa8c7221c6576377317f5ce809899f5a22f280d52808f493837600de09e4ec924a2c7cef0df77bbe8f7f12cb8f33a665ab"
 
-		cryptobin_test.Equal(t, check, toHex(out))	
+		cryptobin_test.Equal(t, check, toHex(out))
 	}
 }

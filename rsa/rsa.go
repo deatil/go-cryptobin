@@ -87,7 +87,7 @@ func (priv *PrivateKey) Sign(rand io.Reader, digest []byte, opts crypto.SignerOp
 	}
 
 	if pkcs1v15Opts, ok := opts.(*PKCS1v15Options); ok {
-		return SignPKCS1v15(rand, priv, pkcs1v15Opts.Hasher, digest)
+		return SignPKCS1v15(priv, pkcs1v15Opts.Hasher, digest)
 	}
 
 	return nil, errors.New("go-cryptobin/rsa: opts not supported")
@@ -115,6 +115,7 @@ func (priv *PrivateKey) Decrypt(rand io.Reader, ciphertext []byte, opts crypto.D
 			if _, err := io.ReadFull(rand, plaintext); err != nil {
 				return nil, err
 			}
+
 			if err := DecryptPKCS1v15SessionKey(rand, priv, ciphertext, plaintext); err != nil {
 				return nil, err
 			}

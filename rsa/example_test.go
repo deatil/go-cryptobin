@@ -87,7 +87,7 @@ func ExampleSignPKCS1v15() {
 	// of writing (2016).
 	hashed := sha256.Sum256(message)
 
-	signature, err := rsa.SignPKCS1v15(nil, rsaPrivateKey, rsa.HasherSha256, hashed[:])
+	signature, err := rsa.SignPKCS1v15(rsaPrivateKey, rsa.HasherSha256, hashed[:])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error from signing: %s\n", err)
 		return

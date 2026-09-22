@@ -8,6 +8,151 @@ import (
 	"io"
 )
 
+const (
+	// PSSSaltLengthAuto causes the salt in a PSS signature to be as large
+	// as possible when signing, and to be auto-detected when verifying.
+	PSSSaltLengthAuto = 0
+
+	// PSSSaltLengthEqualsHash causes the salt length to equal the length
+	// of the hash used in the signature.
+	PSSSaltLengthEqualsHash = -1
+)
+
+// PSSOptions contains options for creating and verifying PSS signatures.
+type PSSOptions struct {
+	// SaltLength controls the length of the salt used in the PSS signature. It
+	// can either be a positive number of bytes, or one of the special
+	// PSSSaltLength constants.
+	SaltLength int
+
+	// Hash is the hash function used to generate the message digest. If not
+	// zero, it overrides the hash function passed to SignPSS. It's required
+	// when using PrivateKey.Sign.
+	Hash crypto.Hash
+}
+
+// HashFunc returns opts.Hash so that PSSOptions implements crypto.SignerOpts.
+func (opts *PSSOptions) HashFunc() crypto.Hash {
+	return opts.Hash
+}
+
+func (opts *PSSOptions) saltLength() int {
+	if opts == nil {
+		return PSSSaltLengthAuto
+	}
+
+	return opts.SaltLength
+}
+
+var invalidSaltLenErr = errors.New("go-cryptobin/rsa: PSSOptions.SaltLength cannot be negative")
+
+// SignPSS calculates the signature of digest using PSS.
+//
+// digest must be the result of hashing the input message using the given hash
+// function. The opts argument may be nil, in which case sensible defaults are
+// used. If opts.Hash is set, it overrides hash.
+//
+// The signature is randomized depending on the message, key, and salt size,
+// using bytes from rand. Most applications should use [crypto/rand.Reader] as
+// rand.
+func SignPSS(rand io.Reader, priv *PrivateKey, hash crypto.Hash, digest []byte, opts *PSSOptions) ([]byte, error) {
+	if opts != nil && opts.Hash != 0 {
+		hash = opts.Hash
+	}
+
+	saltLength := opts.saltLength()
+	switch saltLength {
+	case PSSSaltLengthAuto:
+		saltLength = (priv.N.BitLen()-1+7)/8 - 2 - hash.Size()
+		if saltLength < 0 {
+			return nil, ErrMessageTooLong
+		}
+	case PSSSaltLengthEqualsHash:
+		saltLength = hash.Size()
+	default:
+		// If we get here saltLength is either > 0 or < -1, in the
+		// latter case we fail out.
+		if saltLength <= 0 {
+			return nil, invalidSaltLenErr
+		}
+	}
+
+	salt := make([]byte, saltLength)
+	if _, err := io.ReadFull(rand, salt); err != nil {
+		return nil, err
+	}
+
+	return SignPSSWithSalt(priv, hash, digest, salt)
+}
+
+// VerifyPSS verifies a PSS signature.
+//
+// A valid signature is indicated by returning a nil error. digest must be the
+// result of hashing the input message using the given hash function. The opts
+// argument may be nil, in which case sensible defaults are used. opts.Hash is
+// ignored.
+func VerifyPSS(pub *PublicKey, hash crypto.Hash, digest []byte, sig []byte, opts *PSSOptions) error {
+	if len(sig) != pub.Size() {
+		return ErrVerification
+	}
+
+	// Salt length must be either one of the special constants (-1 or 0)
+	// or otherwise positive. If it is < PSSSaltLengthEqualsHash (-1)
+	// we return an error.
+	if opts.saltLength() < PSSSaltLengthEqualsHash {
+		return invalidSaltLenErr
+	}
+
+	emBits := pub.N.BitLen() - 1
+	emLen := (emBits + 7) / 8
+	em, err := encrypt(pub, sig)
+	if err != nil {
+		return ErrVerification
+	}
+
+	// Like in SignPSSWithSalt, deal with mismatches between emLen and the size
+	// of the modulus. The spec would have us wire emLen into the encoding
+	// function, but we'd rather always encode to the size of the modulus and
+	// then strip leading zeroes if necessary. This only happens for weird
+	// modulus sizes anyway.
+	for len(em) > emLen && len(em) > 0 {
+		if em[0] != 0 {
+			return ErrVerification
+		}
+
+		em = em[1:]
+	}
+
+	return emsaPSSVerify(digest, em, emBits, opts.saltLength(), hash.New())
+}
+
+// SignPSSWithSalt calculates the signature of hashed using PSS with specified salt.
+// Note that hashed must be the result of hashing the input message using the
+// given hash function. salt is a random sequence of bytes whose length will be
+// later used to verify the signature.
+func SignPSSWithSalt(priv *PrivateKey, hash crypto.Hash, hashed, salt []byte) ([]byte, error) {
+	emBits := priv.N.BitLen() - 1
+	em, err := emsaPSSEncode(hashed, emBits, salt, hash.New())
+	if err != nil {
+		return nil, err
+	}
+
+	// RFC 8017: "Note that the octet length of EM will be one less than k if
+	// modBits - 1 is divisible by 8 and equal to k otherwise, where k is the
+	// length in octets of the RSA modulus n."
+	//
+	// This is extremely annoying, as all other encrypt and decrypt inputs are
+	// always the exact same size as the modulus. Since it only happens for
+	// weird modulus sizes, fix it by padding inefficiently.
+	if emLen, k := len(em), priv.Size(); emLen < k {
+		emNew := make([]byte, k)
+		copy(emNew[k-emLen:], em)
+		em = emNew
+	}
+
+	return decryptWithCheck(priv, em)
+}
+
 // This file implements the RSASSA-PSS signature scheme according to RFC 8017.
 //
 // Per RFC 8017, Section 9.1
@@ -195,145 +340,4 @@ func emsaPSSVerify(mHash, em []byte, emBits, sLen int, hash hash.Hash) error {
 		return ErrVerification
 	}
 	return nil
-}
-
-// signPSSWithSalt calculates the signature of hashed using PSS with specified salt.
-// Note that hashed must be the result of hashing the input message using the
-// given hash function. salt is a random sequence of bytes whose length will be
-// later used to verify the signature.
-func signPSSWithSalt(priv *PrivateKey, hash crypto.Hash, hashed, salt []byte) ([]byte, error) {
-	emBits := priv.N.BitLen() - 1
-	em, err := emsaPSSEncode(hashed, emBits, salt, hash.New())
-	if err != nil {
-		return nil, err
-	}
-
-	// RFC 8017: "Note that the octet length of EM will be one less than k if
-	// modBits - 1 is divisible by 8 and equal to k otherwise, where k is the
-	// length in octets of the RSA modulus n." 🙄
-	//
-	// This is extremely annoying, as all other encrypt and decrypt inputs are
-	// always the exact same size as the modulus. Since it only happens for
-	// weird modulus sizes, fix it by padding inefficiently.
-	if emLen, k := len(em), priv.Size(); emLen < k {
-		emNew := make([]byte, k)
-		copy(emNew[k-emLen:], em)
-		em = emNew
-	}
-
-	return decryptWithCheck(priv, em)
-}
-
-const (
-	// PSSSaltLengthAuto causes the salt in a PSS signature to be as large
-	// as possible when signing, and to be auto-detected when verifying.
-	PSSSaltLengthAuto = 0
-	// PSSSaltLengthEqualsHash causes the salt length to equal the length
-	// of the hash used in the signature.
-	PSSSaltLengthEqualsHash = -1
-)
-
-// PSSOptions contains options for creating and verifying PSS signatures.
-type PSSOptions struct {
-	// SaltLength controls the length of the salt used in the PSS signature. It
-	// can either be a positive number of bytes, or one of the special
-	// PSSSaltLength constants.
-	SaltLength int
-
-	// Hash is the hash function used to generate the message digest. If not
-	// zero, it overrides the hash function passed to SignPSS. It's required
-	// when using PrivateKey.Sign.
-	Hash crypto.Hash
-}
-
-// HashFunc returns opts.Hash so that PSSOptions implements crypto.SignerOpts.
-func (opts *PSSOptions) HashFunc() crypto.Hash {
-	return opts.Hash
-}
-
-func (opts *PSSOptions) saltLength() int {
-	if opts == nil {
-		return PSSSaltLengthAuto
-	}
-	return opts.SaltLength
-}
-
-var invalidSaltLenErr = errors.New("go-cryptobin/rsa: PSSOptions.SaltLength cannot be negative")
-
-// SignPSS calculates the signature of digest using PSS.
-//
-// digest must be the result of hashing the input message using the given hash
-// function. The opts argument may be nil, in which case sensible defaults are
-// used. If opts.Hash is set, it overrides hash.
-//
-// The signature is randomized depending on the message, key, and salt size,
-// using bytes from rand. Most applications should use [crypto/rand.Reader] as
-// rand.
-func SignPSS(rand io.Reader, priv *PrivateKey, hash crypto.Hash, digest []byte, opts *PSSOptions) ([]byte, error) {
-	if opts != nil && opts.Hash != 0 {
-		hash = opts.Hash
-	}
-
-	saltLength := opts.saltLength()
-	switch saltLength {
-	case PSSSaltLengthAuto:
-		saltLength = (priv.N.BitLen()-1+7)/8 - 2 - hash.Size()
-		if saltLength < 0 {
-			return nil, ErrMessageTooLong
-		}
-	case PSSSaltLengthEqualsHash:
-		saltLength = hash.Size()
-	default:
-		// If we get here saltLength is either > 0 or < -1, in the
-		// latter case we fail out.
-		if saltLength <= 0 {
-			return nil, invalidSaltLenErr
-		}
-	}
-
-	salt := make([]byte, saltLength)
-	if _, err := io.ReadFull(rand, salt); err != nil {
-		return nil, err
-	}
-
-	return signPSSWithSalt(priv, hash, digest, salt)
-}
-
-// VerifyPSS verifies a PSS signature.
-//
-// A valid signature is indicated by returning a nil error. digest must be the
-// result of hashing the input message using the given hash function. The opts
-// argument may be nil, in which case sensible defaults are used. opts.Hash is
-// ignored.
-func VerifyPSS(pub *PublicKey, hash crypto.Hash, digest []byte, sig []byte, opts *PSSOptions) error {
-	if len(sig) != pub.Size() {
-		return ErrVerification
-	}
-	// Salt length must be either one of the special constants (-1 or 0)
-	// or otherwise positive. If it is < PSSSaltLengthEqualsHash (-1)
-	// we return an error.
-	if opts.saltLength() < PSSSaltLengthEqualsHash {
-		return invalidSaltLenErr
-	}
-
-	emBits := pub.N.BitLen() - 1
-	emLen := (emBits + 7) / 8
-	em, err := encrypt(pub, sig)
-	if err != nil {
-		return ErrVerification
-	}
-
-	// Like in signPSSWithSalt, deal with mismatches between emLen and the size
-	// of the modulus. The spec would have us wire emLen into the encoding
-	// function, but we'd rather always encode to the size of the modulus and
-	// then strip leading zeroes if necessary. This only happens for weird
-	// modulus sizes anyway.
-	for len(em) > emLen && len(em) > 0 {
-		if em[0] != 0 {
-			return ErrVerification
-		}
-		em = em[1:]
-	}
-
-	return emsaPSSVerify(digest, em, emBits, opts.saltLength(), hash.New())
 }

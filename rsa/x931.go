@@ -88,7 +88,7 @@ func VerifyX931(pub *PublicKey, hasher IX931Hasher, hashed []byte, sig []byte) e
 	}
 
 	k := pub.Size()
-	if k < len(hashed)+2 {
+	if k < len(hashed)+3 {
 		return ErrVerification
 	}
 
@@ -125,7 +125,7 @@ func emsaX931Encode(mHash []byte, emLen int, hashID int) (em []byte, err error) 
 }
 
 func emsaX931Verify(mHash []byte, em []byte, emLen int, hashID int) error {
-	if emLen < 2 {
+	if emLen < 3 {
 		return ErrVerification
 	}
 

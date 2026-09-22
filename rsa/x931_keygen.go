@@ -58,17 +58,17 @@ NextSetOfPrimes:
 				return nil, err
 			}
 
-			// if prime % 4 == 3, it is true
-			prem := new(big.Int).Mod(primes[i], big4)
-			if prem.Cmp(big3) != 0 {
-				continue NextSetOfPrimes
-			}
-
 			todo -= primes[i].BitLen()
 		}
 
 		// Make sure that primes is pairwise unequal.
 		for i, prime := range primes {
+			// if prime % 4 == 3, it is true
+			primeRem := new(big.Int).Mod(prime, big4)
+			if primeRem.Cmp(big3) != 0 {
+				continue NextSetOfPrimes
+			}
+
 			for j := 0; j < i; j++ {
 				if prime.Cmp(primes[j]) == 0 {
 					continue NextSetOfPrimes

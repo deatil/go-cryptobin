@@ -19,6 +19,7 @@ type IX931Hasher interface {
 type X931Hasher struct {
 	HashId int
 	Hash   func() hash.Hash
+	Size   int
 }
 
 func (h X931Hasher) HashID() int {
@@ -26,8 +27,7 @@ func (h X931Hasher) HashID() int {
 }
 
 func (h X931Hasher) HashSize() int {
-	d := h.Hash()
-	return d.Size()
+	return h.Size
 }
 
 func (h X931Hasher) HashMsg(msg []byte) ([]byte, error) {
@@ -43,18 +43,22 @@ func (h X931Hasher) HashMsg(msg []byte) ([]byte, error) {
 var X931HasherSha1 = X931Hasher{
 	HashId: 0x33,
 	Hash:   sha1.New,
+	Size:   20,
 }
 var X931HasherSha256 = X931Hasher{
 	HashId: 0x34,
 	Hash:   sha256.New,
+	Size:   32,
 }
 var X931HasherSha384 = X931Hasher{
 	HashId: 0x36,
 	Hash:   sha512.New384,
+	Size:   48,
 }
 var X931HasherSha512 = X931Hasher{
 	HashId: 0x35,
 	Hash:   sha512.New,
+	Size:   64,
 }
 
 type X931Options struct {

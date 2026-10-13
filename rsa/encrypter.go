@@ -12,6 +12,7 @@ const (
 	RsaPkcs1Padding RsaPadding = 1 + iota
 	RsaOaepPadding
 	RsaX931Padding
+	RsaSSLv23Padding
 	RsaNoPadding
 )
 
@@ -77,6 +78,8 @@ func (e *Encrypter) Encrypt(pub *PublicKey, msg []byte) ([]byte, error) {
 		} else {
 			em, err = rsaOaepPad(e.hash, e.hash, e.random, k, msg, e.label)
 		}
+	case RsaSSLv23Padding:
+		em, err = rsaSSLv23Pad(e.random, k, msg)
 	case RsaNoPadding:
 		em, err = rsaNoPad(k, msg)
 	default:
@@ -113,6 +116,8 @@ func (e *Encrypter) Decrypt(priv *PrivateKey, ciphertext []byte) ([]byte, error)
 		} else {
 			m, err = rsaOaepUnpad(e.hash, e.hash, k, em, e.label)
 		}
+	case RsaSSLv23Padding:
+		m, err = rsaSSLv23Unpad(k, em)
 	case RsaNoPadding:
 		m, err = rsaNoUnpad(k, em)
 	default:

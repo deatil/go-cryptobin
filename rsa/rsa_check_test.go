@@ -186,6 +186,50 @@ func Test_VerifyPSS(t *testing.T) {
 	}
 }
 
+func Test_incCounter_Check(t *testing.T) {
+	{
+		counter := [4]byte{0, 0, 0, 5}
+		incCounter(&counter)
+
+		cryptobin_test.Equal(t, "00000006", toHex(counter[0:]))
+	}
+
+	{
+		counter := [4]byte{0, 0, 0, 0xFF}
+		incCounter(&counter)
+
+		cryptobin_test.Equal(t, "00000100", toHex(counter[0:]))
+	}
+
+	{
+		counter := [4]byte{0, 0, 0xFF, 0xFF}
+		incCounter(&counter)
+
+		cryptobin_test.Equal(t, "00010000", toHex(counter[0:]))
+	}
+
+	{
+		counter := [4]byte{0, 0xFF, 0xFF, 0xFF}
+		incCounter(&counter)
+
+		cryptobin_test.Equal(t, "01000000", toHex(counter[0:]))
+	}
+
+	{
+		counter := [4]byte{0xFF, 0xFF, 0xFF, 0xFF}
+		incCounter(&counter)
+
+		cryptobin_test.Equal(t, "00000000", toHex(counter[0:]))
+	}
+
+	{
+		counter := [4]byte{0xFE, 0xFF, 0xFF, 0xFF}
+		incCounter(&counter)
+
+		cryptobin_test.Equal(t, "ff000000", toHex(counter[0:]))
+	}
+}
+
 func TestMgf1XORCheck(t *testing.T) {
 	{
 		msg := []byte("asdf")

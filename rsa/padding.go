@@ -3,6 +3,7 @@ package rsa
 import (
 	"crypto/subtle"
 	"errors"
+	"fmt"
 	"hash"
 	"io"
 )
@@ -261,6 +262,88 @@ func rsaX931Unpad(k int, em []byte) ([]byte, error) {
 	}
 
 	return em[len(em)-j-1 : len(em)-1], nil
+}
+
+// rsaSSLv23Pad pads msg into em using SSLv23-style / PKCS#1v1.5-like structure:
+// em must have length equal to the RSA modulus size (in bytes).
+// PS length must be >= 8.
+func rsaSSLv23Pad(random io.Reader, emLen int, msg []byte) ([]byte, error) {
+	mlen := len(msg)
+	if mlen > emLen-11 {
+		return nil, fmt.Errorf("go-cryptobin/rsa: message too long for key size")
+	}
+
+	// em = 0x00 || 0x02 || PS (non-zero random) || 0x00 || msg
+	em := make([]byte, emLen)
+
+	// leading zero
+	em[0] = 0x00
+	// block type 2
+	em[1] = 0x02
+
+	psLen := emLen - 3 - 8 - mlen
+	if psLen < 0 {
+		return nil, errors.New("go-cryptobin/rsa: invalid padding length")
+	}
+
+	ps := em[2 : 2+psLen]
+
+	// fill PS with non-zero random bytes
+	err := nonZeroRandomBytes(ps, random)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < 8; i++ {
+		em[psLen+2+i] = 0x03
+	}
+
+	em[psLen+10] = 0x00
+	copy(em[psLen+11:], msg)
+
+	return em, nil
+}
+
+func rsaSSLv23Unpad(k int, em []byte) ([]byte, error) {
+	if k < 11 {
+		return nil, ErrDecryption
+	}
+
+	if len(em) < 11 {
+		return nil, fmt.Errorf("go-cryptobin/rsa: em too small")
+	}
+
+	if (em[0] != 0x00) || (em[1] != 0x02) {
+		return nil, fmt.Errorf("go-cryptobin/rsa: em type is not 0x02")
+	}
+
+	// find separator 0x00
+	i := 2
+	for ; i < len(em); i++ {
+		if em[i] == 0x00 {
+			break
+		}
+	}
+	if i == len(em) {
+		return nil, fmt.Errorf("go-cryptobin/rsa: separator 0x00 not found")
+	}
+
+	psLen := i - 2
+	if psLen < 8 {
+		return nil, fmt.Errorf("go-cryptobin/rsa: padding too short")
+	}
+
+	for j := i - 8; j < i; j++ {
+		if em[j] != 0x03 {
+			return nil, ErrDecryption
+		}
+	}
+
+	// message starts at i+1
+	msg := make([]byte, len(em)-(i+1))
+	copy(msg, em[i+1:])
+
+	return msg, nil
 }
 
 func rsaNoPad(emLen int, msg []byte) ([]byte, error) {

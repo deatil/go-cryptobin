@@ -244,6 +244,37 @@ func TestEncryptWithOptions(t *testing.T) {
 		cryptobin_test.Equal(t, string(msg2), string(demsg2))
 	}
 
+	{
+		encrypter := NewEncrypter()
+		encrypter.WithPadding(RsaSSLv23Padding)
+		encrypter.WithRandom(rand.Reader)
+
+		ciphertext, err := encrypter.Encrypt(&rsaPrivateKey.PublicKey, msg)
+		if err != nil {
+			t.Fatalf("Failed to encrypt message: %s", err)
+		}
+
+		demsg, err := encrypter.Decrypt(rsaPrivateKey, ciphertext)
+		if err != nil {
+			t.Fatalf("Failed to decrypt message: %s", err)
+		}
+
+		cryptobin_test.Equal(t, string(msg), string(demsg))
+
+		// ========
+
+		ciphertext2 := "0838de3d8bcf75e5036b543cc67a91a978715d2521f268226f3a0cb2ae875b293333ec17788437a88095debf5b3fb1e16ab0d06380fa46729b9b3ad2440d0454"
+		ct := decodeHex(ciphertext2)
+
+		demsg2, err := encrypter.Decrypt(rsaPrivateKey, ct)
+		if err != nil {
+			t.Fatalf("Failed to decrypt message check: %s", err)
+		}
+
+		cryptobin_test.Equal(t, true, len(demsg2) > 0)
+		cryptobin_test.Equal(t, "12345678abcde", string(demsg2))
+	}
+
 }
 
 func TestDecryptPublicKeyWithOptionsCheck(t *testing.T) {
